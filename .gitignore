@@ -82,30 +82,20 @@ __pycache__
 # IAR temp files
 EW*.tmp
 
-# Generated tool-based project directories
-armgcc
-iar
-kds
-mdk
-dsmdk
-lpcx
-xcc
-xtensa
-
 bin/helper.cfg
 *.tags*
 /lib
-armgcc
-atl
-kds
-iar
-mdk
-lpcx
-mcux
-xtensa
-xcc
 tags
 !rtos/freertos/Source/portable/IAR
 *.json
 bin/helper.cfg
-*.cmake
+cmake_install.cmake
+
+# armgcc build folder
+app_bin
+build_log.txt
+CMakeFiles
+CMakeCache.txt
+Makefile
+*.obj
+*.map
