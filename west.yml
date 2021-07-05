@@ -1,0 +1,19 @@
+# The west manifest file for Harpoon Applications
+
+manifest:
+  defaults:
+    remote: nxpmicro
+
+  remotes:
+    - name: nxpmicro
+      url-base: https://github.com/NXPmicro
+
+  # Please add items below in reverse alphabetical order
+  projects:
+    - name: mcux-sdk
+      revision: 46d44c68e6cb7f97a68e6a1f75aaf4337dba90b5
+    - name: FreeRTOS-Kernel
+      revision: 51e25b23a8738b8326cd751ef3063e7ec2544633
+  self:
+    path: harpoon-apps
+
