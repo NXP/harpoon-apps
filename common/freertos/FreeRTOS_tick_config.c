@@ -82,6 +82,10 @@ void vConfigureTickInterrupt( void )
     GIC_SetPriority(ARM_GENERIC_TIMER_VIRTUAL_IRQn,
                 portLOWEST_USABLE_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
 
+    /* TODO: Connect to the interrupt controller. */
+    /* ... ( ... FreeRTOS_Tick_Handler ...); */
+    // FIXME: Nothing present in the driver yet to register a IRQ handler
+
     /* Enable the interrupt in the GIC. */
     GIC_EnableInterface();
     GIC_SetInterfacePriorityMask(portLOWEST_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
@@ -133,6 +137,12 @@ void vApplicationIRQHandler( uint32_t ulICCIAR )
     called InterruptHandlerFunctionTable, use the interrupt ID to index to and
     call the relevant handler function. */
 
+    /* TODO: Create a InterruptHandlerFunctionTable[] array to register all callbacks
+     * see https://www.freertos.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html#interrupt-handling
+     *
+     * FIXME: call InterruptHandlerFunctionTable[ ulInterruptID ]();
+     * instead of executing this switch statement.
+     */
     switch (ulInterruptID) {
 
         case ARM_GENERIC_TIMER_VIRTUAL_IRQn:
