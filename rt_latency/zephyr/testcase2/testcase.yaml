@@ -1,0 +1,4 @@
+tests:
+  benchmark.kernel.rt-latency:
+    build_only: true
+    tags: kernel latency
