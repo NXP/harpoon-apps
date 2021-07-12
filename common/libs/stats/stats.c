@@ -1,12 +1,18 @@
 /*
- * Copyright 2019 NXP
+ * Copyright 2019-2021 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "os/stdio.h"
+
 #include "stats.h"
-#include "log.h"
+
+#define INF			os_printf
+#define VERBOSE_INFO		(2)
+
+static unsigned int app_log_level = VERBOSE_INFO;
 
 void stats_reset(struct stats *s)
 {
@@ -24,7 +30,7 @@ void stats_reset(struct stats *s)
  */
 void stats_print(struct stats *s)
 {
-    INF("stats(%p) %s min %d mean %d max %d rms^2 %llu stddev^2 %llu absmin %d absmax %d\n",
+    INF("stats(%p) %s min %d mean %d max %d rms^2 %llu stddev^2 %llu absmin %d absmax %d\n\r",
         s, s->priv, s->min, s->mean, s->max, s->ms, s->variance, s->abs_min, s->abs_max);
 }
 
@@ -135,11 +141,11 @@ void hist_print(struct hist *hist)
 {
     int i;
 
-    INF("n_slot %d slot_size %d \n", hist->n_slots, hist->slot_size);
+    INF("n_slot %d slot_size %d \n\r", hist->n_slots, hist->slot_size);
 
     if (app_log_level >= VERBOSE_INFO) {
         for (i = 0; i < (hist->n_slots + 1); i++)
-            PRINTF("%lu ", hist->slots[i]);
-        PRINTF("\n");
+            os_printf("%lu ", hist->slots[i]);
+        os_printf("\n\r");
     }
 }
