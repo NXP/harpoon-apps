@@ -52,78 +52,10 @@ SECTIONS
     KEEP(*(.boot))     /* Startup code */
   } > m_interrupts
 
-  .ocram_text :
-  {
-    __ocramtext_load__ = LOADADDR(.ocram_text);
-    . = ALIGN(4096);
-    __ocramtext_start__ = .;
-    /* insert here code that goes in OCRAM */
-    *ocram.c.obj(.text*)
-    __ocramtext_init_end__ = .;
-    . = ALIGN(4096);
-    __ocramtext_end__ = .;
-  } > ocram_text AT > m_text
-
-  .ocram_data :
-  {
-    __ocramdata_load__ = LOADADDR(.ocram_data);
-    . = ALIGN(4096);
-    __ocramdata_start__ = .;
-    /* insert here data that goes in OCRAM */
-    *ocram.c.obj(.data*)
-    *ocram.c.obj(*.rodata)
-    . = ALIGN(8);
-    __ocramdata_init_end__ = .;
-  } > ocram_data AT > m_text
-
-  .ocram_bss (NOLOAD):
-  {
-    /* insert here bss sections that go in OCRAM */
-    *ocram.c.obj(.bss*)
-    . = ALIGN(4096);
-    __ocramdata_end__ = .;
-  } > ocram_data
-
-  .itcm :
-  {
-    __itcm_load__ = LOADADDR(.itcm);
-    . = ALIGN(4096);
-    __itcm_start__ = .;
-    /* insert here code that goes in ITCM */
-    *tcm.c.obj(.text*)
-    __itcm_init_end__ = .;
-    . = ALIGN(4096);
-    __itcm_end__ = .;
-  } > itcm AT > m_text
-
-  .dtcm :
-  {
-    __dtcm_load__ = LOADADDR(.dtcm);
-    . = ALIGN(4096);
-    __dtcm_start__ = .;
-    /* insert here data that goes in DTCM */
-    *tcm.c.obj(.data*)
-    *tcm.c.obj(*.rodata)
-    . = ALIGN(8);
-    __dtcm_init_end__ = .;
-  } > dtcm AT > m_text
-
-  .dtcm_bss (NOLOAD):
-  {
-    /* insert here bss sections that go in DTCM */
-    *tcm.c.obj(.bss*)
-    . = ALIGN(4096);
-    __dtcm_end__ = .;
-  } > dtcm
-
   /* The program code and other data goes into internal RAM */
   .text :
   {
     . = ALIGN(64);
-    *(.text)                 /* .text sections (code) */
-    *(.text*)                /* .text* sections (code) */
-    *(.rodata)               /* .rodata sections (constants, strings, etc.) */
-    *(.rodata*)              /* .rodata* sections (constants, strings, etc.) */
     *(.glue_7)               /* glue arm to thumb code */
     *(.glue_7t)              /* glue thumb to arm code */
     *(.eh_frame)
@@ -216,10 +148,8 @@ SECTIONS
   {
     __data_load__ = LOADADDR(.data);
     __data_start__ = .;      /* create a global symbol at data start */
-    *(.data)                 /* .data sections */
-    *(.data*)                /* .data* sections */
     . = ALIGN(64);
-    __data_init_end__ = .;   /* define a global symbol at data end */
+    __data_init_end__ = .;        /* define a global symbol at data end */
   } > m_data AT > m_text
 
   __CACHE_REGION_START = ORIGIN(m_interrupts);
@@ -252,13 +182,81 @@ SECTIONS
     . = ALIGN(64);
     __START_BSS = .;
     __bss_start__ = .;
-    *(.bss)
-    *(.bss*)
     *(COMMON)
     . = ALIGN(64);
     __bss_end__ = .;
     __END_BSS = .;
+    . = ALIGN(4096);
+    __data_end__ = .;
   } > m_data
+
+  .itcm :
+  {
+    __itcm_load__ = LOADADDR(.itcm);
+    . = ALIGN(4096);
+    __itcm_start__ = .;
+    /* insert here code that goes in ITCM */
+    *tcm.c.obj(.text*)
+    __itcm_init_end__ = .;
+    . = ALIGN(4096);
+    __itcm_end__ = .;
+  } > itcm AT > m_text
+
+  .dtcm :
+  {
+    __dtcm_load__ = LOADADDR(.dtcm);
+    . = ALIGN(4096);
+    __dtcm_start__ = .;
+    /* insert here data that goes in DTCM */
+    *tcm.c.obj(.data*)
+    *tcm.c.obj(*.rodata)
+    . = ALIGN(8);
+    __dtcm_init_end__ = .;
+  } > dtcm AT > m_text
+
+  .dtcm_bss (NOLOAD):
+  {
+    /* insert here bss sections that go in OCRAM */
+    *tcm.c.obj(.bss*)
+    . = ALIGN(4096);
+    __dtcm_end__ = .;
+  } > dtcm
+
+  .ocram_text :
+  {
+    __ocramtext_load__ = LOADADDR(.ocram_text);
+    . = ALIGN(4096);
+    __ocramtext_start__ = .;
+    /* insert here code that goes in OCRAM */
+    *(.text*)                 /* .text sections (code) */
+    *(.text)                 /* .text sections (code) */
+    *(.rodata)
+    __ocramtext_init_end__ = .;
+    . = ALIGN(4096);
+    __ocramtext_end__ = .;
+  } > ocram_text AT > m_text
+
+  .ocram_data :
+  {
+    __ocramdata_load__ = LOADADDR(.ocram_data);
+    . = ALIGN(4096);
+    __ocramdata_start__ = .;
+    /* insert here data that goes in OCRAM */
+    *(.rodata*)              /* .rodata* sections (constants, strings, etc.) */
+    *(.data)                 /* .data sections */
+    *(.data*)                /* .data* sections */
+    . = ALIGN(8);
+    __ocramdata_init_end__ = .;
+  } > ocram_data AT > m_text
+
+  .ocram_bss (NOLOAD):
+  {
+    /* insert here bss sections that go in OCRAM */
+    *(.bss)
+    *(.bss*)
+    *ocram.c.obj(.bss*)
+    . = ALIGN(4096);
+  } > ocram_data
 
   .heap :
   {
@@ -269,8 +267,7 @@ SECTIONS
     . += HEAP_SIZE;
     __HeapLimit = .;
     __heap_limit = .; /* Add for _sbrk */
-  } > m_data
-
+  } > ocram_data
 
   .stack :
   {
@@ -283,12 +280,11 @@ SECTIONS
     . += STACK_SIZE;
     . = ALIGN(64);
     __el0_stack = .;
-  } > m_data
-
+  } > ocram_data
 
   /* Initializes stack on the end of block */
-  __data_end__ = ORIGIN(m_data) + LENGTH(m_data);
-  __StackTop   = ORIGIN(m_data) + LENGTH(m_data);
+  __ocramdata_end__ = ORIGIN(ocram_data) + LENGTH(ocram_data);
+  __StackTop   = ORIGIN(ocram_data) + LENGTH(ocram_data);
   __StackLimit = __StackTop - 2 * STACK_SIZE;
   PROVIDE(__stack = __StackTop);
 

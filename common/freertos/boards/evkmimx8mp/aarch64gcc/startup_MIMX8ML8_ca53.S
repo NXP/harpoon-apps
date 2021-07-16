@@ -73,14 +73,14 @@ Reset_Handler:
 /*     Loop to copy data from read only memory to RAM. The ranges
  *      of copy from/to are specified by following symbols evaluated in
  *      linker script.
- *      __etext: End of code section, i.e., begin of data sections to copy from.
- *      __data_start__/__data_end__: RAM address range that data should be
+ *      __data_load__: End of code section, i.e., begin of data sections to copy from.
  *      __noncachedata_start__/__noncachedata_end__ : none cachable region
- *      copied to. Both must be aligned to 8-byte boundary.  */
+ *      __data_start__/__data_init_end__: RAM address range that data should be
+ *      copied to. Both must be aligned to 64-byte boundary.  */
 
-	ldr	x1, =__etext
+	ldr	x1, =__data_load__
 	ldr	x2, =__data_start__
-	ldr	x3, =__data_end__
+	ldr	x3, =__data_init_end__
 
 /* Here is an implementation that favors performance over code size. */
 	subs	x3, x3, x2
@@ -92,7 +92,7 @@ Reset_Handler:
 	bgt	.LC0
 .LC1:
 #ifdef __STARTUP_INITIALIZE_NONCACHEDATA
-	ldr	x1, =__NDATA_ROM
+	ldr	x1, =__noncachedata_load__
 	ldr	x2, =__noncachedata_start__
 	ldr	x3, =__noncachedata_init_end__
 /* Here is an implementation that favors performance over code size. */
@@ -104,7 +104,7 @@ Reset_Handler:
 	str	x0, [x2, x3]
 	bgt	.LC2
 .LC3:
-/* zero inited ncache section initialization */
+/* zero init ncache data section */
 	ldr	x0, =__noncachedata_init_end__
 	ldr	x1, =__noncachedata_end__
 	sub	x1, x1, x0
@@ -163,7 +163,7 @@ Reset_Handler:
 	str	x0, [x2, x3]
 	bgt	.LC8
 .LC9:
-/* zero inited data section initialization (including .ocram_bss section) */
+/* zero init OCRAM bss */
 	ldr	x0, =__ocramdata_init_end__
 	ldr	x1, =__ocramdata_end__
 	sub	x1, x1, x0
@@ -201,7 +201,7 @@ Reset_Handler:
 	str	x0, [x2, x3]
 	bgt	.LC13
 .LC14:
-/* zero inited data section initialization (including .ocram_bss section) */
+/* zero init DTCM bss */
 	ldr	x0, =__dtcm_init_end__
 	ldr	x1, =__dtcm_end__
 	sub	x1, x1, x0
@@ -268,6 +268,7 @@ handle_irq:
 
 	.globl vectors
 	.align 11
+/*      Temporary vector table, used up to FreeRTOS vTaskStartScheduler() */
 vectors:
 	ventry	.
 	ventry	.
@@ -291,7 +292,7 @@ vectors:
 
 	.ltorg
 
-
+/*      FreeRTOS vector table used after FreeRTOS vTaskStartScheduler() is called */
 	.globl _freertos_vector_table
 	.align 11
 _freertos_vector_table:
