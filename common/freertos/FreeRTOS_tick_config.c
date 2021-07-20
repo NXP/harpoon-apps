@@ -47,6 +47,12 @@ uint64_t FreeRTOS_tick_interval;
  * Definitions
  ******************************************************************************/
 
+static void ARM_GENERIC_TIMER_VIRTUAL_IRQn_Handler(void *data)
+{
+	(void)data;
+	FreeRTOS_Tick_Handler();
+}
+
 /*-----------------------------------------------------------*/
 
 /*
@@ -84,9 +90,7 @@ void vConfigureTickInterrupt( void )
     GIC_SetPriority(ARM_GENERIC_TIMER_VIRTUAL_IRQn,
                 portLOWEST_USABLE_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
 
-    /* TODO: Connect to the interrupt controller. */
-    /* ... ( ... FreeRTOS_Tick_Handler ...); */
-    // FIXME: Nothing present in the driver yet to register a IRQ handler
+    irq_register(ARM_GENERIC_TIMER_VIRTUAL_IRQn, ARM_GENERIC_TIMER_VIRTUAL_IRQn_Handler, NULL);
 
     /* Enable the interrupt in the GIC. */
     GIC_EnableInterface();
@@ -117,40 +121,4 @@ void vClearTickInterrupt( void )
 {
     /* Set the timer tick interval. */
     Timer_SetInterval(FreeRTOS_tick_interval);
-}
-/*-----------------------------------------------------------*/
-
-void vApplicationIRQHandler( uint32_t ulICCIAR )
-{
-    uint32_t ulInterruptID;
-
-    /* In the 64-bit Cortex-A RTOS port it is necessary to clear the source
-     * of the interrupt BEFORE interrupts are re-enabled. */
-    // TODO: ClearInterruptSource();
-
-    /* Re-enable interrupts. */
-    __asm volatile( "MSR DAIFSET, #2" ); /* was "__asm volatile( "CPSIE I" );" */
-
-    /* The ID of the interrupt is obtained by bitwise anding the ICCIAR value
-    with 0x3FF. */
-    ulInterruptID = ulICCIAR & 0x3FFUL;
-
-    /* On the assumption that handlers for each interrupt are stored in an array
-    called InterruptHandlerFunctionTable, use the interrupt ID to index to and
-    call the relevant handler function. */
-
-    /* TODO: Create a InterruptHandlerFunctionTable[] array to register all callbacks
-     * see https://www.freertos.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html#interrupt-handling
-     *
-     * FIXME: call InterruptHandlerFunctionTable[ ulInterruptID ]();
-     * instead of executing this switch statement.
-     */
-    switch (ulInterruptID) {
-
-        case ARM_GENERIC_TIMER_VIRTUAL_IRQn:
-             FreeRTOS_Tick_Handler();
-             break;
-
-        default: break;
-    }
 }
