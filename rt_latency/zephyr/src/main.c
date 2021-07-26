@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <drivers/counter.h>
 #include <ztest.h>
 #include <zephyr.h>
 #include <kernel.h>
 #include <sys/printk.h>
+
+#include "os/counter.h"
 
 #include "rt_latency.h"
 #include "rt_tc_setup.h"

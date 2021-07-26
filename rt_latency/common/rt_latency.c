@@ -5,6 +5,7 @@
  */
 
 #include "os.h"
+#include "os/counter.h"
 #include "os/stdio.h"
 
 #ifdef OS_ZEPHYR
