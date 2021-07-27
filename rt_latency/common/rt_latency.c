@@ -5,6 +5,7 @@
  */
 
 #include "os.h"
+#include "os/stdio.h"
 
 #ifdef OS_ZEPHYR
 #include "os_zephyr.h"
@@ -292,7 +293,7 @@ static inline void print_cur_stat(void)
 
 }
 
-void print_stats(void *p1, void *p2, void *p3)
+void print_stats(struct latency_stat *rt_stat)
 {
 	unsigned long pre_cycles = 0;
 
@@ -313,67 +314,68 @@ void print_records(void)
 {
 	int j;
 
-	printf("\nLatency Record Lists:\n\t\t");
-	printf("      GPT STATs\t");
-	printf("\nLatency(us)\t    ");
-	printf("(isr - task)\t    ");
+	os_printf("\nLatency Record Lists:\n\t\t");
+	os_printf("      GPT STATs\t");
+	os_printf("\nLatency(us)\t    ");
+	os_printf("(isr - task)\t    ");
 
-	printf("\n");
+	os_printf("\n");
 	for (j = 0; j < MAX_STAT_LATENCY; j++) {
-		printf("\t%02d", j);
-		printf("\t%08d - %08d", isr_latency_record[j],
+		os_printf("\t%02d", j);
+		os_printf("\t%08d - %08d", isr_latency_record[j],
 					thread_latency_record[j]);
-		printf("\n");
+		os_printf("\n");
 	}
 }
 #endif
 
 void print_summary(void)
 {
-	printf("\nTesting Setup:\n");
+	os_printf("\nTesting Setup:\n");
 #ifdef CONFIG_SMP
-	printf("\tUsing the following threads on SMP kernel with %d CPU Cores:\n",
+	os_printf("\tUsing the following threads on SMP kernel with %d CPU Cores:\n",
 			CONFIG_MP_NUM_CPUS);
 #else
-	printf("\tUsing the following threads on non-SMP kernel:\n");
+	os_printf("\tUsing the following threads on non-SMP kernel:\n");
 #endif
 
-	printf("\t\tGPT testing threads with one GPT Counter irq.\n");
+	os_printf("\t\tGPT testing threads with one GPT Counter irq.\n");
 
 #ifndef SILENT_TESTING
-	printf("\t\tOne realtime printing thread.\n");
+	os_printf("\t\tOne realtime printing thread.\n");
 #endif
 
 #ifdef WITH_CPU_LOAD
 #ifdef WITH_CPU_LOAD_SEM
-	printf("\t\tOne CPU load thread with Semaphore load.\n");
+	os_printf("\t\tOne CPU load thread with Semaphore load.\n");
 #else
-	printf("\t\tOne CPU load thread.\n");
+	os_printf("\t\tOne CPU load thread.\n");
 #endif
 #endif
 
 #ifdef WITH_IRQ_LOAD
-	printf("\t\tOne IRQ load and thread.\n");
+	os_printf("\t\tOne IRQ load and thread.\n");
 #endif
 
 #ifdef THREAD_CPU_BINDING
-	printf("\tUsing CPU binding:\n");
-	printf("\t\tGPT_thread on Core%d, Load_thread on Core%d",
+	os_printf("\tUsing CPU binding:\n");
+	os_printf("\t\tGPT_thread on Core%d, Load_thread on Core%d",
 			GPT_CPU_BINDING,
 			PRINT_CPU_BINDING,
 			LOAD_CPU_BINDING);
 #ifndef SILENT_TESTING
-	printf("\t\t, Print_thread on Core%d",
+	os_printf("\t\t, Print_thread on Core%d",
 			PRINT_CPU_BINDING);
 #endif
-	printf(".\n");
+	os_printf(".\n");
 #endif
 
 #ifdef ENABLE_HISTOGRAM
 	print_records();
 #endif
 
-	printf("\nTesting Result:\n");
-	printf("\t");
+	os_printf("\nTesting Result:\n");
+	os_printf("\t");
 	print_cur_stat();
 }
+

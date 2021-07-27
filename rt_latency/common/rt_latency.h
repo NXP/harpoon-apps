@@ -30,7 +30,7 @@ void cpu_load(void *p1, void *p2, void *p3);
 
 void irq_load(void *p1, void *p2, void *p3);
 
-void print_stats(void *p1, void *p2, void *p3);
+void print_stats(struct latency_stat *rt_stat);
 
 void print_summary(void);
 

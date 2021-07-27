@@ -52,8 +52,6 @@
 
 #define os_busy_wait(us)	k_busy_wait(us)
 
-#define printf(...)	printk(__VA_ARGS__)
-
 #define os_invd_dcache_all() sys_cache_data_all(K_CACHE_INVD)
 
 #define os_invd_icache_all() __asm volatile ("IC IALLUIS")

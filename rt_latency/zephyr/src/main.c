@@ -47,6 +47,12 @@ static const char * const devices[] = {
 
 extern struct latency_stat rt_stats;
 
+void print_stats_func(void *p1, void *p2, void *p3)
+{
+	/* TODO : pass latency_stat object */
+	print_stats(NULL);
+}
+
 void test_main(void)
 {
 	const struct device *gpt_dev;
@@ -86,7 +92,7 @@ void test_main(void)
 #ifndef SILENT_TESTING
 	/* Print Thread */
 	k_thread_create(&print_thread, print_stack, STACK_SIZE,
-			print_stats, NULL, NULL, NULL,
+			print_stats_func, NULL, NULL, NULL,
 			K_LOWEST_APPLICATION_THREAD_PRIO - 1, 0, K_FOREVER);
 #ifdef THREAD_CPU_BINDING
 	k_thread_cpu_mask_clear(&print_thread);
