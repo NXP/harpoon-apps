@@ -15,6 +15,8 @@
 #include "os_freertos.h"
 #endif
 
+#include "os/semaphore.h"
+
 #include "rt_latency.h"
 #include "rt_tc_setup.h"
 
@@ -115,7 +117,7 @@ static void load_alarm_handler(const struct device *dev, uint8_t chan_id,
 	} while(cur < start + ticks);
 
 	os_counter_stop(dev);
-	os_sem_give(&irq_load_sem);
+	os_sem_give(&irq_load_sem, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 #endif /* WITH_IRQ_LOAD */
 
@@ -150,14 +152,13 @@ static void test_alarm_latency(const struct device *dev,
 	load_alarm_cfg.callback = load_alarm_handler;
 	load_alarm_cfg.ticks = counter_us_to_ticks(dev, counter_period_us);
 
-	os_sem_init(&irq_load_sem, 0, 1);
+	os_sem_init(&irq_load_sem, 0);
 #endif
 
 	do {
 		os_counter_start(dev);
 #ifdef WITH_IRQ_LOAD
 		os_counter_start(irq_load_dev);
-		os_sem_reset(&irq_load_sem);
 		/* Start irq load alarm firstly */
 		err = os_counter_set_channel_alarm(irq_load_dev, 0,
 				&load_alarm_cfg);
@@ -210,7 +211,7 @@ static void test_alarm_latency(const struct device *dev,
 
 #ifdef	WITH_IRQ_LOAD
 		/* Waiting irq load ISR exits and then go to next loop */
-		os_sem_take(&irq_load_sem, K_FOREVER);
+		os_sem_take(&irq_load_sem, 0, OS_SEM_TIMEOUT_MAX);
 #endif
 	} while(rt_stat->cycles < TESTING_LOOP_NUM);
 
@@ -243,12 +244,12 @@ void cpu_load(void *p1, void *p2, void *p3)
 {
 	struct k_sem cpu_sem;
 
-	os_sem_init(&cpu_sem, 0, UINT_MAX);
+	os_sem_init(&cpu_sem, 0);
 
 	do {
 #ifdef WITH_CPU_LOAD_SEM
-		os_sem_give(&cpu_sem);
-		os_sem_take(&cpu_sem, K_FOREVER);
+		os_sem_give(&cpu_sem, 0);
+		os_sem_take(&cpu_sem, 0, OS_SEM_TIMEOUT_MAX);
 #endif
 #ifdef WITH_INVD_CACHE
 		os_invd_dcache_all();

@@ -38,30 +38,47 @@ static inline int os_sem_destroy(os_sem_t *sem)
     return 0;
 }
 
-static inline int os_sem_give(os_sem_t *sem)
+static inline int os_sem_give(os_sem_t *sem, uint32_t flags)
 {
-    BaseType_t xYieldRequired;
     BaseType_t ret;
 
-    ret = xSemaphoreGiveFromISR(sem->handle, &xYieldRequired);
+    if (flags & OS_SEM_FLAGS_ISR_CONTEXT) {
+        BaseType_t xYieldRequired;
 
-    /* If xYieldRequired was set to true, we should yield */
-    portYIELD_FROM_ISR( xYieldRequired );
+        ret = xSemaphoreGiveFromISR(sem->handle, &xYieldRequired);
+
+        /* If xYieldRequired was set to true, we should yield */
+        portYIELD_FROM_ISR( xYieldRequired );
+
+    } else {
+        ret = xSemaphoreGive(sem->handle);
+    }
 
     return (ret == pdTRUE) ? 0 : -1;
 }
 
-static inline int os_sem_take(os_sem_t *sem, uint32_t timeout_ms)
+static inline int os_sem_take(os_sem_t *sem, uint32_t flags, uint32_t timeout_ms)
 {
     BaseType_t ret;
-    TickType_t t;
 
-    if (timeout_ms == OS_SEM_TIMEOUT_MAX)
-        t = portMAX_DELAY;
-    else
-        t = pdMS_TO_TICKS(timeout_ms);
+    if (flags & OS_SEM_FLAGS_ISR_CONTEXT) {
+        BaseType_t xYieldRequired;
 
-    ret = xSemaphoreTake(sem->handle, t);
+        ret = xSemaphoreTakeFromISR(sem->handle, &xYieldRequired);
+
+        /* If xYieldRequired was set to true, we should yield */
+        portYIELD_FROM_ISR( xYieldRequired );
+
+    } else {
+        TickType_t t;
+
+        if (timeout_ms == OS_SEM_TIMEOUT_MAX)
+            t = portMAX_DELAY;
+        else
+            t = pdMS_TO_TICKS(timeout_ms);
+
+        ret = xSemaphoreTake(sem->handle, t);
+    }
 
     return (ret == pdTRUE) ? 0 : -1;
 }

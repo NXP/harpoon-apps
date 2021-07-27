@@ -13,15 +13,6 @@
 #include <sys/printk.h>
 #include <cache.h>
 
-#define os_sem_init(sem, init_count, limit)	\
-		k_sem_init(sem, init_count, limit)
-
-#define os_sem_reset(sem)	k_sem_reset(sem)
-
-#define os_sem_give(sem)	k_sem_give(sem)
-
-#define os_sem_take(sem, timeout)	k_sem_take(sem, timeout)
-
 #define os_thread_resume(handler)	k_thread_resume(handler);
 
 #define os_thread_suspend(h_thread)	k_thread_suspend(h_thread)
