@@ -28,10 +28,6 @@
 
 #define os_thread_abort(h_thread)	k_thread_abort(h_thread)
 
-#define os_assert_true(cond, msg, ...) zassert_true(cond, msg, ##__VA_ARGS__)
-
-#define os_assert_equal(a, b, msg, ...) zassert_equal(a, b, msg, ##__VA_ARGS__)
-
 #define os_usleep(us)	k_usleep(us)
 
 #define os_busy_wait(us)	k_busy_wait(us)

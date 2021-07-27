@@ -5,6 +5,7 @@
  */
 
 #include "os.h"
+#include "os/assert.h"
 #include "os/counter.h"
 #include "os/stdio.h"
 
@@ -66,14 +67,8 @@ static void latency_alarm_handler(const struct device *dev, uint8_t chan_id,
 			  uint32_t irq_counter,
 			  void *user_data)
 {
-//	uint32_t now;
-//	int err;
 	uint32_t cur_latency;
 	struct latency_stat *rt_stat = user_data;
-
-//	err = os_counter_get_value(dev, &now);
-//	os_assert_true(err == 0, "%s: Counter read failed (err: %d)",
-//		     dev->name, err);
 
 	cur_latency = calc_diff_ns(dev, expected_cnt, irq_counter);
 
