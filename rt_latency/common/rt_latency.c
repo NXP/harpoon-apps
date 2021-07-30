@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "cpu.h"
+
 #include "os.h"
 #include "os/assert.h"
 #include "os/counter.h"
