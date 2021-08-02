@@ -128,7 +128,7 @@ Since Zephyr is installed using `west`, it is recommended to export Zephyr befor
 
 ```
 west zephyr-export
-west build -p auto -b mimx8mp_evk_a53 harpoon-apps/rt_latency/zephyr/testcase7/
+west build -p auto -b mimx8mp_evk_a53_1core harpoon-apps/rt_latency/zephyr/testcase1/
 ```
 
 ## Running the tests
