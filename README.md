@@ -140,6 +140,14 @@ jailhouse cell create /usr/share/jailhouse/cells/imx8mp-freertos.cell
 jailhouse cell load freertos /opt/freertos_hello.bin --address 0xc0000000
 jailhouse cell start freertos
 ```
+And the following example commands are for running Zephyr in a Jailhouse inmate cell:
+
+```
+jailhouse enable imx8mp.cell
+jailhouse cell create imx8mp-zephyr.cell
+jailhouse cell load zephyr-inmate-demo zephyr.bin --address 0xc0000000
+jailhouse cell start zephyr-inmate-demo
+```
 
 To be able to interact with the guest OS console, the UART4 tty shall be opened ; e.g.:
 
