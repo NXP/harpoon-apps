@@ -1,33 +1,21 @@
 /*
-** ###################################################################
-**     Processors:          MIMX8ML8CVNKZ
-**                          MIMX8ML8DVNLZ
-**
-**     Compiler:            GNU C Compiler
-**     Reference manual:    IMX8MPRM, Rev.D, 10/2020
-**     Version:             rev. 4.0, 2020-11-16
-**     Build:               b201031
-**
-**     Abstract:
-**         Linker file for the GNU C Compiler
-**
-**     Copyright 2016 Freescale Semiconductor, Inc.
-**     Copyright 2016-2021 NXP
-**     All rights reserved.
-**
-**     SPDX-License-Identifier: BSD-3-Clause
-**
-**     http:                 www.nxp.com
-**     mail:                 support@nxp.com
-**
-** ###################################################################
-*/
+ * Copyright 2021 NXP.
+ *
+ * Abstract:
+ * Linker file for the GNU C Compiler
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 
 /* Entry Point */
 ENTRY(Reset_Handler)
 
 HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x0400;
-STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
+/*
+ * Let's align the stack size on a page ; note that 2 stacks (for EL0 and El1)
+ * are needed -> LENGTH(m_stacks) must fit two 4kB pages.
+ */
+STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x1000;
 
 /* Specify the memory areas */
 MEMORY
@@ -38,7 +26,8 @@ MEMORY
   ocram_data            (RW)  : ORIGIN = 0x00930000, LENGTH = 0x00030000 /* 176 kB */
   m_interrupts          (RX)  : ORIGIN = 0xC0000000, LENGTH = 0x00002000 /*  8 kB */
   m_text                (RX)  : ORIGIN = 0xC0002000, LENGTH = 0x005FE000 /* ~6 MB */
-  m_data                (RW)  : ORIGIN = 0xC0600000, LENGTH = 0x00600000 /*  6 MB */
+  m_data                (RW)  : ORIGIN = 0xC0600000, LENGTH = 0x005FE000 /* ~6 MB */
+  m_stacks              (RW)  : ORIGIN = 0xC0BFE000, LENGTH = 0x00002000 /*  8 kB */
   m_data_nc             (RW)  : ORIGIN = 0xC0C00000, LENGTH = 0x00400000 /*  4 MB */
 }
 
@@ -269,12 +258,16 @@ SECTIONS
     . += HEAP_SIZE;
     __HeapLimit = .;
     __heap_limit = .; /* Add for _sbrk */
+    . = ALIGN(4096);
+    __data_end__ = .;
   } > m_data
 
+  /* Initializes stack on the end of block */
 
   .stack :
   {
-    . = ALIGN(64);
+    . = ALIGN(4096);
+    __stacks_limit__ = .;
     _el1_stack_end = .;
     . += STACK_SIZE;
     . = ALIGN(64);
@@ -283,16 +276,9 @@ SECTIONS
     . += STACK_SIZE;
     . = ALIGN(64);
     __el0_stack = .;
-  } > m_data
+    . = ALIGN(4096);
+    __stacks_top__ = .;
+  } > m_stacks
 
-
-  /* Initializes stack on the end of block */
-  __data_end__ = ORIGIN(m_data) + LENGTH(m_data);
-  __StackTop   = ORIGIN(m_data) + LENGTH(m_data);
-  __StackLimit = __StackTop - 2 * STACK_SIZE;
-  PROVIDE(__stack = __StackTop);
-
-/*  .ARM.attributes 0 : { *(.ARM.attributes) } */
-
-  ASSERT(__StackLimit >= __HeapLimit, "region m_data overflowed with stack and heap")
 }
+
