@@ -49,5 +49,8 @@ void load_alarm_handler(const void *dev, uint8_t chan_id,
 #endif
 void latency_alarm_handler(const void *dev, uint8_t chan_id,
 			  uint32_t irq_counter, void *user_data);
+#ifdef WITH_INVD_CACHE
+void cache_inval(void);
+#endif
 
 #endif /* _RT_LATENCY_H_ */
