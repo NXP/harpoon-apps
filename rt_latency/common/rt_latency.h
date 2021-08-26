@@ -7,31 +7,47 @@
 #ifndef _RT_LATENCY_H_
 #define _RT_LATENCY_H_
 
+#include "os/semaphore.h"
+
+#include "stats.h"
+
+#include "rt_tc_setup.h"
+
 struct latency_stat {
-	unsigned long cycles;
-	uint32_t min_isr;
-	uint32_t max_isr;
-	uint32_t act_isr;
-	double avg_isr;
-	uint32_t min_thread_wake;
-	uint32_t max_thread_wake;
-	uint32_t act_thread_wake;
-	double avg_thread_wake;
-	uint32_t max_total;
-#ifdef GPT_DEBUG
-	uint32_t counter_diff;
-	uint32_t cycle_diff;
+	const void *dev;
+	const void *irq_load_dev;
+
+	os_sem_t semaphore; /* used to wake the thread up from IRQ callback */
+#ifdef WITH_IRQ_LOAD
+	os_sem_t irq_load_sem; /* used to wake the thread up from IRQ load handler */
 #endif
+
+	uint64_t time_irq;
+	uint32_t time_prog;
+
+	struct stats irq_delay;
+	struct hist irq_delay_hist;
+
+	struct stats irq_to_sched;
+	struct hist irq_to_sched_hist;
 };
 
-void gpt_latency_test(void *p1, void *p2, void *p3);
+int rt_latency_init(const void *dev,
+		const void *irq_load_dev, struct latency_stat *rt_stat);
 
-void cpu_load(void *p1, void *p2, void *p3);
-
-void irq_load(void *p1, void *p2, void *p3);
+int rt_latency_test(struct latency_stat *rt_stat);
 
 void print_stats(struct latency_stat *rt_stat);
-
-void print_summary(void);
+#ifdef WITH_CPU_LOAD
+void cpu_load(void);
+#endif
+#ifdef WITH_IRQ_LOAD
+void irq_load(void *p1, void *p2, void *p3);
+/* TODO: Register these handlers as alarm callback function */
+void load_alarm_handler(const void *dev, uint8_t chan_id,
+			  uint32_t irq_counter, void *user_data);
+#endif
+void latency_alarm_handler(const void *dev, uint8_t chan_id,
+			  uint32_t irq_counter, void *user_data);
 
 #endif /* _RT_LATENCY_H_ */

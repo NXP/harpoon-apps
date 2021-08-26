@@ -6,4 +6,3 @@
 
 #define OS_ZEPHYR
 
-#include "os_zephyr.h"

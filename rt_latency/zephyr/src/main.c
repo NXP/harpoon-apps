@@ -13,15 +13,6 @@
 #include "rt_latency.h"
 #include "rt_tc_setup.h"
 
-struct k_thread gpt_thread;
-
-#ifdef WITH_CPU_LOAD
-struct k_thread cpu_load_thread;
-#endif
-#ifndef SILENT_TESTING
-struct k_thread print_thread;
-#endif
-
 #define STACK_SIZE (640 + CONFIG_TEST_EXTRA_STACKSIZE)
 
 K_THREAD_STACK_DEFINE(gpt_stack, STACK_SIZE);
@@ -45,12 +36,37 @@ static const char * const devices[] = {
 	LABELS_FOR_DT_COMPAT(nxp_imx_gpt)
 };
 
-extern struct latency_stat rt_stats;
+void gpt_latency_test(void *p1, void *p2, void *p3)
+{
+	const struct device *dev = p1;
+	struct latency_stat *rt_stat = p2;
+	int ret;
+
+	k_object_access_grant(dev, k_current_get());
+
+	ret = rt_latency_test(rt_stat);
+	if (ret)
+	{
+		printk("test failed!\n");
+		k_thread_suspend(k_current_get());
+	}
+
+	k_usleep(2000);
+	k_thread_abort(k_current_get());
+}
+
+#ifdef WITH_CPU_LOAD
+void cpu_load_func(void *p1, void *p2, void *p3)
+{
+	cpu_load();
+}
+#endif
 
 void print_stats_func(void *p1, void *p2, void *p3)
 {
-	/* TODO : pass latency_stat object */
-	print_stats(NULL);
+	struct latency_stat *rt_stat = p2;
+
+	print_stats(rt_stat);
 }
 
 void test_main(void)
@@ -59,7 +75,17 @@ void test_main(void)
 #ifdef WITH_IRQ_LOAD
 	const struct device *irq_load_dev;
 #endif
+	struct k_thread gpt_thread;
+#ifdef WITH_CPU_LOAD
+	struct k_thread cpu_load_thread;
+#endif
+#ifndef SILENT_TESTING
+	struct k_thread print_thread;
+#endif
+
+	static struct latency_stat rt_stats;
 	void *p3 = NULL;
+	int ret;
 
 	/* Give required clocks some time to stabilize. In particular, nRF SoCs
 	 * need such delay for the Xtal LF clock source to start and for this
@@ -73,12 +99,17 @@ void test_main(void)
 		printk("Unable to get counter device\n");
 
 #ifdef WITH_IRQ_LOAD
-	/* Use the second GPU Counter to create irq load with lower priority */
+	/* Use the second GPT Counter to create irq load with lower priority */
 	irq_load_dev = device_get_binding(devices[1]);
 	if(!irq_load_dev)
 		printk("Unable to get counter device\n");
 	p3 = (void *)irq_load_dev;
 #endif
+
+	ret = rt_latency_init(gpt_dev, p3, &rt_stats);
+	if (ret)
+		printk("Initialization failed!\n");
+
 	k_thread_create(&gpt_thread, gpt_stack, STACK_SIZE,
 		gpt_latency_test, (void *)gpt_dev, &rt_stats, p3,
 		K_HIGHEST_THREAD_PRIO, 0, K_FOREVER);
@@ -92,7 +123,7 @@ void test_main(void)
 #ifndef SILENT_TESTING
 	/* Print Thread */
 	k_thread_create(&print_thread, print_stack, STACK_SIZE,
-			print_stats_func, NULL, NULL, NULL,
+			print_stats_func, NULL, &rt_stats, NULL,
 			K_LOWEST_APPLICATION_THREAD_PRIO - 1, 0, K_FOREVER);
 #ifdef THREAD_CPU_BINDING
 	k_thread_cpu_mask_clear(&print_thread);
@@ -104,7 +135,7 @@ void test_main(void)
 	/* CPU Load Thread */
 #ifdef WITH_CPU_LOAD
 	k_thread_create(&cpu_load_thread, cpu_load_stack, STACK_SIZE,
-			cpu_load, NULL, NULL, NULL,
+			cpu_load_func, NULL, NULL, NULL,
 			K_LOWEST_APPLICATION_THREAD_PRIO, 0, K_FOREVER);
 #ifdef THREAD_CPU_BINDING
 	k_thread_cpu_mask_clear(&cpu_load_thread);
@@ -121,6 +152,4 @@ void test_main(void)
 #ifndef SILENT_TESTING
 	k_thread_abort(&print_thread);
 #endif
-
-	print_summary();
 }

@@ -9,44 +9,16 @@
 #include "os.h"
 #include "os/assert.h"
 #include "os/counter.h"
-#include "os/stdio.h"
-
-#ifdef OS_ZEPHYR
-#include "os_zephyr.h"
-#elif defined(OS_FREERTOS)
-#include "os_freertos.h"
-#endif
-
 #include "os/semaphore.h"
+#include "os/stdio.h"
+#include "os/unistd.h"
+
+#include "stats.h"
 
 #include "rt_latency.h"
 #include "rt_tc_setup.h"
 
-extern struct k_thread gpt_thread;
-
-#ifndef SILENT_TESTING
-extern struct k_thread print_thread;
-#endif
-
-#ifdef ENABLE_HISTOGRAM
-#define MAX_STAT_LATENCY	25	/* in us */
-static uint32_t isr_latency_record[MAX_STAT_LATENCY];
-static uint32_t thread_latency_record[MAX_STAT_LATENCY];
-#endif
-
-struct latency_stat rt_stats;
-
-static uint32_t expected_cnt;
-
-#ifdef GPT_DEBUG
-static uint32_t start_cycle;
-#endif
-
-#ifdef WITH_IRQ_LOAD
-static struct k_sem irq_load_sem;
-#endif
-
-static inline uint32_t calc_diff_ns(const struct device *dev,
+static inline uint32_t calc_diff_ns(const void *dev,
 			uint32_t cnt_1, uint32_t cnt_2)
 {
 	uint32_t diff;
@@ -63,98 +35,86 @@ static inline uint32_t calc_diff_ns(const struct device *dev,
 	return os_counter_ticks_to_ns(dev, diff);
 }
 
-
-/* Callback function of Counter alarm interrupt handler */
-/* irq_counter: the counter value when alarm HW interrupt happens */
-
-static void latency_alarm_handler(const struct device *dev, uint8_t chan_id,
+/*
+ * Used by all RTOS:
+ *    o FreeRTOS through IRQ_Handler_GPT() handler
+ *    o Zephyr through the alarm's ->callback
+ *
+ * @current_counter: counter value when the IRQ occurred
+ */
+void latency_alarm_handler(const void *dev, uint8_t chan_id,
 			  uint32_t irq_counter,
 			  void *user_data)
 {
-	uint32_t cur_latency;
 	struct latency_stat *rt_stat = user_data;
 
-	cur_latency = calc_diff_ns(dev, expected_cnt, irq_counter);
+	rt_stat->time_irq = irq_counter;
 
-	rt_stat->act_isr = cur_latency;
-
-	if (rt_stat->cycles < IGNORE_FIRST_CYCLES)
-		cur_latency = 0;
-
-	if (rt_stat->max_isr < cur_latency)
-		rt_stat->max_isr = cur_latency;
-
-	if (rt_stat->min_isr > cur_latency && rt_stat->cycles >= IGNORE_FIRST_CYCLES)
-		rt_stat->min_isr = cur_latency;
-
-	rt_stat->avg_isr += cur_latency;
-
-#ifdef ENABLE_HISTOGRAM
-	/* use us in histogram */
-	cur_latency /= 1000;
-	if (cur_latency >= MAX_STAT_LATENCY)
-		cur_latency = MAX_STAT_LATENCY - 1;
-
-	isr_latency_record[cur_latency]++;
-#endif
-
-	os_thread_resume(&gpt_thread);
+	os_sem_give(&rt_stat->semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
 #ifdef WITH_IRQ_LOAD
 
 #define IRQ_LOAD_ISR_DURATION_US	10
 
-static void load_alarm_handler(const struct device *dev, uint8_t chan_id,
+void load_alarm_handler(const void *dev, uint8_t chan_id,
 			  uint32_t irq_counter,
 			  void *user_data)
 {
 	uint32_t ticks;
 	uint32_t start, cur;
+	struct latency_stat *rt_stat = user_data;
 
-	ticks = counter_us_to_ticks(dev, IRQ_LOAD_ISR_DURATION_US);
+	ticks = os_counter_us_to_ticks(dev, IRQ_LOAD_ISR_DURATION_US);
 	os_counter_get_value(dev, &start);
 	do {
 		os_counter_get_value(dev, &cur);
 	} while(cur < start + ticks);
 
 	os_counter_stop(dev);
-	os_sem_give(&irq_load_sem, OS_SEM_FLAGS_ISR_CONTEXT);
+	os_sem_give(&rt_stat->irq_load_sem, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 #endif /* WITH_IRQ_LOAD */
 
-static void test_alarm_latency(const struct device *dev,
-		const struct device *irq_load_dev, struct latency_stat *rt_stat)
+/*
+ * Blocking function including an infinite loop ;
+ * must be called by separate threads/tasks.
+ *
+ * In case an error is returned the caller shall handle the lifecycle of the
+ * thread by suspending or destroying the latter.
+ */
+int rt_latency_test(struct latency_stat *rt_stat)
 {
 	int err;
-	uint32_t ticks;
-	uint32_t cnt;
+	uint32_t cnt, ticks;
 	uint32_t counter_period_us;
-	struct counter_alarm_cfg alarm_cfg;
-#ifdef WITH_IRQ_LOAD
-	struct counter_alarm_cfg load_alarm_cfg;
-#endif
+	struct os_counter_alarm_cfg alarm_cfg;
 	uint32_t now;
-	uint32_t cur_latency;
-#ifdef GPT_DEBUG
-	uint32_t cur_cycle;
+	uint64_t irq_delay;
+	uint64_t irq_to_sched;
+	const void *dev = rt_stat->dev;
+#ifdef WITH_IRQ_LOAD
+	struct os_counter_alarm_cfg load_alarm_cfg;
+	const void *irq_load_dev = rt_stat->irq_load_dev;
 #endif
 
 	counter_period_us = COUNTER_PERIOD_US_VAL;
+	ticks = os_counter_us_to_ticks(dev, counter_period_us);
 
-	ticks = counter_us_to_ticks(dev, counter_period_us);
-
-	alarm_cfg.flags = COUNTER_ALARM_CFG_ABSOLUTE;
-	alarm_cfg.callback = latency_alarm_handler;
+	alarm_cfg.flags = OS_COUNTER_ALARM_CFG_ABSOLUTE;
 	alarm_cfg.user_data = rt_stat;
+#ifndef OS_FREERTOS // TODO: Let callback registration possible
+	alarm_cfg.callback = latency_alarm_handler;
+#endif
 #ifdef WITH_IRQ_LOAD
 	counter_period_us = COUNTER_PERIOD_US_VAL - 1;
 
 	load_alarm_cfg.flags = 0;
+	load_alarm_cfg.user_data = rt_stat;
 	load_alarm_cfg.callback = load_alarm_handler;
-	load_alarm_cfg.ticks = counter_us_to_ticks(dev, counter_period_us);
+	load_alarm_cfg.ticks = os_counter_us_to_ticks(dev, counter_period_us);
 
-	os_sem_init(&irq_load_sem, 0);
+	os_sem_init(&rt_stat->irq_load_sem, 0);
 #endif
 
 	do {
@@ -164,217 +124,138 @@ static void test_alarm_latency(const struct device *dev,
 		/* Start irq load alarm firstly */
 		err = os_counter_set_channel_alarm(irq_load_dev, 0,
 				&load_alarm_cfg);
-		os_assert_equal(0, err, "%s: Counter set alarm failed (err: %d)",
-			irq_load_dev->name, err);
+		os_assert_equal(0, err, "Counter set alarm failed (err: %d)", err);
 #endif
-		/* Start GPU latency testing alarm */
+		/* Start IRQ latency testing alarm */
 		os_counter_get_value(dev, &cnt);
-		expected_cnt = cnt + ticks;
-		alarm_cfg.ticks = expected_cnt;
+		alarm_cfg.ticks = cnt + ticks;
+
+		rt_stat->time_prog = alarm_cfg.ticks;
 
 		err = os_counter_set_channel_alarm(dev, 0, &alarm_cfg);
-		os_assert_equal(0, err, "%s: Counter set alarm failed (err: %d)",
-			dev->name, err);
+		os_assert_equal(0, err, "Counter set alarm failed (err: %d)", err);
 
-		/* Suspend current thread util it is waked up in alarm call back function */
-		os_thread_suspend(k_current_get());
+		/* Sync current thread with alarm callback function thanks to a semaphore */
+		err = os_sem_take(&rt_stat->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		if (err) {
+			os_printf("Error: Can't take the semaphore\n\r");
 
-		/* Waked up and calculate latency */
+			return err;
+		}
+
+		/* Woken up... calculate latency */
 		os_counter_get_value(dev, &now);
 
-		cur_latency = calc_diff_ns(dev, expected_cnt, now);
+		irq_delay = calc_diff_ns(dev, rt_stat->time_prog, rt_stat->time_irq);
 
-		rt_stat->act_thread_wake = cur_latency;
+		stats_update(&rt_stat->irq_delay, irq_delay);
+		hist_update(&rt_stat->irq_delay_hist, irq_delay);
 
-		if (rt_stat->cycles < IGNORE_FIRST_CYCLES)
-			cur_latency = 0;
+		irq_to_sched = calc_diff_ns(dev, rt_stat->time_prog, now);
+		stats_update(&rt_stat->irq_to_sched, irq_to_sched);
+		hist_update(&rt_stat->irq_to_sched_hist, irq_to_sched);
 
-		if (rt_stat->max_thread_wake < cur_latency)
-			rt_stat->max_thread_wake = cur_latency;
-
-		if (rt_stat->min_thread_wake > cur_latency && rt_stat->cycles >= IGNORE_FIRST_CYCLES)
-			rt_stat->min_thread_wake = cur_latency;
-
-		rt_stat->avg_thread_wake += cur_latency;
-
-#ifdef ENABLE_HISTOGRAM
-		/* use us in histogram */
-		cur_latency /= 1000;
-		if (cur_latency >= MAX_STAT_LATENCY)
-			cur_latency = MAX_STAT_LATENCY - 1;
-		thread_latency_record[cur_latency]++;
-#endif
-		rt_stat->cycles++;
 		os_counter_stop(dev);
-
-#ifndef SILENT_TESTING
-		os_thread_resume(&print_thread);
-#endif
 
 #ifdef	WITH_IRQ_LOAD
 		/* Waiting irq load ISR exits and then go to next loop */
-		os_sem_take(&irq_load_sem, 0, OS_SEM_TIMEOUT_MAX);
+		err = os_sem_take(&rt_stat->irq_load_sem, 0, OS_SEM_TIMEOUT_MAX);
+		if (err) {
+			os_printf("Error: Can't take the semaphore\n\r");
+
+			return err;
+		}
 #endif
-	} while(rt_stat->cycles < TESTING_LOOP_NUM);
-
-}
-
-void gpt_latency_test(void *p1, void *p2, void *p3)
-{
-	const struct device *dev = p1;
-	struct latency_stat *rt_stat = p2;
-	const struct device *irq_load_dev = p3;
-
-	rt_stat->min_isr = 0xffffffff;
-	rt_stat->min_thread_wake = 0xffffffff;
-
-#ifdef OS_ZEPHYR
-	k_object_access_grant(dev, k_current_get());
-#endif
-	test_alarm_latency(dev, irq_load_dev, rt_stat);
-
-	os_usleep(2000);
-	os_thread_abort(k_current_get());
+	} while(1);
 }
 
 /* CPU Load */
 #ifdef WITH_CPU_LOAD
 
-#define CPU_LOAD_SWITH_CYCLES 0x8fffffff
-
-void cpu_load(void *p1, void *p2, void *p3)
+void cpu_load(void)
 {
-	struct k_sem cpu_sem;
+#ifdef WITH_CPU_LOAD_SEM
+	int ret;
+	os_sem_t cpu_sem;
 
 	os_sem_init(&cpu_sem, 0);
+#endif
+	os_printf("%s: task started\n\r", __func__);
 
 	do {
 #ifdef WITH_CPU_LOAD_SEM
+		ret = os_sem_take(&cpu_sem, 0, OS_SEM_TIMEOUT_MAX);
+		os_assert_equal(0, ret, "Failed to take semaphore");
+
 		os_sem_give(&cpu_sem, 0);
-		os_sem_take(&cpu_sem, 0, OS_SEM_TIMEOUT_MAX);
+		os_assert_equal(0, ret, "Failed to give semaphore");
 #endif
+#ifdef OS_ZEPHYR // TODO: Move cache invalidation into different task
 #ifdef WITH_INVD_CACHE
 		os_invd_dcache_all();
 		os_invd_icache_all();
 		/* 10Hz */
 		k_busy_wait(USEC_PER_MSEC * 100U);
 #endif
+#endif
 	} while(1);
 }
-#endif
+#endif /* #ifdef WITH_CPU_LOAD */
 
-static inline void print_cur_stat(void)
+#ifdef WITH_INVD_CACHE
+#define CACHE_INVAL_PERIOD_MS (100)
+void cache_inval(void)
 {
-#ifdef GPT_DEBUG
-	printf("C:%7lu, Min:%7d-%d, Act:%8d-%d, Avg:%8ld-%ld, Max:%8d-%d, %u-%u\n",
-#else
-	printf("C:%7lu, Min:%7d-%d, Act:%8d-%d, Avg:%8ld-%ld, Max:%8d-%d\n",
-#endif
-		rt_stats.cycles,
-		rt_stats.min_isr,
-		rt_stats.min_thread_wake,
-		rt_stats.act_isr,
-		rt_stats.act_thread_wake,
-		rt_stats.cycles > IGNORE_FIRST_CYCLES ?
-			(long) rt_stats.avg_isr /
-			(rt_stats.cycles - IGNORE_FIRST_CYCLES) : 0,
-		rt_stats.cycles > IGNORE_FIRST_CYCLES ?
-			(long) rt_stats.avg_thread_wake /
-			(rt_stats.cycles - IGNORE_FIRST_CYCLES) : 0,
-		rt_stats.max_isr,
-#ifdef GPT_DEBUG
-		rt_stats.max_thread_wake,
-		rt_stats.counter_diff,
-		rt_stats.cycle_diff);
-#else
-		rt_stats.max_thread_wake);
-#endif
+	os_printf("%s: task started\n\r", __func__);
 
+	do {
+		os_invd_dcache_all();
+		os_invd_icache_all();
+
+		os_msleep(CACHE_INVAL_PERIOD_MS);
+
+	} while(1);
 }
+#endif /* #ifdef WITH_INVD_CACHE */
 
 void print_stats(struct latency_stat *rt_stat)
 {
-	unsigned long pre_cycles = 0;
-
 	do {
-		if (rt_stats.cycles > pre_cycles) {
-			print_cur_stat();
-			pre_cycles = rt_stats.cycles;
-		}
+		os_msleep(10000);
 
-		//k_usleep(2000);
-		os_thread_suspend(k_current_get());
+		stats_compute(&rt_stat->irq_delay);
+		stats_print(&rt_stat->irq_delay);
+		stats_reset(&rt_stat->irq_delay);
+		hist_print(&rt_stat->irq_delay_hist);
+
+		stats_compute(&rt_stat->irq_to_sched);
+		stats_print(&rt_stat->irq_to_sched);
+		stats_reset(&rt_stat->irq_to_sched);
+		hist_print(&rt_stat->irq_to_sched_hist);
+
+		os_printf("\n\r");
 
 	} while(1);
 }
 
-#ifdef ENABLE_HISTOGRAM
-void print_records(void)
+int rt_latency_init(const void *dev,
+		const void *irq_load_dev, struct latency_stat *rt_stat)
 {
-	int j;
+	int ret;
 
-	os_printf("\nLatency Record Lists:\n\t\t");
-	os_printf("      GPT STATs\t");
-	os_printf("\nLatency(us)\t    ");
-	os_printf("(isr - task)\t    ");
+	rt_stat->dev = dev;
+	rt_stat->irq_load_dev = irq_load_dev;
 
-	os_printf("\n");
-	for (j = 0; j < MAX_STAT_LATENCY; j++) {
-		os_printf("\t%02d", j);
-		os_printf("\t%08d - %08d", isr_latency_record[j],
-					thread_latency_record[j]);
-		os_printf("\n");
-	}
-}
-#endif
+	stats_init(&rt_stat->irq_delay, 31, "irq delay (ns)", NULL);
+	hist_init(&rt_stat->irq_delay_hist, 20, 200);
 
-void print_summary(void)
-{
-	os_printf("\nTesting Setup:\n");
-#ifdef CONFIG_SMP
-	os_printf("\tUsing the following threads on SMP kernel with %d CPU Cores:\n",
-			CONFIG_MP_NUM_CPUS);
-#else
-	os_printf("\tUsing the following threads on non-SMP kernel:\n");
-#endif
+	stats_init(&rt_stat->irq_to_sched, 31, "irq to sched (ns)", NULL);
+	hist_init(&rt_stat->irq_to_sched_hist, 20, 1000);
 
-	os_printf("\t\tGPT testing threads with one GPT Counter irq.\n");
+	ret = os_sem_init(&rt_stat->semaphore, 0);
+	if (ret)
+		os_printf("semaphore creation failed.\r\n");
 
-#ifndef SILENT_TESTING
-	os_printf("\t\tOne realtime printing thread.\n");
-#endif
-
-#ifdef WITH_CPU_LOAD
-#ifdef WITH_CPU_LOAD_SEM
-	os_printf("\t\tOne CPU load thread with Semaphore load.\n");
-#else
-	os_printf("\t\tOne CPU load thread.\n");
-#endif
-#endif
-
-#ifdef WITH_IRQ_LOAD
-	os_printf("\t\tOne IRQ load and thread.\n");
-#endif
-
-#ifdef THREAD_CPU_BINDING
-	os_printf("\tUsing CPU binding:\n");
-	os_printf("\t\tGPT_thread on Core%d, Load_thread on Core%d",
-			GPT_CPU_BINDING,
-			PRINT_CPU_BINDING,
-			LOAD_CPU_BINDING);
-#ifndef SILENT_TESTING
-	os_printf("\t\t, Print_thread on Core%d",
-			PRINT_CPU_BINDING);
-#endif
-	os_printf(".\n");
-#endif
-
-#ifdef ENABLE_HISTOGRAM
-	print_records();
-#endif
-
-	os_printf("\nTesting Result:\n");
-	os_printf("\t");
-	print_cur_stat();
+	return ret;
 }
 

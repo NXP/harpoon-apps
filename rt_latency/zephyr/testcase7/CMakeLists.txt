@@ -16,5 +16,13 @@ zephyr_include_directories(
 	${ProjDirPath}
 	)
 
+set(MCUX_SDK_PROJECT_NAME app)
+
+set(CMAKE_MODULE_PATH
+    ${CommonPath}/libs/stats
+)
+
+include(lib_stats)
+
 target_sources(app PRIVATE ../src/main.c)
 target_sources(app PRIVATE ../../common/rt_latency.c)

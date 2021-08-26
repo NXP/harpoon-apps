@@ -7,6 +7,9 @@
 #ifndef _ZEPHYR_COUNTER_H_
 #define _ZEPHYR_COUNTER_H_
 
+#include <zephyr.h>
+#include <ztest.h>
+
 #include <drivers/counter.h>
 
 #include "os/assert.h"
