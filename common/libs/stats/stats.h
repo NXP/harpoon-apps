@@ -30,7 +30,7 @@ struct stats {
     int32_t abs_min;
     int32_t abs_max;
 
-    void *priv;
+    char *name;
     void (*func)(struct stats *s);
 };
 
@@ -55,14 +55,14 @@ void hist_print(struct hist *hist);
 /** Initialize a stats structure.
  * @s: 			Pointer to structure to be initialized
  * @log2_size:	Set size to be reached before statistics are computed, expressed as a power of 2
- * @priv:		private field for use by func
+ * @name:		character field used by stats_print
  * @func:		pointer to the function to be called when stats are computed
  *
  */
-static inline void stats_init(struct stats *s, unsigned int log2_size, void *priv, void (*func)(struct stats *s))
+static inline void stats_init(struct stats *s, unsigned int log2_size, void *name, void (*func)(struct stats *s))
 {
     s->log2_size = log2_size;
-    s->priv = priv;
+    s->name = name;
     s->func = func;
 
     s->abs_min = 0x7fffffff;

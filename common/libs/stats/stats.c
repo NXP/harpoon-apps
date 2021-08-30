@@ -24,14 +24,13 @@ void stats_reset(struct stats *s)
 }
 
 /** Example function to be passed to stats_init
- * This function expects the priv field to be a character string.
  * Usage:
  * stats_init(s, log2_size, "your string", print_stats);
  */
 void stats_print(struct stats *s)
 {
     INF("stats(%p) %s min %d mean %d max %d rms^2 %llu stddev^2 %llu absmin %d absmax %d\n\r",
-        s, s->priv, s->min, s->mean, s->max, s->ms, s->variance, s->abs_min, s->abs_max);
+        s, s->name, s->min, s->mean, s->max, s->ms, s->variance, s->abs_min, s->abs_max);
 }
 
 /** Update stats with a given sample.
@@ -145,7 +144,7 @@ void hist_print(struct hist *hist)
 
     if (app_log_level >= VERBOSE_INFO) {
         for (i = 0; i < (hist->n_slots + 1); i++)
-            os_printf("%lu ", hist->slots[i]);
+            os_printf("%u ", hist->slots[i]);
         os_printf("\n\r");
     }
 }
