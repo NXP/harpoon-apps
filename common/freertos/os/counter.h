@@ -11,6 +11,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* OSAL includes.*/
+#include "os/counter.h"
+
 /* Freescale includes. */
 #include "fsl_common.h"
 #include "fsl_gpt.h"
@@ -20,13 +23,6 @@ struct os_counter_gpt_dev {
     GPT_Type *base;
     IRQn_Type *irqn;
     void *cb;
-};
-
-struct os_counter_alarm_cfg {
-	void    *callback;   /* callback when "now + ticks" timer is reached */
-	uint32_t ticks;      /* number of ticks that triggers the alarm, relative to now */
-	void    *user_data;  /* pointer to some data sent back to the callback function */
-	uint32_t flags;      /* absolute or relative */
 };
 
 #define OS_COUNTER_ALARM_CFG_ABSOLUTE (1 << 0)

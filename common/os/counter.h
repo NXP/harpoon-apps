@@ -12,6 +12,13 @@
 
 #include "os.h"
 
+struct os_counter_alarm_cfg {
+	void (*callback)(const void *dev, uint8_t chan_id, uint32_t irq_counter, void *user_data);
+	uint32_t ticks;      /* number of ticks that triggers the alarm, relative to now */
+	void    *user_data;  /* pointer to some data sent back to the callback function */
+	uint32_t flags;      /* absolute or relative */
+};
+
 #if defined(OS_ZEPHYR)
   #include "zephyr/os/counter.h"
 #elif defined(OS_FREERTOS)
