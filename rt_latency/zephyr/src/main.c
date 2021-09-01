@@ -21,6 +21,10 @@ K_THREAD_STACK_DEFINE(gpt_stack, STACK_SIZE);
 K_THREAD_STACK_DEFINE(cpu_load_stack, STACK_SIZE);
 #endif
 
+#ifdef WITH_INVD_CACHE
+K_THREAD_STACK_DEFINE(cache_inval_stack, STACK_SIZE);
+#endif
+
 #ifndef SILENT_TESTING
 K_THREAD_STACK_DEFINE(print_stack, STACK_SIZE);
 #endif
@@ -62,6 +66,13 @@ void cpu_load_func(void *p1, void *p2, void *p3)
 }
 #endif
 
+#ifdef WITH_INVD_CACHE
+void cache_inval_func(void *p1, void *p2, void *p3)
+{
+	cache_inval();
+}
+#endif
+
 void print_stats_func(void *p1, void *p2, void *p3)
 {
 	struct latency_stat *rt_stat = p2;
@@ -78,6 +89,9 @@ void test_main(void)
 	struct k_thread gpt_thread;
 #ifdef WITH_CPU_LOAD
 	struct k_thread cpu_load_thread;
+#endif
+#ifdef WITH_INVD_CACHE
+	struct k_thread cache_inval_thread;
 #endif
 #ifndef SILENT_TESTING
 	struct k_thread print_thread;
@@ -142,6 +156,18 @@ void test_main(void)
 	k_thread_cpu_mask_enable(&cpu_load_thread, CPU_LOAD_CPU_BINDING);
 #endif
 	k_thread_start(&cpu_load_thread);
+#endif
+
+	/* Cache Invalidate Thread */
+#ifdef WITH_INVD_CACHE
+	k_thread_create(&cache_inval_thread, cache_inval_stack, STACK_SIZE,
+			cache_inval_func, NULL, NULL, NULL,
+			K_LOWEST_APPLICATION_THREAD_PRIO, 0, K_FOREVER);
+#ifdef THREAD_CPU_BINDING
+	k_thread_cpu_mask_clear(&cache_inval_thread);
+	k_thread_cpu_mask_enable(&cache_inval_thread, CPU_LOAD_CPU_BINDING);
+#endif
+	k_thread_start(&cache_inval_thread);
 #endif
 
 	/* Start GPT Threads */

@@ -198,14 +198,6 @@ void cpu_load(void)
 		os_sem_give(&cpu_sem, 0);
 		os_assert_equal(0, ret, "Failed to give semaphore");
 #endif
-#ifdef OS_ZEPHYR // TODO: Move cache invalidation into different task
-#ifdef WITH_INVD_CACHE
-		os_invd_dcache_all();
-		os_invd_icache_all();
-		/* 10Hz */
-		k_busy_wait(USEC_PER_MSEC * 100U);
-#endif
-#endif
 	} while(1);
 }
 #endif /* #ifdef WITH_CPU_LOAD */
