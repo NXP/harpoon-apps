@@ -22,7 +22,7 @@
 
 #if defined(OS_ZEPHYR)
   #include "zephyr/os/semaphore.h"
-#elif defined(OS_FREERTOS)
+#elif defined(FSL_RTOS_FREE_RTOS)
   #include "freertos/os/semaphore.h"
 #endif
 

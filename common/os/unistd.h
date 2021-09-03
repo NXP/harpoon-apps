@@ -10,7 +10,7 @@
 
 #if defined(OS_ZEPHYR)
   #include "zephyr/os/unistd.h"
-#elif defined(OS_FREERTOS)
+#elif defined(FSL_RTOS_FREE_RTOS)
   #include "freertos/os/unistd.h"
 #endif
 

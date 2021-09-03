@@ -11,7 +11,7 @@
 
 #if defined(OS_ZEPHYR)
   #include "zephyr/os/stdio.h"
-#elif defined(OS_FREERTOS)
+#elif defined(FSL_RTOS_FREE_RTOS)
   #include "freertos/os/stdio.h"
 #endif
 

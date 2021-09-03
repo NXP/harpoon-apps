@@ -1,8 +1,12 @@
 /*
  * Copyright 2021 NXP
- * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#define OS_FREERTOS
+/*
+ * TODO: eventually remove all os.h files and intialize OS flag through conpiler
+ * flag ; e.g.:
+ *
+ * CFLAGS+=-DOS_ZEPHYR
+ */

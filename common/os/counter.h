@@ -21,7 +21,7 @@ struct os_counter_alarm_cfg {
 
 #if defined(OS_ZEPHYR)
   #include "zephyr/os/counter.h"
-#elif defined(OS_FREERTOS)
+#elif defined(FSL_RTOS_FREE_RTOS)
   #include "freertos/os/counter.h"
 #endif
 
