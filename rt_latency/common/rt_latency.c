@@ -22,9 +22,20 @@ static inline uint32_t calc_diff_ns(const void *dev,
 			uint32_t cnt_1, uint32_t cnt_2)
 {
 	uint32_t diff;
-	uint32_t top = os_counter_get_top_value(dev);
+	static uint32_t top = 0;
+	static int counting_up = -1;
 
-	if (os_counter_is_counting_up(dev)) {
+	/*
+	 * Set these variables once for all to avoid multiple register accesses
+	 * each time we call this function.
+	 */
+	if (top == 0)
+		top = os_counter_get_top_value(dev);
+
+	if (counting_up == -1)
+		counting_up = os_counter_is_counting_up(dev);
+
+	if (counting_up) {
 		diff =  (cnt_2 < cnt_1) ?
 			(cnt_2 + top - cnt_1) : (cnt_2 - cnt_1);
 	} else {
@@ -61,15 +72,14 @@ void load_alarm_handler(const void *dev, uint8_t chan_id,
 			  uint32_t irq_counter,
 			  void *user_data)
 {
-	uint32_t ticks;
 	uint32_t start, cur;
 	struct latency_stat *rt_stat = user_data;
 
-	ticks = os_counter_us_to_ticks(dev, IRQ_LOAD_ISR_DURATION_US);
 	os_counter_get_value(dev, &start);
+
 	do {
 		os_counter_get_value(dev, &cur);
-	} while(cur < start + ticks);
+	} while (calc_diff_ns(dev, start, cur) < IRQ_LOAD_ISR_DURATION_US * 1000);
 
 	os_counter_stop(dev);
 	os_sem_give(&rt_stat->irq_load_sem, OS_SEM_FLAGS_ISR_CONTEXT);
