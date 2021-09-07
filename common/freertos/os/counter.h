@@ -27,6 +27,5 @@ struct os_counter_gpt_dev {
 
 #define OS_COUNTER_ALARM_CFG_ABSOLUTE (1 << 0)
 
-void os_counter_init(const void *dev);
-
 #endif /* #ifndef _FREERTOS_COUNTER_H_ */
+

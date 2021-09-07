@@ -138,7 +138,7 @@ static void gpt_irq_handler(void *dev)
 	reset_alarm(dev, chan_id);
 }
 
-void os_counter_init(const void *dev)
+static void counter_init(const void *dev)
 {
 	gpt_config_t gptConfig;
 	IRQn_Type irqn = gpt_get_irqn(dev);
@@ -158,10 +158,21 @@ void os_counter_init(const void *dev)
 
 	counter = &counters[gpt_get_index(dev)];
 	counter->dev = dev;
+
+	os_printf("counter %d using GPT dev %p irq %d initialized\r\n",
+			gpt_get_index(dev), dev, irqn);
 }
 
 int os_counter_start(const void *dev)
 {
+	uint8_t index = gpt_get_index(dev);
+	struct counter_alarm *counter = &counters[index];
+
+	os_assert(index != 0, "Unknown device %p", dev);
+
+	if (!counter->dev)
+		counter_init(dev);
+
 	GPT_StartTimer((GPT_Type *)dev);
 
 	return 0;
