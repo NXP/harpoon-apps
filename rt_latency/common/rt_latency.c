@@ -113,9 +113,7 @@ int rt_latency_test(struct latency_stat *rt_stat)
 
 	alarm_cfg.flags = OS_COUNTER_ALARM_CFG_ABSOLUTE;
 	alarm_cfg.user_data = rt_stat;
-#ifndef OS_FREERTOS // TODO: Let callback registration possible
 	alarm_cfg.callback = latency_alarm_handler;
-#endif
 #ifdef WITH_IRQ_LOAD
 	counter_period_us = COUNTER_PERIOD_US_VAL - 1;
 
