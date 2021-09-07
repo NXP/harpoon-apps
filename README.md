@@ -83,8 +83,8 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   └── zephyr
 │   │       └── main.c                      <-- main entry point for Zephyr
 │   └── manifest-tmp
-├── freertos                                <-- FreeRTOS-Kernel Git submodule
-├── mcux-sdk                                <-- MCUXpresso Git submodule
+├── freertos                                <-- FreeRTOS-Kernel Git tree
+├── mcux-sdk                                <-- MCUXpresso Git tree
 │   ├── ...
 │   ├── components
 │   ├── devices
