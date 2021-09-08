@@ -1,5 +1,5 @@
 # SOC DEVICE SETTING
-SET(MCUX_DEVICE "MIMX8ML8")
+SET(MCUX_DEVICE "MIMX8ML8_ca53")
 
 # HYPERVISOR SETTING
 SET(CMAKE_HYPERVISOR_GUEST 1)
@@ -82,7 +82,7 @@ include(driver_iuart)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
-include(middleware_freertos-kernel_MIMX8ML8_ca53)
+include(middleware_freertos-kernel_ca53)
 
 include(utility_assert)
 include(utility_debug_console)
