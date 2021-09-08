@@ -47,7 +47,7 @@ uint64_t FreeRTOS_tick_interval;
  * Definitions
  ******************************************************************************/
 
-static void ARM_GENERIC_TIMER_VIRTUAL_IRQn_Handler(void *data)
+static void VirtualTimer_IRQn_Handler(void *data)
 {
 	(void)data;
 	FreeRTOS_Tick_Handler();
@@ -87,15 +87,15 @@ void vConfigureTickInterrupt( void )
 
     /* Set the interrupt priority (must be the lowest possible). */
     /* FIXME: This function doesn't actually set the proper value when run from the inmate cell */
-    GIC_SetPriority(ARM_GENERIC_TIMER_VIRTUAL_IRQn,
+    GIC_SetPriority(VirtualTimer_IRQn,
                 portLOWEST_USABLE_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
 
-    irq_register(ARM_GENERIC_TIMER_VIRTUAL_IRQn, ARM_GENERIC_TIMER_VIRTUAL_IRQn_Handler, NULL);
+    irq_register(VirtualTimer_IRQn, VirtualTimer_IRQn_Handler, NULL);
 
     /* Enable the interrupt in the GIC. */
     GIC_EnableInterface();
     GIC_SetInterfacePriorityMask(portLOWEST_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
-    GIC_EnableIRQ(ARM_GENERIC_TIMER_VIRTUAL_IRQn);
+    GIC_EnableIRQ(VirtualTimer_IRQn);
 
     /* Enable the interrupts in the timer. */
     Timer_EnableIRQ();
