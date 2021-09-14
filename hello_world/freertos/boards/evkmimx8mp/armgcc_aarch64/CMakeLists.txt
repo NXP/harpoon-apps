@@ -42,7 +42,7 @@ include(${ProjDirPath}/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/src/hello_world.c"
     "${AppPath}/freertos/main.c"
-    "${BoardPath}/aarch64gcc/startup_MIMX8ML8_ca53.S"
+    "${BoardPath}/armgcc_aarch64/startup_MIMX8ML8_ca53.S"
     "${BoardPath}/board.c"
     "${CommonPath}/freertos/FreeRTOS_tick_config.c"
 )

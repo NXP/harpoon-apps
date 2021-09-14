@@ -307,7 +307,7 @@ SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " \
     muldefs \
     -Xlinker \
     -Map=output.map \
-    -T${BoardPath}/aarch64gcc/MIMX8ML8xxxxx_ca53_ram.ld -static \
+    -T${BoardPath}/armgcc_aarch64/MIMX8ML8xxxxx_ca53_ram.ld -static \
 ")
 SET(CMAKE_EXE_LINKER_FLAGS_RELEASE " \
     -march=armv8.1-a \
@@ -329,7 +329,7 @@ SET(CMAKE_EXE_LINKER_FLAGS_RELEASE " \
     muldefs \
     -Xlinker \
     -Map=output.map \
-    -T${BoardPath}/aarch64gcc/MIMX8ML8xxxxx_ca53_ram.ld -static \
+    -T${BoardPath}/armgcc_aarch64/MIMX8ML8xxxxx_ca53_ram.ld -static \
 ")
 SET(CMAKE_EXE_LINKER_FLAGS_DDR_DEBUG " \
     -g \
@@ -352,7 +352,7 @@ SET(CMAKE_EXE_LINKER_FLAGS_DDR_DEBUG " \
     muldefs \
     -Xlinker \
     -Map=output.map \
-    -T${BoardPath}/aarch64gcc/MIMX8ML8xxxxx_ca53_ddr_ram.ld -static \
+    -T${BoardPath}/armgcc_aarch64/MIMX8ML8xxxxx_ca53_ddr_ram.ld -static \
 ")
 SET(CMAKE_EXE_LINKER_FLAGS_DDR_RELEASE " \
     -march=armv8.1-a \
@@ -374,5 +374,5 @@ SET(CMAKE_EXE_LINKER_FLAGS_DDR_RELEASE " \
     muldefs \
     -Xlinker \
     -Map=output.map \
-    -T${BoardPath}/aarch64gcc/MIMX8ML8xxxxx_ca53_ddr_ram.ld -static \
+    -T${BoardPath}/armgcc_aarch64/MIMX8ML8xxxxx_ca53_ddr_ram.ld -static \
 ")

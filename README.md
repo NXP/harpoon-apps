@@ -42,7 +42,7 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   ├── common                              <-- source code common to all applications
 │   │   ├── freertos
 │   │   │   │   └── evkmimx8mp
-│   │   │   │       ├── aarch64gcc
+│   │   │   │       ├── armgcc_aarch64
 │   │   │   │       │   ├── MIMX8ML8xxxxx_ca53_ddr_ram.ld
 │   │   │   │       │   └── startup_MIMX8ML8_ca53.S
 │   │   │   │       ├── board.c
@@ -72,7 +72,7 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   ├── freertos
 │   │   │   ├── boards                      <-- board-specific source code used for FreeRTOS
 │   │   │   │   └── evkmimx8mp
-│   │   │   │       └── aarch64gcc          <-- entry point to build this application for FreeRTOS/evkmimx8mp
+│   │   │   │       └── armgcc_aarch64          <-- entry point to build this application for FreeRTOS/evkmimx8mp
 │   │   │   │           └── build_ddr_release.sh
 │   │   │   └── main.c                      <-- main entry point for FreeRTOS
 │   │   ├── include
@@ -116,7 +116,7 @@ export ARMGCC_DIR=/opt/gcc-arm-10.2-2020.11-x86_64-aarch64-none-elf
 Then move to the right path, depending on the board and the rtos that you are looking for. The example below builds the application within FreeRTOS and for the i.MX 8M Plus EVK board:
 
 ```
-cd demo_apps/hello_world/freertos/boards/evkmimx8mp/aarch64gcc/
+cd demo_apps/hello_world/freertos/boards/evkmimx8mp/armgcc_aarch64/
 ./build_ddr_release.sh
 ```
 
