@@ -143,6 +143,7 @@ static void counter_init(const void *dev)
 	gpt_config_t gptConfig;
 	IRQn_Type irqn = gpt_get_irqn(dev);
 	struct counter_alarm *counter;
+	int ret;
 
 	os_assert(dev != NULL, "Null pointer!");
 	os_assert(irqn != NotAvail_IRQn, "Unknown IRQn for device %p", dev);
@@ -153,8 +154,9 @@ static void counter_init(const void *dev)
 	gptConfig.divider = 1;
 	GPT_Init((GPT_Type *)(dev), &gptConfig);
 
-	irq_register(irqn, gpt_irq_handler, (void *)dev);
-	EnableIRQ(irqn);
+	ret = irq_register(irqn, gpt_irq_handler, (void *)dev);
+	os_assert(!ret, "Failed to register counter's IRQ! (%d)", ret);
+	GIC_EnableIRQ(irqn);
 
 	counter = &counters[gpt_get_index(dev)];
 	counter->dev = dev;
