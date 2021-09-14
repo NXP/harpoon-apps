@@ -53,40 +53,26 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonPath}
     ${CommonPath}/freertos
     ${BoardPath}
-    ${SdkDirPath}/components/serial_manager
-    ${SdkDirPath}/components/lists
-    ${SdkDirPath}/components/uart
     ${SdkDirPath}/devices/MIMX8ML8
-    ${SdkDirPath}/devices/MIMX8ML8/drivers
-    ${SdkDirPath}/drivers/common
-    ${SdkDirPath}/drivers/iuart
-    ${SdkDirPath}/utilities/assert
-    ${SdkDirPath}/utilities/debug_console
-    ${SdkDirPath}/utilities/misc_utilities
 )
 
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${RtosPath}
-    ${SdkDirPath}/components/serial_manager
-    ${SdkDirPath}/components/lists
-    ${SdkDirPath}/components/uart
-    ${SdkDirPath}/devices/MIMX8ML8
-    ${SdkDirPath}/devices/MIMX8ML8/drivers
-    ${SdkDirPath}/drivers/common
-    ${SdkDirPath}/drivers/iuart
-    ${SdkDirPath}/utilities/assert
-    ${SdkDirPath}/utilities/debug_console
-    ${SdkDirPath}/utilities/misc_utilities
+    ${SdkDirPath}
 )
+
+# include entry for cmake components
+
+include(all_devices)
 
 # include modules
 
 include(common_freertos)
 
 include(component_iuart_adapter)
-include(component_serial_manager)
 include(component_lists)
+include(component_serial_manager)
 include(component_serial_manager_uart)
 
 include(driver_arm_mmu_MIMX8ML8)
@@ -94,13 +80,13 @@ include(driver_clock)
 include(driver_common)
 include(driver_iuart)
 
-include(utility_assert)
-include(utility_debug_console)
-include(utilities_misc_utilities)
-
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
 include(middleware_freertos-kernel_MIMX8ML8_ca53)
+
+include(utility_assert)
+include(utility_debug_console)
+include(utilities_misc_utilities)
 
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
 
