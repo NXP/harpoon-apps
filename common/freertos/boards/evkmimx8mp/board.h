@@ -22,9 +22,7 @@
 #define BOARD_DEBUG_UART_BAUDRATE (115200U)
 #define BOARD_DEBUG_UART_BASEADDR UART4_BASE
 #define BOARD_DEBUG_UART_INSTANCE (4U)
-#define BOARD_DEBUG_UART_CLK_FREQ                                                           \
-    CLOCK_GetPllFreq(kCLOCK_SystemPll1Ctrl) / (CLOCK_GetRootPreDivider(kCLOCK_RootUart4)) / \
-        (CLOCK_GetRootPostDivider(kCLOCK_RootUart4)) / 10
+#define BOARD_DEBUG_UART_CLK_FREQ (CLOCK_GetRootClockFreq(kCLOCK_Root_Uart4))
 #define BOARD_UART_IRQ         UART4_IRQn
 #define BOARD_UART_IRQ_HANDLER UART4_IRQHandler
 
