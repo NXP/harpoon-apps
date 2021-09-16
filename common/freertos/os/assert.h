@@ -13,8 +13,8 @@
 #define os_assert(cond, msg, ...)       \
 do { \
     if (!(cond)) { \
-        os_printf("%s: " msg "\n\r", __func__, ##__VA_ARGS__); \
-        assert(false); \
+        os_printf("\tAssertion failed at %s: %d: %s:\n\r" msg "\n\r", __FILE__, __LINE__, __func__, ##__VA_ARGS__); \
+        while(1); \
     } \
 } while (0)
 
