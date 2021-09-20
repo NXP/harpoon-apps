@@ -132,7 +132,7 @@ int rt_latency_test(struct latency_stat *rt_stat)
 		/* Start irq load alarm firstly */
 		err = os_counter_set_channel_alarm(irq_load_dev, 0,
 				&load_alarm_cfg);
-		os_assert_equal(0, err, "Counter set alarm failed (err: %d)", err);
+		os_assert(!err, "Counter set alarm failed (err: %d)", err);
 #endif
 		/* Start IRQ latency testing alarm */
 		os_counter_get_value(dev, &cnt);
@@ -141,15 +141,11 @@ int rt_latency_test(struct latency_stat *rt_stat)
 		rt_stat->time_prog = alarm_cfg.ticks;
 
 		err = os_counter_set_channel_alarm(dev, 0, &alarm_cfg);
-		os_assert_equal(0, err, "Counter set alarm failed (err: %d)", err);
+		os_assert(!err, "Counter set alarm failed (err: %d)", err);
 
 		/* Sync current thread with alarm callback function thanks to a semaphore */
 		err = os_sem_take(&rt_stat->semaphore, 0, OS_SEM_TIMEOUT_MAX);
-		if (err) {
-			os_printf("Error: Can't take the semaphore\n\r");
-
-			return err;
-		}
+		os_assert(!err, "Can't take the semaphore (err: %d)", err);
 
 		/* Woken up... calculate latency */
 		os_counter_get_value(dev, &now);
@@ -168,11 +164,7 @@ int rt_latency_test(struct latency_stat *rt_stat)
 #ifdef	WITH_IRQ_LOAD
 		/* Waiting irq load ISR exits and then go to next loop */
 		err = os_sem_take(&rt_stat->irq_load_sem, 0, OS_SEM_TIMEOUT_MAX);
-		if (err) {
-			os_printf("Error: Can't take the semaphore\n\r");
-
-			return err;
-		}
+		os_assert(!err, "Can't take the semaphore (err: %d)", err);
 #endif
 	} while(1);
 }
@@ -183,20 +175,21 @@ int rt_latency_test(struct latency_stat *rt_stat)
 void cpu_load(void)
 {
 #ifdef WITH_CPU_LOAD_SEM
-	int ret;
+	int err;
 	os_sem_t cpu_sem;
 
-	os_sem_init(&cpu_sem, 0);
+	err = os_sem_init(&cpu_sem, 0);
+	os_assert(!err, "semaphore init failed!");
 #endif
 	os_printf("%s: task started\n\r", __func__);
 
 	do {
 #ifdef WITH_CPU_LOAD_SEM
-		ret = os_sem_take(&cpu_sem, 0, OS_SEM_TIMEOUT_MAX);
-		os_assert_equal(0, ret, "Failed to take semaphore");
+		err = os_sem_take(&cpu_sem, 0, OS_SEM_TIMEOUT_MAX);
+		os_assert(!err, "Failed to take semaphore");
 
-		os_sem_give(&cpu_sem, 0);
-		os_assert_equal(0, ret, "Failed to give semaphore");
+		err = os_sem_give(&cpu_sem, 0);
+		os_assert(!err, "Failed to give semaphore");
 #endif
 	} while(1);
 }
@@ -241,7 +234,7 @@ void print_stats(struct latency_stat *rt_stat)
 int rt_latency_init(const void *dev,
 		const void *irq_load_dev, struct latency_stat *rt_stat)
 {
-	int ret;
+	int err;
 
 	rt_stat->dev = dev;
 	rt_stat->irq_load_dev = irq_load_dev;
@@ -252,10 +245,9 @@ int rt_latency_init(const void *dev,
 	stats_init(&rt_stat->irq_to_sched, 31, "irq to sched (ns)", NULL);
 	hist_init(&rt_stat->irq_to_sched_hist, 20, 1000);
 
-	ret = os_sem_init(&rt_stat->semaphore, 0);
-	if (ret)
-		os_printf("semaphore creation failed.\r\n");
+	err = os_sem_init(&rt_stat->semaphore, 0);
+	os_assert(!err, "semaphore creation failed!");
 
-	return ret;
+	return err;
 }
 
