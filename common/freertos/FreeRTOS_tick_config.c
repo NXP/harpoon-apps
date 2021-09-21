@@ -86,8 +86,7 @@ void vConfigureTickInterrupt( void )
     Timer_SetInterval(FreeRTOS_tick_interval);
 
     /* Set the interrupt priority (must be the lowest possible). */
-    /* FIXME: This function doesn't actually set the proper value when run from the inmate cell */
-    GIC_SetPriority(VirtualTimer_IRQn,
+    GIC_SetRedistPriority(VirtualTimer_IRQn,
                 portLOWEST_USABLE_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
 
     irq_register(VirtualTimer_IRQn, VirtualTimer_IRQn_Handler, NULL);
