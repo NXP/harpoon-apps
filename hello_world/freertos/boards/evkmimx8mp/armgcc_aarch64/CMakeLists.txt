@@ -75,10 +75,10 @@ include(component_lists)
 include(component_serial_manager)
 include(component_serial_manager_uart)
 
-include(driver_arm_mmu_MIMX8ML8)
 include(driver_clock)
 include(driver_common)
 include(driver_iuart)
+include(device_mmu_regions)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)

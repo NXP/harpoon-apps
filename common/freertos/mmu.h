@@ -7,13 +7,12 @@
 
 #ifndef _MMU_H_
 #define _MMU_H_
-#include "arm_mmu.h"
+
+#include "fsl_device_registers.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define MMU_init(void) z_arm64_mmu_init(void)
-
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
@@ -22,7 +21,10 @@ extern "C" {
  * API
  ******************************************************************************/
 
-void MMU_init(void);
+static inline void MMU_init(void)
+{
+    return ARM_MMU_Initialize(true);
+}
 
 #if defined(__cplusplus)
 }

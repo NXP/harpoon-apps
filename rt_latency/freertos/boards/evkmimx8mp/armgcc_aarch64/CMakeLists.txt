@@ -78,11 +78,11 @@ include(component_lists)
 include(component_serial_manager)
 include(component_serial_manager_uart)
 
-include(driver_arm_mmu_MIMX8ML8)
 include(driver_clock)
 include(driver_common)
 include(driver_gpt)
 include(driver_iuart)
+include(device_mmu_regions)
 
 include(lib_stats)
 
