@@ -13,6 +13,10 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+/* TODO Implement CLOCK_GetRootClockFreq() */
+#define kCLOCK_Root_Uart4                 4
+#define CLOCK_GetRootClockFreq(clockRoot) OSC24M_CLK_FREQ
+
 /*! @brief The board name */
 #define BOARD_NAME        "MIMX8MP-EVK"
 #define MANUFACTURER_NAME "NXP"
