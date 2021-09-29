@@ -10,6 +10,7 @@
 
 #include "irq.h"
 
+#include "fsl_device_registers.h"
 #include "fsl_gpt.h"
 
 /* FIXME use fsl_clock to get the frequency */
