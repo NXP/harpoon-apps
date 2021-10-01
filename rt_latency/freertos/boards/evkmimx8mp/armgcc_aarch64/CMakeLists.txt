@@ -42,9 +42,7 @@ include(${ProjDirPath}/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/rt_latency.c"
-    "${BoardPath}/armgcc_aarch64/startup_MIMX8ML8_ca53.S"
     "${BoardPath}/board.c"
-    "${CommonPath}/freertos/FreeRTOS_tick_config.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
@@ -60,6 +58,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
+    ${CommonPath}/freertos/core/armv8a
     ${CommonPath}/libs/stats
     ${RtosPath}
     ${SdkDirPath}
@@ -72,6 +71,7 @@ include(all_devices)
 # include modules
 
 include(common_freertos)
+include(common_freertos_core_armv8a)
 
 include(component_iuart_adapter)
 include(component_lists)

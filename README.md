@@ -43,19 +43,28 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   ├── freertos
 │   │   │   │   └── evkmimx8mp
 │   │   │   │       ├── armgcc_aarch64
-│   │   │   │       │   ├── MIMX8ML8xxxxx_ca53_ddr_ram.ld
-│   │   │   │       │   └── startup_MIMX8ML8_ca53.S
+│   │   │   │       │   └── MIMX8ML8xxxxx_ca53_ddr_ram.ld <-- linker script
 │   │   │   │       ├── board.c
 │   │   │   │       ├── board.h
 │   │   │   │       └── clock_config.h
 │   │   │   ├── common_freertos.cmake       <-- hardware-agnostic source code for FreeRTOS
-│   │   │   ├── FreeRTOS_assert.c
+│   │   │   ├── core                        <-- includes os-specific header files for the os APIs
+│   │   │   │   └── armv8a
+│   │   │   │       ├── common_freertos_core_armv8a.cmake
+│   │   │   │       └── startup.S           <-- ARMv8-A startup code
+│   │   │   ├── counter.c
 │   │   │   ├── FreeRTOSConfig.h
+│   │   │   ├── FreeRTOS_helper.c
 │   │   │   ├── FreeRTOS_tick_config.c
+│   │   │   ├── irq.{c,h}                   <-- contains interrupt handler
 │   │   │   ├── stdio.c                     <-- local implementation of the os APIs
 │   │   │   ├── mmu.h
 │   │   │   ├── os                          <-- includes os-specific header files for the os APIs
-│   │   │   │   └── stdio.h
+│   │   │   │   ├── assert.h
+│   │   │   │   ├── counter.h
+│   │   │   │   ├── semaphore.h
+│   │   │   │   ├── stdio.h
+│   │   │   │   └── unistd.h
 │   │   │   └── os.h
 │   │   ├── libs
 │   │   │   └── stats
