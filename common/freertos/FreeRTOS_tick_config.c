@@ -32,7 +32,6 @@
 /* NXP includes. */
 #include "fsl_device_registers.h"
 #include "fsl_common.h"
-#include "driver_arm_virtual_timer.h"
 
 #include "irq.h"
 
@@ -41,11 +40,13 @@
  ******************************************************************************/
 
 /*  computed once for all,  used to program the timer */
-uint64_t FreeRTOS_tick_interval;
+uint32_t FreeRTOS_tick_interval;
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+
+#define ARM_TIMER            ARM_TIMER_VIRTUAL
 
 static void VirtualTimer_IRQn_Handler(void *data)
 {
@@ -71,19 +72,19 @@ static void VirtualTimer_IRQn_Handler(void *data)
 
 void vConfigureTickInterrupt( void )
 {
-    uint64_t val;
+    uint32_t val;
 
     /* Initialize the device. */
-    Timer_Init();
+    ARM_TIMER_Initialize(ARM_TIMER);
 
     /* Fetch timer frequency rate. */
-    Timer_GetFreq(&val);
+    ARM_TIMER_GetFreq(ARM_TIMER, &val);
 
     /* Derive values from the tick rate. */
     FreeRTOS_tick_interval = val / configTICK_RATE_HZ;
 
     /* Set the timer tick interval. */
-    Timer_SetInterval(FreeRTOS_tick_interval);
+    ARM_TIMER_SetInterval(ARM_TIMER, FreeRTOS_tick_interval);
 
     /* Set the interrupt priority (must be the lowest possible). */
     GIC_SetRedistPriority(VirtualTimer_IRQn,
@@ -97,10 +98,10 @@ void vConfigureTickInterrupt( void )
     GIC_EnableIRQ(VirtualTimer_IRQn);
 
     /* Enable the interrupts in the timer. */
-    Timer_EnableIRQ();
+    ARM_TIMER_EnableIRQ(ARM_TIMER);
 
     /* Start the timer. */
-    Timer_Start();
+    ARM_TIMER_Start(ARM_TIMER);
 }
 /*-----------------------------------------------------------*/
 
@@ -119,5 +120,5 @@ void vConfigureTickInterrupt( void )
 void vClearTickInterrupt( void )
 {
     /* Set the timer tick interval. */
-    Timer_SetInterval(FreeRTOS_tick_interval);
+    ARM_TIMER_SetInterval(ARM_TIMER, FreeRTOS_tick_interval);
 }
