@@ -1,0 +1,12 @@
+/*
+ * Copyright 2021 NXP
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+#ifndef _I2C_TEST_H_
+#define _I2C_TEST_H_
+
+void i2c_tests(void);
+
+#endif
