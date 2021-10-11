@@ -20,11 +20,7 @@ extern "C" {
 /*******************************************************************************
  * API
  ******************************************************************************/
-
-static inline void MMU_init(void)
-{
-    return ARM_MMU_Initialize(true);
-}
+void MMU_init(void);
 
 #if defined(__cplusplus)
 }

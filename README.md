@@ -46,7 +46,8 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   │   │       │   └── MIMX8ML8xxxxx_ca53_ddr_ram.ld <-- linker script
 │   │   │   │       ├── board.c
 │   │   │   │       ├── board.h
-│   │   │   │       └── clock_config.h
+│   │   │   │       ├── clock_config.h
+│   │   │   │       └── mmu.c               <-- defines the MMU regions
 │   │   │   ├── common_freertos.cmake       <-- hardware-agnostic source code for FreeRTOS
 │   │   │   ├── core                        <-- includes os-specific header files for the os APIs
 │   │   │   │   └── armv8a
@@ -58,7 +59,7 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   │   ├── FreeRTOS_tick_config.c
 │   │   │   ├── irq.{c,h}                   <-- contains interrupt handler
 │   │   │   ├── stdio.c                     <-- local implementation of the os APIs
-│   │   │   ├── mmu.h
+│   │   │   ├── mmu.h                       <-- glue with the SDK MMU driver
 │   │   │   ├── os                          <-- includes os-specific header files for the os APIs
 │   │   │   │   ├── assert.h
 │   │   │   │   ├── counter.h

@@ -43,6 +43,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/rt_latency.c"
     "${BoardPath}/board.c"
+    "${BoardPath}/mmu.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
@@ -82,7 +83,6 @@ include(driver_clock)
 include(driver_common)
 include(driver_gpt)
 include(driver_iuart)
-include(device_mmu_regions)
 
 include(lib_stats)
 
