@@ -32,7 +32,7 @@ project(hello_world)
 
 set(MCUX_SDK_PROJECT_NAME hello_world.elf)
 
-include(${ProjDirPath}/flags.cmake)
+include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/src/hello_world.c"
     "${AppPath}/freertos/main.c"
