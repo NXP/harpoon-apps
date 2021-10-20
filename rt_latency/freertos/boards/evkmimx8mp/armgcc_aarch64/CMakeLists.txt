@@ -32,7 +32,7 @@ project(rt_latency)
 
 set(MCUX_SDK_PROJECT_NAME rt_latency.elf)
 
-include(${ProjDirPath}/flags.cmake)
+include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/rt_latency.c"
