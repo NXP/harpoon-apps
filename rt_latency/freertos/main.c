@@ -25,6 +25,7 @@
 #include "os/stdio.h"
 
 #include "stats.h"
+#include "version.h"
 
 #include "rt_latency.h"
 #include "rt_tc_setup.h"
@@ -127,6 +128,8 @@ int main(void)
 	/* Init board cpu and hardware. */
 	BOARD_InitMemory();
 	BOARD_InitDebugConsole();
+
+	os_printf("Harpoon v.%s\r\n", VERSION);
 
 	/* Create (main) "high prio IRQ" task */
 
