@@ -157,6 +157,8 @@ Reset_Handler:
 	str	x0, [x2, x3]
 	bgt	.LC11
 .LC12:
+	ic	ialluis
+	isb
 
 /* Copy DTCM data from RO region to DTCM */
 	ldr	x1, =__dtcm_load__
