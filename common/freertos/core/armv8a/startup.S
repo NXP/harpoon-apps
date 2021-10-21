@@ -118,6 +118,8 @@ Reset_Handler:
 	ldr	x0, [x1, x3]
 	str	x0, [x2, x3]
 	bgt	.LC6
+	# TODO D-cache flush: make sure code relocation has reached memory
+	# __flush_dcache_area(__ocramtext_start__, __ocramtext_init_end__ - __ocramtext_start__);
 .LC7:
 
 /* Copy OCRAM data from RO region to OCRAM */
@@ -156,6 +158,11 @@ Reset_Handler:
 	ldr	x0, [x1, x3]
 	str	x0, [x2, x3]
 	bgt	.LC11
+	# TODO D-cache flush: make sure code relocation has reached memory
+	# __flush_dcache_area(__itcm_start__, __itcm_init_end__ - __itcm_start__);
+	ic	ialluis
+	isb
+
 .LC12:
 	ic	ialluis
 	isb
