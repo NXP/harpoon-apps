@@ -28,9 +28,9 @@ SET(AppPath "${ProjDirPath}/../../../..")
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
-project(i2c_test)
+project(harpoon_drivers_test)
 
-set(MCUX_SDK_PROJECT_NAME i2c_test.elf)
+set(MCUX_SDK_PROJECT_NAME harpoon_drivers_test.elf)
 
 include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
@@ -96,4 +96,5 @@ target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE nosys)
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)
 
 ADD_CUSTOM_COMMAND(TARGET ${MCUX_SDK_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY}
--Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/i2c_test.bin)
+-Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/harpoon_drivers_test.bin)
+
