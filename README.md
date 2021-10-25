@@ -125,7 +125,7 @@ export ARMGCC_DIR=/opt/gcc-arm-10.2-2020.11-x86_64-aarch64-none-elf
 Then move to the right path, depending on the board and the rtos that you are looking for. The example below builds the application within FreeRTOS and for the i.MX 8M Plus EVK board:
 
 ```
-cd demo_apps/hello_world/freertos/boards/evkmimx8mp/armgcc_aarch64/
+cd harpoon-apps/hello_world/freertos/boards/evkmimx8mp/armgcc_aarch64/
 ./build_ddr_release.sh
 ```
 
