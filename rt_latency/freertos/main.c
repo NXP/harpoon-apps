@@ -169,4 +169,7 @@ int main(void)
 
 	for (;;)
 		;
+
+	return xResult;
 }
+
