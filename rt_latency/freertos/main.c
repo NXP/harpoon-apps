@@ -48,8 +48,7 @@
 
 GPT_Type *gpt_devices[NUM_OF_COUNTER] = {GPT1, GPT2};
 
-//TODO mae it static
-struct latency_stat rt_stats;
+static struct latency_stat rt_stats;
 
 TaskHandle_t main_taskHandle;
 
