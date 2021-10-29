@@ -64,8 +64,6 @@ static void latency_alarm_handler(const void *dev, uint8_t chan_id,
 	os_sem_give(&rt_stat->semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
-#ifdef WITH_IRQ_LOAD
-
 #define IRQ_LOAD_ISR_DURATION_US	10
 
 static void load_alarm_handler(const void *dev, uint8_t chan_id,
@@ -84,7 +82,6 @@ static void load_alarm_handler(const void *dev, uint8_t chan_id,
 	os_counter_stop(dev);
 	os_sem_give(&rt_stat->irq_load_sem, OS_SEM_FLAGS_ISR_CONTEXT);
 }
-#endif /* WITH_IRQ_LOAD */
 
 /*
  * Blocking function including an infinite loop ;
@@ -103,10 +100,9 @@ int rt_latency_test(struct latency_stat *rt_stat)
 	uint64_t irq_delay;
 	uint64_t irq_to_sched;
 	const void *dev = rt_stat->dev;
-#ifdef WITH_IRQ_LOAD
+	/* used when RT_LATENCY_WITH_IRQ_LOAD is set: */
 	struct os_counter_alarm_cfg load_alarm_cfg;
 	const void *irq_load_dev = rt_stat->irq_load_dev;
-#endif
 
 	counter_period_us = COUNTER_PERIOD_US_VAL;
 	ticks = os_counter_us_to_ticks(dev, counter_period_us);
@@ -114,26 +110,27 @@ int rt_latency_test(struct latency_stat *rt_stat)
 	alarm_cfg.flags = OS_COUNTER_ALARM_CFG_ABSOLUTE;
 	alarm_cfg.user_data = rt_stat;
 	alarm_cfg.callback = latency_alarm_handler;
-#ifdef WITH_IRQ_LOAD
-	counter_period_us = COUNTER_PERIOD_US_VAL - 1;
+	if (rt_stat->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
+		counter_period_us = COUNTER_PERIOD_US_VAL - 1;
 
-	load_alarm_cfg.flags = 0;
-	load_alarm_cfg.user_data = rt_stat;
-	load_alarm_cfg.callback = load_alarm_handler;
-	load_alarm_cfg.ticks = os_counter_us_to_ticks(dev, counter_period_us);
+		load_alarm_cfg.flags = 0;
+		load_alarm_cfg.user_data = rt_stat;
+		load_alarm_cfg.callback = load_alarm_handler;
+		load_alarm_cfg.ticks = os_counter_us_to_ticks(dev, counter_period_us);
 
-	os_sem_init(&rt_stat->irq_load_sem, 0);
-#endif
+		os_sem_init(&rt_stat->irq_load_sem, 0);
+	}
 
 	do {
 		os_counter_start(dev);
-#ifdef WITH_IRQ_LOAD
-		os_counter_start(irq_load_dev);
-		/* Start irq load alarm firstly */
-		err = os_counter_set_channel_alarm(irq_load_dev, 0,
-				&load_alarm_cfg);
-		os_assert(!err, "Counter set alarm failed (err: %d)", err);
-#endif
+		if (rt_stat->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
+			os_counter_start(irq_load_dev);
+			/* Start irq load alarm firstly */
+			err = os_counter_set_channel_alarm(irq_load_dev, 0,
+					&load_alarm_cfg);
+			os_assert(!err, "Counter set alarm failed (err: %d)", err);
+		}
+
 		/* Start IRQ latency testing alarm */
 		os_counter_get_value(dev, &cnt);
 		alarm_cfg.ticks = cnt + ticks;
@@ -161,11 +158,11 @@ int rt_latency_test(struct latency_stat *rt_stat)
 
 		os_counter_stop(dev);
 
-#ifdef	WITH_IRQ_LOAD
-		/* Waiting irq load ISR exits and then go to next loop */
-		err = os_sem_take(&rt_stat->irq_load_sem, 0, OS_SEM_TIMEOUT_MAX);
-		os_assert(!err, "Can't take the semaphore (err: %d)", err);
-#endif
+		if (rt_stat->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
+			/* Waiting irq load ISR exits and then go to next loop */
+			err = os_sem_take(&rt_stat->irq_load_sem, 0, OS_SEM_TIMEOUT_MAX);
+			os_assert(!err, "Can't take the semaphore (err: %d)", err);
+		}
 	} while(1);
 }
 

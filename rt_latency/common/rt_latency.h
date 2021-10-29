@@ -13,14 +13,39 @@
 
 #include "rt_tc_setup.h"
 
+/*
+ * Symbol definitions:
+ *
+ * WITH_IRQ_LOAD:     Add an extra IRQ load thread
+ */
+#define RT_LATENCY_WITH_IRQ_LOAD             (1 << 1)
+
+static inline int rt_latency_get_tc_load(int test_case_id)
+{
+    int mask = 0;
+
+    switch (test_case_id) {
+        case 1:
+            break;
+        case 3:
+            mask |= RT_LATENCY_WITH_IRQ_LOAD;
+            break;
+        default:
+            mask = -1;
+            break;
+    }
+
+    return mask;
+}
+
 struct latency_stat {
 	const void *dev;
 	const void *irq_load_dev;
 
+  int tc_load; /* bitmask of the above RT_LATENCY_WITH_xxx test case load conditions */
+
 	os_sem_t semaphore; /* used to wake the thread up from IRQ callback */
-#ifdef WITH_IRQ_LOAD
 	os_sem_t irq_load_sem; /* used to wake the thread up from IRQ load handler */
-#endif
 
 	uint64_t time_irq;
 	uint32_t time_prog;

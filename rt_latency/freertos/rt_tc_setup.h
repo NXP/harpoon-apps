@@ -4,14 +4,13 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#define RT_LATENCY_TC 1
+#define RT_LATENCY_TC 3
 
 #define COUNTER_PERIOD_US_VAL (20000)
 
 /*
  * Symbol definitions:
  *
- * WITH_IRQ_LOAD:     Add extra IRQ load thread
  * WITH_CPU_LOAD:     Add CPU load in the lower priority task
  * WITH_CPU_LOAD_SEM: Add Semaphore load in CPU load thread
  */
@@ -21,10 +20,6 @@
 
 #if (RT_LATENCY_TC == 2)
 #define WITH_CPU_LOAD
-#endif
-
-#if (RT_LATENCY_TC == 3)
-#define WITH_IRQ_LOAD
 #endif
 
 #if (RT_LATENCY_TC == 4)

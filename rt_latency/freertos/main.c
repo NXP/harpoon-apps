@@ -96,13 +96,9 @@ void main_task(void *pvParameters)
 {
 	int ret;
 	struct latency_stat *rt_stat = pvParameters;
-	char *irq_load_msg =
-#ifdef WITH_IRQ_LOAD
-		" (with IRQ load)";
-#else
-		"";
-#endif
-	os_printf("%s: task started%s\n\r", __func__, irq_load_msg);
+
+	os_printf("%s: task started%s\n\r", __func__,
+	       (rt_stat->tc_load & RT_LATENCY_WITH_IRQ_LOAD)  ? " (with IRQ load)" : "");
 
 	ret = rt_latency_test(rt_stat);
 	if (ret)
@@ -123,6 +119,7 @@ int main(void)
 {
 	void *dev;
 	void *irq_load_dev = NULL;
+	int test_case_id = 3;
 	BaseType_t xResult;
 
 	/* Init board cpu and hardware. */
@@ -134,10 +131,11 @@ int main(void)
 	/* Create (main) "high prio IRQ" task */
 
 	dev = gpt_devices[0]; /* GPT1 */
-
-#ifdef WITH_IRQ_LOAD
 	irq_load_dev = gpt_devices[1]; /* GPT2 */
-#endif
+
+	/* Initialize test case load conditions based on test case ID */
+	rt_stats.tc_load = rt_latency_get_tc_load(test_case_id);
+	os_assert(rt_stats.tc_load != -1, "Wrong test conditions!");
 
 	xResult = rt_latency_init(dev, irq_load_dev, &rt_stats);
 	os_assert(xResult == 0, "Initialization failed!");
@@ -167,7 +165,7 @@ int main(void)
 	assert(xResult == pdPASS);
 
 	/* Start scheduler */
-	os_printf("starting scheduler...\n\r");
+	os_printf("Running test case %d\n\r", test_case_id);
 	vTaskStartScheduler();
 
 	for (;;)

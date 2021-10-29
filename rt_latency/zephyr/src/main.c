@@ -83,9 +83,7 @@ void print_stats_func(void *p1, void *p2, void *p3)
 void test_main(void)
 {
 	const struct device *gpt_dev;
-#ifdef WITH_IRQ_LOAD
 	const struct device *irq_load_dev;
-#endif
 	struct k_thread gpt_thread;
 #ifdef WITH_CPU_LOAD
 	struct k_thread cpu_load_thread;
@@ -101,6 +99,12 @@ void test_main(void)
 	void *p3 = NULL;
 	int ret;
 
+	/* Initialize test case load conditions based on test case ID */
+	rt_stats.tc_load = 0;
+#ifdef WITH_IRQ_LOAD
+	rt_stats.tc_load |= RT_LATENCY_WITH_IRQ_LOAD;
+#endif
+
 	/* Give required clocks some time to stabilize. In particular, nRF SoCs
 	 * need such delay for the Xtal LF clock source to start and for this
 	 * test to use the correct timing.
@@ -112,13 +116,11 @@ void test_main(void)
 	if(!gpt_dev)
 		printk("Unable to get counter device\n");
 
-#ifdef WITH_IRQ_LOAD
 	/* Use the second GPT Counter to create irq load with lower priority */
 	irq_load_dev = device_get_binding(devices[1]);
 	if(!irq_load_dev)
 		printk("Unable to get counter device\n");
 	p3 = (void *)irq_load_dev;
-#endif
 
 	ret = rt_latency_init(gpt_dev, p3, &rt_stats);
 	if (ret)
