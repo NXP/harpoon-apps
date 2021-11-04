@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#if __has_include("app_mmu.h")
+#include "app_mmu.h"
+#endif
 #include "fsl_common.h"
 
 #include "mmu.h"
@@ -115,6 +118,9 @@ static const struct ARM_MMU_region mmu_regions[] = {
 			      GIC_DISTRIBUTOR_BASE, KB(1024),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
 
+#ifdef APP_MMU_ENTRIES
+	APP_MMU_ENTRIES
+#endif
 };
 
 /* MMU configuration.
