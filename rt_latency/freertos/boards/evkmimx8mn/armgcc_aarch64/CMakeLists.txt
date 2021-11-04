@@ -24,6 +24,7 @@ SET(RtosPath "${ProjDirPath}/../../../../../../freertos")
 SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/evkmimx8mn")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(AppPath "${ProjDirPath}/../../../..")
+SET(AppBoardPath "${AppPath}/freertos/boards/evkmimx8mn")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -48,6 +49,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonPath}/freertos
     ${CommonPath}/libs/stats
     ${BoardPath}
+    ${AppBoardPath}
     ${SdkDirPath}/devices/MIMX8MN6
 )
 
