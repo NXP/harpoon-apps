@@ -17,6 +17,24 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/* symbols defined in linker script: */
+extern uintptr_t __text[];
+extern uintptr_t __etext[];
+extern uintptr_t __data_start__[];
+extern uintptr_t __data_end__[];
+extern uintptr_t __stacks_limit__[];
+extern uintptr_t __stacks_top__[];
+extern uintptr_t __noncachedata_start__[];
+extern uintptr_t __noncachedata_end__[];
+extern uintptr_t __ocramtext_start__[];
+extern uintptr_t __ocramtext_end__[];
+extern uintptr_t __ocramdata_start__[];
+extern uintptr_t __ocramdata_end__[];
+extern uintptr_t __itcm_start__[];
+extern uintptr_t __itcm_end__[];
+extern uintptr_t __dtcm_start__[];
+extern uintptr_t __dtcm_end__[];
+
 /*******************************************************************************
  * API
  ******************************************************************************/
