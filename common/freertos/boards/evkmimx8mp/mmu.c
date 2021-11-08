@@ -119,7 +119,7 @@ static const struct ARM_MMU_region mmu_regions[] = {
  * It holds the build-time configuration information for the fixed MMU
  * regions enabled during kernel initialization.
  */
-const struct ARM_MMU_config MMU_config = {
+static const struct ARM_MMU_config MMU_config = {
 	.num_regions = ARRAY_SIZE(mmu_regions),
 	.mmu_regions = mmu_regions,
 	.num_os_ranges = ARRAY_SIZE(mmu_os_ranges),
