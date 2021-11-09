@@ -49,7 +49,7 @@
 
 GPT_Type *gpt_devices[NUM_OF_COUNTER] = {GPT1, GPT2};
 
-static struct latency_stat rt_stats;
+static struct rt_latency_ctx rt_ctx;
 
 TaskHandle_t main_taskHandle;
 
@@ -87,20 +87,20 @@ void cache_inval_task(void *pvParameters)
 
 void log_task(void *pvParameters)
 {
-	struct latency_stat *pStats = pvParameters;
+	struct rt_latency_ctx *ctx = pvParameters;
 
-	print_stats(pStats);
+	print_stats(ctx);
 }
 
 void main_task(void *pvParameters)
 {
 	int ret;
-	struct latency_stat *rt_stat = pvParameters;
+	struct rt_latency_ctx *ctx = pvParameters;
 
 	os_printf("%s: task started%s\n\r", __func__,
-	       (rt_stat->tc_load & RT_LATENCY_WITH_IRQ_LOAD)  ? " (with IRQ load)" : "");
+	       (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD)  ? " (with IRQ load)" : "");
 
-	ret = rt_latency_test(rt_stat);
+	ret = rt_latency_test(ctx);
 	if (ret)
 	{
 		os_printf("test failed!\n");
@@ -134,14 +134,14 @@ int main(void)
 	irq_load_dev = gpt_devices[1]; /* GPT2 */
 
 	/* Initialize test case load conditions based on test case ID */
-	rt_stats.tc_load = rt_latency_get_tc_load(test_case_id);
-	os_assert(rt_stats.tc_load != -1, "Wrong test conditions!");
+	rt_ctx.tc_load = rt_latency_get_tc_load(test_case_id);
+	os_assert(rt_ctx.tc_load != -1, "Wrong test conditions!");
 
-	xResult = rt_latency_init(dev, irq_load_dev, &rt_stats);
+	xResult = rt_latency_init(dev, irq_load_dev, &rt_ctx);
 	os_assert(xResult == 0, "Initialization failed!");
 
 	xResult = xTaskCreate(main_task, "main_task", STACK_SIZE,
-			       &rt_stats, HIGHEST_TASK_PRIORITY, &main_taskHandle);
+			       &rt_ctx, HIGHEST_TASK_PRIORITY, &main_taskHandle);
 	if (xResult != pdPASS);
 		assert (true);
 
@@ -161,7 +161,7 @@ int main(void)
 
 	/* Print task */
 	xResult = xTaskCreate(log_task, "log_task", STACK_SIZE,
-				&rt_stats, LOWEST_TASK_PRIORITY, NULL);
+				&rt_ctx, LOWEST_TASK_PRIORITY, NULL);
 	assert(xResult == pdPASS);
 
 	/* Start scheduler */

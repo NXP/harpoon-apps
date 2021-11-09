@@ -38,7 +38,7 @@ static inline int rt_latency_get_tc_load(int test_case_id)
     return mask;
 }
 
-struct latency_stat {
+struct rt_latency_ctx {
 	const void *dev;
 	const void *irq_load_dev;
 
@@ -58,11 +58,11 @@ struct latency_stat {
 };
 
 int rt_latency_init(const void *dev,
-		const void *irq_load_dev, struct latency_stat *rt_stat);
+		const void *irq_load_dev, struct rt_latency_ctx *ctx);
 
-int rt_latency_test(struct latency_stat *rt_stat);
+int rt_latency_test(struct rt_latency_ctx *ctx);
 
-void print_stats(struct latency_stat *rt_stat);
+void print_stats(struct rt_latency_ctx *ctx);
 #ifdef WITH_CPU_LOAD
 void cpu_load(void);
 #endif

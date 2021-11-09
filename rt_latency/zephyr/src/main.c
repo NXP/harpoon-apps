@@ -43,12 +43,12 @@ static const char * const devices[] = {
 void gpt_latency_test(void *p1, void *p2, void *p3)
 {
 	const struct device *dev = p1;
-	struct latency_stat *rt_stat = p2;
+	struct rt_latency_ctx *ctx = p2;
 	int ret;
 
 	k_object_access_grant(dev, k_current_get());
 
-	ret = rt_latency_test(rt_stat);
+	ret = rt_latency_test(ctx);
 	if (ret)
 	{
 		printk("test failed!\n");
@@ -75,9 +75,9 @@ void cache_inval_func(void *p1, void *p2, void *p3)
 
 void print_stats_func(void *p1, void *p2, void *p3)
 {
-	struct latency_stat *rt_stat = p2;
+	struct rt_latency_ctx *ctx = p2;
 
-	print_stats(rt_stat);
+	print_stats(ctx);
 }
 
 void test_main(void)
@@ -95,14 +95,14 @@ void test_main(void)
 	struct k_thread print_thread;
 #endif
 
-	static struct latency_stat rt_stats;
+	static struct rt_latency_ctx rt_ctx;
 	void *p3 = NULL;
 	int ret;
 
 	/* Initialize test case load conditions based on test case ID */
-	rt_stats.tc_load = 0;
+	rt_ctx.tc_load = 0;
 #ifdef WITH_IRQ_LOAD
-	rt_stats.tc_load |= RT_LATENCY_WITH_IRQ_LOAD;
+	rt_ctx.tc_load |= RT_LATENCY_WITH_IRQ_LOAD;
 #endif
 
 	/* Give required clocks some time to stabilize. In particular, nRF SoCs
@@ -122,12 +122,12 @@ void test_main(void)
 		printk("Unable to get counter device\n");
 	p3 = (void *)irq_load_dev;
 
-	ret = rt_latency_init(gpt_dev, p3, &rt_stats);
+	ret = rt_latency_init(gpt_dev, p3, &rt_ctx);
 	if (ret)
 		printk("Initialization failed!\n");
 
 	k_thread_create(&gpt_thread, gpt_stack, STACK_SIZE,
-		gpt_latency_test, (void *)gpt_dev, &rt_stats, p3,
+		gpt_latency_test, (void *)gpt_dev, &rt_ctx, p3,
 		K_HIGHEST_THREAD_PRIO, 0, K_FOREVER);
 
 	k_busy_wait(USEC_PER_MSEC * 300);
@@ -139,7 +139,7 @@ void test_main(void)
 #ifndef SILENT_TESTING
 	/* Print Thread */
 	k_thread_create(&print_thread, print_stack, STACK_SIZE,
-			print_stats_func, NULL, &rt_stats, NULL,
+			print_stats_func, NULL, &rt_ctx, NULL,
 			K_LOWEST_APPLICATION_THREAD_PRIO - 2, 0, K_FOREVER);
 #ifdef THREAD_CPU_BINDING
 	k_thread_cpu_mask_clear(&print_thread);
