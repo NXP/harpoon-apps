@@ -137,7 +137,7 @@ SECTIONS
   {
     __data_load__ = LOADADDR(.data);
     __data_start__ = .;      /* create a global symbol at data start */
-    . = ALIGN(64);
+    . = ALIGN(8);
     __data_init_end__ = .;        /* define a global symbol at data end */
   } > m_data AT > m_text
 
@@ -149,7 +149,7 @@ SECTIONS
     __noncachedata_load__ = LOADADDR(.ncache.init);
     __noncachedata_start__ = .;   /* create a global symbol at ncache data start */
     *(NonCacheable.init)
-    . = ALIGN(64);
+    . = ALIGN(8);
     __noncachedata_init_end__ = .;   /* create a global symbol at initialized ncache data end */
   } > m_data_nc AT > m_text
 
@@ -186,6 +186,7 @@ SECTIONS
     __itcm_start__ = .;
     /* insert here code that goes in ITCM */
     *tcm.c.obj(.text*)
+    . = ALIGN(8);
     __itcm_init_end__ = .;
     . = ALIGN(4096);
     __itcm_end__ = .;
@@ -220,6 +221,7 @@ SECTIONS
     *(.text*)                 /* .text sections (code) */
     *(.text)                 /* .text sections (code) */
     *(.rodata)
+    . = ALIGN(8);
     __ocramtext_init_end__ = .;
     . = ALIGN(4096);
     __ocramtext_end__ = .;
