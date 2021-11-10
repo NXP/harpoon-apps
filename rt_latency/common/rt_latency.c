@@ -16,7 +16,6 @@
 #include "stats.h"
 
 #include "rt_latency.h"
-#include "rt_tc_setup.h"
 
 static inline uint32_t calc_diff_ns(const void *dev,
 			uint32_t cnt_1, uint32_t cnt_2)
@@ -188,8 +187,6 @@ void cpu_load(struct rt_latency_ctx *ctx)
 	} while(1);
 }
 
-#ifdef WITH_INVD_CACHE
-#define CACHE_INVAL_PERIOD_MS (100)
 void cache_inval(void)
 {
 	os_printf("%s: running\n\r", __func__);
@@ -202,7 +199,6 @@ void cache_inval(void)
 
 	} while(1);
 }
-#endif /* #ifdef WITH_INVD_CACHE */
 
 void print_stats(struct rt_latency_ctx *ctx)
 {

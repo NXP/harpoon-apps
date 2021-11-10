@@ -28,7 +28,6 @@
 #include "version.h"
 
 #include "rt_latency.h"
-#include "rt_tc_setup.h"
 
 /*******************************************************************************
  * Definitions
@@ -61,9 +60,7 @@ TaskHandle_t main_taskHandle;
 void main_task(void *pvParameters);
 void log_task(void *pvParameters);
 void cpu_load_task(void *pvParameters);
-#ifdef WITH_INVD_CACHE
 void cache_inval_task(void *pvParameters);
-#endif
 
 /*******************************************************************************
  * Code
@@ -76,12 +73,10 @@ void cpu_load_task(void *pvParameters)
 	cpu_load(ctx);
 }
 
-#ifdef WITH_INVD_CACHE
 void cache_inval_task(void *pvParameters)
 {
 	cache_inval();
 }
-#endif
 
 void log_task(void *pvParameters)
 {
@@ -117,7 +112,7 @@ int main(void)
 {
 	void *dev;
 	void *irq_load_dev = NULL;
-	int test_case_id = 4;
+	int test_case_id = 6;
 	BaseType_t xResult;
 
 	/* Init board cpu and hardware. */
@@ -151,11 +146,11 @@ int main(void)
 	}
 
 	/* Cache invalidate task */
-#ifdef WITH_INVD_CACHE
-	xResult = xTaskCreate(cache_inval_task, "cache_inval_task", STACK_SIZE,
-			       NULL, LOWEST_TASK_PRIORITY, NULL);
-	assert(xResult == pdPASS);
-#endif
+	if (rt_ctx.tc_load & RT_LATENCY_WITH_INVD_CACHE) {
+		xResult = xTaskCreate(cache_inval_task, "cache_inval_task",
+			       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY, NULL);
+		assert(xResult == pdPASS);
+	}
 
 	/* Print task */
 	xResult = xTaskCreate(log_task, "log_task", STACK_SIZE,

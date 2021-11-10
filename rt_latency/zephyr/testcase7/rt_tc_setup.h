@@ -30,9 +30,6 @@
 /* Number of Testing Loop */
 #define TESTING_LOOP_NUM	60000
 
-/* Time for Counter Alarm timeout (us) */
-#define COUNTER_PERIOD_US_VAL	20000
-
 /* Thread CPU Binding for SMP kernel */
 #ifdef CONFIG_SMP
 /* Whether bind threads to specified CPU Core */

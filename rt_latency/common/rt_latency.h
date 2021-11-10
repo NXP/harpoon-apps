@@ -8,10 +8,12 @@
 #define _RT_LATENCY_H_
 
 #include "os/semaphore.h"
-
 #include "stats.h"
 
-#include "rt_tc_setup.h"
+/* Time for Counter Alarm timeout (us) */
+#define COUNTER_PERIOD_US_VAL               (20000)
+
+#define CACHE_INVAL_PERIOD_MS                 (100)
 
 /*
  * Symbol definitions:
@@ -19,10 +21,12 @@
  * WITH_IRQ_LOAD:     Add an extra IRQ load thread
  * WITH_CPU_LOAD:     Add CPU load in the lower priority task
  * WITH_CPU_LOAD_SEM: Add Semaphore load in CPU load thread
+ * WITH_INVD_CACHE:   Add cache invalidation thread
  */
 #define RT_LATENCY_WITH_IRQ_LOAD             (1 << 1)
 #define RT_LATENCY_WITH_CPU_LOAD             (1 << 2)
 #define RT_LATENCY_WITH_CPU_LOAD_SEM         (1 << 3)
+#define RT_LATENCY_WITH_INVD_CACHE           (1 << 4)
 
 static inline int rt_latency_get_tc_load(int test_case_id)
 {
@@ -46,10 +50,12 @@ static inline int rt_latency_get_tc_load(int test_case_id)
             /* TODO: Add command to trigger Linux Load */
             break;
         case 6:
-            mask |= RT_LATENCY_WITH_CPU_LOAD;
+            mask |= RT_LATENCY_WITH_CPU_LOAD |
+                    RT_LATENCY_WITH_INVD_CACHE;
             break;
         case 7:
-            mask |= RT_LATENCY_WITH_CPU_LOAD;
+            mask |= RT_LATENCY_WITH_CPU_LOAD |
+                    RT_LATENCY_WITH_INVD_CACHE;
             /* TODO: Place code in OCRAM (outer cacheable) */
             /* TODO: Add command to trigger Linux Load */
             break;
@@ -87,8 +93,6 @@ int rt_latency_test(struct rt_latency_ctx *ctx);
 
 void print_stats(struct rt_latency_ctx *ctx);
 void cpu_load(struct rt_latency_ctx *ctx);
-#ifdef WITH_INVD_CACHE
 void cache_inval(void);
-#endif
 
 #endif /* _RT_LATENCY_H_ */
