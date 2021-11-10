@@ -28,6 +28,7 @@
 #define RT_LATENCY_WITH_CPU_LOAD_SEM         (1 << 3)
 #define RT_LATENCY_WITH_INVD_CACHE           (1 << 4)
 #define RT_LATENCY_WITH_LINUX_LOAD           (1 << 5)
+#define RT_LATENCY_USES_OCRAM                (1 << 6)
 
 static inline int rt_latency_get_tc_load(int test_case_id)
 {
@@ -57,8 +58,8 @@ static inline int rt_latency_get_tc_load(int test_case_id)
         case 7:
             mask |= RT_LATENCY_WITH_CPU_LOAD |
                     RT_LATENCY_WITH_INVD_CACHE |
-                    RT_LATENCY_WITH_LINUX_LOAD;
-            /* TODO: Place code in OCRAM (outer cacheable) */
+                    RT_LATENCY_WITH_LINUX_LOAD |
+                    RT_LATENCY_USES_OCRAM;
             break;
         default:
             mask = -1;

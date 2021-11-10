@@ -82,6 +82,23 @@ static void load_alarm_handler(const void *dev, uint8_t chan_id,
 	os_sem_give(&ctx->irq_load_sem, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
+#define DDR_BASE_ADDR             0xC0000000
+static void assert_not_in_ddr(uintptr_t ptr)
+{
+	if (ptr > DDR_BASE_ADDR)
+		os_printf("ERROR: Pointer %p is in DDR!\n\r", (void *)ptr);
+}
+
+static void ensure_data_instr_in_ram()
+{
+	void *pc = __builtin_return_address(0);
+	static int gd;
+
+	assert_not_in_ddr((uintptr_t)pc);  /* code */
+	assert_not_in_ddr((uintptr_t)&pc); /* stack */
+	assert_not_in_ddr((uintptr_t)&gd); /* data */
+}
+
 /*
  * Blocking function including an infinite loop ;
  * must be called by separate threads/tasks.
@@ -123,6 +140,11 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 	if (ctx->tc_load & RT_LATENCY_WITH_LINUX_LOAD) {
 		/* TODO: Add command to trigger Linux Load */
 		os_printf("WARNING: Linux load must be run manually!\n\r");
+	}
+
+	if (ctx->tc_load & RT_LATENCY_USES_OCRAM) {
+		/* TODO: Move the code in OCRAM? */
+		ensure_data_instr_in_ram();
 	}
 
 	do {
