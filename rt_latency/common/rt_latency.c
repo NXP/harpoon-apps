@@ -166,9 +166,6 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 	} while(1);
 }
 
-/* CPU Load */
-#ifdef WITH_CPU_LOAD
-
 void cpu_load(void)
 {
 #ifdef WITH_CPU_LOAD_SEM
@@ -190,7 +187,6 @@ void cpu_load(void)
 #endif
 	} while(1);
 }
-#endif /* #ifdef WITH_CPU_LOAD */
 
 #ifdef WITH_INVD_CACHE
 #define CACHE_INVAL_PERIOD_MS (100)

@@ -17,8 +17,10 @@
  * Symbol definitions:
  *
  * WITH_IRQ_LOAD:     Add an extra IRQ load thread
+ * WITH_CPU_LOAD:     Add CPU load in the lower priority task
  */
 #define RT_LATENCY_WITH_IRQ_LOAD             (1 << 1)
+#define RT_LATENCY_WITH_CPU_LOAD             (1 << 2)
 
 static inline int rt_latency_get_tc_load(int test_case_id)
 {
@@ -27,8 +29,26 @@ static inline int rt_latency_get_tc_load(int test_case_id)
     switch (test_case_id) {
         case 1:
             break;
+        case 2:
+            mask |= RT_LATENCY_WITH_CPU_LOAD;
+            break;
         case 3:
             mask |= RT_LATENCY_WITH_IRQ_LOAD;
+            break;
+        case 4:
+            mask |= RT_LATENCY_WITH_CPU_LOAD;
+            break;
+        case 5:
+            mask |= RT_LATENCY_WITH_CPU_LOAD;
+            /* TODO: Add command to trigger Linux Load */
+            break;
+        case 6:
+            mask |= RT_LATENCY_WITH_CPU_LOAD;
+            break;
+        case 7:
+            mask |= RT_LATENCY_WITH_CPU_LOAD;
+            /* TODO: Place code in OCRAM (outer cacheable) */
+            /* TODO: Add command to trigger Linux Load */
             break;
         default:
             mask = -1;
@@ -63,9 +83,7 @@ int rt_latency_init(const void *dev,
 int rt_latency_test(struct rt_latency_ctx *ctx);
 
 void print_stats(struct rt_latency_ctx *ctx);
-#ifdef WITH_CPU_LOAD
 void cpu_load(void);
-#endif
 #ifdef WITH_INVD_CACHE
 void cache_inval(void);
 #endif

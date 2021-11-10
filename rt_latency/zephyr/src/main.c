@@ -104,6 +104,9 @@ void test_main(void)
 #ifdef WITH_IRQ_LOAD
 	rt_ctx.tc_load |= RT_LATENCY_WITH_IRQ_LOAD;
 #endif
+#ifdef WITH_CPU_LOAD
+	rt_ctx.tc_load |= RT_LATENCY_WITH_CPU_LOAD;
+#endif
 
 	/* Give required clocks some time to stabilize. In particular, nRF SoCs
 	 * need such delay for the Xtal LF clock source to start and for this

@@ -60,9 +60,7 @@ TaskHandle_t main_taskHandle;
 /* Application tasks */
 void main_task(void *pvParameters);
 void log_task(void *pvParameters);
-#ifdef WITH_CPU_LOAD
 void cpu_load_task(void *pvParameters);
-#endif
 #ifdef WITH_INVD_CACHE
 void cache_inval_task(void *pvParameters);
 #endif
@@ -71,12 +69,10 @@ void cache_inval_task(void *pvParameters);
  * Code
  ******************************************************************************/
 
-#ifdef WITH_CPU_LOAD
 void cpu_load_task(void *pvParameters)
 {
 	cpu_load();
 }
-#endif
 
 #ifdef WITH_INVD_CACHE
 void cache_inval_task(void *pvParameters)
@@ -119,7 +115,7 @@ int main(void)
 {
 	void *dev;
 	void *irq_load_dev = NULL;
-	int test_case_id = 1;
+	int test_case_id = 2;
 	BaseType_t xResult;
 
 	/* Init board cpu and hardware. */
@@ -146,11 +142,11 @@ int main(void)
 		assert (true);
 
 	/* CPU Load task */
-#ifdef WITH_CPU_LOAD
-	xResult = xTaskCreate(cpu_load_task, "cpu_load_task", STACK_SIZE,
-			       NULL, LOWEST_TASK_PRIORITY, NULL);
-	assert(xResult == pdPASS);
-#endif
+	if (rt_ctx.tc_load & RT_LATENCY_WITH_CPU_LOAD) {
+		xResult = xTaskCreate(cpu_load_task, "cpu_load_task", STACK_SIZE,
+				       NULL, LOWEST_TASK_PRIORITY, NULL);
+		assert(xResult == pdPASS);
+	}
 
 	/* Cache invalidate task */
 #ifdef WITH_INVD_CACHE
