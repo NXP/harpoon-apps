@@ -15,9 +15,6 @@
  * WITH_CPU_LOAD_SEM: Add Semaphore load in CPU load thread
  */
 
-#if (RT_LATENCY_TC == 1)
-#endif
-
 #if (RT_LATENCY_TC == 2)
 #define WITH_CPU_LOAD
 #endif
