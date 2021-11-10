@@ -166,25 +166,25 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 	} while(1);
 }
 
-void cpu_load(void)
+void cpu_load(struct rt_latency_ctx *ctx)
 {
-#ifdef WITH_CPU_LOAD_SEM
 	int err;
 	os_sem_t cpu_sem;
 
 	err = os_sem_init(&cpu_sem, 0);
 	os_assert(!err, "semaphore init failed!");
-#endif
-	os_printf("%s: task started\n\r", __func__);
+
+	os_printf("%s: running%s\n\r", __func__,
+		ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM ? " (with extra semaphore load)" : "");
 
 	do {
-#ifdef WITH_CPU_LOAD_SEM
-		err = os_sem_take(&cpu_sem, 0, OS_SEM_TIMEOUT_MAX);
-		os_assert(!err, "Failed to take semaphore");
+		if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM) {
+			err = os_sem_take(&cpu_sem, 0, OS_SEM_TIMEOUT_MAX);
+			os_assert(!err, "Failed to take semaphore");
 
-		err = os_sem_give(&cpu_sem, 0);
-		os_assert(!err, "Failed to give semaphore");
-#endif
+			err = os_sem_give(&cpu_sem, 0);
+			os_assert(!err, "Failed to give semaphore");
+		}
 	} while(1);
 }
 
@@ -192,7 +192,7 @@ void cpu_load(void)
 #define CACHE_INVAL_PERIOD_MS (100)
 void cache_inval(void)
 {
-	os_printf("%s: task started\n\r", __func__);
+	os_printf("%s: running\n\r", __func__);
 
 	do {
 		os_invd_dcache_all();

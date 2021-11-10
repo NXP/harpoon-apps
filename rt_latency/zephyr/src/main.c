@@ -62,7 +62,9 @@ void gpt_latency_test(void *p1, void *p2, void *p3)
 #ifdef WITH_CPU_LOAD
 void cpu_load_func(void *p1, void *p2, void *p3)
 {
-	cpu_load();
+	struct rt_latency_ctx *ctx = p2;
+
+	cpu_load(ctx);
 }
 #endif
 
@@ -106,6 +108,9 @@ void test_main(void)
 #endif
 #ifdef WITH_CPU_LOAD
 	rt_ctx.tc_load |= RT_LATENCY_WITH_CPU_LOAD;
+#endif
+#ifdef WITH_CPU_LOAD_SEM
+	rt_ctx.tc_load |= RT_LATENCY_WITH_CPU_LOAD_SEM;
 #endif
 
 	/* Give required clocks some time to stabilize. In particular, nRF SoCs
@@ -154,7 +159,7 @@ void test_main(void)
 	/* CPU Load Thread */
 #ifdef WITH_CPU_LOAD
 	k_thread_create(&cpu_load_thread, cpu_load_stack, STACK_SIZE,
-			cpu_load_func, NULL, NULL, NULL,
+			cpu_load_func, NULL, &rt_ctx, NULL,
 			K_LOWEST_APPLICATION_THREAD_PRIO, 0, K_FOREVER);
 #ifdef THREAD_CPU_BINDING
 	k_thread_cpu_mask_clear(&cpu_load_thread);

@@ -18,9 +18,11 @@
  *
  * WITH_IRQ_LOAD:     Add an extra IRQ load thread
  * WITH_CPU_LOAD:     Add CPU load in the lower priority task
+ * WITH_CPU_LOAD_SEM: Add Semaphore load in CPU load thread
  */
 #define RT_LATENCY_WITH_IRQ_LOAD             (1 << 1)
 #define RT_LATENCY_WITH_CPU_LOAD             (1 << 2)
+#define RT_LATENCY_WITH_CPU_LOAD_SEM         (1 << 3)
 
 static inline int rt_latency_get_tc_load(int test_case_id)
 {
@@ -36,7 +38,8 @@ static inline int rt_latency_get_tc_load(int test_case_id)
             mask |= RT_LATENCY_WITH_IRQ_LOAD;
             break;
         case 4:
-            mask |= RT_LATENCY_WITH_CPU_LOAD;
+            mask |= RT_LATENCY_WITH_CPU_LOAD |
+                    RT_LATENCY_WITH_CPU_LOAD_SEM;
             break;
         case 5:
             mask |= RT_LATENCY_WITH_CPU_LOAD;
@@ -83,7 +86,7 @@ int rt_latency_init(const void *dev,
 int rt_latency_test(struct rt_latency_ctx *ctx);
 
 void print_stats(struct rt_latency_ctx *ctx);
-void cpu_load(void);
+void cpu_load(struct rt_latency_ctx *ctx);
 #ifdef WITH_INVD_CACHE
 void cache_inval(void);
 #endif

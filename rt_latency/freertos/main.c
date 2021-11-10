@@ -71,7 +71,9 @@ void cache_inval_task(void *pvParameters);
 
 void cpu_load_task(void *pvParameters)
 {
-	cpu_load();
+	struct rt_latency_ctx *ctx = pvParameters;
+
+	cpu_load(ctx);
 }
 
 #ifdef WITH_INVD_CACHE
@@ -115,7 +117,7 @@ int main(void)
 {
 	void *dev;
 	void *irq_load_dev = NULL;
-	int test_case_id = 2;
+	int test_case_id = 4;
 	BaseType_t xResult;
 
 	/* Init board cpu and hardware. */
@@ -144,7 +146,7 @@ int main(void)
 	/* CPU Load task */
 	if (rt_ctx.tc_load & RT_LATENCY_WITH_CPU_LOAD) {
 		xResult = xTaskCreate(cpu_load_task, "cpu_load_task", STACK_SIZE,
-				       NULL, LOWEST_TASK_PRIORITY, NULL);
+				       &rt_ctx, LOWEST_TASK_PRIORITY, NULL);
 		assert(xResult == pdPASS);
 	}
 
