@@ -53,7 +53,7 @@ static inline uint32_t calc_diff_ns(const void *dev,
  *
  * @current_counter: counter value when the IRQ occurred
  */
-void latency_alarm_handler(const void *dev, uint8_t chan_id,
+static void latency_alarm_handler(const void *dev, uint8_t chan_id,
 			  uint32_t irq_counter,
 			  void *user_data)
 {
@@ -68,7 +68,7 @@ void latency_alarm_handler(const void *dev, uint8_t chan_id,
 
 #define IRQ_LOAD_ISR_DURATION_US	10
 
-void load_alarm_handler(const void *dev, uint8_t chan_id,
+static void load_alarm_handler(const void *dev, uint8_t chan_id,
 			  uint32_t irq_counter,
 			  void *user_data)
 {

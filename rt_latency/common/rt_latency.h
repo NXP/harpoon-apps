@@ -41,14 +41,6 @@ void print_stats(struct latency_stat *rt_stat);
 #ifdef WITH_CPU_LOAD
 void cpu_load(void);
 #endif
-#ifdef WITH_IRQ_LOAD
-void irq_load(void *p1, void *p2, void *p3);
-/* TODO: Register these handlers as alarm callback function */
-void load_alarm_handler(const void *dev, uint8_t chan_id,
-			  uint32_t irq_counter, void *user_data);
-#endif
-void latency_alarm_handler(const void *dev, uint8_t chan_id,
-			  uint32_t irq_counter, void *user_data);
 #ifdef WITH_INVD_CACHE
 void cache_inval(void);
 #endif
