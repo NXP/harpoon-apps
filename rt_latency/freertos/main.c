@@ -112,7 +112,7 @@ int main(void)
 {
 	void *dev;
 	void *irq_load_dev = NULL;
-	int test_case_id = 6;
+	int test_case_id = 7;
 	BaseType_t xResult;
 
 	/* Init board cpu and hardware. */

@@ -120,6 +120,11 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 		os_sem_init(&ctx->irq_load_sem, 0);
 	}
 
+	if (ctx->tc_load & RT_LATENCY_WITH_LINUX_LOAD) {
+		/* TODO: Add command to trigger Linux Load */
+		os_printf("WARNING: Linux load must be run manually!\n\r");
+	}
+
 	do {
 		os_counter_start(dev);
 		if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {

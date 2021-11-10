@@ -27,6 +27,7 @@
 #define RT_LATENCY_WITH_CPU_LOAD             (1 << 2)
 #define RT_LATENCY_WITH_CPU_LOAD_SEM         (1 << 3)
 #define RT_LATENCY_WITH_INVD_CACHE           (1 << 4)
+#define RT_LATENCY_WITH_LINUX_LOAD           (1 << 5)
 
 static inline int rt_latency_get_tc_load(int test_case_id)
 {
@@ -46,8 +47,8 @@ static inline int rt_latency_get_tc_load(int test_case_id)
                     RT_LATENCY_WITH_CPU_LOAD_SEM;
             break;
         case 5:
-            mask |= RT_LATENCY_WITH_CPU_LOAD;
-            /* TODO: Add command to trigger Linux Load */
+            mask |= RT_LATENCY_WITH_CPU_LOAD |
+                    RT_LATENCY_WITH_LINUX_LOAD;
             break;
         case 6:
             mask |= RT_LATENCY_WITH_CPU_LOAD |
@@ -55,9 +56,9 @@ static inline int rt_latency_get_tc_load(int test_case_id)
             break;
         case 7:
             mask |= RT_LATENCY_WITH_CPU_LOAD |
-                    RT_LATENCY_WITH_INVD_CACHE;
+                    RT_LATENCY_WITH_INVD_CACHE |
+                    RT_LATENCY_WITH_LINUX_LOAD;
             /* TODO: Place code in OCRAM (outer cacheable) */
-            /* TODO: Add command to trigger Linux Load */
             break;
         default:
             mask = -1;
