@@ -138,7 +138,7 @@ void test_main(void)
 	/* Print Thread */
 	k_thread_create(&print_thread, print_stack, STACK_SIZE,
 			print_stats_func, NULL, &rt_stats, NULL,
-			K_LOWEST_APPLICATION_THREAD_PRIO - 1, 0, K_FOREVER);
+			K_LOWEST_APPLICATION_THREAD_PRIO - 2, 0, K_FOREVER);
 #ifdef THREAD_CPU_BINDING
 	k_thread_cpu_mask_clear(&print_thread);
 	k_thread_cpu_mask_enable(&print_thread, PRINT_CPU_BINDING);
@@ -162,7 +162,7 @@ void test_main(void)
 #ifdef WITH_INVD_CACHE
 	k_thread_create(&cache_inval_thread, cache_inval_stack, STACK_SIZE,
 			cache_inval_func, NULL, NULL, NULL,
-			K_LOWEST_APPLICATION_THREAD_PRIO, 0, K_FOREVER);
+			K_LOWEST_APPLICATION_THREAD_PRIO - 1, 0, K_FOREVER);
 #ifdef THREAD_CPU_BINDING
 	k_thread_cpu_mask_clear(&cache_inval_thread);
 	k_thread_cpu_mask_enable(&cache_inval_thread, CPU_LOAD_CPU_BINDING);
