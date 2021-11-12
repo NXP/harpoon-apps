@@ -112,7 +112,7 @@ int main(void)
 {
 	void *dev;
 	void *irq_load_dev = NULL;
-	int test_case_id = 7;
+	int test_case_id = RT_LATENCY_TEST_CASE_7;
 	BaseType_t xResult;
 
 	/* Init board cpu and hardware. */

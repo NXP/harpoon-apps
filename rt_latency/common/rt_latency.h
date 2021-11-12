@@ -30,40 +30,53 @@
 #define RT_LATENCY_WITH_LINUX_LOAD           (1 << 5)
 #define RT_LATENCY_USES_OCRAM                (1 << 6)
 
+enum rt_latency_test_case_id
+{
+    RT_LATENCY_TEST_CASE_1 = 1,
+    RT_LATENCY_TEST_CASE_2,
+    RT_LATENCY_TEST_CASE_3,
+    RT_LATENCY_TEST_CASE_4,
+    RT_LATENCY_TEST_CASE_5,
+    RT_LATENCY_TEST_CASE_6,
+    RT_LATENCY_TEST_CASE_7,
+
+    RT_LATENCY_TEST_CASE_MAX,
+};
+
 static inline int rt_latency_get_tc_load(int test_case_id)
 {
     int mask = 0;
 
     switch (test_case_id) {
-        case 1:
-            break;
-        case 2:
-            mask |= RT_LATENCY_WITH_CPU_LOAD;
-            break;
-        case 3:
-            mask |= RT_LATENCY_WITH_IRQ_LOAD;
-            break;
-        case 4:
-            mask |= RT_LATENCY_WITH_CPU_LOAD |
-                    RT_LATENCY_WITH_CPU_LOAD_SEM;
-            break;
-        case 5:
-            mask |= RT_LATENCY_WITH_CPU_LOAD |
-                    RT_LATENCY_WITH_LINUX_LOAD;
-            break;
-        case 6:
-            mask |= RT_LATENCY_WITH_CPU_LOAD |
-                    RT_LATENCY_WITH_INVD_CACHE;
-            break;
-        case 7:
-            mask |= RT_LATENCY_WITH_CPU_LOAD |
-                    RT_LATENCY_WITH_INVD_CACHE |
-                    RT_LATENCY_WITH_LINUX_LOAD |
-                    RT_LATENCY_USES_OCRAM;
-            break;
-        default:
-            mask = -1;
-            break;
+    case RT_LATENCY_TEST_CASE_1:
+        break;
+    case RT_LATENCY_TEST_CASE_2:
+        mask |= RT_LATENCY_WITH_CPU_LOAD;
+        break;
+    case RT_LATENCY_TEST_CASE_3:
+        mask |= RT_LATENCY_WITH_IRQ_LOAD;
+        break;
+    case RT_LATENCY_TEST_CASE_4:
+        mask |= RT_LATENCY_WITH_CPU_LOAD |
+                RT_LATENCY_WITH_CPU_LOAD_SEM;
+        break;
+    case RT_LATENCY_TEST_CASE_5:
+        mask |= RT_LATENCY_WITH_CPU_LOAD |
+                RT_LATENCY_WITH_LINUX_LOAD;
+        break;
+    case RT_LATENCY_TEST_CASE_6:
+        mask |= RT_LATENCY_WITH_CPU_LOAD |
+                RT_LATENCY_WITH_INVD_CACHE;
+        break;
+    case RT_LATENCY_TEST_CASE_7:
+        mask |= RT_LATENCY_WITH_CPU_LOAD |
+                RT_LATENCY_WITH_INVD_CACHE |
+                RT_LATENCY_WITH_LINUX_LOAD |
+                RT_LATENCY_USES_OCRAM;
+        break;
+    default:
+        mask = -1;
+        break;
     }
 
     return mask;
