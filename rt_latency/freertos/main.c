@@ -105,33 +105,24 @@ void main_task(void *pvParameters)
  * Application functions
  ******************************************************************************/
 
-/*!
- * @brief Main function
- */
-int main(void)
+static int create_tc_tasks(void)
 {
 	void *dev;
 	void *irq_load_dev = NULL;
 	int test_case_id = RT_LATENCY_TEST_CASE_7;
 	BaseType_t xResult;
 
-	/* Init board cpu and hardware. */
-	BOARD_InitMemory();
-	BOARD_InitDebugConsole();
-
-	os_printf("Harpoon v.%s\r\n", VERSION);
-
 	/* Create (main) "high prio IRQ" task */
 
 	dev = gpt_devices[0]; /* GPT1 */
 	irq_load_dev = gpt_devices[1]; /* GPT2 */
 
+	xResult = rt_latency_init(dev, irq_load_dev, &rt_ctx);
+	os_assert(xResult == 0, "Initialization failed!");
+
 	/* Initialize test case load conditions based on test case ID */
 	rt_ctx.tc_load = rt_latency_get_tc_load(test_case_id);
 	os_assert(rt_ctx.tc_load != -1, "Wrong test conditions!");
-
-	xResult = rt_latency_init(dev, irq_load_dev, &rt_ctx);
-	os_assert(xResult == 0, "Initialization failed!");
 
 	xResult = xTaskCreate(main_task, "main_task", STACK_SIZE,
 			       &rt_ctx, HIGHEST_TASK_PRIORITY, &main_taskHandle);
@@ -157,8 +148,28 @@ int main(void)
 				&rt_ctx, LOWEST_TASK_PRIORITY, NULL);
 	assert(xResult == pdPASS);
 
+	os_printf("Test case %d loaded\n\r", test_case_id);
+
+	return xResult == pdPASS ? 0 : -1;
+}
+
+/*!
+ * @brief Main function
+ */
+int main(void)
+{
+	BaseType_t xResult;
+
+	/* Init board cpu and hardware. */
+	BOARD_InitMemory();
+	BOARD_InitDebugConsole();
+
+	os_printf("Harpoon v.%s\r\n", VERSION);
+
+	xResult = create_tc_tasks();
+	os_assert(xResult == 0, "Tasks creation failed!");
+
 	/* Start scheduler */
-	os_printf("Running test case %d\n\r", test_case_id);
 	vTaskStartScheduler();
 
 	for (;;)
