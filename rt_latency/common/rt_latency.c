@@ -230,7 +230,7 @@ void cache_inval(void)
 void print_stats(struct rt_latency_ctx *ctx)
 {
 	do {
-		os_msleep(10000);
+		os_msleep(STATS_PERIOD_SEC * 1000);
 
 		stats_compute(&ctx->irq_delay);
 		stats_print(&ctx->irq_delay);
@@ -245,6 +245,39 @@ void print_stats(struct rt_latency_ctx *ctx)
 		os_printf("\n\r");
 
 	} while(1);
+}
+
+void rt_latency_destroy(struct rt_latency_ctx *ctx)
+{
+	int err;
+	const void *dev = ctx->dev;
+	const void *irq_load_dev = ctx->irq_load_dev;
+
+	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
+		err = os_counter_stop(irq_load_dev);
+		os_assert(!err, "Failed to stop counter!");
+
+		err = os_sem_destroy(&ctx->irq_load_sem);
+		os_assert(!err, "Failed to destroy semaphore!");
+	}
+
+	err = os_counter_stop(dev);
+	os_assert(!err, "Failed to stop counter!");
+
+	err = os_sem_destroy(&ctx->semaphore);
+	os_assert(!err, "Failed to destroy semaphore!");
+
+	/* print current stats before reseting them all */
+	print_stats(ctx);
+
+	stats_reset(&ctx->irq_delay);
+	hist_reset(&ctx->irq_delay_hist);
+
+	stats_reset(&ctx->irq_to_sched);
+	hist_reset(&ctx->irq_to_sched_hist);
+
+	ctx->dev = NULL;
+	ctx->irq_load_dev = NULL;
 }
 
 int rt_latency_init(const void *dev,

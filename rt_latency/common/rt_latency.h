@@ -10,9 +10,16 @@
 #include "os/semaphore.h"
 #include "stats.h"
 
-/* Time for Counter Alarm timeout (us) */
+/* Time duration per test case (seconds) */
+#define TEST_EXECUTION_TIME_SEC                (29)
+
+/* Time period between two statistics logs (seconds) */
+#define STATS_PERIOD_SEC                       (10)
+
+/* Time for counter alarm timeout (us) */
 #define COUNTER_PERIOD_US_VAL               (20000)
 
+/* Time between two cache invalidation instructions (ms) */
 #define CACHE_INVAL_PERIOD_MS                 (100)
 
 /*
@@ -103,8 +110,8 @@ struct rt_latency_ctx {
 
 int rt_latency_init(const void *dev,
 		const void *irq_load_dev, struct rt_latency_ctx *ctx);
-
 int rt_latency_test(struct rt_latency_ctx *ctx);
+void rt_latency_destroy(struct rt_latency_ctx *ctx);
 
 void print_stats(struct rt_latency_ctx *ctx);
 void cpu_load(struct rt_latency_ctx *ctx);

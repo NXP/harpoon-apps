@@ -50,7 +50,9 @@ GPT_Type *gpt_devices[NUM_OF_COUNTER] = {GPT1, GPT2};
 
 static struct rt_latency_ctx rt_ctx;
 
-TaskHandle_t main_taskHandle;
+/* hard-coded number of elements ; only used to create/delete test case's
+ * task handles, all at once */
+static TaskHandle_t tc_taskHandles[8];
 
 /*******************************************************************************
  * Prototypes
@@ -58,6 +60,7 @@ TaskHandle_t main_taskHandle;
 
 /* Application tasks */
 void main_task(void *pvParameters);
+void benchmark_task(void *pvParameters);
 void log_task(void *pvParameters);
 void cpu_load_task(void *pvParameters);
 void cache_inval_task(void *pvParameters);
@@ -85,12 +88,12 @@ void log_task(void *pvParameters)
 	print_stats(ctx);
 }
 
-void main_task(void *pvParameters)
+void benchmark_task(void *pvParameters)
 {
 	int ret;
 	struct rt_latency_ctx *ctx = pvParameters;
 
-	os_printf("%s: task started%s\n\r", __func__,
+	os_printf("%s: running%s\n\r", __func__,
 	       (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD)  ? " (with IRQ load)" : "");
 
 	ret = rt_latency_test(ctx);
@@ -105,14 +108,29 @@ void main_task(void *pvParameters)
  * Application functions
  ******************************************************************************/
 
-static int create_tc_tasks(void)
+static void destroy_test_case(void)
+{
+	int hnd_idx;
+
+	for (hnd_idx = 0; hnd_idx < ARRAY_SIZE(tc_taskHandles); hnd_idx++) {
+		if (tc_taskHandles[hnd_idx]) {
+			vTaskDelete(tc_taskHandles[hnd_idx]);
+			tc_taskHandles[hnd_idx] = NULL;
+		}
+	}
+
+	rt_latency_destroy(&rt_ctx);
+}
+
+static int start_test_case(int test_case_id)
 {
 	void *dev;
 	void *irq_load_dev = NULL;
-	int test_case_id = RT_LATENCY_TEST_CASE_7;
+	int hnd_idx = 0;
 	BaseType_t xResult;
 
-	/* Create (main) "high prio IRQ" task */
+	os_printf("---\n\r");
+	os_printf("Running test case %d:\n\r", test_case_id);
 
 	dev = gpt_devices[0]; /* GPT1 */
 	irq_load_dev = gpt_devices[1]; /* GPT2 */
@@ -124,33 +142,52 @@ static int create_tc_tasks(void)
 	rt_ctx.tc_load = rt_latency_get_tc_load(test_case_id);
 	os_assert(rt_ctx.tc_load != -1, "Wrong test conditions!");
 
-	xResult = xTaskCreate(main_task, "main_task", STACK_SIZE,
-			       &rt_ctx, HIGHEST_TASK_PRIORITY, &main_taskHandle);
-	if (xResult != pdPASS);
-		assert (true);
+	/* Benchmark task: main "high prio IRQ" task */
+	xResult = xTaskCreate(benchmark_task, "benchmark_task", STACK_SIZE,
+			       &rt_ctx, HIGHEST_TASK_PRIORITY, &tc_taskHandles[hnd_idx++]);
+	os_assert(xResult == pdPASS, "task creation failed!");
 
 	/* CPU Load task */
 	if (rt_ctx.tc_load & RT_LATENCY_WITH_CPU_LOAD) {
 		xResult = xTaskCreate(cpu_load_task, "cpu_load_task", STACK_SIZE,
-				       &rt_ctx, LOWEST_TASK_PRIORITY, NULL);
-		assert(xResult == pdPASS);
+				       &rt_ctx, LOWEST_TASK_PRIORITY, &tc_taskHandles[hnd_idx++]);
+		os_assert(xResult == pdPASS, "task creation failed!");
 	}
 
 	/* Cache invalidate task */
 	if (rt_ctx.tc_load & RT_LATENCY_WITH_INVD_CACHE) {
 		xResult = xTaskCreate(cache_inval_task, "cache_inval_task",
-			       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY, NULL);
-		assert(xResult == pdPASS);
+			       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY, &tc_taskHandles[hnd_idx++]);
+		os_assert(xResult == pdPASS, "task creation failed!");
 	}
 
 	/* Print task */
 	xResult = xTaskCreate(log_task, "log_task", STACK_SIZE,
-				&rt_ctx, LOWEST_TASK_PRIORITY, NULL);
-	assert(xResult == pdPASS);
+				&rt_ctx, LOWEST_TASK_PRIORITY, &tc_taskHandles[hnd_idx++]);
+	os_assert(xResult == pdPASS, "task creation failed!");
 
-	os_printf("Test case %d loaded\n\r", test_case_id);
+	return 0;
+}
 
-	return xResult == pdPASS ? 0 : -1;
+void main_task(void *pvParameters)
+{
+	int num = 0;
+	int ret;
+
+	os_printf("%s: running\n\r", __func__);
+
+	do {
+		if (++num >= RT_LATENCY_TEST_CASE_MAX)
+			num = RT_LATENCY_TEST_CASE_1;
+
+		ret = start_test_case(num);
+		os_assert(ret == 0, "Tasks creation failed!");
+
+		/* Execute each test case for some time */
+		vTaskDelay(pdMS_TO_TICKS(TEST_EXECUTION_TIME_SEC * 1000));
+		destroy_test_case();
+
+	} while(1);
 }
 
 /*!
@@ -166,14 +203,17 @@ int main(void)
 
 	os_printf("Harpoon v.%s\r\n", VERSION);
 
-	xResult = create_tc_tasks();
-	os_assert(xResult == 0, "Tasks creation failed!");
+	/* Test cases scheduler task */
+	xResult = xTaskCreate(main_task, "main_task",
+		       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY, NULL);
+	assert(xResult == pdPASS);
 
 	/* Start scheduler */
 	vTaskStartScheduler();
 
 	for (;;)
 		;
+
 
 	return xResult;
 }
