@@ -162,8 +162,10 @@ static void counter_init(const void *dev)
 	counter = &counters[gpt_get_index(dev)];
 	counter->dev = dev;
 
+#ifdef DEBUG
 	os_printf("counter %d using GPT dev %p irq %d initialized\r\n",
 			gpt_get_index(dev), dev, irqn);
+#endif
 }
 
 int os_counter_start(const void *dev)
