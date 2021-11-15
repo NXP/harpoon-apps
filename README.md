@@ -40,69 +40,83 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 .
 ├── harpoon-apps
 │   ├── common                              <-- source code common to all applications
-│   │   ├── freertos
-│   │   │   │   └── evkmimx8mp
-│   │   │   │       ├── armgcc_aarch64
-│   │   │   │       │   └── MIMX8ML8xxxxx_ca53_ddr_ram.ld <-- linker script
-│   │   │   │       ├── board.c
-│   │   │   │       ├── board.h
-│   │   │   │       ├── clock_config.h
-│   │   │   │       └── mmu.c               <-- defines the MMU regions
-│   │   │   ├── common_freertos.cmake       <-- hardware-agnostic source code for FreeRTOS
-│   │   │   ├── core                        <-- includes os-specific header files for the os APIs
-│   │   │   │   └── armv8a
-│   │   │   │       ├── common_freertos_core_armv8a.cmake
-│   │   │   │       └── startup.S           <-- ARMv8-A startup code
-│   │   │   ├── counter.c
-│   │   │   ├── FreeRTOSConfig.h
-│   │   │   ├── FreeRTOS_helper.c
-│   │   │   ├── FreeRTOS_tick_config.c
-│   │   │   ├── irq.{c,h}                   <-- contains interrupt handler
-│   │   │   ├── stdio.c                     <-- local implementation of the os APIs
-│   │   │   ├── mmu.h                       <-- glue with the SDK MMU driver
-│   │   │   ├── os                          <-- includes os-specific header files for the os APIs
-│   │   │   │   ├── assert.h
-│   │   │   │   ├── counter.h
-│   │   │   │   ├── semaphore.h
-│   │   │   │   ├── stdio.h
-│   │   │   │   └── unistd.h
-│   │   │   └── os.h
-│   │   ├── libs
-│   │   │   └── stats
-│   │   │       ├── lib_stats.cmake
-│   │   │       ├── stats.c
-│   │   │       └── stats.h
-│   │   ├── os                              <-- includes standard/posix header files os APIs
-│   │   │   └── stdio.h
-│   │   └── zephyr
-│   │       ├── os
-│   │       │   └── stdio.h
-│   │       └── os.h
-│   ├── hello_world                         <-- top-directory of the application
-│   │   ├── freertos
-│   │   │   ├── boards                      <-- board-specific source code used for FreeRTOS
-│   │   │   │   └── evkmimx8mp
-│   │   │   │       └── armgcc_aarch64          <-- entry point to build this application for FreeRTOS/evkmimx8mp
-│   │   │   │           └── build_ddr_release.sh
-│   │   │   └── main.c                      <-- main entry point for FreeRTOS
-│   │   ├── include
-│   │   │   └── hello_world.h
-│   │   ├── readme.txt
-│   │   ├── src
-│   │   │   └── hello_world.c               <-- hardware/os-independant source code for the application
-│   │   └── zephyr
-│   │       └── main.c                      <-- main entry point for Zephyr
-│   └── manifest-tmp
+│   │   ├── cpu.h
+│   │   ├── freertos
+│   │   │   ├── boards
+│   │   │   │   ├── evkmimx8mm
+│   │   │   │   │   ├── armgcc_aarch64
+│   │   │   │   │   │   ├── flags.cmake
+│   │   │   │   │   │   ├── MIMX8MM6xxxxx_ca53_ddr_ram.ld <-- linker script
+│   │   │   │   │   │   └── MIMX8MM6xxxxx_ca53_ram.ld
+│   │   │   │   │   ├── board.c
+│   │   │   │   │   ├── board.h
+│   │   │   │   │   ├── clock_config.h
+│   │   │   │   │   └── mmu.c               <-- define the MMU regions
+│   │   │   │    ...
+│   │   │   ├── common_freertos.cmake       <-- hardware-agnostic source code for FreeRTOS
+│   │   │   ├── core                        <-- includes os-specific header files for the os APIs
+│   │   │   │   └── armv8a
+│   │   │   │       ├── common_freertos_core_armv8a.cmake
+│   │   │   │       └── startup.S           <-- ARMv8-A startup code
+│   │   │   ├── counter.c
+│   │   │   ├── FreeRTOSConfig.h
+│   │   │   ├── FreeRTOS_helper.c
+│   │   │   ├── FreeRTOS_tick_config.c
+│   │   │   ├── irq.{c,h}                   <-- contains interrupt handler
+│   │   │   ├── mmu.h                       <-- glue with the SDK MMU driver
+│   │   │   ├── os                          <-- includes os-specific header files for the os APIs
+│   │   │   │   ├── assert.h
+│   │   │   │   ├── counter.h
+│   │   │   │   ├── semaphore.h
+│   │   │   │   ├── stdio.h
+│   │   │   │   └── unistd.h
+│   │   │   └── os.h
+│   │   ├── libs
+│   │   │   └── stats
+│   │   │       ├── lib_stats.cmake
+│   │   │       ├── stats.c
+│   │   │       └── stats.h
+│   │   ├── os                              <-- includes standard/posix header files os APIs
+│   │   │   ├── assert.h
+│   │   │   ├── counter.h
+│   │   │   ├── semaphore.h
+│   │   │   ├── stdio.h
+│   │   │   └── unistd.h
+│   │   └── zephyr
+│   │       ├── os
+│   │       │   ├── assert.h
+│   │       │   ├── counter.h
+│   │       │   ├── semaphore.h
+│   │       │   ├── stdio.h
+│   │       │   └── unistd.h
+│   │       └── os.h
+│   ├── harpoon_drivers_test                <-- top directory of the application
+│   │   ├── freertos
+│   │   │   ├── boards                      <-- board-specific source code used for FreeRTOS
+│   │   │   │   ├── evkmimx8mm
+│   │   │   │   │   └── armgcc_aarch64      <-- entry point to build this application for FreeRTOS/evkmimx8mm
+│   │   │   │   │       ├── build_ddr_debug.sh
+│   │   │   │   │       ├── build_ddr_release.sh
+│   │   │   │   │       ├── clean.sh
+│   │   │   │   │       └── CMakeLists.txt
+│   │   │   │    ...
+│   │   │   └── main.c                      <-- main entry point for FreeRTOS
+│   │   ├── include
+│   │   │   └── i2c_test.h
+│   │   └── src
+│   │       └── i2c_test.c                  <-- hardware/os-independent source code for the application
+│   ├── README.md
+│   └── west.yml
 ├── freertos                                <-- FreeRTOS-Kernel Git tree
 ├── mcux-sdk                                <-- MCUXpresso Git tree
 │   ├── ...
 │   ├── components
 │   ├── devices
 │   │   ├── <SoC>
-│   │   │   ├── drivers                     <-- SoC-dependant drivers and hardware definitions
+│   │   │   ├── drivers                     <-- SoC-dependent drivers and hardware definitions
 │   │    ...
 │   ├── docs
-│   ├── drivers                             <-- IP-dependant drivers
+│   ├── drivers                             <-- IP-dependent drivers
 │   ├── middleware
 │   ├── tools
 │   └── utilities
