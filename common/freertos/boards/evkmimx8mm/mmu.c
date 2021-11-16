@@ -94,10 +94,6 @@ static const struct ARM_MMU_region mmu_regions[] = {
 			      CCM_BASE, KB(64),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
 
-	MMU_REGION_FLAT_ENTRY("I2C3",
-			      I2C3_BASE, KB(64),
-			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
-
 	MMU_REGION_FLAT_ENTRY("UART2",
 			      UART2_BASE, KB(4),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
