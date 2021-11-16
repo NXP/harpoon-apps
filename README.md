@@ -49,9 +49,9 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   │   │   │   │   ├── MIMX8MM6xxxxx_ca53_ddr_ram.ld <-- linker script
 │   │   │   │   │   │   └── MIMX8MM6xxxxx_ca53_ram.ld
 │   │   │   │   │   ├── board.c
-│   │   │   │   │   ├── board.h
+│   │   │   │   │   ├── board.h             <-- board-specific board configuration for all applications
 │   │   │   │   │   ├── clock_config.h
-│   │   │   │   │   └── mmu.c               <-- define the MMU regions
+│   │   │   │   │   └── mmu.c               <-- board-specific MMU regions for all applications
 │   │   │   │    ...
 │   │   │   ├── common_freertos.cmake       <-- hardware-agnostic source code for FreeRTOS
 │   │   │   ├── core                        <-- includes os-specific header files for the os APIs
@@ -94,6 +94,8 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   ├── freertos
 │   │   │   ├── boards                      <-- board-specific source code used for FreeRTOS
 │   │   │   │   ├── evkmimx8mm
+│   │   │   │   │   ├── app_board.h         <-- optional header file for application-specific board configuration definitions
+│   │   │   │   │   ├── app_mmu.h           <-- optional header file for application-specific MMU regions mapping for this board
 │   │   │   │   │   └── armgcc_aarch64      <-- entry point to build this application for FreeRTOS/evkmimx8mm
 │   │   │   │   │       ├── build_ddr_debug.sh
 │   │   │   │   │       ├── build_ddr_release.sh
