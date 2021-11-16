@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 NXP
+ * Copyright 2019-2021 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -7,6 +7,10 @@
 
 #ifndef _BOARD_H_
 #define _BOARD_H_
+
+#if __has_include("app_board.h")
+#include "app_board.h"
+#endif
 #include "clock_config.h"
 #include "fsl_clock.h"
 
