@@ -45,6 +45,7 @@ set(MCUX_SDK_PROJECT_NAME ${demo_name}.elf)
 include(${ProjDirPath}/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/freertos/main.c"
+    "${AppPath}/common/sai_drv.c"
     "${AppPath}/common/test_sai.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"

@@ -15,6 +15,7 @@
 
 #include "sai_clock_config.h"
 #include "sai_codec_config.h"
+#include "sai_drv.h"
 #include "test_sai.h"
 
 #define test_task_PRIORITY	(configMAX_PRIORITIES - 1)
@@ -32,8 +33,6 @@ static void hardware_setup(void)
 	board_clock_setup(sai_id);
 
 	codec_setup();
-
-	sai_setup(sai_id);
 }
 
 int main(void)
