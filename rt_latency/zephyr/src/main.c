@@ -48,12 +48,14 @@ void gpt_latency_test(void *p1, void *p2, void *p3)
 
 	k_object_access_grant(dev, k_current_get());
 
-	ret = rt_latency_test(ctx);
-	if (ret)
-	{
-		printk("test failed!\n");
-		k_thread_suspend(k_current_get());
-	}
+	do {
+		ret = rt_latency_test(ctx);
+		if (ret)
+		{
+			printk("test failed!\n");
+			k_thread_suspend(k_current_get());
+		}
+	} while (!ret);
 
 	k_usleep(2000);
 	k_thread_abort(k_current_get());
@@ -64,14 +66,23 @@ void cpu_load_func(void *p1, void *p2, void *p3)
 {
 	struct rt_latency_ctx *ctx = p2;
 
-	cpu_load(ctx);
+	printk("%s: running%s\r\n", __func__,
+		ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM ? " (with extra semaphore load)" : "");
+
+	do {
+		cpu_load(ctx);
+	} while(1);
 }
 #endif
 
 #ifdef WITH_INVD_CACHE
 void cache_inval_func(void *p1, void *p2, void *p3)
 {
-	cache_inval();
+	printk("%s: running\r\n", __func__);
+
+	do {
+		cache_inval();
+	} while(1);
 }
 #endif
 
@@ -79,7 +90,9 @@ void print_stats_func(void *p1, void *p2, void *p3)
 {
 	struct rt_latency_ctx *ctx = p2;
 
-	print_stats(ctx);
+	do {
+		print_stats(ctx);
+	} while(1);
 }
 
 void test_main(void)

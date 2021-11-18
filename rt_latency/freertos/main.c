@@ -73,19 +73,30 @@ void cpu_load_task(void *pvParameters)
 {
 	struct rt_latency_ctx *ctx = pvParameters;
 
-	cpu_load(ctx);
+	os_printf("%s: running%s\r\n", __func__,
+		ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM ? " (with extra semaphore load)" : "");
+
+	do {
+		cpu_load(ctx);
+	} while(1);
 }
 
 void cache_inval_task(void *pvParameters)
 {
-	cache_inval();
+	os_printf("%s: running\r\n", __func__);
+
+	do {
+		cache_inval();
+	} while(1);
 }
 
 void log_task(void *pvParameters)
 {
 	struct rt_latency_ctx *ctx = pvParameters;
 
-	print_stats(ctx);
+	do {
+		print_stats(ctx);
+	} while(1);
 }
 
 void benchmark_task(void *pvParameters)
@@ -93,15 +104,17 @@ void benchmark_task(void *pvParameters)
 	int ret;
 	struct rt_latency_ctx *ctx = pvParameters;
 
-	os_printf("%s: running%s\n\r", __func__,
+	os_printf("%s: running%s\r\n", __func__,
 	       (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD)  ? " (with IRQ load)" : "");
 
-	ret = rt_latency_test(ctx);
-	if (ret)
-	{
-		os_printf("test failed!\n");
-		vTaskSuspend(NULL);
-	}
+	do {
+		ret = rt_latency_test(ctx);
+		if (ret)
+		{
+			os_printf("test failed!\n");
+			vTaskSuspend(NULL);
+		}
+	} while (!ret);
 }
 
 /*******************************************************************************
@@ -129,22 +142,23 @@ static int start_test_case(int test_case_id)
 	int hnd_idx = 0;
 	BaseType_t xResult;
 
-	os_printf("---\n\r");
-	os_printf("Running test case %d:\n\r", test_case_id);
+	os_printf("---\r\n");
+	os_printf("Running test case %d:\r\n", test_case_id);
 
 	dev = gpt_devices[0]; /* GPT1 */
 	irq_load_dev = gpt_devices[1]; /* GPT2 */
-
-	xResult = rt_latency_init(dev, irq_load_dev, &rt_ctx);
-	os_assert(xResult == 0, "Initialization failed!");
 
 	/* Initialize test case load conditions based on test case ID */
 	rt_ctx.tc_load = rt_latency_get_tc_load(test_case_id);
 	os_assert(rt_ctx.tc_load != -1, "Wrong test conditions!");
 
+	/* Initialize test cases' context */
+	xResult = rt_latency_init(dev, irq_load_dev, &rt_ctx);
+	os_assert(xResult == 0, "Initialization failed!");
+
 	/* Benchmark task: main "high prio IRQ" task */
 	xResult = xTaskCreate(benchmark_task, "benchmark_task", STACK_SIZE,
-			       &rt_ctx, HIGHEST_TASK_PRIORITY, &tc_taskHandles[hnd_idx++]);
+			       &rt_ctx, HIGHEST_TASK_PRIORITY - 1, &tc_taskHandles[hnd_idx++]);
 	os_assert(xResult == pdPASS, "task creation failed!");
 
 	/* CPU Load task */
@@ -174,7 +188,7 @@ void main_task(void *pvParameters)
 	int num = 0;
 	int ret;
 
-	os_printf("%s: running\n\r", __func__);
+	os_printf("%s: running\r\n", __func__);
 
 	do {
 		if (++num >= RT_LATENCY_TEST_CASE_MAX)

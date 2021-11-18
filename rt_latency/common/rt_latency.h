@@ -96,6 +96,7 @@ struct rt_latency_ctx {
   int tc_load; /* bitmask of the above RT_LATENCY_WITH_xxx test case load conditions */
 
 	os_sem_t semaphore; /* used to wake the thread up from IRQ callback */
+	os_sem_t cpu_load_sem; /* used to increase CPU load through semaphore take/give */
 	os_sem_t irq_load_sem; /* used to wake the thread up from IRQ load handler */
 
 	uint64_t time_irq;

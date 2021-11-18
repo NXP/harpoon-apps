@@ -109,152 +109,130 @@ static void ensure_data_instr_in_ram()
 int rt_latency_test(struct rt_latency_ctx *ctx)
 {
 	int err;
-	uint32_t cnt, ticks;
-	uint32_t counter_period_us;
+	uint32_t cnt;
 	struct os_counter_alarm_cfg alarm_cfg;
+	struct os_counter_alarm_cfg load_alarm_cfg;
 	uint32_t now;
 	uint64_t irq_delay;
 	uint64_t irq_to_sched;
 	const void *dev = ctx->dev;
-	/* used when RT_LATENCY_WITH_IRQ_LOAD is set: */
-	struct os_counter_alarm_cfg load_alarm_cfg;
-	const void *irq_load_dev = ctx->irq_load_dev;
+	static uint32_t ticks = 0;
 
-	counter_period_us = COUNTER_PERIOD_US_VAL;
-	ticks = os_counter_us_to_ticks(dev, counter_period_us);
+	/* only compute it once for all */
+	if (!ticks) {
+		uint32_t counter_period_us;
 
-	alarm_cfg.flags = OS_COUNTER_ALARM_CFG_ABSOLUTE;
-	alarm_cfg.user_data = ctx;
-	alarm_cfg.callback = latency_alarm_handler;
+		counter_period_us = COUNTER_PERIOD_US_VAL;
+		ticks = os_counter_us_to_ticks(dev, counter_period_us);
+	}
+
+	/* Start IRQ latency testing alarm */
+	os_counter_start(dev);
+
+	/* Start IRQ load alarm, if need be */
 	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
-		counter_period_us = COUNTER_PERIOD_US_VAL - 1;
-
+		os_counter_start(ctx->irq_load_dev);
+		cnt = COUNTER_PERIOD_US_VAL - 1;
+		load_alarm_cfg.ticks = os_counter_us_to_ticks(dev, cnt);
 		load_alarm_cfg.flags = 0;
 		load_alarm_cfg.user_data = ctx;
 		load_alarm_cfg.callback = load_alarm_handler;
-		load_alarm_cfg.ticks = os_counter_us_to_ticks(dev, counter_period_us);
 
-		os_sem_init(&ctx->irq_load_sem, 0);
-	}
-
-	if (ctx->tc_load & RT_LATENCY_WITH_LINUX_LOAD) {
-		/* TODO: Add command to trigger Linux Load */
-		os_printf("WARNING: Linux load must be run manually!\n\r");
-	}
-
-	if (ctx->tc_load & RT_LATENCY_USES_OCRAM) {
-		/* TODO: Move the code in OCRAM? */
-		ensure_data_instr_in_ram();
-	}
-
-	do {
-		os_counter_start(dev);
-		if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
-			os_counter_start(irq_load_dev);
-			/* Start irq load alarm firstly */
-			err = os_counter_set_channel_alarm(irq_load_dev, 0,
-					&load_alarm_cfg);
-			os_assert(!err, "Counter set alarm failed (err: %d)", err);
-		}
-
-		/* Start IRQ latency testing alarm */
-		os_counter_get_value(dev, &cnt);
-		alarm_cfg.ticks = cnt + ticks;
-
-		ctx->time_prog = alarm_cfg.ticks;
-
-		err = os_counter_set_channel_alarm(dev, 0, &alarm_cfg);
+		err = os_counter_set_channel_alarm(ctx->irq_load_dev, 0, &load_alarm_cfg);
 		os_assert(!err, "Counter set alarm failed (err: %d)", err);
+		err = os_sem_init(&ctx->irq_load_sem, 0);
+		os_assert(!err, "semaphore init failed!");
+	}
 
-		/* Sync current thread with alarm callback function thanks to a semaphore */
-		err = os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	/* Configure IRQ latency testing alarm */
+	os_counter_get_value(dev, &cnt);
+	alarm_cfg.ticks = cnt + ticks;
+	alarm_cfg.flags = OS_COUNTER_ALARM_CFG_ABSOLUTE;
+	alarm_cfg.user_data = ctx;
+	alarm_cfg.callback = latency_alarm_handler;
+
+	ctx->time_prog = alarm_cfg.ticks;
+
+	err = os_counter_set_channel_alarm(dev, 0, &alarm_cfg);
+	os_assert(!err, "Counter set alarm failed (err: %d)", err);
+
+	/* Sync current thread with alarm callback function thanks to a semaphore */
+	err = os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	os_assert(!err, "Can't take the semaphore (err: %d)", err);
+
+	/* Woken up... calculate latency */
+	os_counter_get_value(dev, &now);
+
+	irq_delay = calc_diff_ns(dev, ctx->time_prog, ctx->time_irq);
+
+	stats_update(&ctx->irq_delay, irq_delay);
+	hist_update(&ctx->irq_delay_hist, irq_delay);
+
+	irq_to_sched = calc_diff_ns(dev, ctx->time_prog, now);
+	stats_update(&ctx->irq_to_sched, irq_to_sched);
+	hist_update(&ctx->irq_to_sched_hist, irq_to_sched);
+
+	os_counter_stop(dev);
+
+	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
+		/* Waiting irq load ISR exits and then go to next loop */
+		err = os_sem_take(&ctx->irq_load_sem, 0, OS_SEM_TIMEOUT_MAX);
 		os_assert(!err, "Can't take the semaphore (err: %d)", err);
+	}
 
-		/* Woken up... calculate latency */
-		os_counter_get_value(dev, &now);
-
-		irq_delay = calc_diff_ns(dev, ctx->time_prog, ctx->time_irq);
-
-		stats_update(&ctx->irq_delay, irq_delay);
-		hist_update(&ctx->irq_delay_hist, irq_delay);
-
-		irq_to_sched = calc_diff_ns(dev, ctx->time_prog, now);
-		stats_update(&ctx->irq_to_sched, irq_to_sched);
-		hist_update(&ctx->irq_to_sched_hist, irq_to_sched);
-
-		os_counter_stop(dev);
-
-		if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
-			/* Waiting irq load ISR exits and then go to next loop */
-			err = os_sem_take(&ctx->irq_load_sem, 0, OS_SEM_TIMEOUT_MAX);
-			os_assert(!err, "Can't take the semaphore (err: %d)", err);
-		}
-	} while(1);
+	return err;
 }
 
 void cpu_load(struct rt_latency_ctx *ctx)
 {
 	int err;
-	os_sem_t cpu_sem;
 
-	err = os_sem_init(&cpu_sem, 0);
-	os_assert(!err, "semaphore init failed!");
+	if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM) {
+		err = os_sem_take(&ctx->cpu_load_sem, 0, OS_SEM_TIMEOUT_MAX);
+		os_assert(!err, "Failed to take semaphore");
 
-	os_printf("%s: running%s\n\r", __func__,
-		ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM ? " (with extra semaphore load)" : "");
-
-	do {
-		if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM) {
-			err = os_sem_take(&cpu_sem, 0, OS_SEM_TIMEOUT_MAX);
-			os_assert(!err, "Failed to take semaphore");
-
-			err = os_sem_give(&cpu_sem, 0);
-			os_assert(!err, "Failed to give semaphore");
-		}
-	} while(1);
+		err = os_sem_give(&ctx->cpu_load_sem, 0);
+		os_assert(!err, "Failed to give semaphore");
+	}
 }
 
 void cache_inval(void)
 {
-	os_printf("%s: running\n\r", __func__);
+	os_invd_dcache_all();
+	os_invd_icache_all();
 
-	do {
-		os_invd_dcache_all();
-		os_invd_icache_all();
-
-		os_msleep(CACHE_INVAL_PERIOD_MS);
-
-	} while(1);
+	os_msleep(CACHE_INVAL_PERIOD_MS);
 }
 
 void print_stats(struct rt_latency_ctx *ctx)
 {
-	do {
-		os_msleep(STATS_PERIOD_SEC * 1000);
+	os_msleep(STATS_PERIOD_SEC * 1000);
 
-		stats_compute(&ctx->irq_delay);
-		stats_print(&ctx->irq_delay);
-		stats_reset(&ctx->irq_delay);
-		hist_print(&ctx->irq_delay_hist);
+	stats_compute(&ctx->irq_delay);
+	stats_print(&ctx->irq_delay);
+	stats_reset(&ctx->irq_delay);
+	hist_print(&ctx->irq_delay_hist);
 
-		stats_compute(&ctx->irq_to_sched);
-		stats_print(&ctx->irq_to_sched);
-		stats_reset(&ctx->irq_to_sched);
-		hist_print(&ctx->irq_to_sched_hist);
+	stats_compute(&ctx->irq_to_sched);
+	stats_print(&ctx->irq_to_sched);
+	stats_reset(&ctx->irq_to_sched);
+	hist_print(&ctx->irq_to_sched_hist);
 
-		os_printf("\n\r");
-
-	} while(1);
+	os_printf("\r\n");
 }
 
 void rt_latency_destroy(struct rt_latency_ctx *ctx)
 {
 	int err;
 	const void *dev = ctx->dev;
-	const void *irq_load_dev = ctx->irq_load_dev;
+
+	if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD) {
+		err = os_sem_destroy(&ctx->cpu_load_sem);
+		os_assert(!err, "semaphore init failed!");
+	}
 
 	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
-		err = os_counter_stop(irq_load_dev);
+		err = os_counter_stop(ctx->irq_load_dev);
 		os_assert(!err, "Failed to stop counter!");
 
 		err = os_sem_destroy(&ctx->irq_load_sem);
@@ -296,6 +274,21 @@ int rt_latency_init(const void *dev,
 
 	err = os_sem_init(&ctx->semaphore, 0);
 	os_assert(!err, "semaphore creation failed!");
+
+	if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD) {
+		err = os_sem_init(&ctx->cpu_load_sem, 0);
+		os_assert(!err, "semaphore init failed!");
+	}
+
+	if (ctx->tc_load & RT_LATENCY_WITH_LINUX_LOAD) {
+		/* TODO: Add command to trigger Linux Load */
+		os_printf("WARNING: Linux load must be run manually!\n\r");
+	}
+
+	if (ctx->tc_load & RT_LATENCY_USES_OCRAM) {
+		/* TODO: Move the code in OCRAM? */
+		ensure_data_instr_in_ram();
+	}
 
 	return err;
 }
