@@ -5,14 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifdef PLAT_WITH_AUDIOMIX
-#include "fsl_audiomix.h"
-#endif
-#include "fsl_sai.h"
-
 #include "board.h"
-#include "irq.h"
-#include "os.h"
 #include "os/assert.h"
 #include "os/semaphore.h"
 #include "os/unistd.h"
@@ -54,7 +47,6 @@ static void tx_callback(const void *dev, void *userData)
 #ifndef SAI_PLAY_MUSIC
 static void record_playback(struct sai_device *dev)
 {
-	sai_transfer_t xfer;
 	int err;
 	uint32_t play_times = 1;
 
@@ -66,11 +58,8 @@ static void record_playback(struct sai_device *dev)
 	while (1) {
 		os_printf("record %d\n\r", play_times);
 		if (emptyBlock > 0) {
-			xfer.data     = Buffer + rx_index * BUFFER_SIZE;
-			xfer.dataSize = BUFFER_SIZE;
-			if (kStatus_Success ==
-					SAI_TransferReceiveNonBlocking(dev->sai_base,
-						dev->sai_rx_handle, &xfer)) {
+			err = sai_read(dev, (uint8_t *)Buffer + rx_index * BUFFER_SIZE, BUFFER_SIZE);
+			if (!err) {
 				rx_index++;
 				err = os_sem_take(&rx_semaphore, 0,
 						OS_SEM_TIMEOUT_MAX);
@@ -83,11 +72,8 @@ static void record_playback(struct sai_device *dev)
 		}
 		os_printf("play %d\n\r", play_times++);
 		if (emptyBlock < BUFFER_NUMBER) {
-			xfer.data     = Buffer + tx_index * BUFFER_SIZE;
-			xfer.dataSize = BUFFER_SIZE;
-			if (kStatus_Success ==
-					SAI_TransferSendNonBlocking(dev->sai_base,
-						dev->sai_tx_handle, &xfer)) {
+			err = sai_write(dev, (uint8_t *)Buffer + tx_index * BUFFER_SIZE, BUFFER_SIZE);
+			if (!err) {
 				tx_index++;
 				err = os_sem_take(&tx_semaphore, 0,
 						OS_SEM_TIMEOUT_MAX);
@@ -105,10 +91,8 @@ static void record_playback(struct sai_device *dev)
 #include "music.h"
 static void play_music(struct sai_device *dev)
 {
-	sai_transfer_t xfer;
 	int err;
 	uint32_t play_times = 1;
-	status_t ret;
 	uintptr_t addr = (uintptr_t) music;
 
 	err = os_sem_init(&tx_semaphore, 0);
@@ -116,10 +100,8 @@ static void play_music(struct sai_device *dev)
 
 	while (1) {
 		os_printf("play the music: %d times\n\r", play_times++);
-		xfer.data = (uint8_t *)addr;
-		xfer.dataSize = MUSIC_LEN;
-		ret = SAI_TransferSendNonBlocking(dev->sai_base, dev->sai_tx_handle, &xfer);
-		if (ret == kStatus_Success) {
+		err = sai_write(dev, (uint8_t *)addr, MUSIC_LEN);
+		if (!err) {
 			err = os_sem_take(&tx_semaphore, 0, OS_SEM_TIMEOUT_MAX);
 			os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
 		}
@@ -133,7 +115,6 @@ static void play_music(struct sai_device *dev)
 void sai_setup(struct sai_device *dev)
 {
 	struct sai_cfg sai_config;
-
 
 	sai_config.sai_base = (void *)DEMO_SAI;
 	sai_config.bit_width = DEMO_AUDIO_BIT_WIDTH;

@@ -38,4 +38,8 @@ uint32_t get_sai_id(I2S_Type *base);
 
 int sai_drv_setup(struct sai_device *sai_dev, struct sai_cfg *sai_config);
 
+int sai_read(struct sai_device *dev, uint8_t *addr, size_t len);
+
+int sai_write(struct sai_device *dev, uint8_t *addr, size_t len);
+
 #endif /* _SAI_DRV_H_ */

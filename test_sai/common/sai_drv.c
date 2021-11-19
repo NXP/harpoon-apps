@@ -44,6 +44,30 @@ struct drv_cb_user_data rx_cb_user_data;
 struct drv_cb_user_data tx_cb_user_data;
 
 
+int sai_read(struct sai_device *dev, uint8_t *addr, size_t len)
+{
+	sai_transfer_t xfer;
+	status_t ret;
+
+	xfer.data = addr;
+	xfer.dataSize = len;
+	ret = SAI_TransferReceiveNonBlocking(dev->sai_base, dev->sai_rx_handle, &xfer);
+
+	return (ret == kStatus_Success) ? 0 : -1;
+}
+
+int sai_write(struct sai_device *dev, uint8_t *addr, size_t len)
+{
+	sai_transfer_t xfer;
+	status_t ret;
+
+	xfer.data     = addr;
+	xfer.dataSize = len;
+	ret = SAI_TransferSendNonBlocking(dev->sai_base, dev->sai_tx_handle, &xfer);
+
+	return (ret == kStatus_Success) ? 0 : -1;
+}
+
 static void sai_master_clock_config(struct sai_cfg *sai_config)
 {
 	I2S_Type *sai = (I2S_Type *)sai_config->sai_base;
