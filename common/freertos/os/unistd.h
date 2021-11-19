@@ -7,6 +7,7 @@
 #define _FREERTOS_UNISTD_H_
 
 #include "FreeRTOS.h"
+#include "task.h"
 
 static inline int os_msleep(int32_t msec)
 {
