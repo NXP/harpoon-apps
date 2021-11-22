@@ -18,7 +18,7 @@
 #include "sai_drv.h"
 #include "test_sai.h"
 
-#define test_task_PRIORITY	(configMAX_PRIORITIES - 1)
+#define test_task_PRIORITY	(configMAX_PRIORITIES - 2)
 
 static void hardware_setup(void)
 {
