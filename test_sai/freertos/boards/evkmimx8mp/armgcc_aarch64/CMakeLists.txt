@@ -30,12 +30,24 @@ SET(SdkBoardPath "${SdkDirPath}/devices/MIMX8ML8")
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
-if(NOT DEMO_TYPE STREQUAL "play_music")
-  SET(demo_name "record_playback")
-  SET(app_extra_flags " ")
-else()
+if(DEMO_TYPE STREQUAL "play_music")
   SET(demo_name "play_music")
   SET(app_extra_flags "-DSAI_PLAY_MUSIC")
+  SET(AppSourceFile "${AppPath}/common/test_sai.c")
+elseif(DEMO_TYPE STREQUAL "hifiberry_dtmf")
+  SET(demo_name "hifiberry_dtmf")
+  SET(AppSourceFile "${AppPath}/common/sai_dtmf_wave.c"
+		  "${AppPath}/common/hifiberry_dtmf.c")
+elseif(DEMO_TYPE STREQUAL "hifiberry_record_playback")
+  SET(demo_name "hifiberry_record_playback")
+  SET(AppSourceFile "${AppPath}/common/hifiberry_rec_playback.c")
+elseif(DEMO_TYPE STREQUAL "hifiberry_sine")
+  SET(demo_name "hifiberry_sine")
+  SET(AppSourceFile "${AppPath}/common/hifiberry_sine.c")
+else()
+  SET(demo_name "record_playback")
+  SET(app_extra_flags " ")
+  SET(AppSourceFile "${AppPath}/common/test_sai.c")
 endif()
 
 project(${demo_name})
@@ -46,13 +58,12 @@ include(${ProjDirPath}/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/sai_drv.c"
-#    "${AppPath}/common/test_sai.c"
-    "${AppPath}/common/hifiberry.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
     "${AppBoardPath}/sai_clock_config.c"
     "${AppBoardPath}/sai_codec_config.c"
     "${SdkBoardPath}/drivers/fsl_audiomix.c"
+    ${AppSourceFile}
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
