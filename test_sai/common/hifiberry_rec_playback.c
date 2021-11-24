@@ -49,8 +49,10 @@ static void sai_rx_tx(void *param)
 {
 	struct sai_device *dev = (struct sai_device *)param;
 	int err;
+#ifdef DEBUG
 	uint32_t record_times = 1;
 	uint32_t play_times = 1;
+#endif
 
 	err = os_sem_take(&data_task_sem, 0, OS_SEM_TIMEOUT_MAX);
 	os_assert(!err, "Can't take the rx task control semaphore (err: %d)", err);
