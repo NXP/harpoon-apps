@@ -16,7 +16,7 @@
 
 #define PLAY_AUDIO_SRATE	44100 /* default sampling rate */
 #define PLAY_AUDIO_CHANNELS	2
-#define PLAY_AUDIO_BITWIDTH	16
+#define PLAY_AUDIO_BITWIDTH	32
 
 /* callback semaphore */
 static os_sem_t tx_semaphore;
