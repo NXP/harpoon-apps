@@ -32,5 +32,10 @@
 	MMU_REGION_FLAT_ENTRY("I2C3",					\
 			      I2C3_BASE, KB(64),			\
 			      MT_DEVICE_nGnRnE | MT_P_RW_U_RW | MT_NS),	\
+									\
+	MMU_REGION_FLAT_ENTRY("SAI5",					\
+			      I2S5_BASE, KB(64),			\
+			      MT_DEVICE_nGnRnE | MT_P_RW_U_RW | MT_NS),	\
+									\
 
 #endif /* _APP_MMU_H_ */

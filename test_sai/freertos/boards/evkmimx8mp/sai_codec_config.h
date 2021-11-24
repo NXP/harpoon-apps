@@ -9,5 +9,7 @@
 #define _SAI_CODEC_CONFIG_H_
 
 void codec_setup(void);
+void codec_set_format(void);
+void codec_close(void);
 
 #endif /* _SAI_CODEC_CONFIG_H_ */

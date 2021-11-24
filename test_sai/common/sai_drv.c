@@ -170,7 +170,11 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 
 #ifdef PLAT_WITH_AUDIOMIX
 	/* SAI bit clock source */
+#ifdef CODEC_WM8960
 	AUDIOMIX_AttachClk(AUDIOMIX, kAUDIOMIX_Attach_SAI3_MCLK1_To_SAI3_ROOT);
+#elif defined(CODEC_PCM512X)
+	AUDIOMIX_AttachClk(AUDIOMIX, kAUDIOMIX_Attach_SAI5_MCLK1_To_SAI5_ROOT);
+#endif
 #endif
 	/* set bit clock divider */
 	SAI_TxSetBitClockRate(sai, sai_config->source_clock_hz,
