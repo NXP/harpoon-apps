@@ -157,7 +157,7 @@ static void counter_init(const void *dev)
 
 	ret = irq_register(irqn, gpt_irq_handler, (void *)dev);
 	os_assert(!ret, "Failed to register counter's IRQ! (%d)", ret);
-	GIC_EnableIRQ(irqn);
+	EnableIRQ(irqn);
 
 	counter = &counters[gpt_get_index(dev)];
 	counter->dev = dev;
