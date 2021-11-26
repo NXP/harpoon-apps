@@ -44,7 +44,7 @@ if(DEMO_TYPE STREQUAL "play_music")
   SET(AppSourceFile "${AppPath}/common/test_sai.c")
 elseif(DEMO_TYPE STREQUAL "hifiberry_dtmf")
   SET(demo_name "hifiberry_dtmf")
-  SET(AppSourceFile "${AppPath}/common/sai_dtmf_wave.c"
+  SET(AppSourceFile "${AppPath}/common/dtmf_wave.c"
 		  "${AppPath}/common/hifiberry_dtmf.c")
 elseif(DEMO_TYPE STREQUAL "hifiberry_record_playback")
   SET(demo_name "hifiberry_record_playback")

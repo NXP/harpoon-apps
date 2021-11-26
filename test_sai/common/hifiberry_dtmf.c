@@ -12,7 +12,7 @@
 #include "os/semaphore.h"
 #include "os/unistd.h"
 #include "sai_drv.h"
-#include "sai_dtmf_wave.h"
+#include "dtmf_wave.h"
 
 #define DTMF_AUDIO_SRATE 44100 /* default sampling rate */
 #define DTMF_AUDIO_BITWIDTH 32
