@@ -20,6 +20,8 @@
 
 #define BUFFER_BYTES (DTMF_AUDIO_SRATE * 2 * (DTMF_AUDIO_BITWIDTH / 8) * DTMF_TONE_DURATION_MS / 1000)
 
+static uint32_t *audio_buf;
+
 /* callback semaphore */
 static os_sem_t tx_semaphore;
 static os_sem_t rx_semaphore;
@@ -41,16 +43,20 @@ void play_dtmf(struct sai_device *dev)
 	const char *dtmf_l_seq = default_dtmf_l_seq;
 	const char *dtmf_r_seq = default_dtmf_r_seq;
 	int sample_rate = DTMF_AUDIO_SRATE;
-	uint32_t audio_buf[BUFFER_BYTES / 4];
-	size_t audio_buf_size;
+	size_t audio_buf_size = BUFFER_BYTES;
 	unsigned int dtmf_seq_idx = 0;
 	int err;
 
-	audio_buf_size = BUFFER_BYTES;
+	err = os_sem_init(&tx_semaphore, 0);
+	os_assert(!err, "tx semaphore initialization failed!");
 
-	os_printf("Playing following DTMF sequence at %d Hz:\n", sample_rate);
-	os_printf("\tleft channel:  %s\n", dtmf_l_seq);
-	os_printf("\tright channel: %s\n", dtmf_r_seq);
+	audio_buf = pvPortMalloc(audio_buf_size);
+	os_assert(audio_buf, "Playing DTMF failed with memory allocation error");
+	memset(audio_buf, 0, audio_buf_size);
+
+	os_printf("Playing following DTMF sequence at %d Hz:\n\r", sample_rate);
+	os_printf("\tleft channel:  %s\n\r", dtmf_l_seq);
+	os_printf("\tright channel: %s\n\r", dtmf_r_seq);
 
 	while (dtmf_seq_idx < strlen(dtmf_l_seq)) {
 		/* prepare dtmf audio buffer */
@@ -76,6 +82,8 @@ void play_dtmf(struct sai_device *dev)
 			os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
 		}
 	}
+	vPortFree(audio_buf);
+	os_printf("End.\n\r");
 }
 
 void sai_setup(struct sai_device *dev)
