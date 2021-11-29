@@ -28,7 +28,6 @@
 
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
-#include "task.h"
 
 /* NXP includes. */
 #include "fsl_device_registers.h"

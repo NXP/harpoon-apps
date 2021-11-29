@@ -212,7 +212,7 @@ uint32_t os_counter_us_to_ticks(const void *dev, uint64_t period_us)
 
 uint64_t os_counter_ticks_to_ns(const void *dev, uint32_t ticks)
 {
-	return (1000 * ticks) / SOURCE_CLOCK_FREQ_MHZ;
+	return (1000 * (uint64_t)ticks) / SOURCE_CLOCK_FREQ_MHZ;
 }
 
 uint32_t os_counter_get_top_value(const void *dev)

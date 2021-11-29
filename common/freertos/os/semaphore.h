@@ -43,7 +43,7 @@ static inline int os_sem_give(os_sem_t *sem, uint32_t flags)
     BaseType_t ret;
 
     if (flags & OS_SEM_FLAGS_ISR_CONTEXT) {
-        BaseType_t xYieldRequired;
+        BaseType_t xYieldRequired = pdFALSE;
 
         ret = xSemaphoreGiveFromISR(sem->handle, &xYieldRequired);
 
@@ -62,7 +62,7 @@ static inline int os_sem_take(os_sem_t *sem, uint32_t flags, uint32_t timeout_ms
     BaseType_t ret;
 
     if (flags & OS_SEM_FLAGS_ISR_CONTEXT) {
-        BaseType_t xYieldRequired;
+        BaseType_t xYieldRequired = pdFALSE;
 
         ret = xSemaphoreTakeFromISR(sem->handle, &xYieldRequired);
 
