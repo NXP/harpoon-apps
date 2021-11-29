@@ -22,7 +22,7 @@
      / (CLOCK_GetRootPostDivider(kCLOCK_RootSai3)))
 
 /* Codec for EVK onboard */
-#elif defined(CODEC_PCM512X)
+#elif defined(CODEC_HIFIBERRY)
 
 #define DEMO_SAI			(I2S5)
 #define CODEC_PCM512X_ENABLE
@@ -34,7 +34,7 @@
      / (CLOCK_GetRootPreDivider(kCLOCK_RootSai5))	\
      / (CLOCK_GetRootPostDivider(kCLOCK_RootSai5)))
 
-#endif /* CODEC_PCM512X */
+#endif /* CODEC_HIFIBERRY */
 
 #define BOARD_CODEC_I2C			(I2C3)
 #define BOARD_CODEC_I2C_INSTANCE	(3U)

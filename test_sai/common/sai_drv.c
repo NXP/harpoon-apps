@@ -172,7 +172,7 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 	/* SAI bit clock source */
 #ifdef CODEC_WM8960
 	AUDIOMIX_AttachClk(AUDIOMIX, kAUDIOMIX_Attach_SAI3_MCLK1_To_SAI3_ROOT);
-#elif defined(CODEC_PCM512X)
+#elif defined(CODEC_HIFIBERRY)
 	AUDIOMIX_AttachClk(AUDIOMIX, kAUDIOMIX_Attach_SAI5_MCLK1_To_SAI5_ROOT);
 #endif
 #endif

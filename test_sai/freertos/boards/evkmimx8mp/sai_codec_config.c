@@ -13,7 +13,7 @@
 #include "fsl_iomuxc.h"
 #ifdef CODEC_WM8960
 #include "fsl_wm8960.h"
-#elif defined(CODEC_PCM512X)
+#elif defined(CODEC_HIFIBERRY)
 #include "fsl_pcm512x.h"
 #endif
 
@@ -47,7 +47,7 @@ void codec_set_format(void)
 {
 }
 
-#elif defined(CODEC_PCM512X)
+#elif defined(CODEC_HIFIBERRY)
 static pcm512x_config_t pcm512xConfig = {
 	.i2cConfig = {
 		.codecI2CInstance = BOARD_CODEC_I2C_INSTANCE,
