@@ -14,7 +14,6 @@
 #ifdef I2C_USE_IRQ
 #include "irq.h"
 #endif
-#include "os/stdio.h"
 
 /*******************************************************************************
  * Definitions
