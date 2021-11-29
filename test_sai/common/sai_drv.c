@@ -211,7 +211,7 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 	ret = irq_register(sai_irq_n, sai_irq_handler, &dev_data);
 	os_assert(!ret, "Failed to register SAI IRQ! (%d)", ret);
 
-	GIC_EnableIRQ(sai_irq_n);
+	EnableIRQ(sai_irq_n);
 
 	dev->sai_base = sai_config->sai_base;
 	dev->sai_rx_handle = &rx_handle;
