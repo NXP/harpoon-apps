@@ -44,7 +44,7 @@ static wm8960_config_t wm8960Config = {
 static codec_config_t sai_codec_config = {.codecDevType = kCODEC_WM8960,
 	.codecDevConfig = &wm8960Config};
 
-void codec_set_format(void)
+void codec_set_format(uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
 {
 }
 
@@ -106,24 +106,18 @@ static codec_config_t sai_codec_config = {
 	.codecDevConfig = &pcm512xConfig,
 };
 
-void codec_set_format(void)
+void codec_set_format(uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
 {
 	int32_t err;
-	uint32_t mclk, sample_rate, bitwidth;
-
-	mclk = ((pcm512x_config_t *)(sai_codec_config.codecDevConfig))->format.mclk_HZ;
-	sample_rate = ((pcm512x_config_t *)(sai_codec_config.codecDevConfig))->format.sampleRate;
-	bitwidth = ((pcm512x_config_t *)(sai_codec_config.codecDevConfig))->format.bitWidth;
 
 	err = CODEC_SetFormat(dac_codec_handle, mclk, sample_rate, bitwidth);
-	if (err != kStatus_Success) {
-		os_assert(false, "Codec set format failed (err %d)", err);
-	}
+	os_assert(err == kStatus_Success, "Codec set format failed (err %d)", err);
 }
 
 void codec_setup(void)
 {
 	int32_t err;
+	uint32_t mclk, sample_rate, bitwidth;
 
 	dac_codec_handle = pvPortMalloc(sizeof(codec_handle_t));
 	os_assert(dac_codec_handle, "Codec initialization failed with memory allocation error");
@@ -137,6 +131,12 @@ void codec_setup(void)
 	/* Use default setting to init codec */
 	err = CODEC_Init(dac_codec_handle, &sai_codec_config);
 	os_assert(err == kStatus_Success, "Codec initialization failed (err %d)", err);
+
+	/* Set default Codec Format */
+	mclk = ((pcm512x_config_t *)(sai_codec_config.codecDevConfig))->format.mclk_HZ;
+	sample_rate = ((pcm512x_config_t *)(sai_codec_config.codecDevConfig))->format.sampleRate;
+	bitwidth = ((pcm512x_config_t *)(sai_codec_config.codecDevConfig))->format.bitWidth;
+	codec_set_format(mclk, sample_rate, bitwidth);
 }
 
 void codec_close(void)
@@ -144,9 +144,7 @@ void codec_close(void)
 	int32_t err;
 
 	err = CODEC_Deinit(dac_codec_handle);
-	if (err != kStatus_Success) {
-		os_assert(false, "Codec deinitialization failed (err %d)", err);
-	}
+	os_assert(err == kStatus_Success, "Codec deinitialization failed (err %d)", err);
 
 	vPortFree(dac_codec_handle);
 }

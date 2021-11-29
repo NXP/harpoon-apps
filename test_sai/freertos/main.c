@@ -33,7 +33,6 @@ static void hardware_setup(void)
 	board_clock_setup(sai_id);
 
 	codec_setup();
-	codec_set_format();
 }
 
 int main(void)
