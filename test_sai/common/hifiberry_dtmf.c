@@ -18,7 +18,8 @@
 #define DTMF_AUDIO_BITWIDTH 32
 #define DTMF_TONE_DURATION_MS 120
 
-#define BUFFER_BYTES (DTMF_AUDIO_SRATE * 2 * (DTMF_AUDIO_BITWIDTH / 8) * DTMF_TONE_DURATION_MS / 1000)
+#define BUFFER_BYTES (DTMF_AUDIO_SRATE * 2 * (DTMF_AUDIO_BITWIDTH / 8) \
+		* DTMF_TONE_DURATION_MS / 1000)
 
 static uint32_t *audio_buf;
 
@@ -60,7 +61,9 @@ void play_dtmf(struct sai_device *dev)
 
 	while (dtmf_seq_idx < strlen(dtmf_l_seq)) {
 		/* prepare dtmf audio buffer */
-		generate_dtmf_tone(audio_buf, dtmf_l_seq[dtmf_seq_idx], dtmf_r_seq[dtmf_seq_idx], sample_rate);
+		generate_dtmf_tone(audio_buf, dtmf_l_seq[dtmf_seq_idx],
+				dtmf_r_seq[dtmf_seq_idx], sample_rate,
+				DTMF_TONE_DURATION_MS);
 		dtmf_seq_idx++;
 
 		/* transmit audio buffer */
@@ -68,7 +71,8 @@ void play_dtmf(struct sai_device *dev)
 		if (!err) {
 			err = os_sem_take(&tx_semaphore, 0,
 					OS_SEM_TIMEOUT_MAX);
-			os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
+			os_assert(!err, "Can't take the tx semaphore (err: %d)",
+					err);
 		}
 
 		/* prepare blank buffer */
@@ -79,7 +83,8 @@ void play_dtmf(struct sai_device *dev)
 		if (!err) {
 			err = os_sem_take(&tx_semaphore, 0,
 					OS_SEM_TIMEOUT_MAX);
-			os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
+			os_assert(!err, "Can't take the tx semaphore (err: %d)",
+					err);
 		}
 	}
 	vPortFree(audio_buf);
