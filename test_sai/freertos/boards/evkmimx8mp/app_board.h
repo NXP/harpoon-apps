@@ -12,7 +12,7 @@
 #ifdef CODEC_WM8960
 
 #define DEMO_SAI			(I2S3)
-#define CODEC_WM8960_ENABLE
+
 /* IMX8MP is master, codec is slave */
 #define DEMO_SAI_MASTER_SLAVE		kSAI_Master
 
@@ -25,7 +25,7 @@
 #elif defined(CODEC_HIFIBERRY)
 
 #define DEMO_SAI			(I2S5)
-#define CODEC_PCM512X_ENABLE
+
 /* IMX8MP is slave, codec is master */
 #define DEMO_SAI_MASTER_SLAVE		kSAI_Slave
 
@@ -33,6 +33,14 @@
     (CLOCK_GetPllFreq(kCLOCK_AudioPll1Ctrl)		\
      / (CLOCK_GetRootPreDivider(kCLOCK_RootSai5))	\
      / (CLOCK_GetRootPostDivider(kCLOCK_RootSai5)))
+
+#define PCM512X_I2C_ADDR                (0x4D)
+#define PCM512X_GPIO_LED                (4U)
+#define PCM512X_GPIO_OSC44              (6U)
+#define PCM512X_GPIO_OSC48              (3U)
+
+#define PCM186X_I2C_ADDR		(0x4A)
+#define PCM186X_GPIO_LED		(2U)
 
 #endif /* CODEC_HIFIBERRY */
 
