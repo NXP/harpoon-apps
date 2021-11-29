@@ -8,7 +8,7 @@
 #ifndef _APP_BOARD_H_
 #define _APP_BOARD_H_
 
-/* Codec for HifiBerry */
+/* Codec for EVK onboard */
 #ifdef CODEC_WM8960
 
 #define DEMO_SAI			(I2S3)
@@ -21,7 +21,7 @@
      / (CLOCK_GetRootPreDivider(kCLOCK_RootSai3))	\
      / (CLOCK_GetRootPostDivider(kCLOCK_RootSai3)))
 
-/* Codec for EVK onboard */
+/* Codec for HifiBerry */
 #elif defined(CODEC_HIFIBERRY)
 
 #define DEMO_SAI			(I2S5)
@@ -56,8 +56,8 @@
 #define DEMO_SAI_MCLK_OUTPUT		true
 
 #define DEMO_AUDIO_DATA_CHANNEL		(2U)
-#define DEMO_AUDIO_BIT_WIDTH		kSAI_WordWidth16bits
-#define DEMO_AUDIO_SAMPLE_RATE		(kSAI_SampleRate16KHz)
+#define DEMO_AUDIO_BIT_WIDTH		kSAI_WordWidth32bits
+#define DEMO_AUDIO_SAMPLE_RATE		(kSAI_SampleRate44100Hz)
 #define DEMO_AUDIO_MASTER_CLOCK		DEMO_SAI_CLK_FREQ
 
 #define PLAT_WITH_AUDIOMIX

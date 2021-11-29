@@ -36,8 +36,8 @@ static wm8960_config_t wm8960Config = {
 	.bus             = kWM8960_BusI2S,
 	.format          = {
 		.mclk_HZ    = 24576000U,
-		.sampleRate = kWM8960_AudioSampleRate16KHz,
-		.bitWidth   = kWM8960_AudioBitWidth16bit
+		.sampleRate = kWM8960_AudioSampleRate44100Hz,
+		.bitWidth   = kWM8960_AudioBitWidth32bit
 	},
 	.master_slave    = false,
 };
