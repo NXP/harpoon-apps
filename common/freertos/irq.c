@@ -28,19 +28,17 @@ int irq_register(int nr, void (*func)(void *data), void *data)
 	int ret = -1;
 
 	if (nr >= NR_IRQS)
-                goto exit;
+		goto exit;
 
 	portDISABLE_INTERRUPTS();
 
 	hdlr = &handler[nr];
-	if (!hdlr)
-		goto unlock;
 
 	hdlr->func = func;
 	hdlr->data = data;
 
 	ret = 0;
-unlock:
+
 	portENABLE_INTERRUPTS();
 exit:
 	return ret;
@@ -57,14 +55,12 @@ int irq_unregister(int nr)
 	portDISABLE_INTERRUPTS();
 
 	hdlr = &handler[nr];
-	if (!hdlr)
-		goto unlock;
 
 	hdlr->func = NULL;
 	hdlr->data = NULL;
 
 	ret = 0;
-unlock:
+
 	portENABLE_INTERRUPTS();
 exit:
 	return ret;
