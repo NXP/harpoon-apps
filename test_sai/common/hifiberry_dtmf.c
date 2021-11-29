@@ -46,6 +46,7 @@ void play_dtmf(struct sai_device *dev)
 	int sample_rate = DTMF_AUDIO_SRATE;
 	size_t audio_buf_size = BUFFER_BYTES;
 	unsigned int dtmf_seq_idx = 0;
+	uint32_t phase = 0;
 	int err;
 
 	err = os_sem_init(&tx_semaphore, 0);
@@ -63,7 +64,7 @@ void play_dtmf(struct sai_device *dev)
 		/* prepare dtmf audio buffer */
 		generate_dtmf_tone(audio_buf, dtmf_l_seq[dtmf_seq_idx],
 				dtmf_r_seq[dtmf_seq_idx], sample_rate,
-				DTMF_TONE_DURATION_MS);
+				DTMF_TONE_DURATION_MS, &phase);
 		dtmf_seq_idx++;
 
 		/* transmit audio buffer */
