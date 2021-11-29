@@ -21,9 +21,10 @@
 
 #include "board.h"
 
-static codec_handle_t	sai_codec_handle;
-
+/*I.MX8MP EVK onboard Codec is WM8960 */
 #ifdef CODEC_WM8960
+static codec_handle_t *codec_handle;
+
 static wm8960_config_t wm8960Config = {
 	.i2cConfig = {
 		.codecI2CInstance = BOARD_CODEC_I2C_INSTANCE,
@@ -47,7 +48,44 @@ void codec_set_format(void)
 {
 }
 
+void codec_setup(void)
+{
+	int32_t err;
+
+	codec_handle = pvPortMalloc(sizeof(codec_handle_t));
+	os_assert(codec_handle, "Codec initialization failed with memory allocation error");
+	memset(codec_handle, 0, sizeof(codec_handle_t));
+
+	/* setup clock */
+	CLOCK_SetRootMux(kCLOCK_RootI2c3, kCLOCK_I2cRootmuxSysPll1Div5); /* Set I2C source to SysPLL1 Div5 160MHZ */
+	CLOCK_SetRootDivider(kCLOCK_RootI2c3, 1U, 10U);                  /* Set root clock to 160MHZ / 10 = 16MHZ */
+	CLOCK_EnableClock(kCLOCK_I2c3);
+
+	/* Use default setting to init codec */
+	err = CODEC_Init(codec_handle, &sai_codec_config);
+	os_assert(err == kStatus_Success, "Codec initialization failed (err %d)", err);
+}
+
+void codec_close(void *codec_dev)
+{
+	int32_t err;
+	codec_handle_t *codec_handle = (codec_handle_t *)codec_dev;
+
+	err = CODEC_Deinit(codec_handle);
+	if (err != kStatus_Success) {
+		os_assert(false, "Codec deinitialization failed (err %d)", err);
+	}
+
+	vPortFree(codec_dev);
+}
 #elif defined(CODEC_HIFIBERRY)
+/*
+ * Two Codecs are on HiFiBerry Board:
+ * ADC Codec is PCM186x:
+ * DAC Codec is PCM512x:
+ */
+static codec_handle_t *dac_codec_handle;
+
 static pcm512x_config_t pcm512xConfig = {
 	.i2cConfig = {
 		.codecI2CInstance = BOARD_CODEC_I2C_INSTANCE,
@@ -77,16 +115,19 @@ void codec_set_format(void)
 	sample_rate = ((pcm512x_config_t *)(sai_codec_config.codecDevConfig))->format.sampleRate;
 	bitwidth = ((pcm512x_config_t *)(sai_codec_config.codecDevConfig))->format.bitWidth;
 
-	err = CODEC_SetFormat(&sai_codec_handle, mclk, sample_rate, bitwidth);
+	err = CODEC_SetFormat(dac_codec_handle, mclk, sample_rate, bitwidth);
 	if (err != kStatus_Success) {
 		os_assert(false, "Codec set format failed (err %d)", err);
 	}
 }
-#endif
 
 void codec_setup(void)
 {
 	int32_t err;
+
+	dac_codec_handle = pvPortMalloc(sizeof(codec_handle_t));
+	os_assert(dac_codec_handle, "Codec initialization failed with memory allocation error");
+	memset(dac_codec_handle, 0, sizeof(codec_handle_t));
 
 	/* setup clock */
 	CLOCK_SetRootMux(kCLOCK_RootI2c3, kCLOCK_I2cRootmuxSysPll1Div5); /* Set I2C source to SysPLL1 Div5 160MHZ */
@@ -94,18 +135,19 @@ void codec_setup(void)
 	CLOCK_EnableClock(kCLOCK_I2c3);
 
 	/* Use default setting to init codec */
-	err = CODEC_Init(&sai_codec_handle, &sai_codec_config);
-	if (err != kStatus_Success) {
-		os_assert(false, "Codec initialization failed (err %d)", err);
-	}
+	err = CODEC_Init(dac_codec_handle, &sai_codec_config);
+	os_assert(err == kStatus_Success, "Codec initialization failed (err %d)", err);
 }
 
 void codec_close(void)
 {
 	int32_t err;
 
-	err = CODEC_Deinit(&sai_codec_handle);
+	err = CODEC_Deinit(dac_codec_handle);
 	if (err != kStatus_Success) {
 		os_assert(false, "Codec deinitialization failed (err %d)", err);
 	}
+
+	vPortFree(dac_codec_handle);
 }
+#endif
