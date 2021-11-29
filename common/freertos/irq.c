@@ -82,6 +82,6 @@ void vApplicationIRQHandler(uint32_t ulICCIAR)
 	if (nr < NR_IRQS)
 		hdlr = &handler[nr];
 
-	if (hdlr)
+	if (hdlr && hdlr->func)
 		hdlr->func(hdlr->data);
 }
