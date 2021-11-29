@@ -57,6 +57,8 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
     ${CommonPath}/libs/stats
+    ${CommonPath}/libs/jailhouse
+    ${CommonPath}/libs/mailbox
     ${RtosPath}
     ${SdkDirPath}
 )
@@ -81,6 +83,8 @@ include(driver_gpt)
 include(driver_iuart)
 
 include(lib_stats)
+include(lib_jailhouse)
+include(lib_mailbox)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
