@@ -56,7 +56,7 @@ static void record_playback(struct sai_device *dev)
 	os_assert(!err, "tx semaphore initialization failed!");
 
 	while (1) {
-		os_printf("record %d\n\r", play_times);
+		os_printf("record %d\r\n", play_times);
 		if (emptyBlock > 0) {
 			err = sai_read(dev, (uint8_t *)Buffer + rx_index * BUFFER_SIZE, BUFFER_SIZE);
 			if (!err) {
@@ -70,7 +70,7 @@ static void record_playback(struct sai_device *dev)
 				rx_index = 0U;
 			}
 		}
-		os_printf("play %d\n\r", play_times++);
+		os_printf("play %d\r\n", play_times++);
 		if (emptyBlock < BUFFER_NUMBER) {
 			err = sai_write(dev, (uint8_t *)Buffer + tx_index * BUFFER_SIZE, BUFFER_SIZE);
 			if (!err) {
@@ -99,7 +99,7 @@ static void play_music(struct sai_device *dev)
 	os_assert(!err, "tx semaphore initialization failed!");
 
 	while (1) {
-		os_printf("play the music: %d times\n\r", play_times++);
+		os_printf("play the music: %d times\r\n", play_times++);
 		err = sai_write(dev, (uint8_t *)addr, MUSIC_LEN);
 		if (!err) {
 			err = os_sem_take(&tx_semaphore, 0, OS_SEM_TIMEOUT_MAX);

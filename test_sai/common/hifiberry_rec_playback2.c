@@ -68,7 +68,7 @@ static void sai_rx(void *param)
 
 	do {
 #ifdef DEBUG
-		os_printf("record %d\n\r", record_times++);
+		os_printf("record %d\r\n", record_times++);
 #endif
 		err = os_sem_take(&buffer_tx_sem[rx_index], 0,
 				OS_SEM_TIMEOUT_MAX);
@@ -100,7 +100,7 @@ static void sai_tx(void *param)
 
 	do {
 #ifdef DEBUG
-		os_printf("play %d\n\r", play_times++);
+		os_printf("play %d\r\n", play_times++);
 #endif
 		err = os_sem_take(&buffer_rx_sem[tx_index], 0,
 				OS_SEM_TIMEOUT_MAX);
@@ -125,7 +125,7 @@ static void sai_record_playback(struct sai_device *dev)
 	BaseType_t xResult;
 	int err, i;
 
-	os_printf("HifiBerry record playback demo (two threads) started\n\r");
+	os_printf("HifiBerry record playback demo (two threads) started\r\n");
 
 	err = os_sem_init(&tx_semaphore, 0);
 	os_assert(!err, "tx interrupt semaphore initialization failed!");

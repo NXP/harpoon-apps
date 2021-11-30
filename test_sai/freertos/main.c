@@ -41,7 +41,7 @@ int main(void)
 
 	hardware_setup();
 
-	os_printf("SAI demo started!\n\r");
+	os_printf("SAI demo is started!\r\n");
 
 	xResult = xTaskCreate(sai_test_task, "sai_test_task",
 			configMINIMAL_STACK_SIZE + 100, NULL,

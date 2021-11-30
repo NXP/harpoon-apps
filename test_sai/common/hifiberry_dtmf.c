@@ -56,9 +56,9 @@ void play_dtmf(struct sai_device *dev)
 	os_assert(audio_buf, "Playing DTMF failed with memory allocation error");
 	memset(audio_buf, 0, audio_buf_size);
 
-	os_printf("Playing following DTMF sequence at %d Hz:\n\r", sample_rate);
-	os_printf("\tleft channel:  %s\n\r", dtmf_l_seq);
-	os_printf("\tright channel: %s\n\r", dtmf_r_seq);
+	os_printf("Playing following DTMF sequence at %d Hz:\r\n", sample_rate);
+	os_printf("\tleft channel:  %s\r\n", dtmf_l_seq);
+	os_printf("\tright channel: %s\r\n", dtmf_r_seq);
 
 	while (dtmf_seq_idx < strlen(dtmf_l_seq)) {
 		/* prepare dtmf audio buffer */
@@ -89,7 +89,7 @@ void play_dtmf(struct sai_device *dev)
 		}
 	}
 	vPortFree(audio_buf);
-	os_printf("End.\n\r");
+	os_printf("End.\r\n");
 }
 
 void sai_setup(struct sai_device *dev)

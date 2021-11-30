@@ -61,7 +61,7 @@ static void sai_rx_tx(void *param)
 		/* Rx Task */
 		if (emptyBlock > 0) {
 #ifdef DEBUG
-			os_printf("record %d\n\r", record_times++);
+			os_printf("record %d\r\n", record_times++);
 #endif
 			os_assert(!err, "Can't take the buffer semaphore (err: %d)", err);
 
@@ -79,7 +79,7 @@ static void sai_rx_tx(void *param)
 		/* Tx Task */
 		if (emptyBlock < BUFFER_NUMBER) {
 #ifdef DEBUG
-			os_printf("play %d\n\r", play_times++);
+			os_printf("play %d\r\n", play_times++);
 #endif
 			os_assert(!err, "Can't take the buffer semaphore (err: %d)", err);
 
@@ -102,7 +102,7 @@ static void sai_record_playback(struct sai_device *dev)
 	BaseType_t xResult;
 	int err;
 
-	os_printf("HifiBerry record playback demo started\n\r");
+	os_printf("HifiBerry record playback demo started\r\n");
 
 	err = os_sem_init(&tx_semaphore, 0);
 	os_assert(!err, "tx interrupt semaphore initialization failed!");
