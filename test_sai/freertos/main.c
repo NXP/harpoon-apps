@@ -31,8 +31,6 @@ static void hardware_setup(void)
 	BOARD_RdcInit();
 
 	board_clock_setup(sai_id);
-
-	codec_setup();
 }
 
 int main(void)

@@ -12,6 +12,7 @@
 #include "os/semaphore.h"
 #include "sai_drv.h"
 #include "dtmf_wave.h"
+#include "sai_codec_config.h"
 
 #define DTMF_AUDIO_SRATE 44100 /* default sampling rate */
 #define DTMF_AUDIO_BITWIDTH 32
@@ -114,7 +115,12 @@ void sai_test_task(void *parameters)
 
 	sai_setup(&dev);
 
+	codec_setup();
+	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, DTMF_AUDIO_SRATE, DTMF_AUDIO_BITWIDTH);
+
 	play_dtmf(&dev);
+
+	codec_close();
 
 	for (;;)
 		;

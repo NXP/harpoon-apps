@@ -11,6 +11,7 @@
 #include "os/assert.h"
 #include "os/semaphore.h"
 #include "sai_drv.h"
+#include "sai_codec_config.h"
 
 #define FRAME_BYTES	(DEMO_AUDIO_DATA_CHANNEL * DEMO_AUDIO_BIT_WIDTH / 8)
 #define REC_PERIOD_SIZE		128
@@ -198,6 +199,9 @@ void sai_test_task(void *parameters)
 	struct sai_device dev;
 
 	sai_setup(&dev);
+
+	codec_setup();
+	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
 	sai_record_playback(&dev);
 

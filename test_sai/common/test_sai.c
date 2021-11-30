@@ -10,6 +10,7 @@
 #include "os/semaphore.h"
 #include "os/unistd.h"
 #include "sai_drv.h"
+#include "sai_codec_config.h"
 
 #ifndef SAI_PLAY_MUSIC
 
@@ -134,6 +135,9 @@ void sai_test_task(void *parameters)
 	struct sai_device dev;
 
 	sai_setup(&dev);
+
+	codec_setup();
+	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
 #ifndef SAI_PLAY_MUSIC
 	record_playback(&dev);

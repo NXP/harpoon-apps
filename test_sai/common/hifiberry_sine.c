@@ -12,6 +12,7 @@
 #include "os/semaphore.h"
 #include "sai_drv.h"
 #include "sai_sine_wave.h"
+#include "sai_codec_config.h"
 
 #define PLAY_AUDIO_SRATE	44100 /* default sampling rate */
 #define PLAY_AUDIO_CHANNELS	2
@@ -72,6 +73,9 @@ void sai_test_task(void *parameters)
 	struct sai_device dev;
 
 	sai_setup(&dev);
+
+	codec_setup();
+	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
 
 	play_sine(&dev);
 

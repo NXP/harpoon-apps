@@ -88,8 +88,8 @@ void codec_close(void *codec_dev)
  * ADC Codec is PCM186x:
  * DAC Codec is PCM512x:
  */
-static codec_handle_t *dac_codec_handle;
-static codec_handle_t *adc_codec_handle;
+static codec_handle_t *dac_handle;
+static codec_handle_t *adc_handle;
 
 static pcm512x_config_t pcm512xConfig = {
 	.i2cConfig = {
@@ -104,9 +104,9 @@ static pcm512x_config_t pcm512xConfig = {
 	},
 	.gpio_led   = PCM512X_GPIO_LED,
 	.gpio_osc44 = PCM512X_GPIO_OSC44,
-	.gpio_osc48 = PCM512X_GPIO_OSC48
+	.gpio_osc48 = PCM512X_GPIO_OSC48,
 };
-static codec_config_t sai_dac_config = {
+static codec_config_t dac_config = {
 	.codecDevType = kCODEC_PCM512X,
 	.codecDevConfig = &pcm512xConfig,
 };
@@ -123,7 +123,7 @@ static pcm186x_config_t pcm186xConfig = {
     },
     .gpio_led   = PCM186X_GPIO_LED,
 };
-static codec_config_t sai_adc_config = {
+static codec_config_t adc_config = {
     .codecDevType = kCODEC_PCM186X,
     .codecDevConfig = &pcm186xConfig,
 };
@@ -133,25 +133,24 @@ void codec_set_format(uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
 	int32_t err;
 
 	/* In general, ADC and DAC will use the same configuration parameters */
-	err = CODEC_SetFormat(dac_codec_handle, mclk, sample_rate, bitwidth);
-	os_assert(err == kStatus_Success, "Codec set format failed (err %d)", err);
+	err = CODEC_SetFormat(dac_handle, mclk, sample_rate, bitwidth);
+	os_assert(err == kStatus_Success, "DAC set format failed (err %d)", err);
 
-	err = CODEC_SetFormat(adc_codec_handle, mclk, sample_rate, bitwidth);
-	os_assert(err == kStatus_Success, "Codec set format failed (err %d)", err);
+	err = CODEC_SetFormat(adc_handle, mclk, sample_rate, bitwidth);
+	os_assert(err == kStatus_Success, "ADC set format failed (err %d)", err);
 }
 
 void codec_setup(void)
 {
 	int32_t err;
-	uint32_t mclk, sample_rate, bitwidth;
 
-	dac_codec_handle = pvPortMalloc(sizeof(codec_handle_t));
-	os_assert(dac_codec_handle, "Codec initialization failed with memory allocation error");
-	memset(dac_codec_handle, 0, sizeof(codec_handle_t));
+	dac_handle = pvPortMalloc(sizeof(codec_handle_t));
+	os_assert(dac_handle, "DAC initialization failed with memory allocation error");
+	memset(dac_handle, 0, sizeof(codec_handle_t));
 
-	adc_codec_handle = pvPortMalloc(sizeof(codec_handle_t));
-	os_assert(adc_codec_handle, "Codec initialization failed with memory allocation error");
-	memset(adc_codec_handle, 0, sizeof(codec_handle_t));
+	adc_handle = pvPortMalloc(sizeof(codec_handle_t));
+	os_assert(adc_handle, "ADC initialization failed with memory allocation error");
+	memset(adc_handle, 0, sizeof(codec_handle_t));
 
 	/* setup clock */
 	CLOCK_SetRootMux(kCLOCK_RootI2c3, kCLOCK_I2cRootmuxSysPll1Div5); /* Set I2C source to SysPLL1 Div5 160MHZ */
@@ -159,26 +158,23 @@ void codec_setup(void)
 	CLOCK_EnableClock(kCLOCK_I2c3);
 
 	/* Use default setting to init codec */
-	err = CODEC_Init(dac_codec_handle, &sai_dac_config);
-	os_assert(err == kStatus_Success, "Codec initialization failed (err %d)", err);
+	err = CODEC_Init(dac_handle, &dac_config);
+	os_assert(err == kStatus_Success, "DAC initialization failed (err %d)", err);
 
-	err = CODEC_Init(adc_codec_handle, &sai_adc_config);
-	os_assert(err == kStatus_Success, "Codec initialization failed (err %d)", err);
-
-	/* Set default Codec Format */
-	mclk = ((pcm512x_config_t *)(sai_dac_config.codecDevConfig))->format.mclk_HZ;
-	sample_rate = ((pcm512x_config_t *)(sai_dac_config.codecDevConfig))->format.sampleRate;
-	bitwidth = ((pcm512x_config_t *)(sai_dac_config.codecDevConfig))->format.bitWidth;
-	codec_set_format(mclk, sample_rate, bitwidth);
+	err = CODEC_Init(adc_handle, &adc_config);
+	os_assert(err == kStatus_Success, "ADC initialization failed (err %d)", err);
 }
 
 void codec_close(void)
 {
 	int32_t err;
 
-	err = CODEC_Deinit(dac_codec_handle);
-	os_assert(err == kStatus_Success, "Codec deinitialization failed (err %d)", err);
+	err = CODEC_Deinit(dac_handle);
+	os_assert(err == kStatus_Success, "DAC deinitialization failed (err %d)", err);
 
-	vPortFree(dac_codec_handle);
+	err = CODEC_Deinit(adc_handle);
+	os_assert(err == kStatus_Success, "ADC deinitialization failed (err %d)", err);
+
+	vPortFree(dac_handle);
 }
 #endif
