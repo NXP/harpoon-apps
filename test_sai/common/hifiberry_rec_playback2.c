@@ -59,7 +59,9 @@ static void sai_rx(void *param)
 {
 	struct sai_device *dev = (struct sai_device *)param;
 	int err;
+#ifdef DEBUG
 	uint32_t record_times = 1;
+#endif
 
 	err = os_sem_take(&rx_task_sem, 0, OS_SEM_TIMEOUT_MAX);
 	os_assert(!err, "Can't take the rx task control semaphore (err: %d)", err);
@@ -89,7 +91,9 @@ static void sai_tx(void *param)
 {
 	struct sai_device *dev = (struct sai_device *)param;
 	int err;
+#ifdef DEBUG
 	uint32_t play_times = 1;
+#endif
 
 	err = os_sem_take(&tx_task_sem, 0, OS_SEM_TIMEOUT_MAX);
 	os_assert(!err, "Can't take the rx task control semaphore (err: %d)", err);
@@ -121,7 +125,7 @@ static void sai_record_playback(struct sai_device *dev)
 	BaseType_t xResult;
 	int err, i;
 
-	os_printf("HifiBerry record playback demo started\n\r");
+	os_printf("HifiBerry record playback demo (two threads) started\n\r");
 
 	err = os_sem_init(&tx_semaphore, 0);
 	os_assert(!err, "tx interrupt semaphore initialization failed!");

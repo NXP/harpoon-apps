@@ -22,4 +22,5 @@ make -j $(nproc)
 do_build "play_music"
 do_build "hifiberry_dtmf"
 do_build "hifiberry_record_playback"
+do_build "hifiberry_record_playback2"
 do_build "hifiberry_sine"
