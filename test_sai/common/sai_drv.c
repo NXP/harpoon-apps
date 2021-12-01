@@ -110,27 +110,23 @@ static void sai_irq_handler(void *sai_dev_data)
 static void rx_callback(I2S_Type *base, sai_handle_t *handle,
 		status_t status, void *user_data)
 {
-	struct drv_cb_user_data *drv_user_data = (struct drv_cb_user_data *)user_data;
+	struct drv_cb_user_data *drv_user_data =
+		(struct drv_cb_user_data *)user_data;
 
-	if (kStatus_SAI_RxError == status) {
-		/* Handle the error. */
-	} else {
-		if (drv_user_data->app_callback)
-			drv_user_data->app_callback(drv_user_data->dev, drv_user_data->app_user_data);
-	}
+	if (status != kStatus_SAI_RxError && drv_user_data->app_callback)
+		drv_user_data->app_callback(drv_user_data->dev,
+				drv_user_data->app_user_data);
 }
 
 static void tx_callback(I2S_Type *base, sai_handle_t *handle,
 		status_t status, void *user_data)
 {
-	struct drv_cb_user_data *drv_user_data = (struct drv_cb_user_data *)user_data;
+	struct drv_cb_user_data *drv_user_data =
+		(struct drv_cb_user_data *)user_data;
 
-	if (kStatus_SAI_TxError == status) {
-		/* Handle the error. */
-	} else {
-		if (drv_user_data->app_callback)
-			drv_user_data->app_callback(drv_user_data->dev, drv_user_data->app_user_data);
-	}
+	if (status != kStatus_SAI_TxError && drv_user_data->app_callback)
+		drv_user_data->app_callback(drv_user_data->dev,
+				drv_user_data->app_user_data);
 }
 
 uint32_t get_sai_id(I2S_Type *base)
