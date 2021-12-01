@@ -10,7 +10,6 @@
 #include "board.h"
 #include "os/assert.h"
 #include "os/semaphore.h"
-#include "os/unistd.h"
 #include "sai_drv.h"
 #include "sai_sine_wave.h"
 

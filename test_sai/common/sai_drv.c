@@ -9,10 +9,7 @@
 
 #include "board.h"
 #include "irq.h"
-#include "os.h"
 #include "os/assert.h"
-#include "os/semaphore.h"
-#include "os/unistd.h"
 #include "sai_drv.h"
 
 #ifdef PLAT_WITH_AUDIOMIX

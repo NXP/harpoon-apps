@@ -10,7 +10,6 @@
 #include "board.h"
 #include "os/assert.h"
 #include "os/semaphore.h"
-#include "os/unistd.h"
 #include "sai_drv.h"
 
 #define FRAME_BYTES	(DEMO_AUDIO_DATA_CHANNEL * DEMO_AUDIO_BIT_WIDTH / 8)
