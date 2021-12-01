@@ -38,6 +38,8 @@ static void play_sine(struct sai_device *dev)
 	uintptr_t addr = (uintptr_t)sine_wave;
 	size_t len = sizeof(sine_wave);
 
+	os_printf("HifiBerry playing Sine wave is started (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
+			PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
 	err = os_sem_init(&tx_semaphore, 0);
 	os_assert(!err, "tx semaphore initialization failed!");
 
