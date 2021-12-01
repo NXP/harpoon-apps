@@ -50,8 +50,10 @@ static void sai_rx_tx(void *param)
 	struct sai_device *dev = (struct sai_device *)param;
 	int err;
 #ifdef DEBUG
-	uint32_t record_times = 1;
-	uint32_t play_times = 1;
+	uint32_t record_times = 0;
+	uint32_t play_times = 0;
+	uint32_t print_steps = 100;
+	uint32_t next_print_times = record_times + print_steps;
 #endif
 
 	err = os_sem_take(&data_task_sem, 0, OS_SEM_TIMEOUT_MAX);
@@ -60,9 +62,6 @@ static void sai_rx_tx(void *param)
 	do {
 		/* Rx Task */
 		if (emptyBlock > 0) {
-#ifdef DEBUG
-			os_printf("record %d\r\n", record_times++);
-#endif
 			os_assert(!err, "Can't take the buffer semaphore (err: %d)", err);
 
 			err = sai_read(dev, (uint8_t *)Buffer + rx_index * BUFFER_SIZE,
@@ -71,6 +70,9 @@ static void sai_rx_tx(void *param)
 				err = os_sem_take(&rx_semaphore, 0, OS_SEM_TIMEOUT_MAX);
 				os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
 				rx_index++;
+#ifdef DEBUG
+				record_times++;
+#endif
 			}
 			if (rx_index == BUFFER_NUMBER)
 				rx_index = 0U;
@@ -78,9 +80,6 @@ static void sai_rx_tx(void *param)
 
 		/* Tx Task */
 		if (emptyBlock < BUFFER_NUMBER) {
-#ifdef DEBUG
-			os_printf("play %d\r\n", play_times++);
-#endif
 			os_assert(!err, "Can't take the buffer semaphore (err: %d)", err);
 
 			err = sai_write(dev, (uint8_t *)Buffer + tx_index * BUFFER_SIZE,
@@ -90,10 +89,19 @@ static void sai_rx_tx(void *param)
 					OS_SEM_TIMEOUT_MAX);
 				os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
 				tx_index++;
+#ifdef DEBUG
+				play_times++;
+#endif
 			}
 			if (tx_index == BUFFER_NUMBER)
 				tx_index = 0U;
 		}
+#ifdef DEBUG
+		if (record_times == next_print_times) {
+			os_printf("Record: %08d, Playback: %08d\r", record_times, play_times);
+			next_print_times = record_times + print_steps;
+		}
+#endif
 	} while (1);
 }
 
@@ -102,7 +110,8 @@ static void sai_record_playback(struct sai_device *dev)
 	BaseType_t xResult;
 	int err;
 
-	os_printf("HifiBerry record playback demo started\r\n");
+	os_printf("HifiBerry record playback demo is started (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
+			DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
 	err = os_sem_init(&tx_semaphore, 0);
 	os_assert(!err, "tx interrupt semaphore initialization failed!");

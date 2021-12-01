@@ -61,15 +61,14 @@ static void sai_rx(void *param)
 	int err;
 #ifdef DEBUG
 	uint32_t record_times = 1;
+	uint32_t print_steps = 100;
+	uint32_t next_print_times = record_times + print_steps;
 #endif
 
 	err = os_sem_take(&rx_task_sem, 0, OS_SEM_TIMEOUT_MAX);
 	os_assert(!err, "Can't take the rx task control semaphore (err: %d)", err);
 
 	do {
-#ifdef DEBUG
-		os_printf("record %d\r\n", record_times++);
-#endif
 		err = os_sem_take(&buffer_tx_sem[rx_index], 0,
 				OS_SEM_TIMEOUT_MAX);
 		os_assert(!err, "Can't take the buffer semaphore (err: %d)", err);
@@ -81,9 +80,18 @@ static void sai_rx(void *param)
 			os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
 			os_sem_give(&buffer_rx_sem[rx_index], 0);
 			rx_index++;
+#ifdef DEBUG
+			record_times++;
+#endif
 		}
 		if (rx_index == BUFFER_NUMBER)
 			rx_index = 0U;
+#ifdef DEBUG
+		if (record_times == next_print_times) {
+			os_printf("Record:   %08d \r\n", record_times);
+			next_print_times = record_times + print_steps;
+		}
+#endif
 	} while (1);
 }
 
@@ -93,15 +101,14 @@ static void sai_tx(void *param)
 	int err;
 #ifdef DEBUG
 	uint32_t play_times = 1;
+	uint32_t print_steps = 100;
+	uint32_t next_print_times = play_times + print_steps;
 #endif
 
 	err = os_sem_take(&tx_task_sem, 0, OS_SEM_TIMEOUT_MAX);
 	os_assert(!err, "Can't take the rx task control semaphore (err: %d)", err);
 
 	do {
-#ifdef DEBUG
-		os_printf("play %d\r\n", play_times++);
-#endif
 		err = os_sem_take(&buffer_rx_sem[tx_index], 0,
 				OS_SEM_TIMEOUT_MAX);
 		os_assert(!err, "Can't take the buffer semaphore (err: %d)", err);
@@ -114,9 +121,18 @@ static void sai_tx(void *param)
 			os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
 			os_sem_give(&buffer_tx_sem[tx_index], 0);
 			tx_index++;
+#ifdef DEBUG
+			play_times++;
+#endif
 		}
 		if (tx_index == BUFFER_NUMBER)
 			tx_index = 0U;
+#ifdef DEBUG
+		if (play_times == next_print_times) {
+			os_printf("Playback: %08d \r\n", play_times);
+			next_print_times = play_times + print_steps;
+		}
+#endif
 	} while (1);
 }
 
@@ -125,7 +141,8 @@ static void sai_record_playback(struct sai_device *dev)
 	BaseType_t xResult;
 	int err, i;
 
-	os_printf("HifiBerry record playback demo (two threads) started\r\n");
+	os_printf("HifiBerry record playback demo (two threads) is started (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
+			DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
 	err = os_sem_init(&tx_semaphore, 0);
 	os_assert(!err, "tx interrupt semaphore initialization failed!");
