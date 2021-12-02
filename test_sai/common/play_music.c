@@ -6,24 +6,12 @@
  */
 
 #include "board.h"
+#include "music.h"
 #include "os/assert.h"
 #include "os/semaphore.h"
 #include "os/unistd.h"
 #include "sai_drv.h"
 #include "sai_codec_config.h"
-
-#ifndef SAI_PLAY_MUSIC
-
-#define BUFFER_SIZE		(1024U)
-#define BUFFER_NUMBER		(4U)
-
-volatile uint32_t emptyBlock = BUFFER_NUMBER;
-
-static uint8_t Buffer[BUFFER_NUMBER * BUFFER_SIZE];
-static uint32_t tx_index = 0U, rx_index = 0U;
-
-#endif /* SAI_PLAY_MUSIC */
-
 
 static os_sem_t tx_semaphore;
 static os_sem_t rx_semaphore;
@@ -32,64 +20,13 @@ static os_sem_t rx_semaphore;
 static void rx_callback(const void *dev, void *userData)
 {
 	os_sem_give(&rx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
-#ifndef SAI_PLAY_MUSIC
-	emptyBlock--;
-#endif
 }
 
 static void tx_callback(const void *dev, void *userData)
 {
 	os_sem_give(&tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
-#ifndef SAI_PLAY_MUSIC
-	emptyBlock++;
-#endif
 }
 
-#ifndef SAI_PLAY_MUSIC
-static void record_playback(struct sai_device *dev)
-{
-	int err;
-	uint32_t play_times = 1;
-
-	err = os_sem_init(&tx_semaphore, 0);
-	os_assert(!err, "tx semaphore initialization failed!");
-	err = os_sem_init(&rx_semaphore, 0);
-	os_assert(!err, "tx semaphore initialization failed!");
-
-	while (1) {
-		os_printf("record %d\r\n", play_times);
-		if (emptyBlock > 0) {
-			err = sai_read(dev, (uint8_t *)Buffer + rx_index * BUFFER_SIZE, BUFFER_SIZE);
-			if (!err) {
-				rx_index++;
-				err = os_sem_take(&rx_semaphore, 0,
-						OS_SEM_TIMEOUT_MAX);
-				os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
-			}
-			if (rx_index == BUFFER_NUMBER)
-			{
-				rx_index = 0U;
-			}
-		}
-		os_printf("play %d\r\n", play_times++);
-		if (emptyBlock < BUFFER_NUMBER) {
-			err = sai_write(dev, (uint8_t *)Buffer + tx_index * BUFFER_SIZE, BUFFER_SIZE);
-			if (!err) {
-				tx_index++;
-				err = os_sem_take(&tx_semaphore, 0,
-						OS_SEM_TIMEOUT_MAX);
-				os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
-			}
-			if (tx_index == BUFFER_NUMBER) {
-				tx_index = 0U;
-			}
-		}
-	}
-}
-
-#else /* SAI_PLAY_MUSIC */
-
-#include "music.h"
 static void play_music(struct sai_device *dev)
 {
 	int err;
@@ -100,7 +37,7 @@ static void play_music(struct sai_device *dev)
 	os_assert(!err, "tx semaphore initialization failed!");
 
 	while (1) {
-		os_printf("play the music: %d times\r\n", play_times++);
+		os_printf("play the music: %d times\r", play_times++);
 		err = sai_write(dev, (uint8_t *)addr, MUSIC_LEN);
 		if (!err) {
 			err = os_sem_take(&tx_semaphore, 0, OS_SEM_TIMEOUT_MAX);
@@ -110,8 +47,6 @@ static void play_music(struct sai_device *dev)
 		os_msleep(2000);
 	}
 }
-
-#endif /* SAI_PLAY_MUSIC */
 
 void sai_setup(struct sai_device *dev)
 {
@@ -139,11 +74,7 @@ void sai_test_task(void *parameters)
 	codec_setup();
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
-#ifndef SAI_PLAY_MUSIC
-	record_playback(&dev);
-#else
 	play_music(&dev);
-#endif
 
 	for (;;)
 		;

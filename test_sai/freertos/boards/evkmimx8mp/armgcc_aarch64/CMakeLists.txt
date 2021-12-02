@@ -44,8 +44,7 @@ endif()
 
 if(DEMO_TYPE STREQUAL "play_music")
   SET(demo_name "play_music")
-  STRING(APPEND app_extra_flags " -DSAI_PLAY_MUSIC")
-  SET(AppSourceFile "${AppPath}/common/test_sai.c")
+  SET(AppSourceFile "${AppPath}/common/play_music.c")
 elseif(DEMO_TYPE STREQUAL "hifiberry_dtmf")
   SET(demo_name "hifiberry_dtmf")
   SET(AppSourceFile "${AppPath}/common/dtmf_wave.c"
