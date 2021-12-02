@@ -11,7 +11,7 @@
 #include "os/assert.h"
 #include "os/semaphore.h"
 #include "sai_drv.h"
-#include "sai_sine_wave.h"
+#include "sine_wave.h"
 #include "sai_codec_config.h"
 
 #define PLAY_AUDIO_SRATE	44100 /* default sampling rate */
