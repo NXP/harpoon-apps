@@ -50,6 +50,10 @@ static codec_config_t sai_codec_config = {.codecDevType = kCODEC_WM8960,
 
 void codec_set_format(uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
 {
+	int32_t err;
+
+	err = CODEC_SetFormat(codec_handle, mclk, sample_rate, bitwidth);
+	os_assert(err == kStatus_Success, "WM8960 set format failed (err %d)", err);
 }
 
 void codec_setup(void)
