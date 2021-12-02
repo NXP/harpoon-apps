@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,6 +7,45 @@
 .macro	ventry	label
 	.align	7
 	b	\label
+.endm
+
+.macro	_eentry from type
+	stp	x29, x30, [sp, #-0x10]!
+	stp	x27, x28, [sp, #-0x10]!
+	stp	x25, x26, [sp, #-0x10]!
+	stp	x23, x24, [sp, #-0x10]!
+	stp	x21, x22, [sp, #-0x10]!
+	stp	x19, x20, [sp, #-0x10]!
+	stp	x17, x18, [sp, #-0x10]!
+	stp	x15, x16, [sp, #-0x10]!
+	stp	x13, x14, [sp, #-0x10]!
+	stp	x11, x12, [sp, #-0x10]!
+	stp	x9, x10, [sp, #-0x10]!
+	stp	x7, x8, [sp, #-0x10]!
+	stp	x5, x6, [sp, #-0x10]!
+	stp	x3, x4, [sp, #-0x10]!
+	stp	x1, x2, [sp, #-0x10]!
+	str	x0, [sp, #-0x8]!
+	mov	x0, #\from
+	mov	x1, #\type
+	bl	exception_handler
+	b	.
+.endm
+
+.macro sentry label from
+	.align 7
+	str	x0, [sp, #-0x8]!
+	mrs	x0, esr_el1
+	lsr	x0, x0, #26	/* Exception Class */
+	cmp	x0, #0x15	/* SVC */
+	ldr	x0, [sp, #0x8]!
+	b.eq	\label
+	_eentry	\from 0
+.endm
+
+.macro	eentry from type
+	.align	7
+	_eentry	\from \type
 .endm
 
 	.section ".boot", "ax"
@@ -205,25 +244,25 @@ Reset_Handler:
 	.globl vectors
 	.align 11
 vectors:
-	ventry	.
-	ventry	.
-	ventry	.
-	ventry	.
+	eentry	0 0
+	eentry	0 1
+	eentry	0 2
+	eentry	0 3
 
-	ventry	.
-	ventry	.
-	ventry	.
-	ventry	.
+	eentry	1 0
+	eentry	1 1
+	eentry	1 2
+	eentry	1 3
 
-	ventry	.
-	ventry	.
-	ventry	.
-	ventry	.
+	eentry	2 0
+	eentry	2 1
+	eentry	2 2
+	eentry	2 3
 
-	ventry	.
-	ventry	.
-	ventry	.
-	ventry	.
+	eentry	3 0
+	eentry	3 1
+	eentry	3 2
+	eentry	3 3
 
 	.ltorg
 
@@ -231,22 +270,22 @@ vectors:
 	.globl _freertos_vector_table
 	.align 11
 _freertos_vector_table:
-	ventry	FreeRTOS_SWI_Handler
+	sentry  FreeRTOS_SWI_Handler 0
 	ventry	FreeRTOS_IRQ_Handler
-	ventry	.
-	ventry	.
+	eentry	0 2
+	eentry	0 3
 
-	ventry	FreeRTOS_SWI_Handler
+	sentry	FreeRTOS_SWI_Handler 0
 	ventry	FreeRTOS_IRQ_Handler
-	ventry	.
-	ventry	.
+	eentry	1 2
+	eentry	1 3
 
-	ventry	.
-	ventry	.
-	ventry	.
-	ventry	.
+	eentry	2 0
+	eentry	2 1
+	eentry	2 2
+	eentry	2 3
 
-	ventry	.
-	ventry	.
-	ventry	.
-	ventry	.
+	eentry	3 0
+	eentry	3 1
+	eentry	3 2
+	eentry	3 3
