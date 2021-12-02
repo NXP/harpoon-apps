@@ -74,7 +74,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /* The following constant describe the hardware GIC */
 #define configUNIQUE_INTERRUPT_PRIORITIES       16
-#define configINTERRUPT_CONTROLLER_BASE_ADDRESS         (GIC_REDISTRIBUTOR_BASE + (0x20000 * 3) + 0x10000)
 
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
 #define configUSE_PREEMPTION                    1
