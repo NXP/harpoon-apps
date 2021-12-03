@@ -28,6 +28,7 @@
 	str	x0, [sp, #-0x8]!
 	mov	x0, #\from
 	mov	x1, #\type
+	mov	x2, sp
 	bl	exception_handler
 	b	.
 .endm

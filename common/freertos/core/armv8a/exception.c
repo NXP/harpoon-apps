@@ -79,7 +79,30 @@ static const char *exception_type[] = {
 	[3] = "Serror/vSerror",
 };
 
-void exception_handler(uint64_t from, uint64_t type)
+static void dump_registers(uint64_t *regs)
+{
+	int i;
+
+	jh_puts("registers:\n");
+	for (i = 0; i < 31; i++) {
+		jh_puts("x");
+		jh_put_dec(i);
+
+		if (i < 10)
+			jh_puts(":  ");
+		else
+			jh_puts(": ");
+
+		jh_put_hex(regs[i]);
+
+		if (i & 0x1)
+			jh_puts("\n");
+		else
+			jh_puts(" ");
+	}
+}
+
+void exception_handler(uint64_t from, uint64_t type, uint64_t *sp)
 {
 	uint64_t sctlr_el1;
 	uint64_t elr_el1;
@@ -119,4 +142,6 @@ void exception_handler(uint64_t from, uint64_t type)
 
 	if (ec_handler[ec].handler)
 		ec_handler[ec].handler(iss);
+
+	dump_registers(sp);
 }
