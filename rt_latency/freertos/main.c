@@ -25,6 +25,9 @@
 #include "os/stdio.h"
 
 #include "stats.h"
+#include "ivshmem.h"
+#include "hrpn_ctrl.h"
+#include "mailbox.h"
 #include "version.h"
 
 #include "rt_latency.h"
@@ -48,11 +51,15 @@
 
 GPT_Type *gpt_devices[NUM_OF_COUNTER] = {GPT1, GPT2};
 
-static struct rt_latency_ctx rt_ctx;
+static struct main_ctx{
+	bool started;
 
-/* hard-coded number of elements ; only used to create/delete test case's
- * task handles, all at once */
-static TaskHandle_t tc_taskHandles[8];
+	struct rt_latency_ctx rt_ctx;
+
+	/* hard-coded number of elements ; only used to create/delete test case's
+	* task handles, all at once */
+	TaskHandle_t tc_taskHandles[8];
+} main_ctx;
 
 /*******************************************************************************
  * Prototypes
@@ -121,26 +128,34 @@ void benchmark_task(void *pvParameters)
  * Application functions
  ******************************************************************************/
 
-static void destroy_test_case(void)
+static void destroy_test_case(struct main_ctx *ctx)
 {
 	int hnd_idx;
 
-	for (hnd_idx = 0; hnd_idx < ARRAY_SIZE(tc_taskHandles); hnd_idx++) {
-		if (tc_taskHandles[hnd_idx]) {
-			vTaskDelete(tc_taskHandles[hnd_idx]);
-			tc_taskHandles[hnd_idx] = NULL;
+	if (!ctx->started)
+		return;
+
+	for (hnd_idx = 0; hnd_idx < ARRAY_SIZE(ctx->tc_taskHandles); hnd_idx++) {
+		if (ctx->tc_taskHandles[hnd_idx]) {
+			vTaskDelete(ctx->tc_taskHandles[hnd_idx]);
+			ctx->tc_taskHandles[hnd_idx] = NULL;
 		}
 	}
 
-	rt_latency_destroy(&rt_ctx);
+	rt_latency_destroy(&ctx->rt_ctx);
+
+	ctx->started = false;
 }
 
-static int start_test_case(int test_case_id)
+static int start_test_case(struct main_ctx *ctx, int test_case_id)
 {
 	void *dev;
 	void *irq_load_dev = NULL;
 	int hnd_idx = 0;
 	BaseType_t xResult;
+
+	if (ctx->started)
+		return -1;
 
 	os_printf("---\r\n");
 	os_printf("Running test case %d:\r\n", test_case_id);
@@ -149,57 +164,119 @@ static int start_test_case(int test_case_id)
 	irq_load_dev = gpt_devices[1]; /* GPT2 */
 
 	/* Initialize test case load conditions based on test case ID */
-	rt_ctx.tc_load = rt_latency_get_tc_load(test_case_id);
-	os_assert(rt_ctx.tc_load != -1, "Wrong test conditions!");
+	ctx->rt_ctx.tc_load = rt_latency_get_tc_load(test_case_id);
+	os_assert(ctx->rt_ctx.tc_load != -1, "Wrong test conditions!");
 
 	/* Initialize test cases' context */
-	xResult = rt_latency_init(dev, irq_load_dev, &rt_ctx);
+	xResult = rt_latency_init(dev, irq_load_dev, &ctx->rt_ctx);
 	os_assert(xResult == 0, "Initialization failed!");
 
 	/* Benchmark task: main "high prio IRQ" task */
 	xResult = xTaskCreate(benchmark_task, "benchmark_task", STACK_SIZE,
-			       &rt_ctx, HIGHEST_TASK_PRIORITY - 1, &tc_taskHandles[hnd_idx++]);
+			       &ctx->rt_ctx, HIGHEST_TASK_PRIORITY - 1, &ctx->tc_taskHandles[hnd_idx++]);
 	os_assert(xResult == pdPASS, "task creation failed!");
 
 	/* CPU Load task */
-	if (rt_ctx.tc_load & RT_LATENCY_WITH_CPU_LOAD) {
+	if (ctx->rt_ctx.tc_load & RT_LATENCY_WITH_CPU_LOAD) {
 		xResult = xTaskCreate(cpu_load_task, "cpu_load_task", STACK_SIZE,
-				       &rt_ctx, LOWEST_TASK_PRIORITY, &tc_taskHandles[hnd_idx++]);
+				       &ctx->rt_ctx, LOWEST_TASK_PRIORITY, &ctx->tc_taskHandles[hnd_idx++]);
 		os_assert(xResult == pdPASS, "task creation failed!");
 	}
 
 	/* Cache invalidate task */
-	if (rt_ctx.tc_load & RT_LATENCY_WITH_INVD_CACHE) {
+	if (ctx->rt_ctx.tc_load & RT_LATENCY_WITH_INVD_CACHE) {
 		xResult = xTaskCreate(cache_inval_task, "cache_inval_task",
-			       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY, &tc_taskHandles[hnd_idx++]);
+			       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY, &ctx->tc_taskHandles[hnd_idx++]);
 		os_assert(xResult == pdPASS, "task creation failed!");
 	}
 
 	/* Print task */
 	xResult = xTaskCreate(log_task, "log_task", STACK_SIZE,
-				&rt_ctx, LOWEST_TASK_PRIORITY, &tc_taskHandles[hnd_idx++]);
+				&ctx->rt_ctx, LOWEST_TASK_PRIORITY, &ctx->tc_taskHandles[hnd_idx++]);
 	os_assert(xResult == pdPASS, "task creation failed!");
+
+	ctx->started = true;
 
 	return 0;
 }
 
+static void response(struct mailbox *m, uint32_t status)
+{
+	struct hrpn_resp_latency resp;
+
+	resp.type = HRPN_RESP_TYPE_LATENCY;
+	resp.status = status;
+	mailbox_resp_send(m, &resp, sizeof(resp));
+}
+
+static void command_handler(struct main_ctx *ctx, struct mailbox *m)
+{
+	struct hrpn_command cmd;
+	unsigned int len;
+	int ret;
+
+	len = sizeof(cmd);
+	if (mailbox_cmd_recv(m, &cmd, &len) < 0)
+		return;
+
+	switch (cmd.u.cmd.type) {
+	case HRPN_CMD_TYPE_LATENCY_RUN:
+		if (len != sizeof(struct hrpn_cmd_latency_run)) {
+			response(m, HRPN_RESP_STATUS_ERROR);
+			break;
+		}
+
+		if (cmd.u.latency_run.id >= RT_LATENCY_TEST_CASE_MAX) {
+			response(m, HRPN_RESP_STATUS_ERROR);
+			break;
+		}
+
+		ret = start_test_case(ctx, cmd.u.latency_run.id);
+		if (ret)
+			response(m, HRPN_RESP_STATUS_ERROR);
+		else
+			response(m, HRPN_RESP_STATUS_SUCCESS);
+
+		break;
+
+	case HRPN_CMD_TYPE_LATENCY_STOP:
+		if (len != sizeof(struct hrpn_cmd_latency_stop)) {
+			response(m, HRPN_RESP_STATUS_ERROR);
+			break;
+		}
+
+		destroy_test_case(ctx);
+		response(m, HRPN_RESP_STATUS_SUCCESS);
+		break;
+
+	default:
+		response(m, HRPN_RESP_STATUS_ERROR);
+		break;
+	}
+}
+
 void main_task(void *pvParameters)
 {
-	int num = 0;
-	int ret;
+	struct main_ctx *ctx = pvParameters;
+	struct ivshmem mem;
+	struct mailbox m;
+	int rc;
 
 	os_printf("%s: running\r\n", __func__);
 
+	rc = ivshmem_init(0, &mem);
+	os_assert(!rc, "ivshmem initialization failed, can not proceed\r\n");
+
+	os_assert(mem.out_size, "ivshmem mis-configuration, can not proceed\r\n");
+
+	mailbox_init(&m, mem.out, mem.out + mem.out_size * mem.id, false);
+
+	ctx->started = false;
+
 	do {
-		if (++num >= RT_LATENCY_TEST_CASE_MAX)
-			num = RT_LATENCY_TEST_CASE_1;
+		command_handler(ctx, &m);
 
-		ret = start_test_case(num);
-		os_assert(ret == 0, "Tasks creation failed!");
-
-		/* Execute each test case for some time */
-		vTaskDelay(pdMS_TO_TICKS(TEST_EXECUTION_TIME_SEC * 1000));
-		destroy_test_case();
+		vTaskDelay(pdMS_TO_TICKS(100));
 
 	} while(1);
 }
@@ -219,7 +296,7 @@ int main(void)
 
 	/* Test cases scheduler task */
 	xResult = xTaskCreate(main_task, "main_task",
-		       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY, NULL);
+		       STACK_SIZE, &main_ctx, LOWEST_TASK_PRIORITY, NULL);
 	assert(xResult == pdPASS);
 
 	/* Start scheduler */

@@ -59,6 +59,7 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/stats
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/mailbox
+    ${CommonPath}/libs/ctrl
     ${RtosPath}
     ${SdkDirPath}
 )
@@ -85,6 +86,7 @@ include(driver_iuart)
 include(lib_stats)
 include(lib_jailhouse)
 include(lib_mailbox)
+include(lib_ctrl)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
