@@ -167,39 +167,71 @@ static int start_test_case(struct main_ctx *ctx, int test_case_id)
 
 	/* Initialize test case load conditions based on test case ID */
 	ctx->rt_ctx.tc_load = rt_latency_get_tc_load(test_case_id);
-	os_assert(ctx->rt_ctx.tc_load != -1, "Wrong test conditions!");
+	if (ctx->rt_ctx.tc_load < 0) {
+		os_printf("Wrong test conditions!\r\n");
+		goto err;
+	}
 
 	/* Initialize test cases' context */
 	xResult = rt_latency_init(dev, irq_load_dev, &ctx->rt_ctx);
-	os_assert(xResult == 0, "Initialization failed!");
+	if (xResult) {
+		os_printf("Initialization failed!\r\n");
+		goto err;
+	}
 
 	/* Benchmark task: main "high prio IRQ" task */
 	xResult = xTaskCreate(benchmark_task, "benchmark_task", STACK_SIZE,
 			       &ctx->rt_ctx, HIGHEST_TASK_PRIORITY - 1, &ctx->tc_taskHandles[hnd_idx++]);
-	os_assert(xResult == pdPASS, "task creation failed!");
+	if (xResult != pdPASS) {
+		os_printf("task creation failed!\r\n");
+		goto err_task;
+	}
 
 	/* CPU Load task */
 	if (ctx->rt_ctx.tc_load & RT_LATENCY_WITH_CPU_LOAD) {
 		xResult = xTaskCreate(cpu_load_task, "cpu_load_task", STACK_SIZE,
 				       &ctx->rt_ctx, LOWEST_TASK_PRIORITY, &ctx->tc_taskHandles[hnd_idx++]);
-		os_assert(xResult == pdPASS, "task creation failed!");
+		if (xResult != pdPASS) {
+			os_printf("task creation failed!\r\n");
+			goto err_task;
+		}
 	}
 
 	/* Cache invalidate task */
 	if (ctx->rt_ctx.tc_load & RT_LATENCY_WITH_INVD_CACHE) {
 		xResult = xTaskCreate(cache_inval_task, "cache_inval_task",
 			       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY + 1, &ctx->tc_taskHandles[hnd_idx++]);
-		os_assert(xResult == pdPASS, "task creation failed!");
+		if (xResult != pdPASS) {
+			os_printf("task creation failed!\r\n");
+			goto err_task;
+		}
 	}
 
 	/* Print task */
 	xResult = xTaskCreate(log_task, "log_task", STACK_SIZE,
 				&ctx->rt_ctx, LOWEST_TASK_PRIORITY + 1, &ctx->tc_taskHandles[hnd_idx++]);
-	os_assert(xResult == pdPASS, "task creation failed!");
+	if (xResult != pdPASS) {
+		os_printf("task creation failed!\r\n");
+		goto err_task;
+	}
 
 	ctx->started = true;
 
 	return 0;
+
+err_task:
+	/* hnd_idx is being incremented before the task creation */
+	for (hnd_idx -= 2; hnd_idx >= 0; hnd_idx--) {
+		if (ctx->tc_taskHandles[hnd_idx]) {
+			vTaskDelete(ctx->tc_taskHandles[hnd_idx]);
+			ctx->tc_taskHandles[hnd_idx] = NULL;
+		}
+	}
+
+	rt_latency_destroy(&ctx->rt_ctx);
+
+err:
+	return -1;
 }
 
 static void response(struct mailbox *m, uint32_t status)
