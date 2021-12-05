@@ -188,13 +188,13 @@ static int start_test_case(struct main_ctx *ctx, int test_case_id)
 	/* Cache invalidate task */
 	if (ctx->rt_ctx.tc_load & RT_LATENCY_WITH_INVD_CACHE) {
 		xResult = xTaskCreate(cache_inval_task, "cache_inval_task",
-			       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY, &ctx->tc_taskHandles[hnd_idx++]);
+			       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY + 1, &ctx->tc_taskHandles[hnd_idx++]);
 		os_assert(xResult == pdPASS, "task creation failed!");
 	}
 
 	/* Print task */
 	xResult = xTaskCreate(log_task, "log_task", STACK_SIZE,
-				&ctx->rt_ctx, LOWEST_TASK_PRIORITY, &ctx->tc_taskHandles[hnd_idx++]);
+				&ctx->rt_ctx, LOWEST_TASK_PRIORITY + 1, &ctx->tc_taskHandles[hnd_idx++]);
 	os_assert(xResult == pdPASS, "task creation failed!");
 
 	ctx->started = true;
@@ -298,7 +298,7 @@ int main(void)
 
 	/* Test cases scheduler task */
 	xResult = xTaskCreate(main_task, "main_task",
-		       STACK_SIZE, &main_ctx, LOWEST_TASK_PRIORITY, NULL);
+		       STACK_SIZE, &main_ctx, LOWEST_TASK_PRIORITY + 1, NULL);
 	assert(xResult == pdPASS);
 
 	/* Start scheduler */
