@@ -206,8 +206,6 @@ void cache_inval(void)
 
 void print_stats(struct rt_latency_ctx *ctx)
 {
-	os_msleep(STATS_PERIOD_SEC * 1000);
-
 	stats_compute(&ctx->irq_delay);
 	stats_print(&ctx->irq_delay);
 	stats_reset(&ctx->irq_delay);

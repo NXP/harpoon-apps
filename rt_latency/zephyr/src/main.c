@@ -91,6 +91,8 @@ void print_stats_func(void *p1, void *p2, void *p3)
 	struct rt_latency_ctx *ctx = p2;
 
 	do {
+		k_msleep(STATS_PERIOD_SEC * 1000);
+
 		print_stats(ctx);
 	} while(1);
 }

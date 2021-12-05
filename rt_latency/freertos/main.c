@@ -102,6 +102,8 @@ void log_task(void *pvParameters)
 	struct rt_latency_ctx *ctx = pvParameters;
 
 	do {
+		vTaskDelay(pdMS_TO_TICKS(STATS_PERIOD_SEC * 1000));
+
 		print_stats(ctx);
 	} while(1);
 }
