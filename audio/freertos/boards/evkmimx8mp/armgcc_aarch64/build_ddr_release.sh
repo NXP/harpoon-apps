@@ -19,8 +19,8 @@ cmake -DCMAKE_TOOLCHAIN_FILE="../../../../../../mcux-sdk/tools/cmake_toolchain_f
 make -j $(nproc)
 }
 
+do_build "play_dtmf"
 do_build "play_music"
-do_build "hifiberry_dtmf"
-do_build "hifiberry_record_playback"
-do_build "hifiberry_record_playback2"
-do_build "hifiberry_sine"
+do_build "play_sine"
+do_build "rec_play"
+do_build "rec_play2"

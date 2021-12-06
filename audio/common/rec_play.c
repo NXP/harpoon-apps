@@ -130,7 +130,7 @@ static void sai_record_playback(struct sai_device *dev)
 	os_assert(!err, "Can't give the data task semaphore (err: %d)", err);
 }
 
-void sai_setup(struct sai_device *dev)
+static void sai_setup(struct sai_device *dev)
 {
 	struct sai_cfg sai_config;
 
@@ -147,7 +147,7 @@ void sai_setup(struct sai_device *dev)
 	sai_drv_setup(dev, &sai_config);
 }
 
-void sai_test_task(void *parameters)
+void rec_play_task(void *parameters)
 {
 	struct sai_device dev;
 

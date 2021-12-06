@@ -38,26 +38,21 @@ else()
 message(FATAL_ERROR "Please set Codec device")
 endif()
 
-if(DEMO_TYPE STREQUAL "play_music")
+if(DEMO_TYPE STREQUAL "play_dtmf")
+  SET(demo_name "play_dtmf")
+  STRING(APPEND app_extra_flags " -DDEMO_MODE=0")
+elseif(DEMO_TYPE STREQUAL "play_music")
   SET(demo_name "play_music")
-  STRING(APPEND app_extra_flags " -DSAI_PLAY_MUSIC")
-  SET(AppSourceFile "${AppPath}/common/test_sai.c")
-elseif(DEMO_TYPE STREQUAL "hifiberry_dtmf")
-  SET(demo_name "hifiberry_dtmf")
-  SET(AppSourceFile "${AppPath}/common/dtmf_wave.c"
-		  "${AppPath}/common/hifiberry_dtmf.c")
-elseif(DEMO_TYPE STREQUAL "hifiberry_record_playback")
-  SET(demo_name "hifiberry_record_playback")
-  SET(AppSourceFile "${AppPath}/common/hifiberry_rec_playback.c")
-elseif(DEMO_TYPE STREQUAL "hifiberry_record_playback2")
-  SET(demo_name "hifiberry_record_playback2")
-  SET(AppSourceFile "${AppPath}/common/hifiberry_rec_playback2.c")
-elseif(DEMO_TYPE STREQUAL "hifiberry_sine")
-  SET(demo_name "hifiberry_sine")
-  SET(AppSourceFile "${AppPath}/common/hifiberry_sine.c")
-else()
-  SET(demo_name "record_playback")
-  SET(AppSourceFile "${AppPath}/common/test_sai.c")
+  STRING(APPEND app_extra_flags " -DDEMO_MODE=1")
+elseif(DEMO_TYPE STREQUAL "play_sine")
+  SET(demo_name "play_sine")
+  STRING(APPEND app_extra_flags " -DDEMO_MODE=2")
+elseif(DEMO_TYPE STREQUAL "rec_play")
+  SET(demo_name "rec_play")
+  STRING(APPEND app_extra_flags " -DDEMO_MODE=3")
+else(DEMO_TYPE STREQUAL "rec_play2")
+  SET(demo_name "rec_play2")
+  STRING(APPEND app_extra_flags " -DDEMO_MODE=4")
 endif()
 
 project(${demo_name})
@@ -72,7 +67,12 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${BoardPath}/mmu.c"
     "${AppBoardPath}/sai_clock_config.c"
     "${AppBoardPath}/sai_codec_config.c"
-    ${AppSourceFile}
+    "${AppPath}/common/dtmf_wave.c"
+    "${AppPath}/common/play_dtmf.c"
+    "${AppPath}/common/play_music.c"
+    "${AppPath}/common/play_sine.c"
+    "${AppPath}/common/rec_play.c"
+    "${AppPath}/common/rec_play2.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE

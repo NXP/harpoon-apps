@@ -37,7 +37,7 @@ static void tx_callback(const void *dev, void *userData)
 	os_sem_give(&tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
-void play_dtmf(struct sai_device *dev)
+static void play_dtmf(struct sai_device *dev)
 {
 	const char default_dtmf_l_seq[] = "1123ABCD0123456789*#";
 	const char default_dtmf_r_seq[] = "#*9876543210DCBA3211";
@@ -92,7 +92,7 @@ void play_dtmf(struct sai_device *dev)
 	os_printf("End.\r\n");
 }
 
-void sai_setup(struct sai_device *dev)
+static void sai_setup(struct sai_device *dev)
 {
 	struct sai_cfg sai_config;
 
@@ -109,7 +109,7 @@ void sai_setup(struct sai_device *dev)
 	sai_drv_setup(dev, &sai_config);
 }
 
-void sai_test_task(void *parameters)
+void play_dtmf_task(void *parameters)
 {
 	struct sai_device dev;
 
