@@ -4,28 +4,14 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-#include "FreeRTOS.h"
-#include "queue.h"
-#include "task.h"
-
 #include "board.h"
 #include "os/assert.h"
 #include "os/stdlib.h"
 #include "sai_drv.h"
 #include "sai_codec_config.h"
+#include "audio.h"
 
 #define BUFFER_NUMBER		(2U)
-
-#define SAI_EVENT_QUEUE_LENGTH	16
-
-enum event_type {
-	SAI_EVENT_IRQ = 0,
-};
-
-struct event {
-	unsigned int type;
-	uint8_t data;
-};
 
 struct sai_statistics {
 	uint64_t rec_play_periods;
@@ -35,15 +21,15 @@ struct sai_statistics {
 };
 
 struct rec_play_ctx {
+	void (*event_send)(void *, uint8_t);
+	void *event_data;
+
 	struct sai_device dev;
 	struct sai_statistics stats;
 	uint8_t *sai_buf;
 	size_t period_bytes_per_chan;
 	size_t buffer_size;
-	uint32_t run_time;	/* ms, 0 for run for ever */
 	uint32_t buf_index;
-	uint8_t irq_status;
-	QueueHandle_t event_queue_h;
 	sai_word_width_t bit_width;
 	sai_sample_rate_t sample_rate;
 	uint32_t chan_numbers;
@@ -51,22 +37,13 @@ struct rec_play_ctx {
 
 static void rx_tx_callback(uint8_t status, void *user_data)
 {
-	struct event e;
-	BaseType_t wake = pdFALSE;
-	BaseType_t ret;
 	struct rec_play_ctx *ctx = (struct rec_play_ctx*)user_data;
 
 	os_assert(ctx, "userData is NULL in callback.");
 
 	sai_disable_irq(&ctx->dev, true, false);
 
-	e.type = SAI_EVENT_IRQ;
-	e.data = status;
-	ret = xQueueSendToBackFromISR(ctx->event_queue_h, &e, &wake);
-	if (ret != pdPASS)
-		ctx->stats.queue_errs++;
-	if (wake)
-		portYIELD_FROM_ISR(wake);
+	ctx->event_send(ctx->event_data, status);
 }
 
 static void start_rec_play(struct rec_play_ctx *ctx)
@@ -74,69 +51,66 @@ static void start_rec_play(struct rec_play_ctx *ctx)
 	/* Reset FIFO for safe */
 	reset_tx_fifo(&ctx->dev);
 	reset_rx_fifo(&ctx->dev);
-	/* Fill Tx FIFO with dumy data */
+
+	/* Fill Tx FIFO with dummy data */
 	memset(ctx->sai_buf, 0, sizeof(ctx->sai_buf));
+
 	/* Write two period into FIFO */
 	sai_fifo_write(&ctx->dev, ctx->sai_buf,
 			ctx->period_bytes_per_chan * 2);
+
 	sai_enable_tx(&ctx->dev, false);
 	sai_enable_rx(&ctx->dev, true);
 }
 
-int rec_play_run(void *parameters)
+int rec_play_run(void *parameters, struct event *e)
 {
 	struct rec_play_ctx *ctx = (struct rec_play_ctx*)parameters;
 	struct sai_device *dev = &ctx->dev;
 	uint8_t *sai_buffer = ctx->sai_buf;
-	uint32_t end_time = 0;
 	size_t period_bytes_per_chan = ctx->period_bytes_per_chan;
 	size_t buffer_size = ctx->buffer_size;
-	struct event sai_event;
-	uint8_t status;
 
-	/* Begin to record and playback */
-	start_rec_play(ctx);
 
-	if (ctx->run_time != 0)
-		end_time = xTaskGetTickCount() + ctx->run_time;
+	switch (e->type) {
+	case EVENT_TYPE_START:
+		/* Begin to record and playback */
+		start_rec_play(ctx);
+		break;
 
-	do {
-		if (xQueueReceive(ctx->event_queue_h, &sai_event, portMAX_DELAY)
-				!= pdTRUE)
-			continue;
+	case EVENT_TYPE_TX_RX:
+		if (e->data == SAI_STATUS_NO_ERROR) {
+			sai_fifo_read(dev, sai_buffer +
+				ctx->buf_index * buffer_size,
+				period_bytes_per_chan);
 
-		status = sai_event.data;
-		switch (sai_event.type) {
-		case SAI_EVENT_IRQ:
-			if (status == SAI_STATUS_NO_ERROR) {
-				sai_fifo_read(dev, sai_buffer +
-						ctx->buf_index * buffer_size,
-						period_bytes_per_chan);
-				sai_fifo_write(dev, sai_buffer +
-						ctx->buf_index * buffer_size,
-						period_bytes_per_chan);
-				sai_enable_irq(dev, true, false);
-				ctx->stats.rec_play_periods++;
-			} else {
-				/* Restart the process in case of error */
-				start_rec_play(ctx);
-				if (status & SAI_STATUS_TX_FF_ERR)
-					ctx->stats.tx_fifo_errs++;
-				if (status & SAI_STATUS_RX_FF_ERR)
-					ctx->stats.rx_fifo_errs++;
-			}
-			break;
-		default:
-			break;
+			sai_fifo_write(dev, sai_buffer +
+				ctx->buf_index * buffer_size,
+				period_bytes_per_chan);
+
+			sai_enable_irq(dev, true, false);
+
+			ctx->buf_index++;
+			if (ctx->buf_index == BUFFER_NUMBER)
+				ctx->buf_index = 0;
+
+			ctx->stats.rec_play_periods++;
+		} else {
+			/* Restart the process in case of error */
+			start_rec_play(ctx);
+
+			if (e->data & SAI_STATUS_TX_FF_ERR)
+				ctx->stats.tx_fifo_errs++;
+
+			if (e->data & SAI_STATUS_RX_FF_ERR)
+				ctx->stats.rx_fifo_errs++;
 		}
 
-		ctx->buf_index++;
-		if (ctx->buf_index == BUFFER_NUMBER)
-			ctx->buf_index = 0;
+		break;
 
-		if (end_time != 0 && xTaskGetTickCount() > end_time)
-			break;
-	} while (1);
+	default:
+		break;
+	}
 
 	return 0;
 }
@@ -161,6 +135,7 @@ static void sai_setup(struct rec_play_ctx *ctx)
 
 void *rec_play_init(void *parameters)
 {
+	struct audio_config *cfg = parameters;
 	size_t frame_bytes_per_chan;
 	size_t period_size = FSL_FEATURE_SAI_FIFO_COUNT / 2;
 	size_t period_bytes_per_chan;
@@ -181,12 +156,10 @@ void *rec_play_init(void *parameters)
 	ctx->bit_width = DEMO_AUDIO_BIT_WIDTH;
 	ctx->period_bytes_per_chan = period_bytes_per_chan;
 	ctx->buffer_size = buffer_size;
-	ctx->run_time = 60000;	/* 60s */
 	ctx->buf_index = 0;
 
-	ctx->event_queue_h = xQueueCreate(SAI_EVENT_QUEUE_LENGTH,
-				sizeof(struct event));
-	os_assert(ctx->event_queue_h, "Can't create event queue.");
+	ctx->event_send = cfg->event_send;
+	ctx->event_data = cfg->event_data;
 
 	sai_setup(ctx);
 
@@ -194,7 +167,7 @@ void *rec_play_init(void *parameters)
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, ctx->sample_rate,
 			ctx->bit_width);
 
-	os_printf("HifiBerry record playback demo is started (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
+	os_printf("Record and playback started (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
 			ctx->sample_rate, ctx->bit_width);
 
 	return ctx;

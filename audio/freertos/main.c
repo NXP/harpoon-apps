@@ -30,11 +30,13 @@
 struct mode_handler {
 	void *(*init)(void *);
 	void (*exit)(void *);
-	int (*run)(void *);
+	int (*run)(void *, struct event *e);
 };
 
 struct data_ctx {
 	os_sem_t semaphore;
+
+	QueueHandle_t event_queue_h;
 
 	const struct mode_handler *handler;
 	void *handle;
@@ -82,27 +84,35 @@ static void hardware_setup(void)
 	board_clock_setup(sai_id);
 }
 
+static void data_send_event(void *userData, uint8_t status)
+{
+	QueueHandle_t event_queue_h = userData;
+	BaseType_t wake = pdFALSE;
+	struct event e;
+
+	e.type = EVENT_TYPE_TX_RX;
+	e.data = status;
+
+	xQueueSendToBackFromISR(event_queue_h, &e, &wake);
+	portYIELD_FROM_ISR(wake);
+}
+
 void data_task(void *pvParameters)
 {
 	struct data_ctx *ctx = pvParameters;
-	bool delay;
+	struct event e;
 
 	do {
-		delay = false;
+		/* check event */
+		if (xQueueReceive(ctx->event_queue_h, &e, portMAX_DELAY) != pdTRUE)
+			continue;
 
 		os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
 
-		if (ctx->handler) {
-			if (ctx->handler->run(ctx->handle) < 0)
-				delay = true;
-		} else {
-			delay = true;
-		}
+		if (ctx->handler)
+			ctx->handler->run(ctx->handle, &e);
 
 		os_sem_give(&ctx->semaphore, 0);
-
-		if (delay)
-			vTaskDelay(pdMS_TO_TICKS(100));
 
 	} while (1);
 }
@@ -119,6 +129,8 @@ static void response(struct mailbox *m, uint32_t status)
 static int audio_run(struct data_ctx *ctx, unsigned int id)
 {
 	int rc = HRPN_RESP_STATUS_ERROR;
+	struct audio_config cfg;
+	struct event e;
 
 	if (ctx->handler)
 		goto exit;
@@ -126,13 +138,21 @@ static int audio_run(struct data_ctx *ctx, unsigned int id)
 	if (id >= ARRAY_SIZE(handler))
 		goto exit;
 
-	ctx->handle = handler[id].init(NULL);
+	cfg.event_send = data_send_event;
+	cfg.event_data = ctx->event_queue_h;
+
+	ctx->handle = handler[id].init(&cfg);
 	if (!ctx->handle)
 		goto exit;
 
 	os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
 	ctx->handler = &handler[id];
 	os_sem_give(&ctx->semaphore, 0);
+
+	/* Send an event to trigger data thread processing */
+	e.type = EVENT_TYPE_START;
+
+	xQueueSendToBack(ctx->event_queue_h, &e, 0);
 
 	rc = HRPN_RESP_STATUS_SUCCESS;
 
@@ -217,6 +237,9 @@ void main_task(void *pvParameters)
 
 	err = os_sem_init(&ctx.semaphore, 1);
 	os_assert(!err, "semaphore initialization failed!");
+
+	ctx.event_queue_h = xQueueCreate(10, sizeof(struct event));
+	os_assert(ctx.event_queue_h, "event queue creation failed");
 
 	ctx.handler = NULL;
 

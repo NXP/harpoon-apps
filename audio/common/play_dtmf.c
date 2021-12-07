@@ -4,16 +4,13 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-#include "FreeRTOS.h"
-#include "task.h"
-
 #include "board.h"
 #include "os/assert.h"
-#include "os/semaphore.h"
 #include "os/stdlib.h"
 #include "sai_drv.h"
 #include "dtmf_wave.h"
 #include "sai_codec_config.h"
+#include "audio.h"
 
 #define DTMF_AUDIO_SRATE 44100 /* default sampling rate */
 #define DTMF_AUDIO_BITWIDTH 32
@@ -28,9 +25,8 @@ static const char default_dtmf_r_seq[] = "#*9876543210DCBA3211";
 struct dtmf_ctx {
 	uint32_t audio_buf[BUFFER_BYTES / 4];
 
-	/* callback semaphore */
-	os_sem_t tx_semaphore;
-	os_sem_t rx_semaphore;
+	void (*event_send)(void *, uint8_t);
+	void *event_data;
 
 	struct sai_device dev;
 
@@ -45,27 +41,18 @@ struct dtmf_ctx {
 	uint32_t phase;
 };
 
-static void rx_callback(uint8_t status, void *userData)
-{
-	struct dtmf_ctx *ctx = userData;
-
-	if (status == SAI_STATUS_NO_ERROR)
-		os_sem_give(&ctx->rx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
-}
-
 static void tx_callback(uint8_t status, void *userData)
 {
 	struct dtmf_ctx *ctx = userData;
 
-	if (status == SAI_STATUS_NO_ERROR)
-		os_sem_give(&ctx->tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
+	ctx->event_send(ctx->event_data, status);
 }
 
-int play_dtmf_run(void *handle)
+int play_dtmf_run(void *handle, struct event *e)
 {
 	struct dtmf_ctx *ctx = handle;
 	struct sai_device *dev = &ctx->dev;
-	int err;
+	int err = 0;
 
 	if (ctx->playing) {
 		/* prepare blank buffer */
@@ -73,12 +60,6 @@ int play_dtmf_run(void *handle)
 
 		/* transmit audio buffer */
 		err = sai_write(dev, (uint8_t *)ctx->audio_buf, ctx->audio_buf_size);
-		if (!err) {
-			err = os_sem_take(&ctx->tx_semaphore, 0,
-					OS_SEM_TIMEOUT_MAX);
-			os_assert(!err, "Can't take the tx semaphore (err: %d)",
-					err);
-		}
 
 		ctx->playing = false;
 	} else {
@@ -93,20 +74,14 @@ int play_dtmf_run(void *handle)
 
 		/* transmit audio buffer */
 		err = sai_write(dev, (uint8_t *)ctx->audio_buf, ctx->audio_buf_size);
-		if (!err) {
-			err = os_sem_take(&ctx->tx_semaphore, 0,
-					OS_SEM_TIMEOUT_MAX);
-			os_assert(!err, "Can't take the tx semaphore (err: %d)",
-					err);
-		}
 
 		ctx->playing = true;
 	}
 
-	return 0;
+	return err;
 }
 
-static void sai_setup(struct dtmf_ctx *ctx)
+static void sai_setup(struct dtmf_ctx *ctx, struct audio_config *cfg)
 {
 	struct sai_cfg sai_config;
 
@@ -117,8 +92,6 @@ static void sai_setup(struct dtmf_ctx *ctx)
 	sai_config.source_clock_hz = DEMO_AUDIO_MASTER_CLOCK;
 	sai_config.tx_sync_mode = DEMO_SAI_TX_SYNC_MODE;
 	sai_config.rx_sync_mode = DEMO_SAI_RX_SYNC_MODE;
-	sai_config.rx_callback = rx_callback;
-	sai_config.rx_user_data = ctx;
 	sai_config.tx_callback = tx_callback;
 	sai_config.tx_user_data = ctx;
 
@@ -127,11 +100,14 @@ static void sai_setup(struct dtmf_ctx *ctx)
 
 void *play_dtmf_init(void *parameters)
 {
+	struct audio_config *cfg = parameters;
 	struct dtmf_ctx *ctx;
-	int err;
 
 	ctx = os_malloc(sizeof(struct dtmf_ctx));
 	os_assert(ctx, "Playing DTMF failed with memory allocation error");
+
+	ctx->event_send = cfg->event_send;
+	ctx->event_data = cfg->event_data;
 
 	ctx->audio_buf_size = BUFFER_BYTES;
 	ctx->sample_rate = DTMF_AUDIO_SRATE;
@@ -142,17 +118,14 @@ void *play_dtmf_init(void *parameters)
 	ctx->phase = 0;
 	ctx->playing = false;
 
-	sai_setup(ctx);
+	sai_setup(ctx, cfg);
 
 	codec_setup();
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, DTMF_AUDIO_SRATE, DTMF_AUDIO_BITWIDTH);
 
-	err = os_sem_init(&ctx->tx_semaphore, 0);
-	os_assert(!err, "tx semaphore initialization failed!");
-
 	memset(ctx->audio_buf, 0, ctx->audio_buf_size);
 
-	os_printf("Playing following DTMF sequence (Sample Rate: %d Hz, Bit Width %d bits)\r\n", ctx->sample_rate, DTMF_AUDIO_BITWIDTH);
+	os_printf("Playing DTMF sequence (Sample Rate: %d Hz, Bit Width %d bits)\r\n", ctx->sample_rate, DTMF_AUDIO_BITWIDTH);
 	os_printf("\tleft channel:  %s\r\n", ctx->dtmf_l_seq);
 	os_printf("\tright channel: %s\r\n", ctx->dtmf_r_seq);
 

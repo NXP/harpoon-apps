@@ -8,36 +8,27 @@
 #include "board.h"
 #include "music.h"
 #include "os/assert.h"
-#include "os/semaphore.h"
-#include "os/unistd.h"
 #include "os/stdlib.h"
 #include "sai_drv.h"
 #include "sai_codec_config.h"
+#include "audio.h"
 
 struct music_ctx {
-	os_sem_t tx_semaphore;
-	os_sem_t rx_semaphore;
+	void (*event_send)(void *, uint8_t);
+	void *event_data;
+
 	struct sai_device dev;
 	uint32_t play_times;
 };
-
-static void rx_callback(uint8_t status, void *userData)
-{
-	struct music_ctx *ctx = userData;
-
-	if (status == SAI_STATUS_NO_ERROR)
-		os_sem_give(&ctx->rx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
-}
 
 static void tx_callback(uint8_t status, void *userData)
 {
 	struct music_ctx *ctx = userData;
 
-	if (status == SAI_STATUS_NO_ERROR)
-		os_sem_give(&ctx->tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
+	ctx->event_send(ctx->event_data, status);
 }
 
-int play_music_run(void *handle)
+int play_music_run(void *handle, struct event *e)
 {
 	struct music_ctx *ctx = handle;
 	struct sai_device *dev = &ctx->dev;
@@ -46,14 +37,8 @@ int play_music_run(void *handle)
 
 	os_printf("play the music: %d times\r", ctx->play_times++);
 	err = sai_write(dev, (uint8_t *)addr, MUSIC_LEN);
-	if (!err) {
-		err = os_sem_take(&ctx->tx_semaphore, 0, OS_SEM_TIMEOUT_MAX);
-		os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
-	}
 
-	os_msleep(2000);
-
-	return 0;
+	return err;
 }
 
 static void sai_setup(struct music_ctx *ctx)
@@ -67,8 +52,6 @@ static void sai_setup(struct music_ctx *ctx)
 	sai_config.source_clock_hz = DEMO_AUDIO_MASTER_CLOCK;
 	sai_config.tx_sync_mode = DEMO_SAI_TX_SYNC_MODE;
 	sai_config.rx_sync_mode = DEMO_SAI_RX_SYNC_MODE;
-	sai_config.rx_callback = rx_callback;
-	sai_config.rx_user_data = ctx;
 	sai_config.tx_callback = tx_callback;
 	sai_config.tx_user_data = ctx;
 
@@ -77,19 +60,21 @@ static void sai_setup(struct music_ctx *ctx)
 
 void *play_music_init(void *parameters)
 {
+	struct audio_config *cfg = parameters;
 	struct music_ctx *ctx;
-	int err;
 
 	ctx = os_malloc(sizeof(struct music_ctx));
-	os_assert(ctx, "Playing DTMF failed with memory allocation error");
+	os_assert(ctx, "Playing MUSIC failed with memory allocation error");
+
+	ctx->event_send = cfg->event_send;
+	ctx->event_data = cfg->event_data;
 
 	sai_setup(ctx);
 
 	codec_setup();
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
-	err = os_sem_init(&ctx->tx_semaphore, 0);
-	os_assert(!err, "tx semaphore initialization failed!");
+	os_printf("Playing MUSIC (Sample Rate: %d Hz, Bit Width %d bits)\r\n", DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
 	ctx->play_times = 1;
 
@@ -105,4 +90,6 @@ void play_music_exit(void *handle)
 	codec_close();
 
 	os_free(ctx);
+
+	os_printf("End.\r\n");
 }
