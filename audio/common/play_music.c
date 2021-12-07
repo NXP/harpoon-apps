@@ -37,23 +37,21 @@ static void tx_callback(uint8_t status, void *userData)
 		os_sem_give(&ctx->tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
-static int play_music_run(void *handle)
+int play_music_run(void *handle)
 {
 	struct music_ctx *ctx = handle;
 	struct sai_device *dev = &ctx->dev;
 	int err;
 	uintptr_t addr = (uintptr_t) music;
 
-	while (1) {
-		os_printf("play the music: %d times\r", ctx->play_times++);
-		err = sai_write(dev, (uint8_t *)addr, MUSIC_LEN);
-		if (!err) {
-			err = os_sem_take(&ctx->tx_semaphore, 0, OS_SEM_TIMEOUT_MAX);
-			os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
-		}
-
-		os_msleep(2000);
+	os_printf("play the music: %d times\r", ctx->play_times++);
+	err = sai_write(dev, (uint8_t *)addr, MUSIC_LEN);
+	if (!err) {
+		err = os_sem_take(&ctx->tx_semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
 	}
+
+	os_msleep(2000);
 
 	return 0;
 }
@@ -77,7 +75,7 @@ static void sai_setup(struct music_ctx *ctx)
 	sai_drv_setup(&ctx->dev, &sai_config);
 }
 
-static void *play_music_init(void *parameters)
+void *play_music_init(void *parameters)
 {
 	struct music_ctx *ctx;
 	int err;
@@ -98,7 +96,7 @@ static void *play_music_init(void *parameters)
 	return ctx;
 }
 
-static void play_music_exit(void *handle)
+void play_music_exit(void *handle)
 {
 	struct music_ctx *ctx = handle;
 
@@ -107,15 +105,4 @@ static void play_music_exit(void *handle)
 	codec_close();
 
 	os_free(ctx);
-}
-
-void play_music_task(void *parameters)
-{
-	void *handle;
-
-	handle = play_music_init(parameters);
-
-	play_music_run(handle);
-
-	play_music_exit(handle);
 }

@@ -37,6 +37,8 @@ struct dtmf_ctx {
 	const char *dtmf_l_seq;
 	const char *dtmf_r_seq;
 
+	bool playing;
+
 	int sample_rate;
 	size_t audio_buf_size;
 	unsigned int dtmf_seq_idx;
@@ -59,13 +61,27 @@ static void tx_callback(uint8_t status, void *userData)
 		os_sem_give(&ctx->tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
-static int play_dtmf_run(void *handle)
+int play_dtmf_run(void *handle)
 {
 	struct dtmf_ctx *ctx = handle;
 	struct sai_device *dev = &ctx->dev;
 	int err;
 
-	while (1) {
+	if (ctx->playing) {
+		/* prepare blank buffer */
+		memset(ctx->audio_buf, 0, ctx->audio_buf_size);
+
+		/* transmit audio buffer */
+		err = sai_write(dev, (uint8_t *)ctx->audio_buf, ctx->audio_buf_size);
+		if (!err) {
+			err = os_sem_take(&ctx->tx_semaphore, 0,
+					OS_SEM_TIMEOUT_MAX);
+			os_assert(!err, "Can't take the tx semaphore (err: %d)",
+					err);
+		}
+
+		ctx->playing = false;
+	} else {
 		/* prepare dtmf audio buffer */
 		generate_dtmf_tone(ctx->audio_buf, ctx->dtmf_l_seq[ctx->dtmf_seq_idx],
 				ctx->dtmf_r_seq[ctx->dtmf_seq_idx], ctx->sample_rate,
@@ -84,17 +100,7 @@ static int play_dtmf_run(void *handle)
 					err);
 		}
 
-		/* prepare blank buffer */
-		memset(ctx->audio_buf, 0, ctx->audio_buf_size);
-
-		/* transmit audio buffer */
-		err = sai_write(dev, (uint8_t *)ctx->audio_buf, ctx->audio_buf_size);
-		if (!err) {
-			err = os_sem_take(&ctx->tx_semaphore, 0,
-					OS_SEM_TIMEOUT_MAX);
-			os_assert(!err, "Can't take the tx semaphore (err: %d)",
-					err);
-		}
+		ctx->playing = true;
 	}
 
 	return 0;
@@ -119,7 +125,7 @@ static void sai_setup(struct dtmf_ctx *ctx)
 	sai_drv_setup(&ctx->dev, &sai_config);
 }
 
-static void *play_dtmf_init(void *parameters)
+void *play_dtmf_init(void *parameters)
 {
 	struct dtmf_ctx *ctx;
 	int err;
@@ -134,6 +140,7 @@ static void *play_dtmf_init(void *parameters)
 
 	ctx->dtmf_seq_idx = 0;
 	ctx->phase = 0;
+	ctx->playing = false;
 
 	sai_setup(ctx);
 
@@ -152,7 +159,7 @@ static void *play_dtmf_init(void *parameters)
 	return ctx;
 }
 
-static void play_dtmf_exit(void *handle)
+void play_dtmf_exit(void *handle)
 {
 	struct dtmf_ctx *ctx = handle;
 
@@ -163,15 +170,4 @@ static void play_dtmf_exit(void *handle)
 	os_free(ctx);
 
 	os_printf("End.\r\n");
-}
-
-void play_dtmf_task(void *parameters)
-{
-	void *handle;
-
-	handle = play_dtmf_init(parameters);
-
-	play_dtmf_run(handle);
-
-	play_dtmf_exit(handle);
 }

@@ -104,6 +104,8 @@ int rec_play2_run(void *handle)
 		}
 #endif
 	} while (1);
+
+	return 0;
 }
 
 static void sai_tx(void *handle)
@@ -203,7 +205,7 @@ static void sai_setup(struct rec_play2_ctx *ctx)
 	sai_drv_setup(&ctx->dev, &sai_config);
 }
 
-static void *rec_play2_init(void *parameters)
+void *rec_play2_init(void *parameters)
 {
 	struct rec_play2_ctx *ctx;
 
@@ -224,7 +226,7 @@ static void *rec_play2_init(void *parameters)
 	return ctx;
 }
 
-static void rec_play2_exit(void *handle)
+void rec_play2_exit(void *handle)
 {
 	struct rec_play2_ctx *ctx = handle;
 
@@ -239,16 +241,3 @@ static void rec_play2_exit(void *handle)
 	os_printf("End.\r\n");
 }
 
-void rec_play2_task(void *parameters)
-{
-	void *ctx;
-
-	ctx = rec_play2_init(parameters);
-
-	rec_play2_run(ctx);
-
-	rec_play2_exit(ctx);
-
-	for (;;)
-		;
-}

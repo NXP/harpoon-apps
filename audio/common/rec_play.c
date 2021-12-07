@@ -212,17 +212,3 @@ void rec_play_exit(void *parameters)
 
 	os_printf("End.\r\n");
 }
-
-void rec_play_task(void *parameters)
-{
-	void *ctx;
-
-	ctx = rec_play_init(NULL);
-
-	rec_play_run(ctx);
-
-	rec_play_exit(ctx);
-
-	for (;;)
-		;
-}

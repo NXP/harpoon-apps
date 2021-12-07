@@ -43,7 +43,7 @@ static void tx_callback(uint8_t status, void *userData)
 		os_sem_give(&ctx->tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
-static int play_sine_run(void *handle)
+int play_sine_run(void *handle)
 {
 	struct sine_ctx *ctx = handle;
 	struct sai_device *dev = &ctx->dev;
@@ -51,12 +51,10 @@ static int play_sine_run(void *handle)
 	size_t len = sizeof(sine_wave);
 	int err;
 
-	while (1) {
-		err = sai_write(dev, (uint8_t *)addr, len);
-		if (!err) {
-			err = os_sem_take(&ctx->tx_semaphore, 0, OS_SEM_TIMEOUT_MAX);
-			os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
-		}
+	err = sai_write(dev, (uint8_t *)addr, len);
+	if (!err) {
+		err = os_sem_take(&ctx->tx_semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
 	}
 
 	return 0;
@@ -81,7 +79,7 @@ static void sai_setup(struct sine_ctx *ctx)
 	sai_drv_setup(&ctx->dev, &sai_config);
 }
 
-static void *play_sine_init(void *parameters)
+void *play_sine_init(void *parameters)
 {
 	struct sine_ctx *ctx;
 	int err;
@@ -96,13 +94,14 @@ static void *play_sine_init(void *parameters)
 
 	os_printf("HifiBerry playing Sine wave is started (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
 			PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
+
 	err = os_sem_init(&ctx->tx_semaphore, 0);
 	os_assert(!err, "tx semaphore initialization failed!");
 
 	return ctx;
 }
 
-static void play_sine_exit(void *handle)
+void play_sine_exit(void *handle)
 {
 	struct sine_ctx *ctx = handle;
 
@@ -111,15 +110,4 @@ static void play_sine_exit(void *handle)
 	codec_close();
 
 	os_free(ctx);
-}
-
-void play_sine_task(void *parameters)
-{
-	void *handle;
-
-	handle = play_sine_init(parameters);
-
-	play_sine_run(handle);
-
-	play_sine_exit(handle);
 }
