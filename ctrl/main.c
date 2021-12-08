@@ -16,6 +16,9 @@
 
 #define COMMAND_TIMEOUT	1000	/* 1 sec */
 
+#define FREQUENCY_DEFAULT	44100
+#define PERIOD_DEFAULT		32
+
 static void usage(void)
 {
 	printf("\nUsage:\nharpoon_ctrl [latency|audio] [options]\n");
@@ -24,11 +27,19 @@ static void usage(void)
 		"\t-r <id>        run latency test case id\n"
 		"\t-s             stop running test case\n"
 		"\nAudio options:\n"
+		"\n-f <frequency> audio clock frequency (in Hz)\n"
+		"\n-p <samples>   audio processing period (in samples)\n"
+		"\n-r <id>        run audio mode id:\n"
+		"\n           0 - dtmf playback\n"
+		"\n           1 - music playback\n"
+		"\n           2 - sine wave playback\n"
+		"\n           3 - playback & recording (loopback)\n"
+		"\n-s             stop running audio mode\n"
 		"\nCommon options:\n"
 		"\t-v             print version\n");
 }
 
-static int command(struct mailbox *m, void *cmd, unsigned int cmd_len, void *resp, unsigned int *resp_len, unsigned int timeout_ms)
+static int command(struct mailbox *m, void *cmd, unsigned int cmd_len, unsigned int resp_type, void *resp, unsigned int *resp_len, unsigned int timeout_ms)
 {
 	int count = timeout_ms / 100;
 	struct hrpn_response *r;
@@ -48,7 +59,7 @@ static int command(struct mailbox *m, void *cmd, unsigned int cmd_len, void *res
 
 		r = resp;
 
-		if (r->u.resp.type != HRPN_RESP_TYPE_LATENCY) {
+		if (r->u.resp.type != resp_type) {
 			rc = -1;
 			printf("command response mismatch: %x\n", r->u.resp.type);
 		} else if (r->u.resp.status != HRPN_RESP_STATUS_SUCCESS) {
@@ -65,19 +76,74 @@ exit:
 	return rc;
 }
 
-static int audio_run(unsigned int test)
+static int audio_run(struct mailbox *m, unsigned int id, unsigned int frequency, unsigned int period)
 {
-	return 0;
+	struct hrpn_cmd_audio_run run;
+	struct hrpn_response resp;
+	unsigned int len;
+
+	run.type = HRPN_CMD_TYPE_AUDIO_RUN;
+	run.id = id;
+	run.frequency = frequency;
+	run.period = period;
+
+	len = sizeof(resp);
+
+	return command(m, &run, sizeof(run), HRPN_RESP_TYPE_AUDIO, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int audio_stop(void)
+static int audio_stop(struct mailbox *m)
 {
-	return 0;
+	struct hrpn_cmd_audio_stop stop;
+	struct hrpn_response resp;
+	unsigned int len;
+
+	stop.type = HRPN_CMD_TYPE_AUDIO_STOP;
+
+	len = sizeof(resp);
+
+	return command(m, &stop, sizeof(stop), HRPN_RESP_TYPE_AUDIO, &resp, &len, COMMAND_TIMEOUT);
 }
 
 static int audio_main(int argc, char *argv[], struct mailbox *m)
 {
-	return 0;
+	int option;
+	unsigned int id;
+	int rc = 0;
+	unsigned int frequency = FREQUENCY_DEFAULT;
+	unsigned int period = PERIOD_DEFAULT;
+
+	while ((option = getopt(argc, argv, "f:p:r:sv")) != -1) {
+		switch (option) {
+		case 'f':
+			frequency = strtoul(optarg, NULL, 0);
+			break;
+
+		case 'p':
+			period = strtoul(optarg, NULL, 0);
+			break;
+
+		case 'r':
+			id = strtoul(optarg, NULL, 0);
+
+			rc = audio_run(m, id, frequency, period);
+			break;
+
+		case 's':
+			rc = audio_stop(m);
+			break;
+
+		case 'v':
+			printf("Harpoon v.%s\n", VERSION);
+			break;
+
+		default:
+			usage();
+			break;
+		}
+	}
+
+	return rc;
 }
 
 static int latency_run(struct mailbox *m, unsigned int id)
@@ -91,7 +157,7 @@ static int latency_run(struct mailbox *m, unsigned int id)
 
 	len = sizeof(resp);
 
-	return command(m, &run, sizeof(run), &resp, &len, COMMAND_TIMEOUT);
+	return command(m, &run, sizeof(run), HRPN_RESP_TYPE_LATENCY, &resp, &len, COMMAND_TIMEOUT);
 }
 
 static int latency_stop(struct mailbox *m)
@@ -104,7 +170,7 @@ static int latency_stop(struct mailbox *m)
 
 	len = sizeof(resp);
 
-	return command(m, &stop, sizeof(stop), &resp, &len, COMMAND_TIMEOUT);
+	return command(m, &stop, sizeof(stop), HRPN_RESP_TYPE_LATENCY, &resp, &len, COMMAND_TIMEOUT);
 }
 
 static int latency_main(int argc, char *argv[], struct mailbox *m)
