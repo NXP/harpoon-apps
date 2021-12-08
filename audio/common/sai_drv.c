@@ -20,6 +20,7 @@ struct sai_dev_data {
 	void *base;
 	sai_handle_t *tx_handle;
 	sai_handle_t *rx_handle;
+	enum sai_mode working_mode;
 };
 
 struct drv_cb_user_data {
@@ -48,7 +49,8 @@ int sai_read(struct sai_device *dev, uint8_t *addr, size_t len)
 
 	xfer.data = addr;
 	xfer.dataSize = len;
-	ret = SAI_TransferReceiveNonBlocking(dev->sai_base, dev->sai_rx_handle, &xfer);
+	ret = SAI_TransferReceiveNonBlocking(dev->sai_base, dev->sai_rx_handle,
+			&xfer);
 
 	return (ret == kStatus_Success) ? 0 : -1;
 }
@@ -60,10 +62,123 @@ int sai_write(struct sai_device *dev, uint8_t *addr, size_t len)
 
 	xfer.data     = addr;
 	xfer.dataSize = len;
-	ret = SAI_TransferSendNonBlocking(dev->sai_base, dev->sai_tx_handle, &xfer);
+	ret = SAI_TransferSendNonBlocking(dev->sai_base, dev->sai_tx_handle,
+			&xfer);
 
 	return (ret == kStatus_Success) ? 0 : -1;
 }
+
+void sai_fifo_read(struct sai_device *dev, uint8_t *addr, size_t len)
+{
+	sai_handle_t *handle = dev->sai_rx_handle;
+
+	SAI_ReadNonBlocking(dev->sai_base, handle->channel, handle->channelMask,
+			handle->endChannel, handle->bitWidth, addr, len);
+}
+
+void sai_fifo_write(struct sai_device *dev, uint8_t *addr, size_t len)
+{
+	sai_handle_t *handle = dev->sai_tx_handle;
+
+	SAI_WriteNonBlocking(dev->sai_base, handle->channel, handle->channelMask,
+			handle->endChannel, handle->bitWidth, addr, len);
+}
+
+void sai_enable_irq(struct sai_device *dev, bool rx_irq, bool tx_irq)
+{
+	if (rx_irq) {
+		/* Enable Rx interrupt */
+#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+		/* Use FIFO request interrupt and fifo error*/
+		SAI_RxEnableInterrupts(dev->sai_base,
+				I2S_TCSR_FEIE_MASK | I2S_TCSR_FRIE_MASK);
+#else
+		SAI_RxEnableInterrupts(dev->sai_base,
+				I2S_TCSR_FEIE_MASK | I2S_TCSR_FWIE_MASK);
+#endif /* FSL_FEATURE_SAI_FIFO_COUNT */
+	}
+
+	if (tx_irq) {
+		/* Enable Tx interrupt */
+#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+		/* Use FIFO request interrupt and fifo error*/
+		SAI_TxEnableInterrupts(dev->sai_base,
+				I2S_TCSR_FEIE_MASK | I2S_TCSR_FRIE_MASK);
+#else
+		SAI_TxEnableInterrupts(dev->sai_base,
+				I2S_TCSR_FEIE_MASK | I2S_TCSR_FWIE_MASK);
+#endif
+	}
+}
+
+void sai_disable_irq(struct sai_device *dev, bool rx_irq, bool tx_irq)
+{
+	if (rx_irq) {
+		/* Disable Rx interrupt */
+ #if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+		SAI_RxDisableInterrupts(dev->sai_base,
+				I2S_TCSR_FEIE_MASK | I2S_TCSR_FRIE_MASK);
+#else
+		SAI_RxDisableInterrupts(dev->sai_base,
+				I2S_TCSR_FEIE_MASK | I2S_TCSR_FWIE_MASK);
+#endif /* FSL_FEATURE_SAI_FIFO_COUNT */
+	}
+
+	if (tx_irq) {
+		/* Disable Tx interrupt */
+#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+		/* Use FIFO request interrupt and fifo error*/
+		SAI_TxDisableInterrupts(dev->sai_base,
+				I2S_TCSR_FEIE_MASK | I2S_TCSR_FRIE_MASK);
+#else
+		SAI_TxDisableInterrupts(dev->sai_base,
+				I2S_TCSR_FEIE_MASK | I2S_TCSR_FWIE_MASK);
+#endif
+	}
+}
+
+void sai_enable_rx(struct sai_device *dev, bool enable_irq)
+{
+	if (enable_irq)
+		sai_enable_irq(dev, true, false);
+
+	/* Enable Rx transfer */
+	SAI_RxEnable(dev->sai_base, true);
+}
+
+void sai_enable_tx(struct sai_device *dev, bool enable_irq)
+{
+	if (enable_irq)
+		sai_enable_irq(dev, false, true);
+
+	/* Enable Tx transfer */
+	SAI_TxEnable(dev->sai_base, true);
+}
+
+void reset_rx_fifo(struct sai_device *dev)
+{
+	sai_handle_t *handle = dev->sai_rx_handle;
+
+	/* Stop the transfer firstly for safe */
+	SAI_TransferAbortReceive(dev->sai_base, handle);
+	/* Clear FIFO error flag for safe */
+	SAI_RxClearStatusFlags(dev->sai_base, I2S_RCSR_FEF_MASK);
+	/* Reset FIFO */
+	SAI_RxSoftwareReset(dev->sai_base, kSAI_ResetTypeFIFO);
+}
+
+void reset_tx_fifo(struct sai_device *dev)
+{
+	sai_handle_t *handle = dev->sai_tx_handle;
+
+	/* Stop the transfer firstly for safe */
+	SAI_TransferAbortSend(dev->sai_base, handle);
+	/* Clear FIFO error for safe */
+	SAI_TxClearStatusFlags(dev->sai_base, I2S_TCSR_FEF_MASK);
+	/* Reset FIFO */
+	SAI_TxSoftwareReset(dev->sai_base, kSAI_ResetTypeFIFO);
+}
+
 
 static void sai_master_clock_config(struct sai_cfg *sai_config)
 {
@@ -75,12 +190,46 @@ static void sai_master_clock_config(struct sai_cfg *sai_config)
 	SAI_SetMasterClockConfig(sai, &mclkConfig);
 }
 
+static void irq_handle_continuous(I2S_Type *base, sai_handle_t *handle)
+{
+
+	struct drv_cb_user_data *drv_user_data;
+	uint8_t status = SAI_STATUS_NO_ERROR;
+
+	os_assert(handle != NULL, "SAI handle is NULL");
+
+	drv_user_data = (struct drv_cb_user_data *)handle->userData;
+
+	/* Tx FIFI Error */
+	if (((base->TCSR) & (uint32_t)I2S_TCSR_FEF_MASK) != 0UL) {
+		status |= SAI_STATUS_TX_FF_ERR;
+		SAI_TransferAbortSend(base, handle);
+	}
+
+	/* Rx FIFI Error */
+	if (((base->RCSR) & (uint32_t)I2S_RCSR_FEF_MASK) != 0UL) {
+		status |= SAI_STATUS_RX_FF_ERR;
+		SAI_TransferAbortReceive(base, handle);
+	}
+
+	if (drv_user_data->app_user_data)
+		*(uint8_t *)drv_user_data->app_user_data = status;
+
+	drv_user_data->app_callback(drv_user_data->dev,
+				drv_user_data->app_user_data);
+}
+
 static void sai_irq_handler(void *sai_dev_data)
 {
 	 struct sai_dev_data *sai_data = sai_dev_data;
 	 I2S_Type *base = sai_data->base;
 	 uint32_t reg_rcsr = base->RCSR;
 	 uint32_t reg_tcsr = base->TCSR;
+
+	 if (sai_data->working_mode == SAI_CONTINUE_MODE) {
+		irq_handle_continuous(base, sai_data->rx_handle);
+		return;
+	 }
 
 #if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
 	if ((reg_rcsr & (I2S_RCSR_FRIE_MASK | I2S_RCSR_FEIE_MASK))
@@ -161,6 +310,10 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 	config.syncMode = sai_config->rx_sync_mode;
 	SAI_TransferRxSetConfig(sai, &rx_handle, &config);
 
+	/* Set FIFO to continue from next frame on error */
+	sai->TCR4 &= ~I2S_TCR4_FCONT_MASK;
+	sai->RCR4 &= ~I2S_RCR4_FCONT_MASK;
+
 #ifdef PLAT_WITH_AUDIOMIX
 	/* SAI bit clock source */
 #ifdef CODEC_WM8960
@@ -197,6 +350,7 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 	dev_data.base = sai;
 	dev_data.tx_handle = &tx_handle;
 	dev_data.rx_handle = &rx_handle;
+	dev_data.working_mode = sai_config->working_mode;
 
 	/* Currently rx and tx use the same irq number */
 	sai_irq_n = s_saiTxIRQ[sai_id];
