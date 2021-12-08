@@ -180,10 +180,10 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 	/* master clock configurations */
 	sai_master_clock_config(sai_config);
 
-	tx_cb_user_data.dev = &dev;
+	tx_cb_user_data.dev = dev;
 	tx_cb_user_data.app_callback = sai_config->tx_callback;
 	tx_cb_user_data.app_user_data = sai_config->tx_user_data;
-	rx_cb_user_data.dev = &dev;
+	rx_cb_user_data.dev = dev;
 	rx_cb_user_data.app_callback = sai_config->rx_callback;
 	rx_cb_user_data.app_user_data = sai_config->rx_user_data;
 
