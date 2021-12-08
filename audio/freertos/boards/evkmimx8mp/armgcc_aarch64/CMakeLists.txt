@@ -42,26 +42,9 @@ else()
 message(FATAL_ERROR "Please set Codec device")
 endif()
 
-if(DEMO_TYPE STREQUAL "play_dtmf")
-  SET(demo_name "play_dtmf")
-  STRING(APPEND app_extra_flags " -DDEMO_MODE=0")
-elseif(DEMO_TYPE STREQUAL "play_music")
-  SET(demo_name "play_music")
-  STRING(APPEND app_extra_flags " -DDEMO_MODE=1")
-elseif(DEMO_TYPE STREQUAL "play_sine")
-  SET(demo_name "play_sine")
-  STRING(APPEND app_extra_flags " -DDEMO_MODE=2")
-elseif(DEMO_TYPE STREQUAL "rec_play")
-  SET(demo_name "rec_play")
-  STRING(APPEND app_extra_flags " -DDEMO_MODE=3")
-else(DEMO_TYPE STREQUAL "rec_play2")
-  SET(demo_name "rec_play2")
-  STRING(APPEND app_extra_flags " -DDEMO_MODE=4")
-endif()
+project(audio)
 
-project(${demo_name})
-
-set(MCUX_SDK_PROJECT_NAME ${demo_name}.elf)
+set(MCUX_SDK_PROJECT_NAME audio.elf)
 
 include(${ProjDirPath}/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
@@ -161,4 +144,4 @@ target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE nosys)
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)
 
 ADD_CUSTOM_COMMAND(TARGET ${MCUX_SDK_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY}
--Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/${demo_name}.bin)
+-Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/audio.bin)
