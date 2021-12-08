@@ -15,6 +15,10 @@
 #include "os/stdio.h"
 #include "os/semaphore.h"
 
+#include "ivshmem.h"
+#include "mailbox.h"
+#include "hrpn_ctrl.h"
+
 #include "sai_clock_config.h"
 #include "sai_codec_config.h"
 #include "sai_drv.h"
@@ -103,11 +107,113 @@ void data_task(void *pvParameters)
 	} while (1);
 }
 
+static void response(struct mailbox *m, uint32_t status)
+{
+	struct hrpn_resp_audio resp;
+
+	resp.type = HRPN_RESP_TYPE_AUDIO;
+	resp.status = status;
+	mailbox_resp_send(m, &resp, sizeof(resp));
+}
+
+static int audio_run(struct data_ctx *ctx, unsigned int id)
+{
+	int rc = HRPN_RESP_STATUS_ERROR;
+
+	if (ctx->handler)
+		goto exit;
+
+	if (id >= ARRAY_SIZE(handler))
+		goto exit;
+
+	ctx->handle = handler[id].init(NULL);
+	if (!ctx->handle)
+		goto exit;
+
+	os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	ctx->handler = &handler[id];
+	os_sem_give(&ctx->semaphore, 0);
+
+	rc = HRPN_RESP_STATUS_SUCCESS;
+
+exit:
+	return rc;
+}
+
+static int audio_stop(struct data_ctx *ctx)
+{
+	const struct mode_handler *handler;
+
+	if (!ctx->handler)
+		goto exit;
+
+	os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	handler = ctx->handler;
+	ctx->handler = NULL;
+	os_sem_give(&ctx->semaphore, 0);
+
+	handler->exit(ctx->handle);
+
+exit:
+	return HRPN_RESP_STATUS_SUCCESS;
+}
+
+static void command_handler(struct mailbox *m, struct data_ctx *ctx)
+{
+	struct hrpn_command cmd;
+	unsigned int len;
+	int rc;
+
+	len = sizeof(cmd);
+	if (mailbox_cmd_recv(m, &cmd, &len) < 0)
+		return;
+
+	switch (cmd.u.cmd.type) {
+	case HRPN_CMD_TYPE_AUDIO_RUN:
+		if (len != sizeof(struct hrpn_cmd_audio_run)) {
+			response(m, HRPN_RESP_STATUS_ERROR);
+			break;
+		}
+
+		rc = audio_run(ctx, cmd.u.audio_run.id);
+
+		response(m, rc);
+
+		break;
+
+	case HRPN_CMD_TYPE_AUDIO_STOP:
+		if (len != sizeof(struct hrpn_cmd_audio_stop)) {
+			response(m, HRPN_RESP_STATUS_ERROR);
+			break;
+		}
+
+		rc = audio_stop(ctx);
+
+		response(m, rc);
+
+		break;
+
+	default:
+		response(m, HRPN_RESP_STATUS_ERROR);
+		break;
+	}
+}
+
 void main_task(void *pvParameters)
 {
 	struct data_ctx ctx;
+	struct ivshmem mem;
+	struct mailbox m;
 	BaseType_t xResult;
 	int err;
+	int rc;
+
+	rc = ivshmem_init(0, &mem);
+	os_assert(!rc, "ivshmem initialization failed, can not proceed\r\n");
+
+	os_assert(mem.out_size, "ivshmem mis-configuration, can not proceed\r\n");
+
+	mailbox_init(&m, mem.out, mem.out + mem.out_size * mem.id, false);
 
 	err = os_sem_init(&ctx.semaphore, 1);
 	os_assert(!err, "semaphore initialization failed!");
@@ -119,14 +225,10 @@ void main_task(void *pvParameters)
                         data_task_PRIORITY, NULL);
 	os_assert(xResult == pdPASS, "data task creation failed");
 
-	ctx.handle = handler[DEMO_MODE].init(NULL);
-
-	os_sem_take(&ctx.semaphore, 0, OS_SEM_TIMEOUT_MAX);
-	ctx.handler = &handler[DEMO_MODE];
-	os_sem_give(&ctx.semaphore, 0);
-
 	do {
-		vTaskDelay(pdMS_TO_TICKS(1000));
+		command_handler(&m, &ctx);
+
+		vTaskDelay(pdMS_TO_TICKS(100));
 
 	} while(1);
 }
