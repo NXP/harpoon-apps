@@ -89,6 +89,9 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
+    ${CommonPath}/libs/jailhouse
+    ${CommonPath}/libs/mailbox
+    ${CommonPath}/libs/ctrl
     ${RtosPath}
     ${SdkDirPath}
 )
@@ -101,6 +104,10 @@ include(all_devices)
 
 include(common_freertos)
 include(common_freertos_core_armv8a)
+
+include(lib_jailhouse)
+include(lib_mailbox)
+include(lib_ctrl)
 
 include(component_codec_i2c_MIMX8MM6)
 include(component_iuart_adapter)
