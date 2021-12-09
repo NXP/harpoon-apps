@@ -6,51 +6,59 @@ Version: 2.0.0
 Package License: LA_OPT_NXP_Software_License.txt - Production Use, Section 2.3 applies
 License File: LICENSES/LA_OPT_NXP_Software_License.txt
 
-Harpoon_Apps               Name: Harpoon application examples
-                           Version: 1.0
-                           Outgoing License: BSD-3-Clause
-                           License File: LICENSES/COPYING-BSD-3
-                           Format: source code, project files, linker files
-                           Description: SDK-based examples to show how
-                           to use peripheral drivers, integrate middleware
-                           and execute application inside jailhouse cells
-                           on a ARM Cortex-A53 core.
-                           Location: harpoon-apps/
-                           Origin: NXP (BSD-3-Clause)
-                           Url: https://github.com/NXPmicro/harpoon-apps
+Package:                     Harpoon Apps
+Version:                     2.0.0
+Outgoing License:            BSD-3-Clause
+License File:                LICENSES/COPYING-BSD-3
+Package Category:            BSP
+Type of Content:             source code, project files, linker files
+Description and comments:    Harpoon application examples
+                             SDK-based examples to show how to use peripheral
+                             drivers, integrate middleware and execute application
+                             inside jailhouse cells on a ARM Cortex-A53 core.
+Release Location:            https://github.com/NXPmicro/harpoon-apps
+Origin                       NXP (BSD-3-Clause)
 
-MCUXpresso_SDK             Name: MCUXpresso Software Development Kit (SDK)
-                           Version: 2.x.x
-                           Outgoing License: LA_OPT_NXP_Software_License.txt
-                           - Additional distribution license granted -
-                           License in Section 2.3 applies
-                           License File: mcux-sdk/LA_OPT_NXP_Software_License.txt
-                           Format: source code
-                           Description: Full SDK including device system files,
-                           middleware components, board peripheral drivers, etc.
-                           See mcux-sdk software content register for details:
-                           Software content register: mcux-sdk/SW-Content-Register.txt
-                           Location: mcux-sdk/
-                           Origin: NXP (LA_OPT_NXP_Software_License)
-                           Url: https://github.com/NXPmicro/mcux-sdk
+--------------------------------------------
 
-FreeRTOS-Kernel            Name: FreeRTOS kernel files only
-                           Version: V10.4.3
-                           Outgoing License: MIT
-                           License File: FreeRTOS-Kernel/LICENSE.md
-                           Format: source code
-                           Description: IoT operating system for microcontrollers
-                           Location: FreeRTOS-Kernel
-                           Origin: Amazon (MIT)
-                           Url: https://github.com/FreeRTOS/FreeRTOS-Kernel
+Package:                     MCUXpresso SDK
+Version:                     2.10.0
+Outgoing License:            LA_OPT_NXP_Software_License.txt
+                             - Additional distribution license granted -
+                             License in Section 2.3 applies
+License File:                mcux-sdk/LA_OPT_NXP_Software_License.txt
+Package Category:            BSP
+Type of Content:             Source code
+Description and comments:    MCUXpresso Software Development Kit (SDK)
+                             Description: Full SDK including device system files,
+                             middleware components, board peripheral drivers, etc.
+                             See mcux-sdk software content register for details:
+                             Software content register: mcux-sdk/SW-Content-Register.txt
+Release Location:            https://github.com/NXPmicro/mcux-sdk
+Origin:                      NXP (LA_OPT_NXP_Software_License) - https://github.com/NXPmicro/mcux-sdk
 
-FreeRTOS Cortex-A53 port   Name: Cortex-A53 port with system register interface
-                           Version: 4e3bf0f5c0efecf731c4e562defdba8aa01c15cb
-                           Outgoing License: MIT
-                           License File: FreeRTOS-Kernel/LICENSE.md
-                           Format: source code
-                           Description: IoT operating system for ARM Cortex-A53
-                           Location: FreeRTOS-Kernel/portable/GCC/ARM_CA53_64_BIT_SRE
-                           Origin: Amazon (MIT)
-                           Url: https://github.com/FreeRTOS/FreeRTOS-Kernel
+--------------------------------------------
 
+Package:                     FreeRTOS-Kernel
+Version:                     10.4.3
+Outgoing License:            MIT
+License File:                FreeRTOS-Kernel/LICENSE.md
+Package Category:            BSP
+Type of Content:             Source code
+Description and comments:    FreeRTOS kernel files only
+                             IoT operating system for microcontrollers
+Release Location:            https://github.com/NXPmicro/FreeRTOS-Kernel
+Origin:                      Amazon (MIT) - https://github.com/FreeRTOS/FreeRTOS-Kernel
+
+--------------------------------------------
+
+Package:                     FreeRTOS Cortex-A53 port
+Version:                     4e3bf0f5c0efecf731c4e562defdba8aa01c15cb
+Outgoing License:            MIT
+License File:                FreeRTOS-Kernel/LICENSE.md
+Package Category:            BSP
+Type of Content:             Source code
+Description and comments:    Cortex-A53 port with system register interface
+                             IoT operating system for ARM Cortex-A53
+Release Location:            https://github.com/NXPmicro/FreeRTOS-Kernel
+Origin:                      Amazon (MIT) - https://github.com/FreeRTOS/FreeRTOS-Kernel
