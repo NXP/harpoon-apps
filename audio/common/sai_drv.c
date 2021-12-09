@@ -366,3 +366,10 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 
 	return 0;
 }
+
+void sai_drv_exit(struct sai_device *dev)
+{
+	I2S_Type *sai = (I2S_Type *)dev->sai_base;
+
+	SAI_Deinit(sai);
+}
