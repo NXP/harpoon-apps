@@ -20,7 +20,7 @@ SET(CMAKE_EXECUTABLE_LIBRARY_SUFFIX)
 
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
 SET(SdkDirPath "${ProjDirPath}/../../../../../../mcux-sdk")
-SET(RtosPath "${ProjDirPath}/../../../../../../freertos")
+SET(RtosPath "${ProjDirPath}/../../../../../../FreeRTOS-Kernel")
 SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/evkmimx8mm")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(AppPath "${ProjDirPath}/../../../..")

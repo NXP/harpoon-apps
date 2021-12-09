@@ -86,7 +86,6 @@ bin/helper.cfg
 *.tags*
 /lib
 tags
-!rtos/freertos/Source/portable/IAR
 *.json
 bin/helper.cfg
 cmake_install.cmake

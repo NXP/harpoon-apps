@@ -34,22 +34,23 @@ MCUXpresso_SDK             Name: MCUXpresso Software Development Kit (SDK)
                            Origin: NXP (LA_OPT_NXP_Software_License)
                            Url: https://github.com/NXPmicro/mcux-sdk
 
-FreeRTOS                   Name: FreeRTOS kernel files only
+FreeRTOS-Kernel            Name: FreeRTOS kernel files only
                            Version: V10.4.3
                            Outgoing License: MIT
-                           License File: freertos/LICENSE.md
+                           License File: FreeRTOS-Kernel/LICENSE.md
                            Format: source code
                            Description: IoT operating system for microcontrollers
-                           Location: freertos
+                           Location: FreeRTOS-Kernel
                            Origin: Amazon (MIT)
                            Url: https://github.com/FreeRTOS/FreeRTOS-Kernel
 
 FreeRTOS Cortex-A53 port   Name: Cortex-A53 port with system register interface
                            Version: 4e3bf0f5c0efecf731c4e562defdba8aa01c15cb
                            Outgoing License: MIT
-                           License File: freertos/LICENSE.md
+                           License File: FreeRTOS-Kernel/LICENSE.md
                            Format: source code
                            Description: IoT operating system for ARM Cortex-A53
-                           Location: freertos/portable/GCC/ARM_CA53_64_BIT_SRE
+                           Location: FreeRTOS-Kernel/portable/GCC/ARM_CA53_64_BIT_SRE
                            Origin: Amazon (MIT)
                            Url: https://github.com/FreeRTOS/FreeRTOS-Kernel
+

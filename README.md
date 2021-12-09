@@ -109,7 +109,7 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │       └── i2c_test.c                  <-- hardware/os-independent source code for the application
 │   ├── README.md
 │   └── west.yml
-├── freertos                                <-- FreeRTOS-Kernel Git tree
+├── FreeRTOS-Kernel                         <-- RTOS Kernel Git tree
 ├── mcux-sdk                                <-- MCUXpresso Git tree
 │   ├── ...
 │   ├── components
