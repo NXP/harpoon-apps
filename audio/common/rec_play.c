@@ -49,20 +49,19 @@ struct rec_play_ctx {
 	uint32_t chan_numbers;
 };
 
-static void rx_tx_callback(const void *dev, void *userData)
+static void rx_tx_callback(uint8_t status, void *user_data)
 {
 	struct event e;
 	BaseType_t wake = pdFALSE;
 	BaseType_t ret;
-	struct sai_device *s_dev = (struct sai_device *)dev;
-	struct rec_play_ctx *ctx = (struct rec_play_ctx*)userData;
+	struct rec_play_ctx *ctx = (struct rec_play_ctx*)user_data;
 
 	os_assert(ctx, "userData is NULL in callback.");
 
-	sai_disable_irq(s_dev, true, false);
+	sai_disable_irq(&ctx->dev, true, false);
 
 	e.type = SAI_EVENT_IRQ;
-	e.data = ctx->irq_status;
+	e.data = status;
 	ret = xQueueSendToBackFromISR(ctx->event_queue_h, &e, &wake);
 	if (ret != pdPASS)
 		ctx->stats.queue_errs++;
