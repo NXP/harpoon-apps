@@ -102,7 +102,7 @@ static void play_music_exit(void *handle)
 {
 	struct music_ctx *ctx = handle;
 
-	/* Stop SAI */
+	sai_drv_exit(&ctx->dev);
 
 	codec_close();
 
