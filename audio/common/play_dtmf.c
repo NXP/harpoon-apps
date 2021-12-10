@@ -153,7 +153,7 @@ static void play_dtmf_exit(void *handle)
 {
 	struct dtmf_ctx *ctx = handle;
 
-	/* Stop SAI */
+	sai_drv_exit(&ctx->dev);
 
 	codec_close();
 
