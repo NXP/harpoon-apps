@@ -212,10 +212,7 @@ static void irq_handle_continuous(I2S_Type *base, sai_handle_t *handle)
 		SAI_TransferAbortReceive(base, handle);
 	}
 
-	if (drv_user_data->app_user_data)
-		*(uint8_t *)drv_user_data->app_user_data = status;
-
-	drv_user_data->app_callback(drv_user_data->dev,
+	drv_user_data->app_callback(status,
 				drv_user_data->app_user_data);
 }
 
@@ -258,9 +255,13 @@ static void rx_callback(I2S_Type *base, sai_handle_t *handle,
 {
 	struct drv_cb_user_data *drv_user_data =
 		(struct drv_cb_user_data *)user_data;
+	uint8_t sai_status;
 
-	if (status != kStatus_SAI_RxError && drv_user_data->app_callback)
-		drv_user_data->app_callback(drv_user_data->dev,
+	sai_status = (status == kStatus_SAI_RxError) ?
+		SAI_STATUS_RX_FF_ERR: SAI_STATUS_NO_ERROR;
+
+	if (drv_user_data->app_callback)
+		drv_user_data->app_callback(sai_status,
 				drv_user_data->app_user_data);
 }
 
@@ -269,9 +270,13 @@ static void tx_callback(I2S_Type *base, sai_handle_t *handle,
 {
 	struct drv_cb_user_data *drv_user_data =
 		(struct drv_cb_user_data *)user_data;
+	uint8_t sai_status;
 
-	if (status != kStatus_SAI_TxError && drv_user_data->app_callback)
-		drv_user_data->app_callback(drv_user_data->dev,
+	sai_status = (status == kStatus_SAI_TxError) ?
+		SAI_STATUS_TX_FF_ERR : SAI_STATUS_NO_ERROR;
+
+	if (drv_user_data->app_callback)
+		drv_user_data->app_callback(sai_status,
 				drv_user_data->app_user_data);
 }
 

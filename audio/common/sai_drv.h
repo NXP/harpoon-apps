@@ -22,7 +22,7 @@ struct sai_device {
 	void *sai_base;
 };
 
-typedef void (*sai_callback_t)(const void *dev, void *user_data);
+typedef void (*sai_callback_t)(uint8_t status, void *user_data);
 
 enum sai_mode {
 	SAI_NORMAL_MODE,
