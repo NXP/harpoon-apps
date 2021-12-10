@@ -65,12 +65,15 @@ static int play_dtmf_run(void *handle)
 	struct sai_device *dev = &ctx->dev;
 	int err;
 
-	while (ctx->dtmf_seq_idx < strlen(ctx->dtmf_l_seq)) {
+	while (1) {
 		/* prepare dtmf audio buffer */
 		generate_dtmf_tone(ctx->audio_buf, ctx->dtmf_l_seq[ctx->dtmf_seq_idx],
 				ctx->dtmf_r_seq[ctx->dtmf_seq_idx], ctx->sample_rate,
 				DTMF_TONE_DURATION_MS, &ctx->phase);
+
 		ctx->dtmf_seq_idx++;
+		if (ctx->dtmf_seq_idx >= strlen(ctx->dtmf_l_seq))
+			ctx->dtmf_seq_idx = 0;
 
 		/* transmit audio buffer */
 		err = sai_write(dev, (uint8_t *)ctx->audio_buf, ctx->audio_buf_size);
