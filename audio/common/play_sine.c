@@ -106,7 +106,7 @@ static void play_sine_exit(void *handle)
 {
 	struct sine_ctx *ctx = handle;
 
-	/* Stop SAI */
+	sai_drv_exit(&ctx->dev);
 
 	codec_close();
 
