@@ -21,6 +21,13 @@ struct music_ctx {
 	uint32_t play_times;
 };
 
+void play_music_stats(void *handle)
+{
+	struct music_ctx *ctx = handle;
+
+	os_printf("Played Music: %d times\r", ctx->play_times);
+}
+
 static void tx_callback(uint8_t status, void *userData)
 {
 	struct music_ctx *ctx = userData;
@@ -35,8 +42,9 @@ int play_music_run(void *handle, struct event *e)
 	int err;
 	uintptr_t addr = (uintptr_t) music;
 
-	os_printf("play the music: %d times\r", ctx->play_times++);
 	err = sai_write(dev, (uint8_t *)addr, MUSIC_LEN);
+
+	ctx->play_times++;
 
 	return err;
 }
@@ -64,7 +72,7 @@ void *play_music_init(void *parameters)
 	struct music_ctx *ctx;
 
 	ctx = os_malloc(sizeof(struct music_ctx));
-	os_assert(ctx, "Playing MUSIC failed with memory allocation error");
+	os_assert(ctx, "Playing Music failed with memory allocation error");
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
@@ -74,7 +82,7 @@ void *play_music_init(void *parameters)
 	codec_setup();
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
-	os_printf("Playing MUSIC (Sample Rate: %d Hz, Bit Width %d bits)\r\n", DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
+	os_printf("Playing Music (Sample Rate: %d Hz, Bit Width: %d bits)\r\n", DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
 	ctx->play_times = 1;
 
@@ -91,5 +99,5 @@ void play_music_exit(void *handle)
 
 	os_free(ctx);
 
-	os_printf("End.\r\n");
+	os_printf("\r\nEnd.\r\n");
 }

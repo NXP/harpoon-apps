@@ -21,7 +21,16 @@ struct sine_ctx {
 	void *event_data;
 
 	struct sai_device dev;
+
+	uint32_t play_times;
 };
+
+void play_sine_stats(void *handle)
+{
+	struct sine_ctx *ctx = handle;
+
+	os_printf("Played Sine wave: %d times\r", ctx->play_times);
+}
 
 static void tx_callback(uint8_t status, void *userData)
 {
@@ -39,6 +48,8 @@ int play_sine_run(void *handle, struct event *e)
 	int err;
 
 	err = sai_write(dev, (uint8_t *)addr, len);
+
+	ctx->play_times++;
 
 	return err;
 }
@@ -70,6 +81,7 @@ void *play_sine_init(void *parameters)
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
+	ctx->play_times = 0;
 
 	sai_setup(ctx);
 
@@ -92,5 +104,5 @@ void play_sine_exit(void *handle)
 
 	os_free(ctx);
 
-	os_printf("End.\r\n");
+	os_printf("\r\nEnd.\r\n");
 }

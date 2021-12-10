@@ -30,6 +30,7 @@
 struct mode_handler {
 	void *(*init)(void *);
 	void (*exit)(void *);
+	void (*stats)(void *);
 	int (*run)(void *, struct event *e);
 };
 
@@ -48,26 +49,31 @@ const static struct mode_handler handler[] =
 		.init = play_dtmf_init,
 		.exit = play_dtmf_exit,
 		.run = play_dtmf_run,
+		.stats = play_dtmf_stats,
 	},
 	[1] = {
 		.init = play_music_init,
 		.exit = play_music_exit,
 		.run = play_music_run,
+		.stats = play_music_stats,
 	},
 	[2] = {
 		.init = play_sine_init,
 		.exit = play_sine_exit,
 		.run = play_sine_run,
+		.stats = play_sine_stats,
 	},
 	[3] = {
 		.init = rec_play_init,
 		.exit = rec_play_exit,
 		.run = rec_play_run,
+		.stats = rec_play_stats,
 	},
 	[4] = {
 		.init = rec_play2_init,
 		.exit = rec_play2_exit,
 		.run = rec_play2_run,
+		.stats = rec_play2_stats,
 	}
 };
 
@@ -178,6 +184,12 @@ exit:
 	return HRPN_RESP_STATUS_SUCCESS;
 }
 
+static void audio_stats(struct data_ctx *ctx)
+{
+	if (ctx->handler)
+		ctx->handler->stats(ctx->handle);
+}
+
 static void command_handler(struct mailbox *m, struct data_ctx *ctx)
 {
 	struct hrpn_command cmd;
@@ -219,12 +231,17 @@ static void command_handler(struct mailbox *m, struct data_ctx *ctx)
 	}
 }
 
+#define CONTROL_POLL_PERIOD	100
+#define STATS_POLL_PERIOD	10000
+#define STATS_COUNT		(STATS_POLL_PERIOD / CONTROL_POLL_PERIOD)
+
 void main_task(void *pvParameters)
 {
 	struct data_ctx ctx;
 	struct ivshmem mem;
 	struct mailbox m;
 	BaseType_t xResult;
+	int count;
 	int err;
 	int rc;
 
@@ -248,10 +265,17 @@ void main_task(void *pvParameters)
                         data_task_PRIORITY, NULL);
 	os_assert(xResult == pdPASS, "data task creation failed");
 
+	count = STATS_COUNT;
 	do {
 		command_handler(&m, &ctx);
 
-		vTaskDelay(pdMS_TO_TICKS(100));
+		count--;
+		if (!count) {
+			audio_stats(&ctx);
+			count = STATS_COUNT;
+		}
+
+		vTaskDelay(pdMS_TO_TICKS(CONTROL_POLL_PERIOD));
 
 	} while(1);
 }

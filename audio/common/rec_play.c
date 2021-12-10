@@ -17,7 +17,6 @@ struct sai_statistics {
 	uint64_t rec_play_periods;
 	uint64_t rx_fifo_errs;
 	uint64_t tx_fifo_errs;
-	uint64_t queue_errs;
 };
 
 struct rec_play_ctx {
@@ -34,6 +33,14 @@ struct rec_play_ctx {
 	sai_sample_rate_t sample_rate;
 	uint32_t chan_numbers;
 };
+
+void rec_play_stats(void *handle)
+{
+	struct rec_play_ctx *ctx = handle;
+
+	os_printf("periods: %lld, rx error: %lld, tx error: %lld\r",
+		ctx->stats.rec_play_periods, ctx->stats.rx_fifo_errs, ctx->stats.rx_fifo_errs);
+}
 
 static void rx_tx_callback(uint8_t status, void *user_data)
 {
@@ -183,5 +190,5 @@ void rec_play_exit(void *parameters)
 
 	os_free(ctx);
 
-	os_printf("End.\r\n");
+	os_printf("\r\nEnd.\r\n");
 }

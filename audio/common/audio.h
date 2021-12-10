@@ -37,6 +37,12 @@ int play_sine_run(void *handle, struct event *e);
 int rec_play_run(void *handle, struct event *e);
 int rec_play2_run(void *handle, struct event *e);
 
+void play_dtmf_stats(void *handle);
+void play_music_stats(void *handle);
+void play_sine_stats(void *handle);
+void rec_play_stats(void *handle);
+void rec_play2_stats(void *handle);
+
 void play_dtmf_exit(void *handle);
 void play_music_exit(void *handle);
 void play_sine_exit(void *handle);

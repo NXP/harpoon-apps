@@ -39,7 +39,16 @@ struct dtmf_ctx {
 	size_t audio_buf_size;
 	unsigned int dtmf_seq_idx;
 	uint32_t phase;
+
+	uint32_t play_times;
 };
+
+void play_dtmf_stats(void *handle)
+{
+	struct dtmf_ctx *ctx = handle;
+
+	os_printf("Played DTMF sequence: %d times\r", ctx->play_times);
+}
 
 static void tx_callback(uint8_t status, void *userData)
 {
@@ -71,6 +80,8 @@ int play_dtmf_run(void *handle, struct event *e)
 		ctx->dtmf_seq_idx++;
 		if (ctx->dtmf_seq_idx >= strlen(ctx->dtmf_l_seq))
 			ctx->dtmf_seq_idx = 0;
+
+		ctx->play_times++;
 
 		/* transmit audio buffer */
 		err = sai_write(dev, (uint8_t *)ctx->audio_buf, ctx->audio_buf_size);
@@ -125,7 +136,7 @@ void *play_dtmf_init(void *parameters)
 
 	memset(ctx->audio_buf, 0, ctx->audio_buf_size);
 
-	os_printf("Playing DTMF sequence (Sample Rate: %d Hz, Bit Width %d bits)\r\n", ctx->sample_rate, DTMF_AUDIO_BITWIDTH);
+	os_printf("Playing DTMF sequence (Sample Rate: %d Hz, Bit Width: %d bits)\r\n", ctx->sample_rate, DTMF_AUDIO_BITWIDTH);
 	os_printf("\tleft channel:  %s\r\n", ctx->dtmf_l_seq);
 	os_printf("\tright channel: %s\r\n", ctx->dtmf_r_seq);
 
@@ -142,5 +153,5 @@ void play_dtmf_exit(void *handle)
 
 	os_free(ctx);
 
-	os_printf("End.\r\n");
+	os_printf("\r\nEnd.\r\n");
 }

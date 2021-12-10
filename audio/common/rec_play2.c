@@ -60,6 +60,13 @@ struct rec_play2_ctx {
 	uint32_t play_times;
 };
 
+void rec_play2_stats(void *handle)
+{
+	struct rec_play2_ctx *ctx = handle;
+
+	os_printf("recorded: %d times, played: %d times\r", ctx->record_times, ctx->play_times);
+}
+
 static void rx_callback(uint8_t status, void *userData)
 {
 	struct rec_play2_ctx *ctx = userData;
@@ -225,5 +232,5 @@ void rec_play2_exit(void *handle)
 
 	os_free(ctx);
 
-	os_printf("End.\r\n");
+	os_printf("\r\nEnd.\r\n");
 }
