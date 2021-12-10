@@ -45,14 +45,16 @@ static os_sem_t rx_semaphore;
 static os_sem_t tx_task_sem;
 static os_sem_t rx_task_sem;
 
-static void rx_callback(const void *dev, void *userData)
+static void rx_callback(uint8_t status, void *userData)
 {
-	os_sem_give(&rx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
+	if (status == SAI_STATUS_NO_ERROR)
+		os_sem_give(&rx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
-static void tx_callback(const void *dev, void *userData)
+static void tx_callback(uint8_t status, void *userData)
 {
-	os_sem_give(&tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
+	if (status == SAI_STATUS_NO_ERROR)
+		os_sem_give(&tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
 static void sai_rx(void *param)
