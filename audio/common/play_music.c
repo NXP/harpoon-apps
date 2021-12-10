@@ -21,18 +21,20 @@ struct music_ctx {
 	uint32_t play_times;
 };
 
-static void rx_callback(const void *dev, void *userData)
+static void rx_callback(uint8_t status, void *userData)
 {
 	struct music_ctx *ctx = userData;
 
-	os_sem_give(&ctx->rx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
+	if (status == SAI_STATUS_NO_ERROR)
+		os_sem_give(&ctx->rx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
-static void tx_callback(const void *dev, void *userData)
+static void tx_callback(uint8_t status, void *userData)
 {
 	struct music_ctx *ctx = userData;
 
-	os_sem_give(&ctx->tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
+	if (status == SAI_STATUS_NO_ERROR)
+		os_sem_give(&ctx->tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
 static int play_music_run(void *handle)
