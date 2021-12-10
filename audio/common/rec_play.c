@@ -53,7 +53,7 @@ static void start_rec_play(struct rec_play_ctx *ctx)
 	reset_rx_fifo(&ctx->dev);
 
 	/* Fill Tx FIFO with dummy data */
-	memset(ctx->sai_buf, 0, sizeof(ctx->sai_buf));
+	memset(ctx->sai_buf, 0, ctx->buffer_size * BUFFER_NUMBER);
 
 	/* Write two period into FIFO */
 	sai_fifo_write(&ctx->dev, ctx->sai_buf,
