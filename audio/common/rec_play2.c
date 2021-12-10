@@ -10,6 +10,7 @@
 #include "board.h"
 #include "os/assert.h"
 #include "os/semaphore.h"
+#include "os/stdlib.h"
 #include "sai_drv.h"
 #include "sai_codec_config.h"
 
@@ -19,13 +20,18 @@
 #define BUFFER_SIZE		REC_PERIOD_BYTES
 #define BUFFER_NUMBER		(4U)
 
-#define SAI_RX_PRIORITY		(configMAX_PRIORITIES - 1)
 #define SAI_TX_PRIORITY		(configMAX_PRIORITIES - 1)
 
-volatile uint32_t emptyBlock = BUFFER_NUMBER;
+struct rec_play2_ctx {
+	struct sai_device dev;
 
-static uint8_t Buffer[BUFFER_NUMBER * BUFFER_SIZE];
-static uint32_t tx_index = 0U, rx_index = 0U;
+	volatile uint32_t emptyBlock;
+
+	TaskHandle_t taskHandle;
+
+	uint8_t Buffer[BUFFER_NUMBER * BUFFER_SIZE];
+	uint32_t tx_index;
+	uint32_t rx_index;
 /*
  * Each buffer have a pair ofsemaphore
  * -----------------------------------------------------------------------
@@ -35,31 +41,37 @@ static uint32_t tx_index = 0U, rx_index = 0U;
  * |   tx_sem  |    give       | take-->rx          |        tx-->give   |
  * -----------------------------------------------------------------------
  */
-static os_sem_t buffer_rx_sem[BUFFER_SIZE];
-static os_sem_t buffer_tx_sem[BUFFER_SIZE];
+	os_sem_t buffer_rx_sem[BUFFER_SIZE];
+	os_sem_t buffer_tx_sem[BUFFER_SIZE];
 
-/* callback semaphore */
-static os_sem_t tx_semaphore;
-static os_sem_t rx_semaphore;
-/* task semaphore */
-static os_sem_t tx_task_sem;
-static os_sem_t rx_task_sem;
+	/* callback semaphore */
+	os_sem_t tx_semaphore;
+	os_sem_t rx_semaphore;
+
+	/* task semaphore */
+	os_sem_t tx_task_sem;
+};
 
 static void rx_callback(uint8_t status, void *userData)
 {
+	struct rec_play2_ctx *ctx = userData;
+
 	if (status == SAI_STATUS_NO_ERROR)
-		os_sem_give(&rx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
+		os_sem_give(&ctx->rx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
 static void tx_callback(uint8_t status, void *userData)
 {
+	struct rec_play2_ctx *ctx = userData;
+
 	if (status == SAI_STATUS_NO_ERROR)
-		os_sem_give(&tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
+		os_sem_give(&ctx->tx_semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
-static void sai_rx(void *param)
+int rec_play2_run(void *handle)
 {
-	struct sai_device *dev = (struct sai_device *)param;
+	struct rec_play2_ctx *ctx = handle;
+	struct sai_device *dev = &ctx->dev;
 	int err;
 #ifdef DEBUG
 	uint32_t record_times = 1;
@@ -67,27 +79,24 @@ static void sai_rx(void *param)
 	uint32_t next_print_times = record_times + print_steps;
 #endif
 
-	err = os_sem_take(&rx_task_sem, 0, OS_SEM_TIMEOUT_MAX);
-	os_assert(!err, "Can't take the rx task control semaphore (err: %d)", err);
-
 	do {
-		err = os_sem_take(&buffer_tx_sem[rx_index], 0,
+		err = os_sem_take(&ctx->buffer_tx_sem[ctx->rx_index], 0,
 				OS_SEM_TIMEOUT_MAX);
 		os_assert(!err, "Can't take the buffer semaphore (err: %d)", err);
 
-		err = sai_read(dev, (uint8_t *)Buffer + rx_index * BUFFER_SIZE,
+		err = sai_read(dev, (uint8_t *)ctx->Buffer + ctx->rx_index * BUFFER_SIZE,
 				BUFFER_SIZE);
 		if (!err) {
-			err = os_sem_take(&rx_semaphore, 0, OS_SEM_TIMEOUT_MAX);
+			err = os_sem_take(&ctx->rx_semaphore, 0, OS_SEM_TIMEOUT_MAX);
 			os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
-			os_sem_give(&buffer_rx_sem[rx_index], 0);
-			rx_index++;
+			os_sem_give(&ctx->buffer_rx_sem[ctx->rx_index], 0);
+			ctx->rx_index++;
 #ifdef DEBUG
 			record_times++;
 #endif
 		}
-		if (rx_index == BUFFER_NUMBER)
-			rx_index = 0U;
+		if (ctx->rx_index == BUFFER_NUMBER)
+			ctx->rx_index = 0U;
 #ifdef DEBUG
 		if (record_times == next_print_times) {
 			os_printf("Record:   %08d \r\n", record_times);
@@ -97,9 +106,10 @@ static void sai_rx(void *param)
 	} while (1);
 }
 
-static void sai_tx(void *param)
+static void sai_tx(void *handle)
 {
-	struct sai_device *dev = (struct sai_device *)param;
+	struct rec_play2_ctx *ctx = handle;
+	struct sai_device *dev = &ctx->dev;
 	int err;
 #ifdef DEBUG
 	uint32_t play_times = 1;
@@ -107,28 +117,28 @@ static void sai_tx(void *param)
 	uint32_t next_print_times = play_times + print_steps;
 #endif
 
-	err = os_sem_take(&tx_task_sem, 0, OS_SEM_TIMEOUT_MAX);
-	os_assert(!err, "Can't take the rx task control semaphore (err: %d)", err);
+	err = os_sem_take(&ctx->tx_task_sem, 0, OS_SEM_TIMEOUT_MAX);
+	os_assert(!err, "Can't take the tx task control semaphore (err: %d)", err);
 
 	do {
-		err = os_sem_take(&buffer_rx_sem[tx_index], 0,
+		err = os_sem_take(&ctx->buffer_rx_sem[ctx->tx_index], 0,
 				OS_SEM_TIMEOUT_MAX);
 		os_assert(!err, "Can't take the buffer semaphore (err: %d)", err);
 
-		err = sai_write(dev, (uint8_t *)Buffer + tx_index * BUFFER_SIZE,
+		err = sai_write(dev, (uint8_t *)ctx->Buffer + ctx->tx_index * BUFFER_SIZE,
 				BUFFER_SIZE);
 		if (!err) {
-			err = os_sem_take(&tx_semaphore, 0,
+			err = os_sem_take(&ctx->tx_semaphore, 0,
 					OS_SEM_TIMEOUT_MAX);
 			os_assert(!err, "Can't take the tx semaphore (err: %d)", err);
-			os_sem_give(&buffer_tx_sem[tx_index], 0);
-			tx_index++;
+			os_sem_give(&ctx->buffer_tx_sem[ctx->tx_index], 0);
+			ctx->tx_index++;
 #ifdef DEBUG
 			play_times++;
 #endif
 		}
-		if (tx_index == BUFFER_NUMBER)
-			tx_index = 0U;
+		if (ctx->tx_index == BUFFER_NUMBER)
+			ctx->tx_index = 0U;
 #ifdef DEBUG
 		if (play_times == next_print_times) {
 			os_printf("Playback: %08d \r\n", play_times);
@@ -138,48 +148,43 @@ static void sai_tx(void *param)
 	} while (1);
 }
 
-static void sai_record_playback(struct sai_device *dev)
+static void sai_record_playback(struct rec_play2_ctx *ctx)
 {
 	BaseType_t xResult;
 	int err, i;
 
-	os_printf("HifiBerry record playback demo (two threads) is started (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
+	os_printf("Record and playback (two threads) started (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
 			DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
-	err = os_sem_init(&tx_semaphore, 0);
+	err = os_sem_init(&ctx->tx_semaphore, 0);
 	os_assert(!err, "tx interrupt semaphore initialization failed!");
-	err = os_sem_init(&rx_semaphore, 0);
+
+	err = os_sem_init(&ctx->rx_semaphore, 0);
 	os_assert(!err, "rx interrupt semaphore initialization failed!");
-	err = os_sem_init(&tx_task_sem, 0);
+
+	err = os_sem_init(&ctx->tx_task_sem, 0);
 	os_assert(!err, "tx task semaphore initialization failed!");
-	err = os_sem_init(&rx_task_sem, 0);
-	os_assert(!err, "rx task semaphore initialization failed!");
+
 	for (i = 0; i < BUFFER_SIZE; i++) {
-		err = os_sem_init(&buffer_tx_sem[i], 0);
+		err = os_sem_init(&ctx->buffer_tx_sem[i], 0);
 		os_assert(!err, "buffer semaphore initialization failed!");
-		err = os_sem_init(&buffer_rx_sem[i], 0);
+		err = os_sem_init(&ctx->buffer_rx_sem[i], 0);
 		os_assert(!err, "buffer semaphore initialization failed!");
-		err = os_sem_give(&buffer_tx_sem[i], 0);
+		err = os_sem_give(&ctx->buffer_tx_sem[i], 0);
 		os_assert(!err, "give buffer semaphore failed!");
 	}
 
-	xResult = xTaskCreate(sai_rx, "sai_record_playback_task",
-			configMINIMAL_STACK_SIZE + 100, (void *)dev,
-			SAI_RX_PRIORITY, NULL);
-	os_assert(xResult == pdPASS, "Created sai test task failed");
 	xResult = xTaskCreate(sai_tx, "sai_record_playback_task",
-			configMINIMAL_STACK_SIZE + 100, (void *)dev,
-			SAI_TX_PRIORITY, NULL);
+			configMINIMAL_STACK_SIZE + 100, (void *)ctx,
+			SAI_TX_PRIORITY, &ctx->taskHandle);
 	os_assert(xResult == pdPASS, "Created sai test task failed");
 
 	/* Release the rx task firstly, and then tx task */
-	err = os_sem_give(&rx_task_sem, 0);
-	os_assert(!err, "Can't give the rx task semaphore (err: %d)", err);
-	err = os_sem_give(&tx_task_sem, 0);
+	err = os_sem_give(&ctx->tx_task_sem, 0);
 	os_assert(!err, "Can't give the rx task semaphore (err: %d)", err);
 }
 
-static void sai_setup(struct sai_device *dev)
+static void sai_setup(struct rec_play2_ctx *ctx)
 {
 	struct sai_cfg sai_config;
 
@@ -191,21 +196,58 @@ static void sai_setup(struct sai_device *dev)
 	sai_config.tx_sync_mode = DEMO_SAI_TX_SYNC_MODE;
 	sai_config.rx_sync_mode = DEMO_SAI_RX_SYNC_MODE;
 	sai_config.rx_callback = rx_callback;
+	sai_config.rx_user_data = ctx;
 	sai_config.tx_callback = tx_callback;
+	sai_config.tx_user_data = ctx;
 
-	sai_drv_setup(dev, &sai_config);
+	sai_drv_setup(&ctx->dev, &sai_config);
 }
 
-void rec_play2_task(void *parameters)
+static void *rec_play2_init(void *parameters)
 {
-	struct sai_device dev;
+	struct rec_play2_ctx *ctx;
 
-	sai_setup(&dev);
+	ctx = os_malloc(sizeof(struct rec_play2_ctx));
+	os_assert(ctx, "Record and playback failed with memory allocation error");
+
+	sai_setup(ctx);
+
+	ctx->emptyBlock = BUFFER_NUMBER;
+	ctx->tx_index = 0U;
+	ctx->rx_index = 0U;
 
 	codec_setup();
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
-	sai_record_playback(&dev);
+	sai_record_playback(ctx);
+
+	return ctx;
+}
+
+static void rec_play2_exit(void *handle)
+{
+	struct rec_play2_ctx *ctx = handle;
+
+	sai_drv_exit(&ctx->dev);
+
+	codec_close();
+
+	vTaskDelete(ctx->taskHandle);
+
+	os_free(ctx);
+
+	os_printf("End.\r\n");
+}
+
+void rec_play2_task(void *parameters)
+{
+	void *ctx;
+
+	ctx = rec_play2_init(parameters);
+
+	rec_play2_run(ctx);
+
+	rec_play2_exit(ctx);
 
 	for (;;)
 		;
