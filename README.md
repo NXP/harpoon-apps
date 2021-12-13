@@ -4,7 +4,7 @@ Harpoon is a Base Enablement SW platform, providing an RTOS and application spec
 
 Harpoon offers customers an environment for developing real-time demanding applications leveraging the higher performance of the Cortex-A cores (ARMv8-A) compared to the Cortex-M cores (ARMv7-M) traditionally used for RTOS based applications.
 
-The reference applications embedded in this repository may run on several jailhouse guest RTOS (e.g.: Zephyr, FreeRTOS) leveraging the existing NXP RTOS development environment – MCUXpresso.
+The reference applications embedded in this repository may run on several jailhouse guest RTOS (e.g.: FreeRTOS for now, and Zephyr soon) leveraging the existing NXP RTOS development environment – MCUXpresso.
 
 # Getting Started
 
@@ -33,7 +33,7 @@ west update
 # Repository structure
 
 The aim of this repository is to provide a comprehensive set of reference applications.
-It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as well as the MCUXpresso SDK (including drivers and libraries):
+It provides a `west` manifest to fetch FreeRTOS as well as the MCUXpresso SDK (including drivers and libraries):
 
 ```txt
 .
@@ -82,14 +82,7 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   │   ├── semaphore.h
 │   │   │   ├── stdio.h
 │   │   │   └── unistd.h
-│   │   └── zephyr
-│   │       ├── os
-│   │       │   ├── assert.h
-│   │       │   ├── counter.h
-│   │       │   ├── semaphore.h
-│   │       │   ├── stdio.h
-│   │       │   └── unistd.h
-│   │       └── os.h
+│   │   └── <other RTOS>
 │   ├── harpoon_drivers_test                <-- top directory of the application
 │   │   ├── freertos
 │   │   │   ├── boards                      <-- board-specific source code used for FreeRTOS
@@ -122,7 +115,7 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   ├── middleware
 │   ├── tools
 │   └── utilities
-└── zephyr                                  <-- Imported Zephyr module
+└── ...
 ```
 
 # Reference Applications
@@ -148,15 +141,6 @@ cd harpoon-apps/rt_latency/freertos/boards/evkmimx8mp/armgcc_aarch64/
 
 The resulting binary is located under the `ddr_release/` directory and is called `rt_latency.bin`. This is the binary blob that _jailhouse_ loads into the inmate cell before starting it.
 
-### Zephyr
-
-Since Zephyr is installed using `west`, it is recommended to export Zephyr before building an application:
-
-```
-west zephyr-export
-west build -p auto -b mimx8mp_evk_a53_1core harpoon-apps/rt_latency/zephyr/testcase1/
-```
-
 ## Running the reference applications
 
 Jailhouse, running in the Linux root cell, provides the necessary tools to create, load and execute the reference applications built within this repository ; this example gives the commands for a FreeRTOS inmate cell for i.MX 8MP EVK:
@@ -167,14 +151,6 @@ jailhouse cell load freertos /usr/share/harpoon/inmates/rt_latency.bin --address
 jailhouse cell start freertos
 
 /usr/share/harpoon/harpoon_ctrl latency -r 1   # start rt_latency test case 1
-```
-And the following example commands are for running Zephyr in a Jailhouse inmate cell:
-
-```
-jailhouse enable imx8mp.cell
-jailhouse cell create imx8mp-zephyr.cell
-jailhouse cell load zephyr zephyr.bin --address 0xc0000000
-jailhouse cell start zephyr
 ```
 
 To be able to visualize the guest OS console, the UART4 tty shall be opened ; e.g.:
