@@ -13,6 +13,10 @@
 
 #define BUFFER_NUMBER		(2U)
 
+#define SAI_DEFAULT_PERIOD	(FSL_FEATURE_SAI_FIFO_COUNT / 2)
+
+static const int supported_period[] = {4, 8, 16, 32, 64};
+
 struct sai_statistics {
 	uint64_t rec_play_periods;
 	uint64_t rx_fifo_errs;
@@ -32,6 +36,7 @@ struct rec_play_ctx {
 	sai_word_width_t bit_width;
 	sai_sample_rate_t sample_rate;
 	uint32_t chan_numbers;
+	uint8_t period;
 };
 
 void rec_play_stats(void *handle)
@@ -136,6 +141,8 @@ static void sai_setup(struct rec_play_ctx *ctx)
 	sai_config.rx_callback = rx_tx_callback;
 	sai_config.rx_user_data = ctx;
 	sai_config.working_mode = SAI_CONTINUE_MODE;
+	/* Set FIFO water mark to be same with period size */
+	sai_config.fifo_water_mark = ctx->period;
 
 	sai_drv_setup(&ctx->dev, &sai_config);
 }
@@ -144,10 +151,15 @@ void *rec_play_init(void *parameters)
 {
 	struct audio_config *cfg = parameters;
 	size_t frame_bytes_per_chan;
-	size_t period_size = FSL_FEATURE_SAI_FIFO_COUNT / 2;
+	size_t period_size = SAI_DEFAULT_PERIOD;
 	size_t period_bytes_per_chan;
 	size_t buffer_size;
 	struct rec_play_ctx *ctx;
+
+	if (assign_nonzero_valid_val(period_size, cfg->period, supported_period) != 0) {
+		os_printf("Period %d samples is not supported\r\n", cfg->period);
+		goto err;
+	}
 
 	frame_bytes_per_chan = DEMO_AUDIO_BIT_WIDTH / 8;
 	period_bytes_per_chan = period_size * frame_bytes_per_chan;
@@ -164,6 +176,7 @@ void *rec_play_init(void *parameters)
 	ctx->period_bytes_per_chan = period_bytes_per_chan;
 	ctx->buffer_size = buffer_size;
 	ctx->buf_index = 0;
+	ctx->period = period_size;
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
@@ -174,10 +187,13 @@ void *rec_play_init(void *parameters)
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, ctx->sample_rate,
 			ctx->bit_width);
 
-	os_printf("Record and playback started (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
-			ctx->sample_rate, ctx->bit_width);
+	os_printf("Record and playback started (Sample Rate: %d Hz, Bit Width: %d bits, Period: %d samples)\r\n",
+			ctx->sample_rate, ctx->bit_width, ctx->period);
 
 	return ctx;
+
+err:
+	return NULL;
 }
 
 void rec_play_exit(void *parameters)

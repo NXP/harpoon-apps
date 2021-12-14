@@ -311,6 +311,10 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 			1U << DEMO_SAI_CHANNEL);
 	config.syncMode    = sai_config->tx_sync_mode;
 	config.masterSlave = DEMO_SAI_MASTER_SLAVE;
+
+	if (sai_config->fifo_water_mark)
+		config.fifo.fifoWatermark = sai_config->fifo_water_mark;
+
 	SAI_TransferTxSetConfig(sai, &tx_handle, &config);
 	config.syncMode = sai_config->rx_sync_mode;
 	SAI_TransferRxSetConfig(sai, &rx_handle, &config);

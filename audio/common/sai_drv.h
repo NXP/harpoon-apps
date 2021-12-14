@@ -41,6 +41,7 @@ struct sai_cfg {
 	uint32_t source_clock_hz;
 	sai_sync_mode_t rx_sync_mode;
 	sai_sync_mode_t tx_sync_mode;
+	uint8_t fifo_water_mark;
 	enum sai_mode working_mode;
 };
 
