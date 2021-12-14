@@ -11,18 +11,20 @@
 #include "os/assert.h"
 #include "os/stdlib.h"
 
-static void generate_sinewave(uint32_t *buf, int lfreq, int rfreq, int samplerate,
-		uint32_t duration_us, uint32_t *phase)
+#define PI 3.141592654
+
+static void generate_sinewave(uint32_t *buf, int lfreq, int rfreq,
+		uint32_t sample_rate, uint32_t duration_us, uint32_t *phase)
 {
     int i;
-    size_t nsamples = samplerate * duration_us / 1000;
+    size_t nsamples = sample_rate * duration_us / 1000;
     for (i = 0; i < nsamples; i++) {
         double v1, v2;
         int32_t w1, w2;
 
-        v1 = 0.5 * sin((i + *phase)* 2 * 3.141592654 * lfreq / samplerate);
+        v1 = 0.5 * sin((i + *phase)* 2 * PI * lfreq / sample_rate);
         w1 = (int32_t)(v1 * ((1 << 30) - 1));
-        v2 = 0.5 * sin((i + *phase) * 2 * 3.141592654 * rfreq / samplerate);
+        v2 = 0.5 * sin((i + *phase) * 2 * PI * rfreq / sample_rate);
         w2 = (int32_t)(v2 * ((1 << 30) - 1));
         *buf++ = w1;
         *buf++ = w2;
@@ -102,11 +104,10 @@ static void get_dtmf_freqs(char key, int *freq1, int *freq2)
     }
 }
 
-void generate_dtmf_tone(uint32_t *buf, char lkey, char rkey, int sample_rate,
-		uint32_t duration_us, uint32_t *phase)
+void generate_dtmf_tone(uint32_t *buf, size_t buf_size, char lkey, char rkey,
+		uint32_t sample_rate, uint32_t duration_us, uint32_t *phase)
 {
     int lfreq1 = 0, lfreq2 = 0, rfreq1 = 0, rfreq2 = 0;
-    size_t buf_size = sample_rate * 2 * 4 * duration_us / 1000;
     uint32_t *buf2;
     uint32_t dtmf_phase = *phase;
     int i;

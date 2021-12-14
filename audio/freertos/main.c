@@ -132,7 +132,7 @@ static void response(struct mailbox *m, uint32_t status)
 	mailbox_resp_send(m, &resp, sizeof(resp));
 }
 
-static int audio_run(struct data_ctx *ctx, unsigned int id)
+static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 {
 	int rc = HRPN_RESP_STATUS_ERROR;
 	struct audio_config cfg;
@@ -141,18 +141,20 @@ static int audio_run(struct data_ctx *ctx, unsigned int id)
 	if (ctx->handler)
 		goto exit;
 
-	if (id >= ARRAY_SIZE(handler))
+	if (run->id >= ARRAY_SIZE(handler))
 		goto exit;
 
 	cfg.event_send = data_send_event;
 	cfg.event_data = ctx->event_queue_h;
+	cfg.rate = run->frequency;
+	cfg.period = run->period;
 
-	ctx->handle = handler[id].init(&cfg);
+	ctx->handle = handler[run->id].init(&cfg);
 	if (!ctx->handle)
 		goto exit;
 
 	os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
-	ctx->handler = &handler[id];
+	ctx->handler = &handler[run->id];
 	os_sem_give(&ctx->semaphore, 0);
 
 	/* Send an event to trigger data thread processing */
@@ -207,7 +209,7 @@ static void command_handler(struct mailbox *m, struct data_ctx *ctx)
 			break;
 		}
 
-		rc = audio_run(ctx, cmd.u.audio_run.id);
+		rc = audio_run(ctx, &cmd.u.audio_run);
 
 		response(m, rc);
 

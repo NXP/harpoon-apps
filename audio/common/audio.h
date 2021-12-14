@@ -9,7 +9,8 @@
 #define _AUDIO_H_
 
 struct audio_config {
-	unsigned int rate;
+	uint32_t rate;
+	uint32_t period;
 
 	void (*event_send)(void *, uint8_t);
 	void *event_data;
@@ -48,5 +49,28 @@ void play_music_exit(void *handle);
 void play_sine_exit(void *handle);
 void rec_play_exit(void *handle);
 void rec_play2_exit(void *handle);
+
+/* assign_nonzero_valid_val(): Validate and assign nonzero value.
+ * "value" == 0: "var" use default vale, return 0;
+ * "value" != 0: if "value" is in array "supported_list", "var" = "value",
+ * 		 then return 0, otherwise return -1;
+ */
+#define assign_nonzero_valid_val(var, value, valid_list)		\
+({									\
+	int __i, __ret = -1;						\
+									\
+	if ((value) == 0) {						\
+		__ret = 0;						\
+	} else {							\
+		for (__i = 0; __i < ARRAY_SIZE((valid_list)); __i++) {	\
+			if ((value) == (valid_list)[__i]) {		\
+				(var) = (value);			\
+				__ret = 0;				\
+				break;					\
+			}						\
+		}							\
+	}								\
+	(__ret);							\
+})
 
 #endif /* _AUDIO_H_ */
