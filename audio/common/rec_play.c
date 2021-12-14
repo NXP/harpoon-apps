@@ -16,6 +16,7 @@
 #define SAI_DEFAULT_PERIOD	(FSL_FEATURE_SAI_FIFO_COUNT / 2)
 
 static const int supported_period[] = {4, 8, 16, 32, 64};
+static const uint32_t supported_rate[] = {44100, 48000, 88200, 176400, 96000, 192000};
 
 struct sai_statistics {
 	uint64_t rec_play_periods;
@@ -152,12 +153,18 @@ void *rec_play_init(void *parameters)
 	struct audio_config *cfg = parameters;
 	size_t frame_bytes_per_chan;
 	size_t period_size = SAI_DEFAULT_PERIOD;
+	uint32_t rate = DEMO_AUDIO_SAMPLE_RATE;
 	size_t period_bytes_per_chan;
 	size_t buffer_size;
 	struct rec_play_ctx *ctx;
 
 	if (assign_nonzero_valid_val(period_size, cfg->period, supported_period) != 0) {
 		os_printf("Period %d samples is not supported\r\n", cfg->period);
+		goto err;
+	}
+
+	if (assign_nonzero_valid_val(rate, cfg->rate, supported_rate) != 0) {
+		os_printf("Rate %d Hz is not supported\r\n", cfg->rate);
 		goto err;
 	}
 
@@ -170,7 +177,7 @@ void *rec_play_init(void *parameters)
 	memset(ctx, 0, sizeof(struct rec_play_ctx));
 	ctx->sai_buf = (uint8_t *)(ctx + 1);
 
-	ctx->sample_rate = DEMO_AUDIO_SAMPLE_RATE;
+	ctx->sample_rate = rate;
 	ctx->chan_numbers = DEMO_AUDIO_DATA_CHANNEL;
 	ctx->bit_width = DEMO_AUDIO_BIT_WIDTH;
 	ctx->period_bytes_per_chan = period_bytes_per_chan;
