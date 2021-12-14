@@ -9,6 +9,7 @@
 #include "FreeRTOS.h"
 
 #include "os/assert.h"
+#include "os/stdlib.h"
 
 static void generate_sinewave(uint32_t *buf, int lfreq, int rfreq, int samplerate,
 		uint32_t duration_us, uint32_t *phase)
@@ -110,7 +111,7 @@ void generate_dtmf_tone(uint32_t *buf, char lkey, char rkey, int sample_rate,
     uint32_t dtmf_phase = *phase;
     int i;
 
-    buf2 = pvPortMalloc(buf_size);
+    buf2 = os_malloc(buf_size);
     os_assert(buf2, "generate_dtmf_tone() failed with memory allocation error.");
     memset(buf2, 0, buf_size);
 
@@ -129,5 +130,5 @@ void generate_dtmf_tone(uint32_t *buf, char lkey, char rkey, int sample_rate,
         buf[i] += buf2[i];
     }
 
-    vPortFree(buf2);
+    os_free(buf2);
 }
