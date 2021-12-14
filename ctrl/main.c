@@ -16,9 +16,6 @@
 
 #define COMMAND_TIMEOUT	1000	/* 1 sec */
 
-#define FREQUENCY_DEFAULT	44100
-#define PERIOD_DEFAULT		32
-
 static void usage(void)
 {
 	printf("\nUsage:\nharpoon_ctrl [latency|audio] [options]\n");
@@ -110,8 +107,8 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 	int option;
 	unsigned int id;
 	int rc = 0;
-	unsigned int frequency = FREQUENCY_DEFAULT;
-	unsigned int period = PERIOD_DEFAULT;
+	unsigned int frequency = 0;
+	unsigned int period = 0;
 	bool is_run_cmd = false;
 
 	while ((option = getopt(argc, argv, "f:p:r:sv")) != -1) {
