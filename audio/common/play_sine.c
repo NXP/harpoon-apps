@@ -14,7 +14,7 @@
 
 #define PLAY_AUDIO_SRATE	44100 /* default sampling rate */
 #define PLAY_AUDIO_CHANNELS	2
-#define PLAY_AUDIO_BITWIDTH	32
+#define PLAY_AUDIO_BITWIDTH	16
 
 struct sine_ctx {
 	void (*event_send)(void *, uint8_t);
