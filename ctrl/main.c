@@ -112,6 +112,7 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 	int rc = 0;
 	unsigned int frequency = FREQUENCY_DEFAULT;
 	unsigned int period = PERIOD_DEFAULT;
+	bool is_run_cmd = false;
 
 	while ((option = getopt(argc, argv, "f:p:r:sv")) != -1) {
 		switch (option) {
@@ -125,8 +126,7 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 
 		case 'r':
 			id = strtoul(optarg, NULL, 0);
-
-			rc = audio_run(m, id, frequency, period);
+			is_run_cmd = true;
 			break;
 
 		case 's':
@@ -142,6 +142,9 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 			break;
 		}
 	}
+	/* Run the case after we get all parameters */
+	if (is_run_cmd)
+		rc = audio_run(m, id, frequency, period);
 
 	return rc;
 }
