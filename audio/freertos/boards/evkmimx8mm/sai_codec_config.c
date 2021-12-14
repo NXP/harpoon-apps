@@ -10,7 +10,6 @@
 #include "fsl_codec_pcm512x_adapter.h"
 #include "fsl_codec_common.h"
 #include "fsl_debug_console.h"
-#include "fsl_gpio.h"
 #include "fsl_pcm186x.h"
 #include "fsl_pcm512x.h"
 
