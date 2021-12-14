@@ -56,7 +56,7 @@ int play_sine_run(void *handle, struct event *e)
 
 static void sai_setup(struct sine_ctx *ctx)
 {
-	struct sai_cfg sai_config;
+	struct sai_cfg sai_config = {0};
 
 	sai_config.sai_base = (void *)DEMO_SAI;
 	sai_config.bit_width = PLAY_AUDIO_BITWIDTH;

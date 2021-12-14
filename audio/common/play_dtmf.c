@@ -95,7 +95,7 @@ int play_dtmf_run(void *handle, struct event *e)
 
 static void sai_setup(struct dtmf_ctx *ctx, struct audio_config *cfg)
 {
-	struct sai_cfg sai_config;
+	struct sai_cfg sai_config = {0};
 
 	sai_config.sai_base = (void *)DEMO_SAI;
 	sai_config.bit_width = DTMF_AUDIO_BITWIDTH;

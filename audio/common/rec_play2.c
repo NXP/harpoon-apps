@@ -177,7 +177,7 @@ static void sai_record_playback(struct rec_play2_ctx *ctx)
 
 static void sai_setup(struct rec_play2_ctx *ctx)
 {
-	struct sai_cfg sai_config;
+	struct sai_cfg sai_config = {0};
 
 	sai_config.sai_base = (void *)DEMO_SAI;
 	sai_config.bit_width = DEMO_AUDIO_BIT_WIDTH;
