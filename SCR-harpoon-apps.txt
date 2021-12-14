@@ -3,13 +3,15 @@ NXP Software Content Register
 Release: Harpoon Apps
 Version: 2.0.0
 
-Package License: LA_OPT_NXP_Software_License.txt - Production Use, Section 2.3 applies
-License File: LICENSES/LA_OPT_NXP_Software_License.txt
+Outgoing License: LA_OPT_NXP_Software_License.txt - Production Use, Section 2.3 applies
+License File: harpoon-apps/LICENSES/LA_OPT_NXP_Software_License.txt
 
 Package:                     Harpoon Apps
 Version:                     2.0.0
 Outgoing License:            BSD-3-Clause
-License File:                LICENSES/COPYING-BSD-3
+License File:                harpoon-apps/LICENSES/COPYING-BSD-3
+                             harpoon-apps/LICENSES/COPYING-Apache.txt (*/mmu.c)
+                             FreeRTOS-Kernel/LICENSE.md (common/freertos/FreeRTOS*.{c,h})
 Package Category:            BSP
 Type of Content:             source code, project files, linker files
 Description and comments:    Harpoon application examples
