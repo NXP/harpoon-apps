@@ -13,6 +13,10 @@
 #include "sai_codec_config.h"
 #include "audio.h"
 
+#define PLAY_AUDIO_SRATE	44100 /* default sampling rate */
+#define PLAY_AUDIO_CHANNELS	2
+#define PLAY_AUDIO_BITWIDTH	16
+
 struct music_ctx {
 	void (*event_send)(void *, uint8_t);
 	void *event_data;
@@ -54,9 +58,9 @@ static void sai_setup(struct music_ctx *ctx)
 	struct sai_cfg sai_config;
 
 	sai_config.sai_base = (void *)DEMO_SAI;
-	sai_config.bit_width = DEMO_AUDIO_BIT_WIDTH;
-	sai_config.sample_rate = DEMO_AUDIO_SAMPLE_RATE;
-	sai_config.chan_numbers = DEMO_AUDIO_DATA_CHANNEL;
+	sai_config.bit_width = PLAY_AUDIO_BITWIDTH;
+	sai_config.sample_rate = PLAY_AUDIO_SRATE;
+	sai_config.chan_numbers = PLAY_AUDIO_CHANNELS;
 	sai_config.source_clock_hz = DEMO_AUDIO_MASTER_CLOCK;
 	sai_config.tx_sync_mode = DEMO_SAI_TX_SYNC_MODE;
 	sai_config.rx_sync_mode = DEMO_SAI_RX_SYNC_MODE;
@@ -80,9 +84,9 @@ void *play_music_init(void *parameters)
 	sai_setup(ctx);
 
 	codec_setup();
-	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
+	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
 
-	os_printf("Playing Music (Sample Rate: %d Hz, Bit Width: %d bits)\r\n", DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
+	os_printf("Playing Music (Sample Rate: %d Hz, Bit Width: %d bits)\r\n", PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
 
 	ctx->play_times = 1;
 
