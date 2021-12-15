@@ -1,12 +1,12 @@
 #!/bin/bash
 
-INMATE_CELL_NAME=freertos
+INMATE_NAME=%TEMPLATE_INMATE_NAME%
 
 echo 'Shutdown inmate cell'
-jailhouse cell shutdown ${INMATE_CELL_NAME}
+jailhouse cell shutdown ${INMATE_NAME}
 
 echo 'Destroy inmate cell'
-jailhouse cell destroy ${INMATE_CELL_NAME}
+jailhouse cell destroy ${INMATE_NAME}
 
 echo 'Disabling Jailhouse root cell'
 jailhouse disable

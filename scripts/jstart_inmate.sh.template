@@ -1,12 +1,11 @@
 #!/bin/bash
 
-ROOT_CELL=imx8mm.cell
-INMATE_CELL=imx8mm-freertos-audio.cell
-INMATE_CELL_NAME=freertos
-#BINS_PATH=/usr/share/harpoon/inmates
-BINS_PATH=/opt
+ROOT_CELL=%TEMPLATE_ROOT_CELL%
+INMATE_CELL=%TEMPLATE_INMATE_CELL%
+INMATE_NAME=%TEMPLATE_INMATE_NAME%
+BINS_PATH=%TEMPLATE_BINS_PATH%
 
-INMATE_BIN=${BINS_PATH}/audio.bin
+INMATE_BIN=${BINS_PATH}/%TEMPLATE_INMATE_BIN%
 INMATE_ENTRY_ADDRESS=0xc0000000
 
 echo 'modprobe jailhouse'
@@ -19,7 +18,7 @@ echo 'Creating jailhouse inmate cell'
 jailhouse cell create /usr/share/jailhouse/cells/${INMATE_CELL}
 
 echo 'Loading jailhouse inmate cell'
-jailhouse cell load ${INMATE_CELL_NAME} ${LK_BIN} -a ${INMATE_ENTRY_ADDRESS}
+jailhouse cell load ${INMATE_NAME} ${INMATE_BIN} -a ${INMATE_ENTRY_ADDRESS}
 
 echo 'Starting inmate cell'
-jailhouse cell start ${INMATE_CELL_NAME}
+jailhouse cell start ${INMATE_NAME}
