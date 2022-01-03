@@ -76,10 +76,11 @@ static inline int rt_latency_get_tc_load(int test_case_id)
                 RT_LATENCY_WITH_INVD_CACHE;
         break;
     case RT_LATENCY_TEST_CASE_7:
-        mask |= RT_LATENCY_WITH_CPU_LOAD |
-                RT_LATENCY_WITH_INVD_CACHE |
-                RT_LATENCY_WITH_LINUX_LOAD |
-                RT_LATENCY_USES_OCRAM;
+        /*
+         * TODO: Move/duplicate the code in OCRAM to enable before enabling
+         * RT_LATENCY_TEST_CASE_7
+         */
+        mask = -1;
         break;
     default:
         mask = -1;
