@@ -22,7 +22,7 @@ static inline void os_invd_dcache_all()
     static int warn_once = 0;
 
     if (!warn_once++)
-        os_printf("WARNING:  TODO: Flush D-Cache -> HRPN-90 \n\r ");
+        os_printf("WARNING:  TODO: Flush D-Cache\n\r ");
 #else
     sys_cache_data_all(K_CACHE_INVD);
 #endif
