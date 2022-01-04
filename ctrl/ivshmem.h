@@ -26,7 +26,7 @@ struct ivshmem {
 	size_t out_size;
 };
 
-int ivshmem_exit(struct ivshmem *mem);
+void ivshmem_exit(struct ivshmem *mem);
 
 int ivshmem_init(struct ivshmem *mem, unsigned int uio_id);
 

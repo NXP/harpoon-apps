@@ -12,29 +12,37 @@
 
 #include "ivshmem.h"
 
-static int uio_read_mem_size(unsigned int uio_id, int id)
+static int uio_read_mem_size(unsigned int uio_id, int id, size_t *size)
 {
 	char sysfs_path[64];
 	char buf[20] = "";
-	int fd, rc, size;
+	int fd, rc;
 
-	snprintf(sysfs_path, sizeof(sysfs_path), "/sys/class/uio/uio%u/maps/map%d/size",
-		uio_id, id);
+	if (snprintf(sysfs_path, sizeof(sysfs_path), "/sys/class/uio/uio%u/maps/map%d/size", uio_id, id) < 0)
+		goto err;
 
 	fd = open(sysfs_path, O_RDONLY);
 	if (fd < 0)
-		return fd;
+		goto err_open;
 
 	rc = read(fd, buf, sizeof(buf));
 	if (rc < 0)
-		return rc;
+		goto err_read;
 
-	sscanf(buf, "0x%x", &size);
+	if (sscanf(buf, "0x%zx", size) < 1)
+		goto err_sscanf;
 
-	return size;
+	return 0;
+
+err_sscanf:
+err_read:
+	close(fd);
+err_open:
+err:
+	return -1;
 }
 
-int ivshmem_exit(struct ivshmem *mem)
+void ivshmem_exit(struct ivshmem *mem)
 {
 	munmap(mem->out, mem->out_size);
 	munmap(mem->in, mem->in_size);
@@ -54,7 +62,8 @@ int ivshmem_init(struct ivshmem *mem, unsigned int uio_id)
 
 	pgsize = getpagesize();
 
-	snprintf(uio_path, sizeof(uio_path), "/dev/uio%u", uio_id);
+	if (snprintf(uio_path, sizeof(uio_path), "/dev/uio%u", uio_id) < 0)
+		goto err;
 
 	mem->fd = open(uio_path, O_RDWR);
 	if (mem->fd < 0) {
@@ -63,7 +72,9 @@ int ivshmem_init(struct ivshmem *mem, unsigned int uio_id)
 	}
 
 	offset = 0;
-	mem->regs_size = uio_read_mem_size(uio_id, 0);
+	if (uio_read_mem_size(uio_id, 0, &mem->regs_size) < 0)
+		goto err_regs;
+
 	mem->regs = mmap(NULL, mem->regs_size, PROT_READ | PROT_WRITE, MAP_SHARED, mem->fd, offset);
 	if (mem->regs == MAP_FAILED) {
 		fprintf(stderr, "mmap() failed: %s\n", strerror(errno));
@@ -71,7 +82,10 @@ int ivshmem_init(struct ivshmem *mem, unsigned int uio_id)
 	}
 
 	offset += pgsize;
-	mem->state_size = uio_read_mem_size(uio_id, 1);
+
+	if (uio_read_mem_size(uio_id, 1, &mem->state_size) < 0)
+		goto err_state;
+
 	mem->state = mmap(NULL, mem->state_size, PROT_READ, MAP_SHARED, mem->fd, offset);
 	if (mem->state == MAP_FAILED) {
 		fprintf(stderr, "mmap() failed: %s\n", strerror(errno));
@@ -79,7 +93,10 @@ int ivshmem_init(struct ivshmem *mem, unsigned int uio_id)
 	}
 
 	offset += pgsize;
-	mem->rw_size = uio_read_mem_size(uio_id, 2);
+
+	if (uio_read_mem_size(uio_id, 2, &mem->rw_size) < 0)
+		goto err_rw;
+
 	mem->rw = mmap(NULL, mem->rw_size, PROT_READ | PROT_WRITE, MAP_SHARED, mem->fd, offset);
 	if (mem->rw == MAP_FAILED) {
 		fprintf(stderr, "mmap() failed: %s\n", strerror(errno));
@@ -87,7 +104,10 @@ int ivshmem_init(struct ivshmem *mem, unsigned int uio_id)
 	}
 
 	offset += pgsize;
-	mem->in_size = uio_read_mem_size(uio_id, 3);
+
+	if (uio_read_mem_size(uio_id, 3, &mem->in_size) < 0)
+		goto err_in;
+
 	mem->in = mmap(NULL, mem->in_size, PROT_READ, MAP_SHARED, mem->fd, offset);
 	if (mem->in == MAP_FAILED) {
 		fprintf(stderr, "mmap() failed: %s\n", strerror(errno));
@@ -95,7 +115,9 @@ int ivshmem_init(struct ivshmem *mem, unsigned int uio_id)
 	}
 
 	offset += pgsize;
-	mem->out_size = uio_read_mem_size(uio_id, 4);
+	if (uio_read_mem_size(uio_id, 4, &mem->out_size) < 0)
+		goto err_out;
+
 	mem->out = mmap(NULL, mem->out_size, PROT_READ | PROT_WRITE, MAP_SHARED, mem->fd, offset);
 	if (mem->out == MAP_FAILED) {
 		fprintf(stderr, "mmap() failed: %s\n", strerror(errno));
@@ -120,6 +142,7 @@ err_regs:
 	close(mem->fd);
 
 err_open:
+err:
 	mem->fd = -1;
 
 	return -1;

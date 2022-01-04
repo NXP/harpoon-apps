@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 #include "ivshmem.h"
 #include "mailbox.h"
@@ -106,6 +107,17 @@ static int audio_stop(struct mailbox *m)
 	return command(m, &stop, sizeof(stop), HRPN_RESP_TYPE_AUDIO, &resp, &len, COMMAND_TIMEOUT);
 }
 
+static int strtoul_check(const char *nptr, char **endptr, int base, unsigned int *val)
+{
+	errno = 0;
+
+	*val = strtoul(nptr, endptr, base);
+	if (errno)
+		return -1;
+
+	return 0;
+}
+
 static int audio_main(int argc, char *argv[], struct mailbox *m)
 {
 	int option;
@@ -118,15 +130,30 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 	while ((option = getopt(argc, argv, "f:p:r:sv")) != -1) {
 		switch (option) {
 		case 'f':
-			frequency = strtoul(optarg, NULL, 0);
+			if (strtoul_check(optarg, NULL, 0, &frequency) < 0) {
+				printf("Invalid frequency\n");
+				rc = -1;
+				goto out;
+			}
+
 			break;
 
 		case 'p':
-			period = strtoul(optarg, NULL, 0);
+			if (strtoul_check(optarg, NULL, 0, &period) < 0) {
+				printf("Invalid period\n");
+				rc = -1;
+				goto out;
+			}
+
 			break;
 
 		case 'r':
-			id = strtoul(optarg, NULL, 0);
+			if (strtoul_check(optarg, NULL, 0, &id) < 0) {
+				printf("Invalid id\n");
+				rc = -1;
+				goto out;
+			}
+
 			is_run_cmd = true;
 			break;
 
@@ -147,6 +174,7 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 	if (is_run_cmd)
 		rc = audio_run(m, id, frequency, period);
 
+out:
 	return rc;
 }
 
@@ -187,9 +215,14 @@ static int latency_main(int argc, char *argv[], struct mailbox *m)
 		/* common options */
 		switch (option) {
 		case 'r':
-			id = strtoul(optarg, NULL, 0);
+			if (strtoul_check(optarg, NULL, 0, &id) < 0) {
+				printf("Invalid id\n");
+				rc = -1;
+				goto out;
+			}
 
 			rc = latency_run(m, id);
+
 			break;
 
 		case 's':
@@ -199,12 +232,14 @@ static int latency_main(int argc, char *argv[], struct mailbox *m)
 		case 'v':
 			printf("Harpoon v.%s\n", VERSION);
 			break;
+
 		default:
 			usage();
 			break;
 		}
 	}
 
+out:
 	return rc;
 }
 
@@ -213,7 +248,7 @@ int main(int argc, char *argv[])
 	struct ivshmem mem;
 	struct mailbox m;
 	unsigned int uio_id = 0;
-	int rc;
+	int rc = 0;
 
 	if (argc < 2) {
 		usage();
