@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 ROOT_CELL=%TEMPLATE_ROOT_CELL%
 INMATE_CELL=%TEMPLATE_INMATE_CELL%
