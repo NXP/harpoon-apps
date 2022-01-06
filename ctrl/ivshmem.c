@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -11,6 +11,8 @@
 #include <sys/mman.h>
 
 #include "ivshmem.h"
+
+#define UIO_MAX_MEM_SIZE	0x1000000	/* Arbitrary size limit */
 
 static int uio_read_mem_size(unsigned int uio_id, int id, size_t *size)
 {
@@ -32,8 +34,14 @@ static int uio_read_mem_size(unsigned int uio_id, int id, size_t *size)
 	if (sscanf(buf, "0x%zx", size) < 1)
 		goto err_sscanf;
 
+	if (*size > UIO_MAX_MEM_SIZE)
+		goto err_range;
+
+	close(fd);
+
 	return 0;
 
+err_range:
 err_sscanf:
 err_read:
 	close(fd);

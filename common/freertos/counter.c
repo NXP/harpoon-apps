@@ -40,7 +40,7 @@ static struct counter_alarm counters[NB_COUNTERS + 1];
  * @returns the index number of the specified peripheral,
  *          matching arrays defined here as well as in mcux-sdk
  */
-static const uint8_t gpt_get_index(const GPT_Type *base)
+static uint8_t gpt_get_index(const GPT_Type *base)
 {
 	uint8_t index = 0;
 
@@ -60,7 +60,7 @@ static const uint8_t gpt_get_index(const GPT_Type *base)
 /*
  * @returns the interrupt vector for the specified GPT peripheral
  */
-static const IRQn_Type gpt_get_irqn(const GPT_Type *base)
+static IRQn_Type gpt_get_irqn(const GPT_Type *base)
 {
 	const IRQn_Type irqs[] = GPT_IRQS;
 	uint8_t index = gpt_get_index(base);

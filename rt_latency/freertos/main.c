@@ -19,7 +19,6 @@
 #include "fsl_gpt.h"
 
 /* Harpoon-apps includes. */
-#include "os.h"
 #include "os/counter.h"
 #include "os/semaphore.h"
 #include "os/stdio.h"

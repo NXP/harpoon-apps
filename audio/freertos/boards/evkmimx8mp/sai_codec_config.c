@@ -12,7 +12,6 @@
 #include "fsl_codec_pcm512x_adapter.h"
 #endif
 #include "fsl_codec_common.h"
-#include "fsl_debug_console.h"
 #include "fsl_iomuxc.h"
 #ifdef CODEC_WM8960
 #include "fsl_wm8960.h"
