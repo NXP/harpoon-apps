@@ -8,10 +8,6 @@ The reference applications embedded in this repository may run on several jailho
 
 # Getting Started
 
-```txt
-TODO: insert link to user guide
-```
-
 A cross compiler is required to build Cortex-A applications ; this project is compatible with the ARM GCC toolchain that you may download and install:
 
 ```
@@ -20,15 +16,13 @@ tar -C /opt/ -xvf gcc-arm-10.2-2020.11-x86_64-aarch64-none-elf.tar.xz     # (sud
 ```
 
 # Cloning this repository
-
+You need to have both Git and West installed, then execute below commands to replicate the whole Harpoon delivery at revision ```${revision}``` and place it in a west worspace named ```hww```.
 ```txt
-# create a Harpoon west workspace:
-mkdir hww
-cd hww/
-# setup the workspace using west commands:
-west init -m ssh://git@bitbucket.sw.nxp.com/HRPN/harpoon-apps
+west init -m https://github.com/NXPmicro/harpoon-apps --mr ${revision} hww
+cd hww
 west update
 ```
+Replace ```${revision}``` with any Harpoon release you wish to use (e.g.: ```harpoon_2.0.0```). This can also be ```main``` if you want the latest state, or any commit SHA.
 
 # Repository structure
 
@@ -165,3 +159,5 @@ To be able to visualize the guest OS console, the UART4 tty shall be opened ; e.
 ```
 screen /dev/ttyUSB3 115200
 ```
+
+Please refer to the Harpoon User's Guide for more details.
