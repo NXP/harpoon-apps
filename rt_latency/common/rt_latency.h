@@ -10,9 +10,6 @@
 #include "os/semaphore.h"
 #include "stats.h"
 
-/* Time duration per test case (seconds) */
-#define TEST_EXECUTION_TIME_SEC                (29)
-
 /* Time period between two statistics logs (seconds) */
 #define STATS_PERIOD_SEC                       (10)
 
