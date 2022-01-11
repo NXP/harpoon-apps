@@ -146,11 +146,18 @@ The resulting binary is located under the `ddr_release/` directory and is called
 Jailhouse, running in the Linux root cell, provides the necessary tools to create, load and execute the reference applications built within this repository ; this example gives the commands for a FreeRTOS inmate cell for i.MX 8MP EVK:
 
 ```
+modprobe jailhouse
+jailhouse enable /usr/share/jailhouse/cells/imx8mp.cell
 jailhouse cell create /usr/share/jailhouse/cells/imx8mp-freertos.cell
 jailhouse cell load freertos /usr/share/harpoon/inmates/rt_latency.bin --address 0xc0000000
 jailhouse cell start freertos
 
 /usr/share/harpoon/harpoon_ctrl latency -r 1   # start rt_latency test case 1
+
+jailhouse cell shutdown freertos
+jailhouse cell destroy freertos
+jailhouse disable
+modprobe -r jailhouse
 ```
 
 To be able to visualize the guest OS console, the UART4 tty shall be opened ; e.g.:
