@@ -17,7 +17,7 @@
 static int uio_read_mem_size(unsigned int uio_id, int id, size_t *size)
 {
 	char sysfs_path[64];
-	char buf[20] = "";
+	char buf[20];
 	int fd, rc;
 
 	if (snprintf(sysfs_path, sizeof(sysfs_path), "/sys/class/uio/uio%u/maps/map%d/size", uio_id, id) < 0)
@@ -27,9 +27,11 @@ static int uio_read_mem_size(unsigned int uio_id, int id, size_t *size)
 	if (fd < 0)
 		goto err_open;
 
-	rc = read(fd, buf, sizeof(buf));
+	rc = read(fd, buf, sizeof(buf) - 1);
 	if (rc < 0)
 		goto err_read;
+
+	buf[19] = '\0';
 
 	if (sscanf(buf, "0x%zx", size) < 1)
 		goto err_sscanf;
