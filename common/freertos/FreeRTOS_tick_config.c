@@ -97,11 +97,8 @@ void vConfigureTickInterrupt( void )
     GIC_SetInterfacePriorityMask(portLOWEST_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
     GIC_EnableIRQ(VirtualTimer_IRQn);
 
-    /* Enable the interrupts in the timer. */
-    ARM_TIMER_EnableIRQ(ARM_TIMER);
-
-    /* Start the timer. */
-    ARM_TIMER_Start(ARM_TIMER);
+    /* Start the timer with interrupt enabled. */
+    ARM_TIMER_Start(ARM_TIMER, true);
 }
 /*-----------------------------------------------------------*/
 
