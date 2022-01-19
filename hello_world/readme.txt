@@ -11,6 +11,7 @@ The example application creates one task called hello_task. This task prints
 
 Toolchain supported
 ===================
+- GCC ARM 10.3-2021.07 for aarch64
 - GCC ARM 10.2-2020.11 for aarch64
 
 Hardware requirements

@@ -11,8 +11,8 @@ The reference applications embedded in this repository may run on several jailho
 A cross compiler is required to build Cortex-A applications ; this project is compatible with the ARM GCC toolchain that you may download and install:
 
 ```
-wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-aarch64-none-elf.tar.xz
-tar -C /opt/ -xvf gcc-arm-10.2-2020.11-x86_64-aarch64-none-elf.tar.xz     # (sudo permissions might be required)
+wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+tar -C /opt/ -xvf gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz     # (sudo permissions might be required)
 ```
 
 # Cloning this repository
@@ -123,7 +123,7 @@ The first application that you may attempt to build and execute is the `rt_laten
 If starting from a fresh console, the cross-compiler variable needs to be set:
 
 ```
-export ARMGCC_DIR=/opt/gcc-arm-10.2-2020.11-x86_64-aarch64-none-elf
+export ARMGCC_DIR=/opt/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf
 ```
 
 Then move to the right path, depending on the board and the RTOS that you are looking for. The example below builds the application within FreeRTOS and for the i.MX 8M Plus EVK board:
