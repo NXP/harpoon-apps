@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -162,7 +162,7 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 			break;
 
 		case 'v':
-			printf("Harpoon v.%s\n", VERSION);
+			printf("Harpoon v%s\n", VERSION);
 			break;
 
 		default:

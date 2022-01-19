@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -325,7 +325,7 @@ int main(void)
 	BOARD_InitMemory();
 	BOARD_InitDebugConsole();
 
-	os_printf("Harpoon v.%s\r\n", VERSION);
+	os_printf("Harpoon v%s\r\n", VERSION);
 
 	/* Test cases scheduler task */
 	xResult = xTaskCreate(main_task, "main_task",
