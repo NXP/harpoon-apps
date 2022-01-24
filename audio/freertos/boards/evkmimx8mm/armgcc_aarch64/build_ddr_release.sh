@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # Select codec to be used:
-# CODEC_DEVICE_TYPE="-DCODEC_DEVICE=wm8960" will enable EVK on board codec
 # CODEC_DEVICE_TYPE="-DCODEC_DEVICE=hifiberry" will enable HiFiBerry Codec
 CODEC_DEVICE_TYPE="-DCODEC_DEVICE=hifiberry"
 
