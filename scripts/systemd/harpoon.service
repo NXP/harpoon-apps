@@ -1,0 +1,11 @@
+[Unit]
+Description=Control Harpoon application with Jailhouse
+
+[Service]
+User=root
+ExecStart=/usr/share/harpoon/scripts/jh_harpoon.sh start
+ExecStop=/usr/share/harpoon/scripts/jh_harpoon.sh stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=basic.target
