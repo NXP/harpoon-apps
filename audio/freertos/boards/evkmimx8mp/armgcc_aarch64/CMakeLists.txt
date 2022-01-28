@@ -52,6 +52,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/sai_drv.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
+    "${AppBoardPath}/pin_mux.c"
     "${AppBoardPath}/sai_clock_config.c"
     "${AppBoardPath}/sai_codec_config.c"
     "${SdkBoardPath}/drivers/fsl_audiomix.c"

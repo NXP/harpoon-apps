@@ -19,6 +19,7 @@
 #include "mailbox.h"
 #include "hrpn_ctrl.h"
 
+#include "pin_mux.h"
 #include "sai_clock_config.h"
 #include "sai_codec_config.h"
 #include "sai_drv.h"
@@ -86,6 +87,8 @@ static void hardware_setup(void)
 	BOARD_InitDebugConsole();
 
 	BOARD_RdcInit();
+
+	BOARD_InitPins();
 
 	board_clock_setup(sai_id);
 }
