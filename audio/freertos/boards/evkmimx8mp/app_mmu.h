@@ -37,5 +37,8 @@
 			      I2S5_BASE, KB(64),			\
 			      MT_DEVICE_nGnRnE | MT_P_RW_U_RW | MT_NS),	\
 									\
+	MMU_REGION_FLAT_ENTRY("IOMUXC",					\
+			      IOMUXC_BASE, KB(64),			\
+			      MT_DEVICE_nGnRnE | MT_P_RW_U_RW | MT_NS),	\
 
 #endif /* _APP_MMU_H_ */
