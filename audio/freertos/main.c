@@ -74,6 +74,12 @@ const static struct mode_handler handler[] =
 		.exit = rec_play2_exit,
 		.run = rec_play2_run,
 		.stats = rec_play2_stats,
+	},
+	[5] = {
+		.init = play_pipeline_init,
+		.exit = play_pipeline_exit,
+		.run = play_pipeline_run,
+		.stats = play_pipeline_stats,
 	}
 };
 
