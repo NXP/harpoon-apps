@@ -154,6 +154,16 @@ jailhouse disable
 modprobe -r jailhouse
 ```
 
+Alternatively, a systemd unit file is provided to start the reference applications. This unit file runs a scripts that uses configuration file `/etc/harpoon/harpoon.conf` to figure out the different jailhouse parameters (application name, cell names, load address, ...).
+Preconfigured configurations can be generated with script `harpoon_set_configuration.sh`.
+
+Example to run the `rt_latency` application:
+
+```
+harpoon_set_configuration.sh latency # this needs to be run only once
+systemctl start harpoon
+```
+
 To be able to visualize the guest OS console, the UART4 tty shall be opened ; e.g.:
 
 ```
