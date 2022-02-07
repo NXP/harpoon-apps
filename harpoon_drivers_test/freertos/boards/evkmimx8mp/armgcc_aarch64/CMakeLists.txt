@@ -37,6 +37,7 @@ include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppBoardPath}/clock_config.c"
     "${AppBoardPath}/pin_mux.c"
+    "${AppPath}/src/flexcan_test.c"
     "${AppPath}/src/i2c_test.c"
     "${AppPath}/freertos/main.c"
     "${BoardPath}/board.c"
@@ -81,8 +82,10 @@ include(component_serial_manager_uart)
 
 include(driver_clock)
 include(driver_common)
-include(driver_iuart)
+include(driver_flexcan)
+include(driver_igpio)
 include(driver_ii2c)
+include(driver_iuart)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
