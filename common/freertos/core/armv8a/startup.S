@@ -80,6 +80,10 @@ Reset_Handler:
 	ldr	x0, =__el1_stack
 	mov	sp, x0
 
+#ifndef __NO_SYSTEM_INIT
+	bl	SystemInit
+#endif
+
 /*     Loop to copy data from read only memory to RAM. The ranges
  *      of copy from/to are specified by following symbols evaluated in
  *      linker script.
@@ -230,10 +234,6 @@ Reset_Handler:
 	str	xzr, [x0], #8
 	cbnz	x1, .LC15
 .L__dtcm_cleared:
-
-	# enable FPU/NEON instructions
-	mov	x0, #(3 << 20)
-	msr	cpacr_el1, x0
 
 	isb
 

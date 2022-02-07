@@ -86,6 +86,8 @@ include(all_devices)
 
 # include modules
 
+include(device_system_ca53)
+
 include(common_freertos)
 include(common_freertos_core_armv8a)
 
