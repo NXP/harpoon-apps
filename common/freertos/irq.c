@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <stddef.h>
+#include "os/stddef.h"
 #include "os/stdint.h"
 
 #include "FreeRTOS.h"
