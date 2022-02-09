@@ -7,7 +7,7 @@
 #ifndef _COMMON_COUNTER_H_
 #define _COMMON_COUNTER_H_
 
-#include <stdint.h>
+#include "os/stdint.h"
 
 struct os_counter_alarm_cfg {
 	void (*callback)(const void *dev, uint8_t chan_id, uint32_t irq_counter, void *user_data);

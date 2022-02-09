@@ -7,7 +7,7 @@
 #ifndef _FREERTOS_SEMAPHORE_H_
 #define _FREERTOS_SEMAPHORE_H_
 
-#include <stdint.h>
+#include "os/stdint.h"
 
 #include "FreeRTOS.h"
 #include "semphr.h"

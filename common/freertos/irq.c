@@ -6,7 +6,7 @@
  */
 
 #include <stddef.h>
-#include <stdint.h>
+#include "os/stdint.h"
 
 #include "FreeRTOS.h"
 

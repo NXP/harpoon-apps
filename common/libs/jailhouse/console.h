@@ -6,7 +6,7 @@
 #ifndef _JH_CONSOLE_H_
 #define _JH_CONSOLE_H_
 
-#include <stdint.h>
+#include "os/stdint.h"
 
 void jh_putc(int c);
 void jh_puts(const char *s);

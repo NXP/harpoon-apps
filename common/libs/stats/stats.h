@@ -8,7 +8,7 @@
 #ifndef _COMMON_STATS_H_
 #define _COMMON_STATS_H_
 
-#include <stdint.h>
+#include "os/stdint.h"
 
 struct stats {
     uint32_t log2_size;

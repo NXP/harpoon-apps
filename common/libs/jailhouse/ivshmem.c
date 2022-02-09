@@ -5,12 +5,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <stdint.h>
-
 #include "ivshmem.h"
+#include "memory.h"
 
-#include <memory.h>
-
+#include "os/stdint.h"
 #include "os/stdio.h"
 
 /* Jailhouse COMM */

@@ -8,7 +8,7 @@
 #define _COMMON_SEMAPHORE_H_
 
 #include <limits.h>
-#include <stdint.h>
+#include "os/stdint.h"
 
 #define OS_SEM_TIMEOUT_MAX    UINT_MAX
 
