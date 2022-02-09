@@ -4,11 +4,10 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-#include "math.h"
-
 #include "FreeRTOS.h"
 
 #include "os/assert.h"
+#include "os/math.h"
 #include "os/stdlib.h"
 
 #define PI 3.141592654
