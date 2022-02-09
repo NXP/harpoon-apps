@@ -7,7 +7,7 @@
 #ifndef _COMMON_SEMAPHORE_H_
 #define _COMMON_SEMAPHORE_H_
 
-#include <limits.h>
+#include "os/limits.h"
 #include "os/stdint.h"
 
 #define OS_SEM_TIMEOUT_MAX    UINT_MAX
