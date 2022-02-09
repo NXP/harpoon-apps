@@ -37,4 +37,3 @@ int os_counter_set_channel_alarm(const void *dev, uint8_t chan_id,
           const struct os_counter_alarm_cfg *alarm_cfg);
 
 #endif /* #ifndef _COMMON_COUNTER_H_ */
-

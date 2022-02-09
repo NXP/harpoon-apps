@@ -16,4 +16,3 @@
 #endif
 
 #endif /* #ifndef _COMMON_STDIO_H_ */
-
