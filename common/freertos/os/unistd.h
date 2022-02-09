@@ -6,6 +6,8 @@
 #ifndef _FREERTOS_UNISTD_H_
 #define _FREERTOS_UNISTD_H_
 
+#include <stdint.h>
+
 #include "FreeRTOS.h"
 #include "task.h"
 

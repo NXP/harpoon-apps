@@ -7,7 +7,6 @@
 #ifndef _FREERTOS_ASSERT_H_
 #define _FREERTOS_ASSERT_H_
 
-#include "FreeRTOS.h"
 #include "os/stdio.h"
 
 #define os_assert(cond, msg, ...)       \

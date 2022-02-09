@@ -7,10 +7,6 @@
 #ifndef _FREERTOS_COUNTER_H_
 #define _FREERTOS_COUNTER_H_
 
-/* System includes.*/
-#include <stdbool.h>
-#include <stdint.h>
-
 /* OSAL includes.*/
 #include "os/counter.h"
 

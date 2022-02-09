@@ -9,8 +9,7 @@
 
 #include <stdint.h>
 
-#include "os/assert.h"
-
+#include "FreeRTOS.h"
 #include "semphr.h"
 
 typedef struct {

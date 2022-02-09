@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-/* System includes.*/
-#include <stdio.h>
-
 /* Kernel includes. */
 #include "FreeRTOS.h"
 #include "semphr.h"
@@ -19,6 +16,7 @@
 #include "fsl_gpt.h"
 
 /* Harpoon-apps includes. */
+#include "os/assert.h"
 #include "os/counter.h"
 #include "os/semaphore.h"
 #include "os/stdio.h"
