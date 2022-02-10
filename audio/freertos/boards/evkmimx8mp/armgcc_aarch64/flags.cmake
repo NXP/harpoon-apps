@@ -128,7 +128,7 @@ SET(CMAKE_C_FLAGS_RELEASE " \
     -DFSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL \
     -DSERIAL_PORT_TYPE_UART=1 \
     -DFSL_RTOS_FREE_RTOS \
-    -Os \
+    -O3 \
     -march=armv8.1-a \
     -mtune=cortex-a53 \
     -Wall \
@@ -173,7 +173,7 @@ SET(CMAKE_C_FLAGS_DDR_RELEASE " \
     -DFSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL \
     -DSERIAL_PORT_TYPE_UART=1 \
     -DFSL_RTOS_FREE_RTOS \
-    -Os \
+    -O3 \
     -march=armv8.1-a \
     -mtune=cortex-a53 \
     -Wall \
@@ -240,7 +240,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE " \
     -DGUEST \
     -DFSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL \
     -DSERIAL_PORT_TYPE_UART=1 \
-    -Os \
+    -O3 \
     -march=armv8.1-a \
     -mtune=cortex-a53 \
     -Wall \
@@ -283,7 +283,7 @@ SET(CMAKE_CXX_FLAGS_DDR_RELEASE " \
     -DGUEST \
     -DFSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL \
     -DSERIAL_PORT_TYPE_UART=1 \
-    -Os \
+    -O3 \
     -march=armv8.1-a \
     -mtune=cortex-a53 \
     -Wall \
@@ -304,7 +304,7 @@ SET(CMAKE_CXX_FLAGS_RAM_RELEASE " \
     -DGUEST \
     -DFSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL \
     -DSERIAL_PORT_TYPE_UART=1 \
-    -Os \
+    -O3 \
     -march=armv8.1-a \
     -mtune=cortex-a53 \
     -Wall \
