@@ -26,7 +26,7 @@
 
 /*I.MX8MP EVK onboard Codec is WM8960 */
 #ifdef CODEC_WM8960
-static codec_handle_t *codec_handle;
+static codec_handle_t codec_handle;
 
 static wm8960_config_t wm8960Config = {
 	.i2cConfig = {
@@ -51,7 +51,7 @@ void codec_set_format(uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
 {
 	int32_t err;
 
-	err = CODEC_SetFormat(codec_handle, mclk, sample_rate, bitwidth);
+	err = CODEC_SetFormat(&codec_handle, mclk, sample_rate, bitwidth);
 	os_assert(err == kStatus_Success, "WM8960 set format failed (err %d)", err);
 }
 
@@ -59,31 +59,24 @@ void codec_setup(void)
 {
 	int32_t err;
 
-	codec_handle = pvPortMalloc(sizeof(codec_handle_t));
-	os_assert(codec_handle, "Codec initialization failed with memory allocation error");
-	memset(codec_handle, 0, sizeof(codec_handle_t));
-
 	/* setup clock */
 	CLOCK_SetRootMux(kCLOCK_RootI2c3, kCLOCK_I2cRootmuxSysPll1Div5); /* Set I2C source to SysPLL1 Div5 160MHZ */
 	CLOCK_SetRootDivider(kCLOCK_RootI2c3, 1U, 10U);                  /* Set root clock to 160MHZ / 10 = 16MHZ */
 	CLOCK_EnableClock(kCLOCK_I2c3);
 
 	/* Use default setting to init codec */
-	err = CODEC_Init(codec_handle, &sai_codec_config);
+	err = CODEC_Init(&codec_handle, &sai_codec_config);
 	os_assert(err == kStatus_Success, "Codec initialization failed (err %d)", err);
 }
 
-void codec_close(void *codec_dev)
+void codec_close(void)
 {
 	int32_t err;
-	codec_handle_t *codec_handle = (codec_handle_t *)codec_dev;
 
-	err = CODEC_Deinit(codec_handle);
+	err = CODEC_Deinit(&codec_handle);
 	if (err != kStatus_Success) {
 		os_assert(false, "Codec deinitialization failed (err %d)", err);
 	}
-
-	vPortFree(codec_dev);
 }
 #elif defined(CODEC_HIFIBERRY)
 /*
@@ -91,8 +84,8 @@ void codec_close(void *codec_dev)
  * ADC Codec is PCM186x:
  * DAC Codec is PCM512x:
  */
-static codec_handle_t *dac_handle;
-static codec_handle_t *adc_handle;
+static codec_handle_t dac_handle;
+static codec_handle_t adc_handle;
 
 static pcm512x_config_t pcm512xConfig = {
 	.i2cConfig = {
@@ -136,10 +129,10 @@ void codec_set_format(uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
 	int32_t err;
 
 	/* In general, ADC and DAC will use the same configuration parameters */
-	err = CODEC_SetFormat(dac_handle, mclk, sample_rate, bitwidth);
+	err = CODEC_SetFormat(&dac_handle, mclk, sample_rate, bitwidth);
 	os_assert(err == kStatus_Success, "DAC set format failed (err %d)", err);
 
-	err = CODEC_SetFormat(adc_handle, mclk, sample_rate, bitwidth);
+	err = CODEC_SetFormat(&adc_handle, mclk, sample_rate, bitwidth);
 	os_assert(err == kStatus_Success, "ADC set format failed (err %d)", err);
 }
 
@@ -147,24 +140,16 @@ void codec_setup(void)
 {
 	int32_t err;
 
-	dac_handle = pvPortMalloc(sizeof(codec_handle_t));
-	os_assert(dac_handle, "DAC initialization failed with memory allocation error");
-	memset(dac_handle, 0, sizeof(codec_handle_t));
-
-	adc_handle = pvPortMalloc(sizeof(codec_handle_t));
-	os_assert(adc_handle, "ADC initialization failed with memory allocation error");
-	memset(adc_handle, 0, sizeof(codec_handle_t));
-
 	/* setup clock */
 	CLOCK_SetRootMux(kCLOCK_RootI2c3, kCLOCK_I2cRootmuxSysPll1Div5); /* Set I2C source to SysPLL1 Div5 160MHZ */
 	CLOCK_SetRootDivider(kCLOCK_RootI2c3, 1U, 10U);                  /* Set root clock to 160MHZ / 10 = 16MHZ */
 	CLOCK_EnableClock(kCLOCK_I2c3);
 
 	/* Use default setting to init codec */
-	err = CODEC_Init(dac_handle, &dac_config);
+	err = CODEC_Init(&dac_handle, &dac_config);
 	os_assert(err == kStatus_Success, "DAC initialization failed (err %d)", err);
 
-	err = CODEC_Init(adc_handle, &adc_config);
+	err = CODEC_Init(&adc_handle, &adc_config);
 	os_assert(err == kStatus_Success, "ADC initialization failed (err %d)", err);
 }
 
@@ -172,12 +157,10 @@ void codec_close(void)
 {
 	int32_t err;
 
-	err = CODEC_Deinit(dac_handle);
+	err = CODEC_Deinit(&dac_handle);
 	os_assert(err == kStatus_Success, "DAC deinitialization failed (err %d)", err);
 
-	err = CODEC_Deinit(adc_handle);
+	err = CODEC_Deinit(&adc_handle);
 	os_assert(err == kStatus_Success, "ADC deinitialization failed (err %d)", err);
-
-	vPortFree(dac_handle);
 }
 #endif
