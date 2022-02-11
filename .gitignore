@@ -98,3 +98,6 @@ CMakeCache.txt
 Makefile
 *.obj
 *.map
+
+# Linux application binaries
+ctrl/harpoon_ctrl
