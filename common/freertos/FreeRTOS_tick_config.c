@@ -1,7 +1,7 @@
 /*
  * FreeRTOS V202012.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -78,7 +78,7 @@ void vConfigureTickInterrupt( void )
     ARM_TIMER_Initialize(ARM_TIMER);
 
     /* Fetch timer frequency rate. */
-    ARM_TIMER_GetFreq(ARM_TIMER, &val);
+    ARM_TIMER_GetFreq(&val);
 
     /* Derive values from the tick rate. */
     FreeRTOS_tick_interval = val / configTICK_RATE_HZ;
