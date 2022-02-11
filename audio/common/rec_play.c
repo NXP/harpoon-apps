@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #include "board.h"
+#include "log.h"
 #include "os/assert.h"
 #include "os/stdlib.h"
 #include "sai_drv.h"
@@ -45,7 +46,7 @@ void rec_play_stats(void *handle)
 {
 	struct rec_play_ctx *ctx = handle;
 
-	os_printf("periods: %lld, rx error: %lld, tx error: %lld\r",
+	log_info("periods: %lld, rx error: %lld, tx error: %lld",
 		ctx->stats.rec_play_periods, ctx->stats.rx_fifo_errs, ctx->stats.rx_fifo_errs);
 }
 
@@ -154,12 +155,12 @@ void *rec_play_init(void *parameters)
 	struct rec_play_ctx *ctx;
 
 	if (assign_nonzero_valid_val(period, cfg->period, supported_period) != 0) {
-		os_printf("Period %d frames is not supported\r\n", cfg->period);
+		log_err("Period %d frames is not supported\n", cfg->period);
 		goto err;
 	}
 
 	if (assign_nonzero_valid_val(rate, cfg->rate, supported_rate) != 0) {
-		os_printf("Rate %d Hz is not supported\r\n", cfg->rate);
+		log_err("Rate %d Hz is not supported\n", cfg->rate);
 		goto err;
 	}
 
@@ -188,7 +189,7 @@ void *rec_play_init(void *parameters)
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, ctx->sample_rate,
 			ctx->bit_width);
 
-	os_printf("Record and playback started (Sample Rate: %d Hz, Bit Width: %d bits, Period: %d frames)\r\n",
+	log_info("Record and playback started (Sample Rate: %d Hz, Bit Width: %d bits, Period: %d frames)\n",
 			ctx->sample_rate, ctx->bit_width, ctx->period);
 
 	return ctx;
@@ -207,5 +208,5 @@ void rec_play_exit(void *parameters)
 
 	os_free(ctx);
 
-	os_printf("\r\nEnd.\r\n");
+	log_info("\nEnd.\n");
 }

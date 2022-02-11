@@ -1,10 +1,11 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #include "board.h"
+#include "log.h"
 #include "os/assert.h"
 #include "os/stdlib.h"
 #include "sai_drv.h"
@@ -46,7 +47,7 @@ void play_dtmf_stats(void *handle)
 {
 	struct dtmf_ctx *ctx = handle;
 
-	os_printf("Played DTMF sequence: %d times\r", ctx->play_times);
+	log_info("Played DTMF sequence: %d times", ctx->play_times);
 }
 
 static void tx_callback(uint8_t status, void *userData)
@@ -118,7 +119,7 @@ void *play_dtmf_init(void *parameters)
 	uint32_t rate = DTMF_AUDIO_SRATE;
 
 	if (assign_nonzero_valid_val(rate, cfg->rate, supported_rate) != 0) {
-		os_printf("Frequency %d Hz is not supported\r\n", cfg->rate);
+		log_err("Frequency %d Hz is not supported\n", cfg->rate);
 		goto err;
 	}
 
@@ -148,9 +149,9 @@ void *play_dtmf_init(void *parameters)
 	codec_setup();
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, ctx->sample_rate, DTMF_AUDIO_BITWIDTH);
 
-	os_printf("Playing DTMF sequence (Sample Rate: %d Hz, Bit Width: %d bits)\r\n", ctx->sample_rate, DTMF_AUDIO_BITWIDTH);
-	os_printf("\tleft channel:  %s\r\n", ctx->dtmf_l_seq);
-	os_printf("\tright channel: %s\r\n", ctx->dtmf_r_seq);
+	log_info("Playing DTMF sequence (Sample Rate: %d Hz, Bit Width: %d bits)\n", ctx->sample_rate, DTMF_AUDIO_BITWIDTH);
+	log_info("\tleft channel:  %s\n", ctx->dtmf_l_seq);
+	log_info("\tright channel: %s\n", ctx->dtmf_r_seq);
 
 	return ctx;
 
@@ -168,5 +169,5 @@ void play_dtmf_exit(void *handle)
 
 	os_free(ctx);
 
-	os_printf("\r\nEnd.\r\n");
+	log_info("\nEnd.\n");
 }

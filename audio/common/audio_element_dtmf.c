@@ -7,10 +7,10 @@
 #include "os/math.h"
 #include "os/stdint.h"
 #include "os/string.h"
-#include "os/stdio.h"
 
 #include "audio_element_dtmf.h"
 #include "audio_element.h"
+#include "log.h"
 
 #define USEC_PER_SEC	1000000
 
@@ -218,8 +218,8 @@ static void dtmf_element_dump(struct audio_element *element)
 {
 	struct dtmf_element *dtmf = element->data;
 
-	os_printf("dmtf(%p/%p), state: %u\n\r", dtmf, element, dtmf->state);
-	os_printf("sequence: %s, %u\n\r", dtmf->sequence, dtmf->sequence_id);
+	log_info("dmtf(%p/%p), state: %u\n", dtmf, element, dtmf->state);
+	log_info("sequence: %s, %u\n", dtmf->sequence, dtmf->sequence_id);
 	audio_buf_dump(dtmf->out);
 }
 

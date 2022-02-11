@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -10,8 +10,8 @@
 #include "queue.h"
 
 #include "board.h"
+#include "log.h"
 #include "os/assert.h"
-#include "os/stdio.h"
 #include "os/semaphore.h"
 
 #include "ivshmem.h"
@@ -266,9 +266,9 @@ void main_task(void *pvParameters)
 	int rc;
 
 	rc = ivshmem_init(0, &mem);
-	os_assert(!rc, "ivshmem initialization failed, can not proceed\r\n");
+	os_assert(!rc, "ivshmem initialization failed, can not proceed\n");
 
-	os_assert(mem.out_size, "ivshmem mis-configuration, can not proceed\r\n");
+	os_assert(mem.out_size, "ivshmem mis-configuration, can not proceed\n");
 
 	mailbox_init(&m, mem.out, mem.out + mem.out_size * mem.id, false);
 
@@ -306,7 +306,7 @@ int main(void)
 
 	hardware_setup();
 
-	os_printf("Audio application started!\r\n");
+	log_info("Audio application started!\n");
 
 	xResult = xTaskCreate(main_task, "main_task",
 			configMINIMAL_STACK_SIZE + 100, NULL,

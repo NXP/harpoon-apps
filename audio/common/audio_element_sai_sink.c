@@ -6,6 +6,7 @@
 
 #include "audio_element_sai_sink.h"
 #include "audio_element.h"
+#include "log.h"
 
 #include "sai_drv.h"
 
@@ -163,12 +164,12 @@ static void sai_sink_element_dump(struct audio_element *element)
 	struct sai_sink_element *sai = element->data;
 	int i;
 
-	os_printf("sai sink(%p/%p)\n\r", sai, element);
-	os_printf("  inputs: %u\n\r", sai->in_n);
-	os_printf("  mapping:\n\r");
+	log_info("sai sink(%p/%p)\n", sai, element);
+	log_info("  inputs: %u\n", sai->in_n);
+	log_info("  mapping:\n");
 
 	for (i = 0; i < sai->map_n; i++)
-		os_printf("    %p => %p\n\r", sai->map[i].in, sai->map[i].tx_fifo);
+		log_info("    %p => %p\n", sai->map[i].in, sai->map[i].tx_fifo);
 
 	for (i = 0; i < sai->in_n; i++)
 		audio_buf_dump(sai->in[i]);

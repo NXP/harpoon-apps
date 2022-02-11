@@ -6,6 +6,7 @@
 
 #include "audio_element_sai_source.h"
 #include "audio_element.h"
+#include "log.h"
 
 #include "sai_drv.h"
 
@@ -162,12 +163,12 @@ static void sai_source_element_dump(struct audio_element *element)
 	struct sai_source_element *sai = element->data;
 	int i;
 
-	os_printf("sai source(%p/%p)\n\r", sai, element);
-	os_printf("  outputs: %u\n\r", sai->out_n);
-	os_printf("  mapping:\n\r");
+	log_info("sai source(%p/%p)\n", sai, element);
+	log_info("  outputs: %u\n", sai->out_n);
+	log_info("  mapping:\n");
 
 	for (i = 0; i < sai->map_n; i++)
-		os_printf("    %p => %p\n\r", sai->map[i].rx_fifo, sai->map[i].out);
+		log_info("    %p => %p\n", sai->map[i].rx_fifo, sai->map[i].out);
 
 	for (i = 0; i < sai->out_n; i++)
 		audio_buf_dump(sai->out[i]);

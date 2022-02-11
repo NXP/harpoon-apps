@@ -9,6 +9,7 @@
 #include "audio_element_routing.h"
 #include "audio_element.h"
 #include "hrpn_ctrl.h"
+#include "log.h"
 #include "mailbox.h"
 
 struct routing_output {
@@ -145,13 +146,13 @@ static void routing_element_dump(struct audio_element *element)
 	struct routing_element *routing = element->data;
 	int i;
 
-	os_printf("routing(%p/%p)\n\r", routing, element);
-	os_printf("  inputs: %u\n\r", routing->inputs);
-	os_printf("  outputs: %u\n\r", routing->outputs);
-	os_printf("  maping:\n\r");
+	log_info("routing(%p/%p)\n", routing, element);
+	log_info("  inputs: %u\n", routing->inputs);
+	log_info("  outputs: %u\n", routing->outputs);
+	log_info("  maping:\n");
 
 	for (i = 0; i < routing->outputs; i++)
-		os_printf("    %x => %x\n\r", routing->out[i].input, i);
+		log_info("    %x => %x\n", routing->out[i].input, i);
 
 	for (i = 0; i < routing->inputs + 1; i++)
 		audio_buf_dump(routing->in[i]);

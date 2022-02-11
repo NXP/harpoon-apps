@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/stdio.h"
 #include "os/assert.h"
 #include "os/stdlib.h"
 
@@ -12,6 +11,7 @@
 
 #include "audio_pipeline.h"
 #include "audio.h"
+#include "log.h"
 #include "sai_codec_config.h"
 #include "sai_drv.h"
 
@@ -45,7 +45,7 @@ void play_pipeline_stats(void *handle)
 {
 	struct pipeline_ctx *ctx = handle;
 
-	os_printf("callback: %llu, run: %llu, err: %llu\r\n", ctx->stats.callback, ctx->stats.run,
+	log_info("callback: %llu, run: %llu, err: %llu\n", ctx->stats.callback, ctx->stats.run,
 		ctx->stats.err);
 }
 
@@ -108,12 +108,12 @@ void *play_pipeline_init(void *parameters)
 	uint32_t rate = DEFAULT_SAMPLE_RATE;
 
 	if (assign_nonzero_valid_val(period, cfg->period, supported_period) != 0) {
-		os_printf("Period %d frames is not supported\r\n", cfg->period);
+		log_err("Period %d frames is not supported\n", cfg->period);
 		goto err;
 	}
 
 	if (assign_nonzero_valid_val(rate, cfg->rate, supported_rate) != 0) {
-		os_printf("Rate %d Hz is not supported\r\n", cfg->rate);
+		log_err("Rate %d Hz is not supported\n", cfg->rate);
 		goto err;
 	}
 
@@ -144,7 +144,7 @@ void *play_pipeline_init(void *parameters)
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, rate,
 			ctx->bit_width);
 
-	os_printf("Starting pipeline (Sample Rate: %d Hz, Period: %d frames)\r\n",
+	log_info("Starting pipeline (Sample Rate: %d Hz, Period: %d frames)\n",
 			rate, period);
 
 	return ctx;
@@ -165,5 +165,5 @@ void play_pipeline_exit(void *handle)
 
 	os_free(ctx);
 
-	os_printf("\r\nEnd.\r\n");
+	log_info("\nEnd.\n");
 }

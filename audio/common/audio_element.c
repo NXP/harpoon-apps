@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/stdio.h"
-
 #include "audio_element.h"
 #include "audio_pipeline.h"
 #include "hrpn_ctrl.h"
+#include "log.h"
 #include "mailbox.h"
 
 static void audio_element_response(struct mailbox *m, uint32_t status)
@@ -95,7 +94,7 @@ int audio_element_init(struct audio_element *element, struct audio_element_confi
 {
 	int rc;
 
-	os_printf("%s: enter, type %d\n\r", __func__, config->type);
+	log_info("enter, type %d\n", config->type);
 
 	element->type = config->type;
 	element->sample_rate = config->sample_rate;
@@ -127,7 +126,7 @@ int audio_element_init(struct audio_element *element, struct audio_element_confi
 		break;
 	}
 
-	os_printf("%s: done\n\r", __func__);
+	log_info("done\n");
 
 	return rc;
 }

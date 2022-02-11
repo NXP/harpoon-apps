@@ -5,11 +5,11 @@
  */
 
 #include "os/math.h"
-#include "os/stdio.h"
 
 #include "audio_element_sine.h"
 #include "audio_element.h"
 #include "audio_buffer.h"
+#include "log.h"
 
 struct sine_element {
 	struct audio_buffer *out;
@@ -55,8 +55,8 @@ static void sine_element_dump(struct audio_element *element)
 {
 	struct sine_element *sine = element->data;
 
-	os_printf("sine(%p/%p)\n\r", sine, element);
-	os_printf("  phase: %u, amplitude: %f\n\r", sine->phase, sine->amplitude);
+	log_info("sine(%p/%p)\n", sine, element);
+	log_info("  phase: %u, amplitude: %f\n", sine->phase, sine->amplitude);
 	audio_buf_dump(sine->out);
 }
 

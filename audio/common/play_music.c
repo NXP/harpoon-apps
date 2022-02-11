@@ -1,11 +1,12 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "board.h"
+#include "log.h"
 #include "music.h"
 #include "os/assert.h"
 #include "os/stdlib.h"
@@ -29,7 +30,7 @@ void play_music_stats(void *handle)
 {
 	struct music_ctx *ctx = handle;
 
-	os_printf("Played Music: %d times\r", ctx->play_times);
+	log_info("Played Music: %d times", ctx->play_times);
 }
 
 static void tx_callback(uint8_t status, void *userData)
@@ -86,7 +87,7 @@ void *play_music_init(void *parameters)
 	codec_setup();
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
 
-	os_printf("Playing Music (Sample Rate: %d Hz, Bit Width: %d bits)\r\n", PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
+	log_info("Playing Music (Sample Rate: %d Hz, Bit Width: %d bits)\n", PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
 
 	ctx->play_times = 1;
 
@@ -103,5 +104,5 @@ void play_music_exit(void *handle)
 
 	os_free(ctx);
 
-	os_printf("\r\nEnd.\r\n");
+	log_info("\nEnd.\n");
 }

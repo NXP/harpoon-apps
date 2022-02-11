@@ -1,10 +1,11 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #include "FreeRTOS.h"
+#include "log.h"
 #include "task.h"
 
 #include "board.h"
@@ -64,7 +65,7 @@ void rec_play2_stats(void *handle)
 {
 	struct rec_play2_ctx *ctx = handle;
 
-	os_printf("recorded: %d times, played: %d times\r", ctx->record_times, ctx->play_times);
+	log_info("recorded: %d times, played: %d times", ctx->record_times, ctx->play_times);
 }
 
 static void rx_callback(uint8_t status, void *userData)
@@ -147,7 +148,7 @@ static void sai_record_playback(struct rec_play2_ctx *ctx)
 	BaseType_t xResult;
 	int err, i;
 
-	os_printf("Record and playback (two threads) started (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
+	log_info("Record and playback (two threads) started (Sample Rate: %d Hz, Bit Width: %d bits)\n",
 			DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
 	err = os_sem_init(&ctx->tx_semaphore, 0);
@@ -232,5 +233,5 @@ void rec_play2_exit(void *handle)
 
 	os_free(ctx);
 
-	os_printf("\r\nEnd.\r\n");
+	log_info("\nEnd.\n");
 }

@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/stdio.h"
-
 #include "audio_buffer.h"
+#include "log.h"
 
 /*
  * Audio buffer structure (circular) with single writter/reader.
@@ -30,7 +29,7 @@
 */
 void audio_buf_dump(struct audio_buffer *buf)
 {
-	os_printf("buf(%p): base %p, size %x/%x, read %x, write %x\n\r",
+	log_info("buf(%p): base %p, size %x/%x, read %x, write %x\n",
 		  buf, buf->base, buf->size, buf->size_mask, buf->read, buf->write);
 }
 

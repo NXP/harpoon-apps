@@ -84,6 +84,7 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
     ${CommonPath}/libs/jailhouse
+    ${CommonPath}/libs/logging
     ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/ctrl
     ${RtosPath}
@@ -102,6 +103,7 @@ include(common_freertos)
 include(common_freertos_core_armv8a)
 
 include(lib_jailhouse)
+include(lib_logging)
 include(lib_mailbox)
 include(lib_ctrl)
 

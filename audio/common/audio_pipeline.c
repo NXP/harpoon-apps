@@ -5,10 +5,10 @@
  */
 
 #include "os/stdlib.h"
-#include "os/stdio.h"
 
 #include "audio_pipeline.h"
 #include "hrpn_ctrl.h"
+#include "log.h"
 #include "mailbox.h"
 
 #define MAX_PIPELINES	4
@@ -305,7 +305,7 @@ static struct audio_pipeline *audio_pipeline_create(struct audio_pipeline_config
 {
 	struct audio_pipeline *pipeline;
 
-	os_printf("%s: enter\n\r", __func__);
+	log_info("enter\n");
 
 	if (audio_pipeline_config_check(config) < 0)
 		goto err;
@@ -318,7 +318,7 @@ static struct audio_pipeline *audio_pipeline_create(struct audio_pipeline_config
 
 	audio_pipeline_buffer_init(pipeline, config);
 
-	os_printf("%s: done\n\r", __func__);
+	log_info("done\n");
 
 	return pipeline;
 
@@ -357,7 +357,7 @@ struct audio_pipeline *audio_pipeline_init(struct audio_pipeline_config *config)
 	struct audio_element *element;
 	int i, j;
 
-	os_printf("%s: enter\n\r", __func__);
+	log_info("enter\n");
 
 	audio_pipeline_set_config(config);
 
@@ -381,7 +381,7 @@ struct audio_pipeline *audio_pipeline_init(struct audio_pipeline_config *config)
 		}
 	}
 
-	os_printf("%s: done\n\r", __func__);
+	log_info("done\n");
 
 	return pipeline;
 

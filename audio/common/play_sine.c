@@ -1,10 +1,11 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #include "board.h"
+#include "log.h"
 #include "os/assert.h"
 #include "os/stdlib.h"
 #include "sai_drv.h"
@@ -29,7 +30,7 @@ void play_sine_stats(void *handle)
 {
 	struct sine_ctx *ctx = handle;
 
-	os_printf("Played Sine wave: %d times\r", ctx->play_times);
+	log_info("Played Sine wave: %d times", ctx->play_times);
 }
 
 static void tx_callback(uint8_t status, void *userData)
@@ -88,7 +89,7 @@ void *play_sine_init(void *parameters)
 	codec_setup();
 	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
 
-	os_printf("Playing Sine wave (Sample Rate: %d Hz, Bit Width: %d bits)\r\n",
+	log_info("Playing Sine wave (Sample Rate: %d Hz, Bit Width: %d bits)\n",
 			PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
 
 	return ctx;
@@ -104,5 +105,5 @@ void play_sine_exit(void *handle)
 
 	os_free(ctx);
 
-	os_printf("\r\nEnd.\r\n");
+	log_info("\nEnd.\n");
 }
