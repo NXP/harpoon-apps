@@ -7,7 +7,6 @@
 #ifndef _COMMON_CPU_H_
 #define _COMMON_CPU_H_
 
-#include "os.h"
 #include "os/stdio.h"
 
 #ifdef OS_ZEPHYR /* TODO: Implement cache invalidation with OS-independant code */

@@ -9,7 +9,6 @@
 
 #include <stdint.h>
 
-#include "os.h"
 #include "os/assert.h"
 
 #include "semphr.h"

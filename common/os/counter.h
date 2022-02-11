@@ -10,8 +10,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "os.h"
-
 struct os_counter_alarm_cfg {
 	void (*callback)(const void *dev, uint8_t chan_id, uint32_t irq_counter, void *user_data);
 	uint32_t ticks;      /* number of ticks that triggers the alarm, relative to now */

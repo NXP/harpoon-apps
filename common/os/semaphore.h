@@ -10,8 +10,6 @@
 #include <limits.h>
 #include <stdint.h>
 
-#include "os.h"
-
 #define OS_SEM_TIMEOUT_MAX    UINT_MAX
 
 /**

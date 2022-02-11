@@ -10,7 +10,6 @@
 #include "queue.h"
 
 #include "board.h"
-#include "os.h"
 #include "os/assert.h"
 #include "os/stdio.h"
 #include "os/semaphore.h"

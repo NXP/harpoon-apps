@@ -7,8 +7,6 @@
 #ifndef _COMMON_STDIO_H_
 #define _COMMON_STDIO_H_
 
-#include "os.h"
-
 #if defined(OS_ZEPHYR)
   #include "zephyr/os/stdio.h"
 #elif defined(FSL_RTOS_FREE_RTOS)

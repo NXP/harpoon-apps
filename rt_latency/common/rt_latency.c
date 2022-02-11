@@ -6,7 +6,6 @@
 
 #include "cpu.h"
 
-#include "os.h"
 #include "os/assert.h"
 #include "os/counter.h"
 #include "os/semaphore.h"

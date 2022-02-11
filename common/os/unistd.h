@@ -6,8 +6,6 @@
 #ifndef _COMMON_UNISTD_H_
 #define _COMMON_UNISTD_H_
 
-#include "os.h"
-
 #if defined(OS_ZEPHYR)
   #include "zephyr/os/unistd.h"
 #elif defined(FSL_RTOS_FREE_RTOS)
