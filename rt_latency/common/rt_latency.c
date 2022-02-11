@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP.
+ * Copyright 2021-2022 NXP.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,9 +9,9 @@
 #include "os/assert.h"
 #include "os/counter.h"
 #include "os/semaphore.h"
-#include "os/stdio.h"
 #include "os/unistd.h"
 
+#include "log.h"
 #include "stats.h"
 
 #include "rt_latency.h"
@@ -85,7 +85,7 @@ static void load_alarm_handler(const void *dev, uint8_t chan_id,
 static void assert_not_in_ddr(uintptr_t ptr)
 {
 	if (ptr > DDR_BASE_ADDR)
-		os_printf("ERROR: Pointer %p is in DDR!\n\r", (void *)ptr);
+		log_err("Pointer %p is in DDR!\n", (void *)ptr);
 }
 
 static void ensure_data_instr_in_ram()
@@ -215,7 +215,7 @@ void print_stats(struct rt_latency_ctx *ctx)
 	stats_reset(&ctx->irq_to_sched);
 	hist_print(&ctx->irq_to_sched_hist);
 
-	os_printf("\r\n");
+	log_info("\n");
 }
 
 void rt_latency_destroy(struct rt_latency_ctx *ctx)
@@ -279,7 +279,7 @@ int rt_latency_init(const void *dev,
 
 	if (ctx->tc_load & RT_LATENCY_WITH_LINUX_LOAD) {
 		/* TODO: Add command to trigger Linux Load */
-		os_printf("WARNING: Linux load must be run manually!\n\r");
+		log_warn("Linux load must be run manually!\n");
 	}
 
 	if (ctx->tc_load & RT_LATENCY_USES_OCRAM) {

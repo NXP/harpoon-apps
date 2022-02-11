@@ -58,6 +58,7 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos/core/armv8a
     ${CommonPath}/libs/stats
     ${CommonPath}/libs/jailhouse
+    ${CommonPath}/libs/logging
     ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/ctrl
     ${RtosPath}
@@ -87,6 +88,7 @@ include(driver_iuart)
 
 include(lib_stats)
 include(lib_jailhouse)
+include(lib_logging)
 include(lib_mailbox)
 include(lib_ctrl)
 

@@ -19,11 +19,11 @@
 #include "os/assert.h"
 #include "os/counter.h"
 #include "os/semaphore.h"
-#include "os/stdio.h"
 
 #include "stats.h"
 #include "ivshmem.h"
 #include "hrpn_ctrl.h"
+#include "log.h"
 #include "mailbox.h"
 #include "version.h"
 
@@ -77,8 +77,8 @@ void cpu_load_task(void *pvParameters)
 {
 	struct rt_latency_ctx *ctx = pvParameters;
 
-	os_printf("%s: running%s\r\n", __func__,
-		ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM ? " (with extra semaphore load)" : "");
+	log_info("running%s\n", ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM ?
+		       " (with extra semaphore load)" : "");
 
 	do {
 		cpu_load(ctx);
@@ -87,7 +87,7 @@ void cpu_load_task(void *pvParameters)
 
 void cache_inval_task(void *pvParameters)
 {
-	os_printf("%s: running\r\n", __func__);
+	log_info("running\n");
 
 	do {
 		cache_inval();
@@ -110,14 +110,14 @@ void benchmark_task(void *pvParameters)
 	int ret;
 	struct rt_latency_ctx *ctx = pvParameters;
 
-	os_printf("%s: running%s\r\n", __func__,
+	log_info("running%s\n",
 	       (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD)  ? " (with IRQ load)" : "");
 
 	do {
 		ret = rt_latency_test(ctx);
 		if (ret)
 		{
-			os_printf("test failed!\n");
+			log_err("test failed!\n");
 			vTaskSuspend(NULL);
 		}
 	} while (!ret);
@@ -156,8 +156,8 @@ static int start_test_case(struct main_ctx *ctx, int test_case_id)
 	if (ctx->started)
 		return -1;
 
-	os_printf("---\r\n");
-	os_printf("Running test case %d:\r\n", test_case_id);
+	log(INFO, "---\n");
+	log_info("Running test case %d:\n", test_case_id);
 
 	dev = gpt_devices[0]; /* GPT1 */
 	irq_load_dev = gpt_devices[1]; /* GPT2 */
@@ -165,14 +165,14 @@ static int start_test_case(struct main_ctx *ctx, int test_case_id)
 	/* Initialize test case load conditions based on test case ID */
 	ctx->rt_ctx.tc_load = rt_latency_get_tc_load(test_case_id);
 	if (ctx->rt_ctx.tc_load < 0) {
-		os_printf("Wrong test conditions!\r\n");
+		log_err("Wrong test conditions!\n");
 		goto err;
 	}
 
 	/* Initialize test cases' context */
 	xResult = rt_latency_init(dev, irq_load_dev, &ctx->rt_ctx);
 	if (xResult) {
-		os_printf("Initialization failed!\r\n");
+		log_err("Initialization failed!\n");
 		goto err;
 	}
 
@@ -180,7 +180,7 @@ static int start_test_case(struct main_ctx *ctx, int test_case_id)
 	xResult = xTaskCreate(benchmark_task, "benchmark_task", STACK_SIZE,
 			       &ctx->rt_ctx, HIGHEST_TASK_PRIORITY - 1, &ctx->tc_taskHandles[hnd_idx++]);
 	if (xResult != pdPASS) {
-		os_printf("task creation failed!\r\n");
+		log_err("task creation failed!\n");
 		goto err_task;
 	}
 
@@ -189,7 +189,7 @@ static int start_test_case(struct main_ctx *ctx, int test_case_id)
 		xResult = xTaskCreate(cpu_load_task, "cpu_load_task", STACK_SIZE,
 				       &ctx->rt_ctx, LOWEST_TASK_PRIORITY, &ctx->tc_taskHandles[hnd_idx++]);
 		if (xResult != pdPASS) {
-			os_printf("task creation failed!\r\n");
+			log_err("task creation failed!\n");
 			goto err_task;
 		}
 	}
@@ -199,7 +199,7 @@ static int start_test_case(struct main_ctx *ctx, int test_case_id)
 		xResult = xTaskCreate(cache_inval_task, "cache_inval_task",
 			       STACK_SIZE, NULL, LOWEST_TASK_PRIORITY + 1, &ctx->tc_taskHandles[hnd_idx++]);
 		if (xResult != pdPASS) {
-			os_printf("task creation failed!\r\n");
+			log_err("task creation failed!\n");
 			goto err_task;
 		}
 	}
@@ -208,7 +208,7 @@ static int start_test_case(struct main_ctx *ctx, int test_case_id)
 	xResult = xTaskCreate(log_task, "log_task", STACK_SIZE,
 				&ctx->rt_ctx, LOWEST_TASK_PRIORITY + 1, &ctx->tc_taskHandles[hnd_idx++]);
 	if (xResult != pdPASS) {
-		os_printf("task creation failed!\r\n");
+		log_err("task creation failed!\n");
 		goto err_task;
 	}
 
@@ -293,12 +293,12 @@ void main_task(void *pvParameters)
 	struct mailbox m;
 	int rc;
 
-	os_printf("%s: running\r\n", __func__);
+	log_info("running\n");
 
 	rc = ivshmem_init(0, &mem);
-	os_assert(!rc, "ivshmem initialization failed, can not proceed\r\n");
+	os_assert(!rc, "ivshmem initialization failed, can not proceed\n");
 
-	os_assert(mem.out_size, "ivshmem mis-configuration, can not proceed\r\n");
+	os_assert(mem.out_size, "ivshmem mis-configuration, can not proceed\n");
 
 	mailbox_init(&m, mem.out, mem.out + mem.out_size * mem.id, false);
 
@@ -323,7 +323,7 @@ int main(void)
 	BOARD_InitMemory();
 	BOARD_InitDebugConsole();
 
-	os_printf("Harpoon v%s\r\n", VERSION);
+	log_info("Harpoon v%s\n", VERSION);
 
 	/* Test cases scheduler task */
 	xResult = xTaskCreate(main_task, "main_task",
