@@ -13,8 +13,10 @@ set(CMAKE_MODULE_PATH
 )
 
 add_executable(harpoon_ctrl
-   main.c
+   audio_pipeline.c
+   common.c
    ivshmem.c
+   main.c
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
