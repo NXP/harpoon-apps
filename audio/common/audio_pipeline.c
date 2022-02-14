@@ -8,6 +8,118 @@
 #include "os/stdio.h"
 
 #include "audio_pipeline.h"
+#include "hrpn_ctrl.h"
+#include "mailbox.h"
+
+#define MAX_PIPELINES	4
+
+static struct audio_pipeline *pipeline_table[MAX_PIPELINES];
+
+static int audio_pipeline_table_add(struct audio_pipeline *pipeline)
+{
+	int i;
+
+	for (i = 0; i < MAX_PIPELINES; i++) {
+		if (!pipeline_table[i]) {
+			pipeline_table[i] = pipeline;
+			goto done;
+		}
+	}
+
+	return -1;
+
+done:
+	return 0;
+}
+
+static void audio_pipeline_table_del(struct audio_pipeline *pipeline)
+{
+	int i;
+
+	for (i = 0; i < MAX_PIPELINES; i++)
+		if (pipeline_table[i] == pipeline)
+			pipeline_table[i] = NULL;
+}
+
+static struct audio_pipeline *audio_pipeline_table_find(unsigned int id)
+{
+	if (id >= MAX_PIPELINES)
+		return NULL;
+
+	return pipeline_table[id];
+}
+
+static struct audio_element *audio_pipeline_element_find(struct audio_pipeline *pipeline, unsigned int type, unsigned int id)
+{
+	struct audio_pipeline_stage *stage;
+	struct audio_element *element;
+	unsigned int element_id = 0;
+	int i, j;
+
+	for (i = 0; i < pipeline->stages; i++) {
+		stage = &pipeline->stage[i];
+
+		for (j = 0; j < stage->elements; j++) {
+			element = &stage->element[j];
+
+			if (element->type == type) {
+				if (element_id == id)
+					return element;
+
+				element_id++;
+			}
+		}
+	}
+
+	return NULL;
+}
+
+static void audio_pipeline_response(struct mailbox *m, uint32_t status)
+{
+	struct hrpn_resp_audio_pipeline resp;
+
+	resp.type = HRPN_RESP_TYPE_AUDIO_PIPELINE;
+	resp.status = status;
+	mailbox_resp_send(m, &resp, sizeof(resp));
+}
+
+void audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, struct mailbox *m)
+{
+	struct audio_pipeline *pipeline = NULL;
+	struct audio_element *element = NULL;
+
+	/* search for matching pipeline id */
+	if (len >= sizeof(struct hrpn_cmd_audio_pipeline_common))
+		pipeline = audio_pipeline_table_find(cmd->u.common.pipeline.id);
+
+	switch (cmd->u.common.type) {
+	case HRPN_CMD_TYPE_AUDIO_PIPELINE_DUMP:
+		if (len != sizeof(struct hrpn_cmd_audio_pipeline_dump))
+			goto err;
+
+		if (!pipeline)
+			goto err;
+
+		audio_pipeline_dump(pipeline);
+
+		audio_pipeline_response(m, HRPN_RESP_STATUS_SUCCESS);
+
+		break;
+
+	default:
+		if (pipeline && (len >= sizeof(struct hrpn_cmd_audio_element_common)))
+			element = audio_pipeline_element_find(pipeline, cmd->u.element.u.common.element.type, cmd->u.element.u.common.element.id);
+
+		audio_element_ctrl(element, &cmd->u.element, len, m);
+
+		break;
+	}
+
+	return;
+
+err:
+	audio_pipeline_response(m, HRPN_RESP_STATUS_ERROR);
+}
 
 static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 {
@@ -253,6 +365,9 @@ struct audio_pipeline *audio_pipeline_init(struct audio_pipeline_config *config)
 	if (!pipeline)
 		goto err_alloc;
 
+	if (audio_pipeline_table_add(pipeline) < 0)
+		goto err_add;
+
 	for (i = 0; i < pipeline->stages; i++) {
 		stage = &pipeline->stage[i];
 		stage_config = &config->stage[i];
@@ -272,6 +387,9 @@ struct audio_pipeline *audio_pipeline_init(struct audio_pipeline_config *config)
 
 err_init:
 	/* call exit for all already initialized elements */
+	audio_pipeline_table_del(pipeline);
+
+err_add:
 	audio_pipeline_free(pipeline);
 
 err_alloc:
@@ -317,6 +435,7 @@ void audio_pipeline_exit(struct audio_pipeline *pipeline)
 		}
 	}
 
+	audio_pipeline_table_del(pipeline);
 	audio_pipeline_free(pipeline);
 }
 

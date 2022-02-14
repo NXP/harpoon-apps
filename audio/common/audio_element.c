@@ -7,6 +7,50 @@
 #include "os/stdio.h"
 
 #include "audio_element.h"
+#include "audio_pipeline.h"
+#include "hrpn_ctrl.h"
+#include "mailbox.h"
+
+static void audio_element_response(struct mailbox *m, uint32_t status)
+{
+	struct hrpn_resp_audio_element resp;
+
+	resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT;
+	resp.status = status;
+	mailbox_resp_send(m, &resp, sizeof(resp));
+}
+
+void audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element *cmd, unsigned int len, struct mailbox *m)
+{
+	switch (cmd->u.common.type) {
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_DUMP:
+		if (len != sizeof(struct hrpn_cmd_audio_element_dump))
+			goto err;
+
+		if (!element)
+			goto err;
+
+		audio_element_dump(element);
+
+		audio_element_response(m, HRPN_RESP_STATUS_SUCCESS);
+
+		break;
+
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_CONNECT:
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_DISCONNECT:
+		routing_element_ctrl(element, &cmd->u.routing, len, m);
+		break;
+
+	default:
+		goto err;
+		break;
+	}
+
+	return;
+
+err:
+	audio_element_response(m, HRPN_RESP_STATUS_ERROR);
+}
 
 unsigned int audio_element_data_size(struct audio_element_config *config)
 {
@@ -53,6 +97,7 @@ int audio_element_init(struct audio_element *element, struct audio_element_confi
 
 	os_printf("%s: enter, type %d\n\r", __func__, config->type);
 
+	element->type = config->type;
 	element->sample_rate = config->sample_rate;
 	element->period = config->period;
 

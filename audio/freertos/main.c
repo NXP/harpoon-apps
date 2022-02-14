@@ -24,6 +24,8 @@
 #include "sai_drv.h"
 #include "audio.h"
 
+#include "audio_pipeline.h"
+
 #define main_task_PRIORITY	(configMAX_PRIORITIES - 3)
 #define data_task_PRIORITY   (configMAX_PRIORITIES - 2)
 
@@ -232,6 +234,14 @@ static void command_handler(struct mailbox *m, struct data_ctx *ctx)
 		rc = audio_stop(ctx);
 
 		response(m, rc);
+
+		break;
+
+	case HRPN_CMD_TYPE_AUDIO_PIPELINE_DUMP:
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_DUMP:
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_CONNECT:
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_DISCONNECT:
+		audio_pipeline_ctrl(&cmd.u.audio_pipeline, len, m);
 
 		break;
 

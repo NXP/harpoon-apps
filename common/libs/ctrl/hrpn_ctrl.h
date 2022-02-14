@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 
+#include "hrpn_ctrl_audio_pipeline.h"
+
 enum {
 	HRPN_CMD_TYPE_LATENCY_RUN = 0x0000,
 	HRPN_CMD_TYPE_LATENCY_STOP,
@@ -17,6 +19,16 @@ enum {
 	HRPN_CMD_TYPE_AUDIO_RUN = 0x0100,
 	HRPN_CMD_TYPE_AUDIO_STOP,
 	HRPN_RESP_TYPE_AUDIO = 0x0110,
+
+	HRPN_CMD_TYPE_AUDIO_PIPELINE_DUMP = 0x200,
+	HRPN_RESP_TYPE_AUDIO_PIPELINE = 0x2ff,
+
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_DUMP = 0x300,
+	HRPN_RESP_TYPE_AUDIO_ELEMENT = 0x3ff,
+
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_CONNECT = 0x400,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_DISCONNECT = 0x401,
+	HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING = 0x4ff,
 };
 
 enum {
@@ -72,6 +84,7 @@ struct hrpn_command {
 		struct hrpn_cmd_latency_stop latency_stop;
 		struct hrpn_cmd_audio_run audio_run;
 		struct hrpn_cmd_audio_stop audio_stop;
+		struct hrpn_cmd_audio_pipeline audio_pipeline;
 	} u;
 };
 
