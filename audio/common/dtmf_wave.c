@@ -10,8 +10,6 @@
 #include "os/math.h"
 #include "os/stdlib.h"
 
-#define PI 3.141592654
-
 static void generate_sinewave(uint32_t *buf, int lfreq, int rfreq,
 		uint32_t sample_rate, uint32_t duration_us, uint32_t *phase)
 {
@@ -21,9 +19,9 @@ static void generate_sinewave(uint32_t *buf, int lfreq, int rfreq,
         double v1, v2;
         int32_t w1, w2;
 
-        v1 = 0.5 * sin((i + *phase)* 2 * PI * lfreq / sample_rate);
+        v1 = 0.5 * sin((i + *phase)* 2 * M_PI * lfreq / sample_rate);
         w1 = (int32_t)(v1 * ((1 << 30) - 1));
-        v2 = 0.5 * sin((i + *phase) * 2 * PI * rfreq / sample_rate);
+        v2 = 0.5 * sin((i + *phase) * 2 * M_PI * rfreq / sample_rate);
         w2 = (int32_t)(v2 * ((1 << 30) - 1));
         *buf++ = w1;
         *buf++ = w2;
