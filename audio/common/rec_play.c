@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -91,7 +91,13 @@ int rec_play_run(void *parameters, struct event *e)
 		break;
 
 	case EVENT_TYPE_TX_RX:
-		if (e->data == SAI_STATUS_NO_ERROR) {
+		if (__sai_rx_error(dev->sai_base)) {
+			ctx->stats.rx_fifo_errs++;
+			start_rec_play(ctx);
+		} else if (__sai_tx_error(dev->sai_base)) {
+			ctx->stats.tx_fifo_errs++;
+			start_rec_play(ctx);
+		} else {
 			sai_fifo_read(dev, sai_buffer +
 				ctx->buf_index * period_bytes,
 				period_bytes);
@@ -107,15 +113,6 @@ int rec_play_run(void *parameters, struct event *e)
 				ctx->buf_index = 0;
 
 			ctx->stats.rec_play_periods++;
-		} else {
-			/* Restart the process in case of error */
-			start_rec_play(ctx);
-
-			if (e->data & SAI_STATUS_TX_FF_ERR)
-				ctx->stats.tx_fifo_errs++;
-
-			if (e->data & SAI_STATUS_RX_FF_ERR)
-				ctx->stats.rx_fifo_errs++;
 		}
 
 		break;

@@ -107,20 +107,8 @@ static void sai_master_clock_config(struct sai_cfg *sai_config)
 static void sai_irq_handler_continuous(void *data)
 {
 	struct sai_device *dev = data;
-	I2S_Type *base = dev->sai_base;
-	uint8_t status = SAI_STATUS_NO_ERROR;
 
-	/* Tx FIFI Error */
-	if (((base->TCSR) & (uint32_t)I2S_TCSR_FEF_MASK) != 0UL) {
-		status |= SAI_STATUS_TX_FF_ERR;
-	}
-
-	/* Rx FIFI Error */
-	if (((base->RCSR) & (uint32_t)I2S_RCSR_FEF_MASK) != 0UL) {
-		status |= SAI_STATUS_RX_FF_ERR;
-	}
-
-	dev->rx_callback(status, dev->rx_user_data);
+	dev->rx_callback(SAI_STATUS_NO_ERROR, dev->rx_user_data);
 }
 
 static void sai_irq_handler(void *data)
