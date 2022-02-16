@@ -177,4 +177,14 @@ static inline bool __sai_tx_error(void *base)
 	return (((((I2S_Type *)base)->TCSR) & (uint32_t)I2S_TCSR_FEF_MASK) != 0UL);
 }
 
+static inline void *__sai_rx_fifo_addr(void *base, unsigned int line)
+{
+	return (void *)SAI_RxGetDataRegisterAddress(base, line);
+}
+
+static inline void *__sai_tx_fifo_addr(void *base, unsigned int line)
+{
+	return (void *)SAI_TxGetDataRegisterAddress(base, line);
+}
+
 #endif /* _SAI_DRV_H_ */

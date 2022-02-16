@@ -7,29 +7,7 @@
 #include "audio_element_sai_sink.h"
 #include "audio_element.h"
 
-static uint32_t fifo;
-
-static uint32_t *sai_baseaddr[SAI_TX_MAX_ID] = {
-	&fifo,
-	&fifo,
-	&fifo,
-	&fifo,
-	&fifo,
-	&fifo,
-	&fifo,
-	&fifo
-};
-
-static const unsigned int line_tx_fifo_offset[SAI_TX_INSTANCE_MAX_LINE] = {
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0
-};
+#include "sai_drv.h"
 
 struct sai_sink_map {
 	volatile uint32_t *tx_fifo;	/* sai tx fifo address */
@@ -44,7 +22,20 @@ struct sai_sink_element {
 	struct sai_sink_map *map;
 	unsigned int in_n;
 	struct audio_buffer **in;
+	unsigned int sai_n;
+	void **base;
+	bool started;
 };
+
+uint32_t sai_dummy[65] = {0};
+
+static void *sai_baseaddr(unsigned int id)
+{
+	if (!id)
+		return &sai_dummy;
+
+	return __sai_base(id);
+}
 
 static inline void invert_int32(int32_t *val)
 {
@@ -87,6 +78,30 @@ static int sai_sink_element_run(struct audio_element *element)
 	}
 #endif
 
+	if (sai->started) {
+		/* Check for SAI Tx Fifo errors */
+		for (i = 0; i < sai->sai_n; i++)
+			if (__sai_tx_error(sai->base[i]))
+				goto err;
+	} else {
+		/* Fill SAI Tx Fifo with silence */
+		for (i = 0; i < element->period; i++) {
+			for (j = 0; j < sai->map_n; j++) {
+				map = &sai->map[j];
+
+				val = 0;
+
+				/* do format conversion here if required */
+				val = (val >> map->shift) & map->mask;
+
+				if (map->invert)
+					invert_int32(&val);
+
+				*map->tx_fifo = val;
+			}
+		}
+	}
+
 	for (i = 0; i < element->period; i++) {
 		for (j = 0; j < sai->map_n; j++) {
 			map = &sai->map[j];
@@ -103,16 +118,40 @@ static int sai_sink_element_run(struct audio_element *element)
 		}
 	}
 
+	if (!sai->started) {
+		for (i = 0; i < sai->sai_n; i++) {
+			/* FIXME */
+			/* If some SAI's are only used for Rx, they will be missing below */
+			/* For multi SAI sync, we should enable the asynchronous/master one last */
+			if (sai->base[i] != &sai_dummy) {
+				__sai_enable_rx(sai->base[i], false);
+				__sai_enable_tx(sai->base[i], false);
+			}
+		}
+
+		sai->started = true;
+	}
+
 	for (i = 0; i < sai->in_n; i++)
 		audio_buf_read_update(sai->in[i], element->period);
 
 	return 0;
+
+err:
+	return -1;
 }
 
 static void sai_sink_element_reset(struct audio_element *element)
 {
-	/* Disable all SAI Tx */
-	/* Reset all SAI Tx fifo */
+	struct sai_sink_element *sai = element->data;
+	int i;
+
+	for (i = 0; i < sai->sai_n; i++) {
+		if (sai->base[i] != &sai_dummy)
+			__sai_tx_reset(sai->base[i]);
+	}
+
+	sai->started = false;
 }
 
 static void sai_sink_element_exit(struct audio_element *element)
@@ -161,6 +200,7 @@ unsigned int sai_sink_element_size(struct audio_element_config *config)
 
 	size = sizeof(struct sai_sink_element);
 	size += sai_sink_map_size(config) * (sizeof(struct sai_sink_map) + sizeof(struct audio_buffer *));
+	size += config->u.sai_source.sai_n * sizeof(void *);
 
 	return size;
 }
@@ -184,14 +224,23 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 	element->exit = sai_sink_element_exit;
 	element->dump = sai_sink_element_dump;
 
+	sai->started = false;
+
 	sai->map_n = sai_sink_map_size(config);
 	sai->in_n = sai->map_n;
+	sai->sai_n = config->u.sai_sink.sai_n;
+
 	sai->map = (struct sai_sink_map *)((uint8_t *)sai + sizeof(struct sai_sink_element));
 	sai->in = (struct audio_buffer **)((uint8_t *)sai->map + sai->map_n * sizeof(struct sai_sink_map));
+	sai->base = (void **)((uint8_t *)sai->in + sai->in_n * sizeof(struct audio_buffer *));
 
 	l = 0;
 	for (i = 0; i < config->u.sai_sink.sai_n; i++) {
 		sai_config = &config->u.sai_sink.sai[i];
+
+		sai->base[i] = sai_baseaddr(sai_config->id);
+		if (!sai->base[i])
+			goto err;
 
 		for (j = 0; j < sai_config->line_n; j++) {
 			line_config = &sai_config->line[j];
@@ -199,7 +248,7 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 			for (k = 0; k < line_config->channel_n; k++) {
 				map = &sai->map[l];
 
-				map->tx_fifo = sai_baseaddr[sai_config->id] + line_tx_fifo_offset[line_config->id];
+				map->tx_fifo = __sai_tx_fifo_addr(sai->base[i], line_config->id);
 				map->in = &buffer[config->input[l]];
 				map->mask = 0xffffffff;
 				map->shift = 0;

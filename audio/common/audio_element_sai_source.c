@@ -7,6 +7,8 @@
 #include "audio_element_sai_source.h"
 #include "audio_element.h"
 
+#include "sai_drv.h"
+
 /*
  Sai source
 
@@ -26,29 +28,7 @@ use case 3
 
 */
 
-static uint32_t fifo;
-
-static uint32_t *sai_baseaddr[SAI_RX_MAX_ID] = {
-	&fifo,
-	&fifo,
-	&fifo,
-	&fifo,
-	&fifo,
-	&fifo,
-	&fifo,
-	&fifo
-};
-
-static const unsigned int line_rx_fifo_offset[SAI_RX_INSTANCE_MAX_LINE] = {
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0
-};
+extern uint32_t sai_dummy[65];
 
 struct sai_source_map {
 	volatile uint32_t *rx_fifo;	/* sai rx fifo address */
@@ -63,7 +43,18 @@ struct sai_source_element {
 	struct sai_source_map *map;
 	unsigned int out_n;
 	struct audio_buffer **out;
+	unsigned int sai_n;
+	void **base;
+	bool started;
 };
+
+static void *sai_baseaddr(unsigned int id)
+{
+	if (!id)
+		return &sai_dummy;
+
+	return __sai_base(id);
+}
 
 static inline void invert_int32(int32_t *val)
 {
@@ -105,27 +96,45 @@ static int sai_source_element_run(struct audio_element *element)
 		*/
 	}
 #endif
+	if (sai->started) {
+		/* Check for SAI Rx Fifo errors */
+		for (i = 0; i < sai->sai_n; i++)
+			if (__sai_rx_error(sai->base[i]))
+				goto err;
 
-	for (i = 0; i < element->period; i++) {
-		for (j = 0; j < sai->map_n; j++) {
-			map = &sai->map[j];
+		for (i = 0; i < element->period; i++) {
+			for (j = 0; j < sai->map_n; j++) {
+				map = &sai->map[j];
 
-			val = *map->rx_fifo;
+				val = *map->rx_fifo;
 
-			/* do format conversion here if required */
-			if (map->invert)
-				invert_int32(&val);
+				/* do format conversion here if required */
+				if (map->invert)
+					invert_int32(&val);
 
-			val = (val & map->mask) << map->shift;
+				val = (val & map->mask) << map->shift;
 
-			__audio_buf_write(map->out, i, &val, 1);
+				__audio_buf_write(map->out, i, &val, 1);
+			}
 		}
+	} else {
+		/* Fill output buffer with silence */
+		val = 0;
+
+		for (i = 0; i < sai->out_n; i++)
+			for (j = 0; j < element->period; j++)
+				__audio_buf_write(sai->out[i], j, &val, 1);
+
+		sai->started = true;
 	}
 
 	for (i = 0; i < sai->out_n; i++)
 		audio_buf_write_update(sai->out[i], element->period);
 
 	return 0;
+
+err:
+	return -1;
 }
 
 static void sai_source_element_reset(struct audio_element *element)
@@ -133,12 +142,15 @@ static void sai_source_element_reset(struct audio_element *element)
 	struct sai_source_element *sai = element->data;
 	int i;
 
-	/* Disable all SAI Rx */
-
-	/* Reset all SAI Rx fifo */
+	for (i = 0; i < sai->sai_n; i++) {
+		if (sai->base[i] != &sai_dummy)
+			__sai_rx_reset(sai->base[i]);
+	}
 
 	for (i = 0; i < sai->out_n; i++)
 		audio_buf_reset(sai->out[i]);
+
+	sai->started = false;
 }
 
 static void sai_source_element_exit(struct audio_element *element)
@@ -187,6 +199,7 @@ unsigned int sai_source_element_size(struct audio_element_config *config)
 
 	size = sizeof(struct sai_source_element);
 	size += sai_source_map_size(config) * (sizeof(struct sai_source_map) + sizeof(struct audio_buffer *));
+	size += config->u.sai_source.sai_n * sizeof(void *);
 
 	return size;
 }
@@ -210,14 +223,23 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 	element->exit = sai_source_element_exit;
 	element->dump = sai_source_element_dump;
 
+	sai->started = false;
+
 	sai->map_n = sai_source_map_size(config);
 	sai->out_n = sai->map_n;
+	sai->sai_n = config->u.sai_source.sai_n;
+
 	sai->map = (struct sai_source_map *)((uint8_t *)sai + sizeof(struct sai_source_element));
 	sai->out = (struct audio_buffer **)((uint8_t *)sai->map + sai->map_n * sizeof(struct sai_source_map));
+	sai->base = (void **)((uint8_t *)sai->out + sai->out_n * sizeof(struct audio_buffer *));
 
 	l = 0;
 	for (i = 0; i < config->u.sai_source.sai_n; i++) {
 		sai_config = &config->u.sai_source.sai[i];
+
+		sai->base[i] = sai_baseaddr(sai_config->id);
+		if (!sai->base[i])
+			goto err;
 
 		for (j = 0; j < sai_config->line_n; j++) {
 			line_config = &sai_config->line[j];
@@ -225,7 +247,7 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 			for (k = 0; k < line_config->channel_n; k++) {
 				map = &sai->map[l];
 
-				map->rx_fifo = sai_baseaddr[sai_config->id] + line_rx_fifo_offset[line_config->id];
+				map->rx_fifo = __sai_rx_fifo_addr(sai->base[i], line_config->id);
 				map->out = &buffer[config->output[l]];
 				map->mask = 0xffffffff;
 				map->shift = 0;
