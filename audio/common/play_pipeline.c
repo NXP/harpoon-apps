@@ -5,6 +5,7 @@
  */
 
 #include "os/stdio.h"
+#include "os/assert.h"
 
 #include "audio_pipeline.h"
 #include "audio.h"
@@ -27,11 +28,11 @@ int play_pipeline_run(void *handle, struct event *e)
 	int err;
 
 	err = audio_pipeline_run(pipeline);
-	err = audio_pipeline_run(pipeline);
-	err = audio_pipeline_run(pipeline);
-	err = audio_pipeline_run(pipeline);
-	err = audio_pipeline_run(pipeline);
-	err = audio_pipeline_run(pipeline);
+	if (err) {
+		audio_pipeline_reset(pipeline);
+		err = audio_pipeline_run(pipeline);
+		os_assert(!err, "pipeline couldn't restart");
+	}
 
 	return err;
 }

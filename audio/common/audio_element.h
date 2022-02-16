@@ -57,6 +57,7 @@ struct audio_element {
 	unsigned int period;
 
 	int (*run)(struct audio_element *element);
+	void(*reset)(struct audio_element *element);
 	void(*exit)(struct audio_element *element);
 	void(*dump)(struct audio_element *element);
 };
@@ -74,4 +75,8 @@ static inline int audio_element_run(struct audio_element *element)
 	return element->run(element);
 }
 
+static inline void audio_element_reset(struct audio_element *element)
+{
+	element->reset(element);
+}
 #endif /* _AUDIO_ELEMENT_H_ */

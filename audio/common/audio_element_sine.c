@@ -40,6 +40,13 @@ static int sine_element_run(struct audio_element *element)
 	return 0;
 }
 
+static void sine_element_reset(struct audio_element *element)
+{
+	struct sine_element *sine = element->data;
+
+	audio_buf_reset(sine->out);
+}
+
 static void sine_element_exit(struct audio_element *element)
 {
 }
@@ -70,6 +77,7 @@ int sine_element_init(struct audio_element *element, struct audio_element_config
 		goto err;
 
 	element->run = sine_element_run;
+	element->reset = sine_element_reset;
 	element->exit = sine_element_exit;
 	element->dump = sine_element_dump;
 

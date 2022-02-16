@@ -112,4 +112,10 @@ static inline void audio_buf_read_update(struct audio_buffer *buf, unsigned int 
 	buf->read = read;
 }
 
+static inline void audio_buf_reset(struct audio_buffer *buf)
+{
+	buf->read = 0;
+	buf->write = 0;
+}
+
 #endif /* _AUDIO_BUFFER_H_ */

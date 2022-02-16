@@ -124,6 +124,15 @@ static int routing_element_run(struct audio_element *element)
 	return 0;
 }
 
+static void routing_element_reset(struct audio_element *element)
+{
+	struct routing_element *routing = element->data;
+	int i;
+
+	for (i = 0; i < routing->outputs; i++)
+		audio_buf_reset(routing->out[i].buf);
+}
+
 static void routing_element_exit(struct audio_element *element)
 {
 	struct routing_element *routing = element->data;
@@ -174,6 +183,7 @@ int routing_element_init(struct audio_element *element, struct audio_element_con
 		goto err;
 
 	element->run = routing_element_run;
+	element->reset = routing_element_reset;
 	element->exit = routing_element_exit;
 	element->dump = routing_element_dump;
 

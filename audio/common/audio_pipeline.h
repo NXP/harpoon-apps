@@ -72,6 +72,7 @@ void audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, 
 struct audio_pipeline *audio_pipeline_init(struct audio_pipeline_config *config);
 int audio_pipeline_run(struct audio_pipeline *pipeline);
 void audio_pipeline_exit(struct audio_pipeline *pipeline);
+void audio_pipeline_reset(struct audio_pipeline *pipeline);
 void audio_pipeline_dump(struct audio_pipeline *pipeline);
 
 #endif /* _AUDIO_PIPELINE_H_ */

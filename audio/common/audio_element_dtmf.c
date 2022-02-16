@@ -203,6 +203,13 @@ static int dtmf_element_run(struct audio_element *element)
 	return 0;
 }
 
+static void dtmf_element_reset(struct audio_element *element)
+{
+	struct dtmf_element *dtmf = element->data;
+
+	audio_buf_reset(dtmf->out);
+}
+
 static void dtmf_element_exit(struct audio_element *element)
 {
 }
@@ -234,6 +241,7 @@ int dtmf_element_init(struct audio_element *element, struct audio_element_config
 		goto err;
 
 	element->run = dtmf_element_run;
+	element->reset = dtmf_element_reset;
 	element->exit = dtmf_element_exit;
 	element->dump = dtmf_element_dump;
 

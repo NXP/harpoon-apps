@@ -109,6 +109,12 @@ static int sai_sink_element_run(struct audio_element *element)
 	return 0;
 }
 
+static void sai_sink_element_reset(struct audio_element *element)
+{
+	/* Disable all SAI Tx */
+	/* Reset all SAI Tx fifo */
+}
+
 static void sai_sink_element_exit(struct audio_element *element)
 {
 }
@@ -174,6 +180,7 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 		goto err;
 
 	element->run = sai_sink_element_run;
+	element->reset = sai_sink_element_reset;
 	element->exit = sai_sink_element_exit;
 	element->dump = sai_sink_element_dump;
 

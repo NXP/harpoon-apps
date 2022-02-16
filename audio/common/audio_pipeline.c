@@ -419,6 +419,23 @@ err:
 	return -1;
 }
 
+void audio_pipeline_reset(struct audio_pipeline *pipeline)
+{
+	struct audio_pipeline_stage *stage;
+	struct audio_element *element;
+	int i, j;
+
+	for (i = 0; i < pipeline->stages; i++) {
+		stage = &pipeline->stage[i];
+
+		for (j = 0; j < stage->elements; j++) {
+			element = &stage->element[j];
+
+			audio_element_reset(element);
+		}
+	}
+}
+
 void audio_pipeline_exit(struct audio_pipeline *pipeline)
 {
 	struct audio_pipeline_stage *stage;

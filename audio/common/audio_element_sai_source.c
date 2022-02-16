@@ -128,6 +128,19 @@ static int sai_source_element_run(struct audio_element *element)
 	return 0;
 }
 
+static void sai_source_element_reset(struct audio_element *element)
+{
+	struct sai_source_element *sai = element->data;
+	int i;
+
+	/* Disable all SAI Rx */
+
+	/* Reset all SAI Rx fifo */
+
+	for (i = 0; i < sai->out_n; i++)
+		audio_buf_reset(sai->out[i]);
+}
+
 static void sai_source_element_exit(struct audio_element *element)
 {
 }
@@ -193,6 +206,7 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 		goto err;
 
 	element->run = sai_source_element_run;
+	element->reset = sai_source_element_reset;
 	element->exit = sai_source_element_exit;
 	element->dump = sai_source_element_dump;
 
