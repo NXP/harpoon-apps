@@ -18,7 +18,7 @@
 #define SAI_DEFAULT_PERIOD	(FSL_FEATURE_SAI_FIFO_COUNT / DEMO_AUDIO_DATA_CHANNEL / 2)
 
 static const int supported_period[] = {2, 4, 8, 16, 32};
-static const uint32_t supported_rate[] = {44100, 48000, 88200, 176400, 96000, 192000};
+static const uint32_t supported_rate[] = {44100, 48000, 88200, 96000, 176400, 192000};
 
 struct sai_statistics {
 	uint64_t rec_play_periods;

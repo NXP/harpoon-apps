@@ -16,7 +16,7 @@
 #define DTMF_AUDIO_BITWIDTH 32
 #define DTMF_TONE_DURATION_MS 120
 
-static const uint32_t supported_rate[] = {44100, 48000, 88200, 176400, 96000, 192000};
+static const uint32_t supported_rate[] = {44100, 48000, 88200, 96000, 176400, 192000};
 
 static const char default_dtmf_l_seq[] = "1123ABCD0123456789*#";
 static const char default_dtmf_r_seq[] = "#*9876543210DCBA3211";
