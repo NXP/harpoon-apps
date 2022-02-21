@@ -57,6 +57,59 @@ static void __sai_tx_disable(void *base)
 	((I2S_Type *)base)->TCSR = ((((I2S_Type *)base)->TCSR & 0xFFE3FFFFU) & (~I2S_TCSR_TE_MASK));
 }
 
+void __sai_disable_rx(void *base)
+{
+	/* For sync Rx, disable is done in Tx disable */
+	if (__sai_rx_is_sync(base))
+		return;
+
+	__sai_rx_disable(base);
+
+	/* Wait for completion */
+	while (__sai_rx_is_enabled(base))
+		;
+
+	SAI_RxClearStatusFlags(base, I2S_RCSR_FEF_MASK);
+
+	/* Reset FIFO */
+	SAI_RxSoftwareReset(base, kSAI_ResetTypeFIFO);
+
+	if (__sai_tx_is_sync(base)) {
+		__sai_tx_disable(base);
+
+		/* Need to reset Tx fifo after Rx is disabled */
+		SAI_TxClearStatusFlags(base, I2S_TCSR_FEF_MASK);
+
+		SAI_TxSoftwareReset(base, kSAI_ResetTypeFIFO);
+	}
+}
+
+void __sai_disable_tx(void *base)
+{
+	/* For sync Tx, disable is done in Rx disable */
+	if (__sai_tx_is_sync(base))
+		return;
+
+	__sai_tx_disable(base);
+
+	/* Wait for completion */
+	while (__sai_tx_is_enabled(base))
+		;
+
+	SAI_TxClearStatusFlags(base, I2S_TCSR_FEF_MASK);
+
+	/* Reset FIFO */
+	SAI_TxSoftwareReset(base, kSAI_ResetTypeFIFO);
+
+	if (__sai_rx_is_sync(base)) {
+		__sai_rx_disable(base);
+
+		/* Need to reset Rx fifo after Tx is disabled */
+		SAI_RxClearStatusFlags(base, I2S_RCSR_FEF_MASK);
+		SAI_RxSoftwareReset(base, kSAI_ResetTypeFIFO);
+	}
+}
+
 int sai_read(struct sai_device *dev, uint8_t *addr, size_t len)
 {
 	sai_transfer_t xfer;
@@ -119,14 +172,14 @@ void sai_enable_tx(struct sai_device *dev, bool enable_irq)
 	__sai_enable_tx(dev->sai_base, enable_irq);
 }
 
-void reset_rx_fifo(struct sai_device *dev)
+void sai_disable_rx(struct sai_device *dev)
 {
-	__sai_rx_reset(dev->sai_base);
+	__sai_disable_rx(dev->sai_base);
 }
 
-void reset_tx_fifo(struct sai_device *dev)
+void sai_disable_tx(struct sai_device *dev)
 {
-	__sai_tx_reset(dev->sai_base);
+	__sai_disable_tx(dev->sai_base);
 }
 
 static void sai_master_clock_config(struct sai_cfg *sai_config)

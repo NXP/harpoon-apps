@@ -137,9 +137,8 @@ static void sai_sink_element_reset(struct audio_element *element)
 	struct sai_sink_element *sai = element->data;
 	int i;
 
-	for (i = 0; i < sai->sai_n; i++) {
-		__sai_tx_reset(sai->base[i]);
-	}
+	for (i = 0; i < sai->sai_n; i++)
+		__sai_disable_tx(sai->base[i]);
 
 	sai->started = false;
 }

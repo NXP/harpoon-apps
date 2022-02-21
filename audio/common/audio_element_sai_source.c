@@ -139,9 +139,8 @@ static void sai_source_element_reset(struct audio_element *element)
 	struct sai_source_element *sai = element->data;
 	int i;
 
-	for (i = 0; i < sai->sai_n; i++) {
-		__sai_rx_reset(sai->base[i]);
-	}
+	for (i = 0; i < sai->sai_n; i++)
+		__sai_disable_rx(sai->base[i]);
 
 	for (i = 0; i < sai->out_n; i++)
 		audio_buf_reset(sai->out[i].buf);

@@ -63,9 +63,9 @@ static void rx_tx_callback(uint8_t status, void *user_data)
 
 static void start_rec_play(struct rec_play_ctx *ctx)
 {
-	/* Reset FIFO for safe */
-	reset_tx_fifo(&ctx->dev);
-	reset_rx_fifo(&ctx->dev);
+	/* Disable tx/rx */
+	sai_disable_tx(&ctx->dev);
+	sai_disable_rx(&ctx->dev);
 
 	/* Fill Tx FIFO with dummy data */
 	memset(ctx->sai_buf, 0, ctx->period_bytes * BUFFER_NUMBER);

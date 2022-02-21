@@ -71,33 +71,17 @@ void sai_enable_rx(struct sai_device *dev, bool enable_irq);
 
 void sai_enable_tx(struct sai_device *dev, bool enable_irq);
 
-void reset_rx_fifo(struct sai_device *dev);
+void sai_disable_rx(struct sai_device *dev);
 
-void reset_tx_fifo(struct sai_device *dev);
+void sai_disable_tx(struct sai_device *dev);
+
+void __sai_disable_rx(void *base);
+
+void __sai_disable_tx(void *base);
 
 void sai_enable_irq(struct sai_device *dev, bool rx_irq, bool tx_irq);
 
 void sai_disable_irq(struct sai_device *dev, bool rx_irq, bool tx_irq);
-
-static inline void __sai_rx_reset(void *base)
-{
-	SAI_RxEnable(base, false);
-
-	SAI_RxClearStatusFlags(base, I2S_RCSR_FEF_MASK);
-
-	/* Reset FIFO */
-	SAI_RxSoftwareReset(base, kSAI_ResetTypeFIFO);
-}
-
-static inline void __sai_tx_reset(void *base)
-{
-	SAI_TxEnable(base, false);
-
-	SAI_TxClearStatusFlags(base, I2S_TCSR_FEF_MASK);
-
-	/* Reset FIFO */
-	SAI_TxSoftwareReset(base, kSAI_ResetTypeFIFO);
-}
 
 static inline void __sai_enable_irq(void *base, bool rx_irq, bool tx_irq)
 {
