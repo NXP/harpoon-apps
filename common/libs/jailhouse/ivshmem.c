@@ -7,9 +7,7 @@
 
 #include "ivshmem.h"
 #include "memory.h"
-
-#include "os/stdint.h"
-#include "os/stdio.h"
+#include "log.h"
 
 /* Jailhouse COMM */
 struct jailhouse_console {
@@ -237,12 +235,12 @@ int ivshmem_init(unsigned int bfd, struct ivshmem *ivshmem)
 		ivshmem->out = NULL;
 	}
 
-	os_printf("ivshmem init done\r\n");
+	log_info("ivshmem init done\n");
 
 	return 0;
 
 err:
-	os_printf("ivshmem init failed\r\n");
+	log_err("ivshmem init failed\n");
 
 	return -1;
 }
