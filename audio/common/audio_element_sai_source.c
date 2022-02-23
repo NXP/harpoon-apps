@@ -35,16 +35,22 @@ extern uint32_t sai_dummy[65];
 struct sai_source_map {
 	volatile uint32_t *rx_fifo;	/* sai rx fifo address */
 	struct audio_buffer *out;	/* output audio buffer address */
+};
+
+struct sai_output {
+	struct audio_buffer *buf;
+	bool convert;
+	bool invert;			/* format conversion */
 	unsigned int shift;		/* format conversion */
 	unsigned int mask;		/* format conversion */
-	bool invert;			/* format conversion */
+	int32_t val;			/* silence sample, in source format */
 };
 
 struct sai_source_element {
 	unsigned int map_n;
 	struct sai_source_map *map;
 	unsigned int out_n;
-	struct audio_buffer **out;
+	struct sai_output *out;
 	unsigned int sai_n;
 	void **base;
 	bool started;
@@ -56,11 +62,6 @@ static void *sai_baseaddr(unsigned int id)
 		return &sai_dummy;
 
 	return __sai_base(id);
-}
-
-static inline void invert_int32(int32_t *val)
-{
-	/* invert a signed 32bit integer */
 }
 
 static int sai_source_element_run(struct audio_element *element)
@@ -110,28 +111,24 @@ static int sai_source_element_run(struct audio_element *element)
 
 				val = *map->rx_fifo;
 
-				/* do format conversion here if required */
-				if (map->invert)
-					audio_invert_int32(&val);
-
-				val = (val & map->mask) << map->shift;
-
 				__audio_buf_write(map->out, i, &val, 1);
 			}
 		}
 	} else {
 		/* Fill output buffer with silence */
-		val = 0;
-
 		for (i = 0; i < sai->out_n; i++)
 			for (j = 0; j < element->period; j++)
-				__audio_buf_write(sai->out[i], j, &val, 1);
+				__audio_buf_write(sai->out[i].buf, j, &sai->out[i].val, 1);
 
 		sai->started = true;
 	}
 
-	for (i = 0; i < sai->out_n; i++)
-		audio_buf_write_update(sai->out[i], element->period);
+	for (i = 0; i < sai->out_n; i++) {
+		if (sai->out[i].convert)
+			audio_convert_from(audio_buf_write_addr(sai->out[i].buf), element->period, sai->out[i].invert, sai->out[i].mask, sai->out[i].shift);
+
+		audio_buf_write_update(sai->out[i].buf, element->period);
+	}
 
 	return 0;
 
@@ -150,7 +147,7 @@ static void sai_source_element_reset(struct audio_element *element)
 	}
 
 	for (i = 0; i < sai->out_n; i++)
-		audio_buf_reset(sai->out[i]);
+		audio_buf_reset(sai->out[i].buf);
 
 	sai->started = false;
 }
@@ -172,7 +169,7 @@ static void sai_source_element_dump(struct audio_element *element)
 		log_info("    %p => %p\n", sai->map[i].rx_fifo, sai->map[i].out);
 
 	for (i = 0; i < sai->out_n; i++)
-		audio_buf_dump(sai->out[i]);
+		audio_buf_dump(sai->out[i].buf);
 }
 
 static unsigned int sai_source_map_size(struct audio_element_config *config)
@@ -255,7 +252,7 @@ unsigned int sai_source_element_size(struct audio_element_config *config)
 	unsigned int size;
 
 	size = sizeof(struct sai_source_element);
-	size += sai_source_map_size(config) * (sizeof(struct sai_source_map) + sizeof(struct audio_buffer *));
+	size += sai_source_map_size(config) * (sizeof(struct sai_source_map) + sizeof(struct sai_output));
 	size += config->u.sai_source.sai_n * sizeof(void *);
 
 	return size;
@@ -281,8 +278,8 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 	sai->sai_n = config->u.sai_source.sai_n;
 
 	sai->map = (struct sai_source_map *)((uint8_t *)sai + sizeof(struct sai_source_element));
-	sai->out = (struct audio_buffer **)((uint8_t *)sai->map + sai->map_n * sizeof(struct sai_source_map));
-	sai->base = (void **)((uint8_t *)sai->out + sai->out_n * sizeof(struct audio_buffer *));
+	sai->out = (struct sai_output *)((uint8_t *)sai->map + sai->map_n * sizeof(struct sai_source_map));
+	sai->base = (void **)((uint8_t *)sai->out + sai->out_n * sizeof(struct sai_output));
 
 	l = 0;
 	for (i = 0; i < config->u.sai_source.sai_n; i++) {
@@ -300,16 +297,16 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 
 				map->rx_fifo = __sai_rx_fifo_addr(sai->base[i], line_config->id);
 				map->out = &buffer[config->output[l]];
-				map->mask = 0xffffffff;
-				map->shift = 0;
-				map->invert = false;
 				l++;
 			}
 		}
 	}
 
-	for (i = 0; i < sai->out_n; i++)
-		sai->out[i] = &buffer[config->output[i]];
+	for (i = 0; i < sai->out_n; i++) {
+		sai->out[i].buf = &buffer[config->output[i]];
+		sai->out[i].convert = false;
+		sai->out[i].val = 0;
+	}
 
 	sai_source_element_dump(element);
 
