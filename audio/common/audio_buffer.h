@@ -79,6 +79,16 @@ static inline void __audio_memcpy(int32_t *dst, int32_t *src, unsigned int len)
 	}
 }
 
+static inline int32_t *audio_buf_write_addr(struct audio_buffer *buf)
+{
+	return &buf->base[buf->write];
+}
+
+static inline int32_t *audio_buf_read_addr(struct audio_buffer *buf)
+{
+	return &buf->base[buf->read];
+}
+
 static inline void __audio_buf_write(struct audio_buffer *buf, unsigned int offset, int32_t *samples, unsigned int len)
 {
 	__audio_memcpy(&buf->base[buf->write + offset], samples, len);

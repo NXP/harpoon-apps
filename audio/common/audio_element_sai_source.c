@@ -6,6 +6,7 @@
 
 #include "audio_element_sai_source.h"
 #include "audio_element.h"
+#include "audio_format.h"
 #include "log.h"
 
 #include "sai_drv.h"
@@ -111,7 +112,7 @@ static int sai_source_element_run(struct audio_element *element)
 
 				/* do format conversion here if required */
 				if (map->invert)
-					invert_int32(&val);
+					audio_invert_int32(&val);
 
 				val = (val & map->mask) << map->shift;
 

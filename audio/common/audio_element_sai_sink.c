@@ -6,6 +6,7 @@
 
 #include "audio_element_sai_sink.h"
 #include "audio_element.h"
+#include "audio_format.h"
 #include "log.h"
 
 #include "sai_drv.h"
@@ -36,11 +37,6 @@ static void *sai_baseaddr(unsigned int id)
 		return &sai_dummy;
 
 	return __sai_base(id);
-}
-
-static inline void invert_int32(int32_t *val)
-{
-	/* invert a signed 32bit integer */
 }
 
 static int sai_sink_element_run(struct audio_element *element)
@@ -96,7 +92,7 @@ static int sai_sink_element_run(struct audio_element *element)
 				val = (val >> map->shift) & map->mask;
 
 				if (map->invert)
-					invert_int32(&val);
+					audio_invert_int32(&val);
 
 				*map->tx_fifo = val;
 			}
@@ -113,7 +109,7 @@ static int sai_sink_element_run(struct audio_element *element)
 			val = (val >> map->shift) & map->mask;
 
 			if (map->invert)
-				invert_int32(&val);
+				audio_invert_int32(&val);
 
 			*map->tx_fifo = val;
 		}
