@@ -14,16 +14,21 @@
 struct sai_sink_map {
 	volatile uint32_t *tx_fifo;	/* sai tx fifo address */
 	struct audio_buffer *in;	/* input audio buffer address */
+};
+
+struct sai_input {
+	struct audio_buffer *buf;	/* input audio buffer address */
+	bool convert;
+	bool invert;			/* format conversion */
 	unsigned int shift;		/* format conversion */
 	unsigned int mask;		/* format conversion */
-	bool invert;			/* format conversion */
 };
 
 struct sai_sink_element {
 	unsigned int map_n;
 	struct sai_sink_map *map;
 	unsigned int in_n;
-	struct audio_buffer **in;
+	struct sai_input *in;
 	unsigned int sai_n;
 	void **base;
 	bool started;
@@ -88,15 +93,14 @@ static int sai_sink_element_run(struct audio_element *element)
 
 				val = 0;
 
-				/* do format conversion here if required */
-				val = (val >> map->shift) & map->mask;
-
-				if (map->invert)
-					audio_invert_int32(&val);
-
 				*map->tx_fifo = val;
 			}
 		}
+	}
+
+	for (i = 0; i < sai->in_n; i++) {
+		if (sai->in[i].convert)
+			audio_convert_to(audio_buf_read_addr(sai->in[i].buf), element->period, sai->in[i].invert, sai->in[i].mask, sai->in[i].shift);
 	}
 
 	for (i = 0; i < element->period; i++) {
@@ -104,12 +108,6 @@ static int sai_sink_element_run(struct audio_element *element)
 			map = &sai->map[j];
 
 			__audio_buf_read(map->in, i, &val, 1);
-
-			/* do format conversion here if required */
-			val = (val >> map->shift) & map->mask;
-
-			if (map->invert)
-				audio_invert_int32(&val);
 
 			*map->tx_fifo = val;
 		}
@@ -130,7 +128,7 @@ static int sai_sink_element_run(struct audio_element *element)
 	}
 
 	for (i = 0; i < sai->in_n; i++)
-		audio_buf_read_update(sai->in[i], element->period);
+		audio_buf_read_update(sai->in[i].buf, element->period);
 
 	return 0;
 
@@ -168,7 +166,7 @@ static void sai_sink_element_dump(struct audio_element *element)
 		log_info("    %p => %p\n", sai->map[i].in, sai->map[i].tx_fifo);
 
 	for (i = 0; i < sai->in_n; i++)
-		audio_buf_dump(sai->in[i]);
+		audio_buf_dump(sai->in[i].buf);
 }
 
 static unsigned int sai_sink_map_size(struct audio_element_config *config)
@@ -251,7 +249,7 @@ unsigned int sai_sink_element_size(struct audio_element_config *config)
 	unsigned int size;
 
 	size = sizeof(struct sai_sink_element);
-	size += sai_sink_map_size(config) * (sizeof(struct sai_sink_map) + sizeof(struct audio_buffer *));
+	size += sai_sink_map_size(config) * (sizeof(struct sai_sink_map) + sizeof(struct sai_input));
 	size += config->u.sai_source.sai_n * sizeof(void *);
 
 	return size;
@@ -277,8 +275,8 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 	sai->sai_n = config->u.sai_sink.sai_n;
 
 	sai->map = (struct sai_sink_map *)((uint8_t *)sai + sizeof(struct sai_sink_element));
-	sai->in = (struct audio_buffer **)((uint8_t *)sai->map + sai->map_n * sizeof(struct sai_sink_map));
-	sai->base = (void **)((uint8_t *)sai->in + sai->in_n * sizeof(struct audio_buffer *));
+	sai->in = (struct sai_input *)((uint8_t *)sai->map + sai->map_n * sizeof(struct sai_sink_map));
+	sai->base = (void **)((uint8_t *)sai->in + sai->in_n * sizeof(struct sai_input));
 
 	l = 0;
 	for (i = 0; i < config->u.sai_sink.sai_n; i++) {
@@ -296,16 +294,15 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 
 				map->tx_fifo = __sai_tx_fifo_addr(sai->base[i], line_config->id);
 				map->in = &buffer[config->input[l]];
-				map->mask = 0xffffffff;
-				map->shift = 0;
-				map->invert = false;
 				l++;
 			}
 		}
 	}
 
-	for (i = 0; i < sai->in_n; i++)
-		sai->in[i] = &buffer[config->input[i]];
+	for (i = 0; i < sai->in_n; i++) {
+		sai->in[i].buf = &buffer[config->input[i]];
+		sai->in[i].convert = false;
+	}
 
 	sai_sink_element_dump(element);
 
