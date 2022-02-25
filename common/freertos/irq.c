@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -71,6 +71,11 @@ void vApplicationIRQHandler(uint32_t ulICCIAR)
 {
 	struct irq_handler *hdlr = NULL;
 	unsigned int nr;
+	extern uint64_t cpu_load_work_begin;
+
+	/* CPU load: get a timestamp of the activity start */
+	if (cpu_load_work_begin == 0)
+		ARM_TIMER_GetCounterCount(ARM_TIMER_VIRTUAL, &cpu_load_work_begin);
 
 	/*
 	 * TODO: For now interrupt nesting is disabled,
