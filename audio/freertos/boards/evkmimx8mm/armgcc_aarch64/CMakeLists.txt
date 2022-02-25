@@ -31,18 +31,18 @@ SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
 if(CODEC_DEVICE STREQUAL "hifiberry")
-SET(app_extra_flags "-DCODEC_MULTI_ADAPTERS=1")
-STRING(APPEND app_extra_flags " -DCODEC_PCM186X_ENABLE=1")
-STRING(APPEND app_extra_flags " -DCODEC_PCM512X_ENABLE=1")
+  add_compile_options(-DCODEC_MULTI_ADAPTERS=1)
+  add_compile_options(-DCODEC_PCM186X_ENABLE=1)
+  add_compile_options(-DCODEC_PCM512X_ENABLE=1)
 else()
-message(FATAL_ERROR "Please set Codec device")
+  message(FATAL_ERROR "Please set Codec device")
 endif()
 
 project(audio)
 
 set(MCUX_SDK_PROJECT_NAME audio.elf)
 
-include(${ProjDirPath}/flags.cmake)
+include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/sai_drv.c"
