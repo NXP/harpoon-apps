@@ -16,10 +16,6 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-/* TODO Implement CLOCK_GetRootClockFreq() */
-#define kCLOCK_Root_Uart4                 4
-#define CLOCK_GetRootClockFreq(clockRoot) OSC24M_CLK_FREQ
-
 /*! @brief The board name */
 #define BOARD_NAME        "MIMX8MM-EVK"
 #define MANUFACTURER_NAME "NXP"
@@ -29,7 +25,7 @@
 #define BOARD_DEBUG_UART_BAUDRATE (115200U)
 #define BOARD_DEBUG_UART_BASEADDR UART4_BASE
 #define BOARD_DEBUG_UART_INSTANCE (4U)
-#define BOARD_DEBUG_UART_CLK_FREQ (CLOCK_GetRootClockFreq(kCLOCK_Root_Uart4))
+#define BOARD_DEBUG_UART_CLK_FREQ (CLOCK_GetClockRootFreq(kCLOCK_Uart4ClkRoot))
 #define BOARD_UART_IRQ         UART4_IRQn
 #define BOARD_UART_IRQ_HANDLER UART4_IRQHandler
 
