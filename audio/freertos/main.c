@@ -24,6 +24,8 @@
 #include "sai_drv.h"
 #include "audio.h"
 
+#include "idle.h"
+
 #include "audio_pipeline.h"
 
 #define main_task_PRIORITY	(configMAX_PRIORITIES - 3)
@@ -292,6 +294,7 @@ void main_task(void *pvParameters)
 		count--;
 		if (!count) {
 			audio_stats(&ctx);
+			cpu_load_stats();
 			count = STATS_COUNT;
 		}
 
