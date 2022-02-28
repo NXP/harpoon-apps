@@ -19,7 +19,7 @@ struct audio_pipeline_config pipeline_config = {
 				.us = 120000,
 				.pause_us = 100000,
 				.sequence_pause_us = 500000,
-				.amplitude = 1.0,
+				.amplitude = 0.5,
 				.sequence = "1123ABCD0123456789*#",
 			},
 
@@ -33,7 +33,7 @@ struct audio_pipeline_config pipeline_config = {
 				.us = 120000,
 				.pause_us = 100000,
 				.sequence_pause_us = 500000,
-				.amplitude = 1.0,
+				.amplitude = 0.5,
 				.sequence = "#*9876543210DCBA3211",
 			},
 
@@ -45,7 +45,7 @@ struct audio_pipeline_config pipeline_config = {
 			.type = AUDIO_ELEMENT_SINE_SOURCE,
 			.u.sine = {
 				.freq = 440,
-				.amplitude = 1.0,
+				.amplitude = 0.5,
 			},
 			.outputs = 1,
 			.output = {2},
@@ -55,7 +55,7 @@ struct audio_pipeline_config pipeline_config = {
 			.type = AUDIO_ELEMENT_SINE_SOURCE,
 			.u.sine = {
 				.freq = 880,
-				.amplitude = 1.0,
+				.amplitude = 0.5,
 			},
 			.outputs = 1,
 			.output = {3},

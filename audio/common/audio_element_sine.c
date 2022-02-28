@@ -9,6 +9,7 @@
 #include "audio_element_sine.h"
 #include "audio_element.h"
 #include "audio_buffer.h"
+#include "audio_format.h"
 #include "log.h"
 
 struct sine_element {
@@ -29,7 +30,7 @@ static int sine_element_run(struct audio_element *element)
 
 	for (i = 0; i < element->period; i++) {
 		v = sine->amplitude * sin(sine->phase * sine->dphase);
-		w = (int32_t)(v * ((1 << 30) - 1));
+		w = audio_double_to_int32(v);
 
 		__audio_buf_write(sine->out, i, &w, 1);
 		sine->phase++;

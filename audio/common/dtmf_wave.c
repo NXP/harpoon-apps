@@ -10,6 +10,8 @@
 #include "os/math.h"
 #include "os/stdlib.h"
 
+#include "audio_format.h"
+
 static void generate_sinewave(uint32_t *buf, int lfreq, int rfreq,
 		uint32_t sample_rate, uint32_t duration_us, uint32_t *phase)
 {
@@ -19,10 +21,10 @@ static void generate_sinewave(uint32_t *buf, int lfreq, int rfreq,
         double v1, v2;
         int32_t w1, w2;
 
-        v1 = 0.5 * sin((i + *phase)* 2 * M_PI * lfreq / sample_rate);
-        w1 = (int32_t)(v1 * ((1 << 30) - 1));
-        v2 = 0.5 * sin((i + *phase) * 2 * M_PI * rfreq / sample_rate);
-        w2 = (int32_t)(v2 * ((1 << 30) - 1));
+        v1 = 0.25 * sin((i + *phase)* 2 * M_PI * lfreq / sample_rate);
+        w1 = audio_double_to_int32(v1);
+        v2 = 0.25 * sin((i + *phase) * 2 * M_PI * rfreq / sample_rate);
+        w2 = audio_double_to_int32(v2);
         *buf++ = w1;
         *buf++ = w2;
     }

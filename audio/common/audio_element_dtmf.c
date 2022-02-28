@@ -10,6 +10,7 @@
 
 #include "audio_element_dtmf.h"
 #include "audio_element.h"
+#include "audio_format.h"
 #include "log.h"
 
 #define USEC_PER_SEC	1000000
@@ -49,7 +50,7 @@ static void dtmf_generate_sinewave(struct dtmf_element *dtmf, unsigned int sampl
 
 	for (i = 0; i < samples; i++) {
 		v = dtmf->amplitude * (sin((i + dtmf->phase) * dtmf->dphase1) + sin((i + dtmf->phase) * dtmf->dphase2)) / 2.0;
-		w = (int32_t)(v * ((1 << 30) - 1));
+		w = audio_double_to_int32(v);
 
 		__audio_buf_write(dtmf->out, i, &w, 1);
 	}
