@@ -46,8 +46,8 @@ void rec_play_stats(void *handle)
 {
 	struct rec_play_ctx *ctx = handle;
 
-	log_info("periods: %lld, rx error: %lld, tx error: %lld",
-		ctx->stats.rec_play_periods, ctx->stats.rx_fifo_errs, ctx->stats.rx_fifo_errs);
+	log_info("periods: %llu, rx error: %llu, tx error: %llu",
+		ctx->stats.rec_play_periods, ctx->stats.rx_fifo_errs, ctx->stats.tx_fifo_errs);
 }
 
 static void rx_tx_callback(uint8_t status, void *user_data)

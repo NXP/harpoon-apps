@@ -65,7 +65,7 @@ void rec_play2_stats(void *handle)
 {
 	struct rec_play2_ctx *ctx = handle;
 
-	log_info("recorded: %d times, played: %d times", ctx->record_times, ctx->play_times);
+	log_info("recorded: %u times, played: %u times", ctx->record_times, ctx->play_times);
 }
 
 static void rx_callback(uint8_t status, void *userData)

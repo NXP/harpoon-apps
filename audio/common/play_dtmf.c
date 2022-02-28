@@ -47,7 +47,7 @@ void play_dtmf_stats(void *handle)
 {
 	struct dtmf_ctx *ctx = handle;
 
-	log_info("Played DTMF sequence: %d times", ctx->play_times);
+	log_info("Played DTMF sequence: %u times", ctx->play_times);
 }
 
 static void tx_callback(uint8_t status, void *userData)

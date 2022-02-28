@@ -30,7 +30,7 @@ void play_music_stats(void *handle)
 {
 	struct music_ctx *ctx = handle;
 
-	log_info("Played Music: %d times", ctx->play_times);
+	log_info("Played Music: %u times", ctx->play_times);
 }
 
 static void tx_callback(uint8_t status, void *userData)

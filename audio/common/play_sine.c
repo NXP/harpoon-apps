@@ -30,7 +30,7 @@ void play_sine_stats(void *handle)
 {
 	struct sine_ctx *ctx = handle;
 
-	log_info("Played Sine wave: %d times", ctx->play_times);
+	log_info("Played Sine wave: %u times", ctx->play_times);
 }
 
 static void tx_callback(uint8_t status, void *userData)
