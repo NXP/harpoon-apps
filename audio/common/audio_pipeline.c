@@ -532,7 +532,8 @@ static void audio_pipeline_set_config(struct audio_pipeline_config *config)
 {
 	struct audio_pipeline_stage_config *stage_config;
 	struct audio_element_config *element_config;
-	int i, j;
+	unsigned int next;
+	int i, j, k;
 
 	for (i = 0; i < config->stages; i++) {
 		stage_config = &config->stage[i];
@@ -546,6 +547,28 @@ static void audio_pipeline_set_config(struct audio_pipeline_config *config)
 
 			if (!element_config->period)
 				element_config->period = config->period;
+
+			/* Use 0 for default input, last + 1 */
+			next = 0;
+			for (k = 0; k < element_config->inputs; k++) {
+				if (!element_config->input[k])
+					element_config->input[k] = next;
+				else
+					next = element_config->input[k];
+
+				next++;
+			}
+
+			/* Use 0 for default output, last + 1 */
+			next = 0;
+			for (k = 0; k < element_config->outputs; k++) {
+				if (!element_config->output[k])
+					element_config->output[k] = next;
+				else
+					next = element_config->output[k];
+
+				next++;
+			}
 		}
 	}
 

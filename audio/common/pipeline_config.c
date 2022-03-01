@@ -87,7 +87,7 @@ struct audio_pipeline_config pipeline_config = {
 				},
 			},
 			.outputs = 4,
-			.output = {4, 5, 6, 7},
+			.output = {4, },	/* 4 - 7 */
 		},
 	},
 
@@ -102,10 +102,10 @@ struct audio_pipeline_config pipeline_config = {
 			},
 
 			.inputs = 8,
-			.input = {0, 1, 2, 3, 4, 5, 6, 7},
+			.input = {0, }, 	/* 0 - 7 */
 
 			.outputs = 4,
-			.output = {8, 9, 10, 11},
+			.output = {8, },	/* 8 - 11 */
 		},
 	},
 
@@ -140,7 +140,7 @@ struct audio_pipeline_config pipeline_config = {
 			},
 
 			.inputs = 4,
-			.input = {8, 9, 10, 11},
+			.input = {8, },		/* 8 - 11 */
 		},
 	},
 
