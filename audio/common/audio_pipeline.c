@@ -12,6 +12,7 @@
 #include "mailbox.h"
 
 #define MAX_PIPELINES	4
+#define STORAGE_DEFAULT_PERIODS 2
 
 static struct audio_pipeline *pipeline_table[MAX_PIPELINES];
 
@@ -547,6 +548,16 @@ static void audio_pipeline_set_config(struct audio_pipeline_config *config)
 				element_config->period = config->period;
 		}
 	}
+
+	/* Use 0, for default storage id (same as buffer id) */
+	for (i = 0; i < config->buffers; i++)
+		if (!config->buffer[i].storage)
+			config->buffer[i].storage = i;
+
+	/* Use 0, for default storage size */
+	for (i = 0; i < config->buffer_storage; i++)
+		if (!config->storage[i].periods)
+			config->storage[i].periods = STORAGE_DEFAULT_PERIODS;
 }
 
 struct audio_pipeline *audio_pipeline_init(struct audio_pipeline_config *config)
