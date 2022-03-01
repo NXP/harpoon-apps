@@ -121,23 +121,212 @@ err:
 	audio_pipeline_response(m, HRPN_RESP_STATUS_ERROR);
 }
 
+static unsigned int audio_pipeline_count_input(struct audio_pipeline_config *config, unsigned int stage, unsigned int input)
+{
+	struct audio_pipeline_stage_config *stage_config;
+	struct audio_element_config *element_config;
+	int count = 0;
+	int i, j, k;
+
+	for (i = stage; i < config->stages; i++) {
+		stage_config = &config->stage[i];
+
+		for (j = 0; j < stage_config->elements; j++) {
+			element_config = &stage_config->element[j];
+
+			for (k = 0; k < element_config->inputs; k++) {
+				if (element_config->input[k] == input)
+					count++;
+			}
+		}
+	}
+
+	return count;
+}
+
+static unsigned int audio_pipeline_count_output(struct audio_pipeline_config *config, unsigned int stage, unsigned int output)
+{
+	struct audio_pipeline_stage_config *stage_config;
+	struct audio_element_config *element_config;
+	int count = 0;
+	int i, j, k;
+
+	for (i = stage; i < config->stages; i++) {
+		stage_config = &config->stage[i];
+
+		for (j = 0; j < stage_config->elements; j++) {
+			element_config = &stage_config->element[j];
+
+			for (k = 0; k < element_config->outputs; k++) {
+				if (element_config->output[k] == output)
+					count++;
+			}
+		}
+	}
+
+	return count;
+}
+
+static unsigned int audio_pipeline_count_buffers(struct audio_pipeline_config *config, unsigned int storage)
+{
+	int count = 0;
+	int i;
+
+	for (i = 0; i < config->buffers; i++) {
+		if (config->buffer[i].storage == storage)
+			count++;
+	}
+
+	return count;
+}
+
 static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 {
+	struct audio_pipeline_stage_config *stage_config;
+	struct audio_element_config *element_config;
+	unsigned int input, output;
+	unsigned int buffer;
+	int i, j, k;
+
 	/* Sanity check pipeline configuration */
 
-	/* Errors */
-	/* Check all buffers point to existing memory */
-	/* Check all buffers are referenced by a single input and single output */
-	/* Check that all elements point to existing inputs/outputs */
-	/* Check that no element input is connected to an ouput of a later stage */
+	/* Check that all elements inputs/outputs reference valid buffers */
+	for (i = 0; i < config->stages; i++) {
+		stage_config = &config->stage[i];
 
-	/* Warnings */
-	/* Check all buffers are referenced by one input and one output */
+		for (j = 0; j < stage_config->elements; j++) {
+			element_config = &stage_config->element[j];
+
+			for (k = 0; k < element_config->inputs; k++) {
+				if (element_config->input[k] >= config->buffers) {
+					log_err("stage(%u), element(%u): input(%u) \n", i, j, k, element_config->input[k]);
+					goto err;
+				}
+			}
+
+			for (k = 0; k < element_config->outputs; k++) {
+				if (element_config->output[k] >= config->buffers) {
+					log_err("stage(%u), element(%u): output(%u) references invalid buffer(%u)\n", i, j, k, element_config->output[k]);
+					goto err;
+				}
+			}
+		}
+	}
+
+	/* Check all buffers reference valid storage */
+	for (i = 0; i < config->buffers; i++) {
+		if (config->buffer[i].storage >= config->buffer_storage) {
+				log_err("buffer(%u) references invalid storage(%u)\n", i, config->buffer[i].storage);
+				goto err;
+		}
+
+		/* Check all buffers are referenced by a single input and single output */
+		input = audio_pipeline_count_input(config, 0, i);
+		output = audio_pipeline_count_output(config, 0, i);
+
+		if (input > 1) {
+			log_err("buffer(%u) referenced by %u inputs\n", i, input);
+			goto err;
+		}
+
+		if (output > 1) {
+			log_err("buffer(%u) referenced by %u outputs \n", i, output);
+			goto err;
+		}
+
+		/* Check all buffers are referenced by one input and one output */
+		if (!input)
+			log_warn("buffer(%u) not referenced by any input\n", i);
+
+		if (!output)
+			log_warn("buffer(%u) not referenced by any output\n", i);
+	}
+
+	/* Check that no element input is connected to an ouput of a later stage */
+	for (i = 0; i < config->stages; i++) {
+		stage_config = &config->stage[i];
+
+		for (j = 0; j < stage_config->elements; j++) {
+			element_config = &stage_config->element[j];
+
+			for (k = 0; k < element_config->inputs; k++) {
+				output = audio_pipeline_count_output(config, i, element_config->input[k]);
+
+				if (output) {
+					log_err("stage(%u), element(%u): pipeline loop, input(%u) connected to same/later stage output\n", i, j, k);
+					goto err;
+				}
+			}
+		}
+	}
+
 	/* Check all buffer_storage is referenced by a buffer */
+	for (i = 0; i < config->buffer_storage; i++) {
+		buffer = audio_pipeline_count_buffers(config, i);
+
+		if (!buffer)
+			log_warn("storage(%u) not referenced\n", i);
+
+		if (buffer > 1)
+			log_warn("storage(%u) referenced by %u buffers\n", buffer);
+	}
 
 	/* Check the configuration of all elements */
 
 	return 0;
+
+err:
+	return -1;
+}
+
+static int audio_pipeline_early_config_check(struct audio_pipeline_config *config)
+{
+	struct audio_pipeline_stage_config *stage_config;
+	struct audio_element_config *element_config;
+	int i, j;
+
+	if (config->stages > AUDIO_PIPELINE_MAX_STAGES) {
+		log_err("pipeline: too many stages %u, max %u\n", config->stages, AUDIO_PIPELINE_MAX_STAGES);
+		goto err;
+	}
+
+	if (config->buffers > AUDIO_PIPELINE_MAX_BUFFERS) {
+		log_err("pipeline: too many buffers %u, max %u\n", config->buffers, AUDIO_PIPELINE_MAX_BUFFERS);
+		goto err;
+	}
+
+	if (config->buffer_storage > AUDIO_PIPELINE_MAX_BUFFERS) {
+		log_err("pipeline: too many storage %u, max %u\n", config->buffer_storage, AUDIO_PIPELINE_MAX_BUFFERS);
+		goto err;
+	}
+
+	for (i = 0; i < config->stages; i++) {
+		stage_config = &config->stage[i];
+
+		if (stage_config->elements > AUDIO_PIPELINE_MAX_ELEMENTS) {
+			log_err("stage(%u): too many elements %u, max %u\n\r", i, stage_config->elements, AUDIO_PIPELINE_MAX_ELEMENTS);
+			goto err;
+		}
+
+		for (j = 0; j < stage_config->elements; j++) {
+			element_config = &stage_config->element[j];
+
+			if (element_config->inputs > AUDIO_ELEMENT_MAX_INPUTS) {
+				log_err("stage(%u), element(%u): too many inputs %u, max %u\n\r", i, j, element_config->inputs, AUDIO_ELEMENT_MAX_INPUTS);
+				goto err;
+			}
+
+			if (element_config->outputs > AUDIO_ELEMENT_MAX_OUTPUTS) {
+				log_err("stage(%u), element(%u): too many outputs %u, max %u\n\r", i, j, element_config->outputs, AUDIO_ELEMENT_MAX_OUTPUTS);
+				goto err;
+			}
+		}
+	}
+
+	return 0;
+
+err:
+	return -1;
 }
 
 static unsigned int audio_buffer_storage_size(struct audio_pipeline_config *config)
@@ -359,6 +548,9 @@ struct audio_pipeline *audio_pipeline_init(struct audio_pipeline_config *config)
 
 	log_info("enter\n");
 
+	if (audio_pipeline_early_config_check(config) < 0)
+		goto err_config;
+
 	audio_pipeline_set_config(config);
 
 	pipeline = audio_pipeline_create(config);
@@ -393,6 +585,7 @@ err_add:
 	audio_pipeline_free(pipeline);
 
 err_alloc:
+err_config:
 	return NULL;
 }
 
