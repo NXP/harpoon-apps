@@ -11,7 +11,6 @@
 #if __has_include("app_board.h")
 #include "app_board.h"
 #endif
-#include "clock_config.h"
 #include "fsl_clock.h"
 
 /*******************************************************************************
