@@ -127,7 +127,7 @@ void *play_pipeline_init(void *parameters)
 
 	ctx->pipeline = audio_pipeline_init(&pipeline_config);
 	if (!ctx->pipeline)
-		goto err;
+		goto err_init;
 
 	audio_pipeline_dump(ctx->pipeline);
 
@@ -148,6 +148,9 @@ void *play_pipeline_init(void *parameters)
 			rate, period);
 
 	return ctx;
+
+err_init:
+	os_free(ctx);
 
 err:
 	return NULL;
