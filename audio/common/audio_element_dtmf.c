@@ -17,9 +17,6 @@
 struct dtmf_element {
 	struct audio_buffer *out;
 
-	unsigned int period;	/* number of samples to generate at each iteration */
-	unsigned int sample;
-
 	unsigned int sample_rate;
 
 	double amplitude;
