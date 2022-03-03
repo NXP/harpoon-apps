@@ -65,10 +65,11 @@ struct audio_element {
 struct mailbox;
 
 void audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element *cmd, unsigned int len, struct mailbox *m);
-unsigned int audio_element_data_size(struct audio_element_config *config);
-int audio_element_init(struct audio_element *element, struct audio_element_config *config, struct audio_buffer *buffer);
 void audio_element_exit(struct audio_element *element);
 void audio_element_dump(struct audio_element *element);
+int audio_element_check_config(struct audio_element_config *config);
+unsigned int audio_element_data_size(struct audio_element_config *config);
+int audio_element_init(struct audio_element *element, struct audio_element_config *config, struct audio_buffer *buffer);
 
 static inline int audio_element_run(struct audio_element *element)
 {

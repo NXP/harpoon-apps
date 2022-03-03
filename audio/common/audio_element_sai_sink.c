@@ -175,7 +175,7 @@ static void sai_sink_element_dump(struct audio_element *element)
 		audio_buf_dump(sai->in[i]);
 }
 
-unsigned int sai_sink_map_size(struct audio_element_config *config)
+static unsigned int sai_sink_map_size(struct audio_element_config *config)
 {
 	struct sai_tx_config *sai_config;
 	struct sai_tx_line_config *line_config;
@@ -193,6 +193,61 @@ unsigned int sai_sink_map_size(struct audio_element_config *config)
 	}
 
 	return map_size;
+}
+
+int sai_sink_element_check_config(struct audio_element_config *config)
+{
+	struct sai_tx_config *sai_config;
+	struct sai_tx_line_config *line_config;
+	int i, j;
+
+	if (config->outputs) {
+		log_err("sai sink: invalid outputs: %u\n", config->outputs);
+		goto err;
+	}
+
+	if (config->inputs != sai_sink_map_size(config)) {
+		log_err("sai sink: invalid inputs: %u\n", config->inputs);
+		goto err;
+	}
+
+	if (config->u.sai_sink.sai_n > SAI_RX_MAX_INSTANCE) {
+		log_err("sai sink: invalid instances: %u\n", config->u.sai_sink.sai_n);
+		goto err;
+	}
+
+	for (i = 0; i < config->u.sai_sink.sai_n; i++) {
+		sai_config = &config->u.sai_sink.sai[i];
+
+		if (sai_config->id >= SAI_TX_MAX_ID) {
+			log_err("sai sink: invalid sai: %u\n", sai_config->id);
+			goto err;
+		}
+
+		if (sai_config->line_n > SAI_TX_INSTANCE_MAX_LINE) {
+			log_err("sai sink: invalid lines: %u\n", sai_config->line_n);
+			goto err;
+		}
+
+		for (j = 0; j < sai_config->line_n; j++) {
+			line_config = &sai_config->line[j];
+
+			if (line_config->id >= SAI_TX_INSTANCE_MAX_LINE) {
+				log_err("sai sink: invalid line: %u\n", line_config->id);
+				goto err;
+			}
+
+			if (line_config->channel_n > SAI_TX_INSTANCE_MAX_CHANNELS) {
+				log_err("sai sink: invalid channels: %u\n", line_config->channel_n);
+				goto err;
+			}
+		}
+	}
+
+	return 0;
+
+err:
+	return -1;
 }
 
 unsigned int sai_sink_element_size(struct audio_element_config *config)
@@ -213,12 +268,6 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 	struct sai_tx_line_config *line_config;
 	struct sai_sink_map *map;
 	int i, j, k, l;
-
-	if (config->outputs)
-		goto err;
-
-	if (config->inputs != sai_sink_map_size(config))
-		goto err;
 
 	element->run = sai_sink_element_run;
 	element->reset = sai_sink_element_reset;

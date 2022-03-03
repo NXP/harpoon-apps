@@ -17,6 +17,7 @@ struct sine_element_config {
 struct audio_element_config;
 struct audio_element;
 
+int sine_element_check_config(struct audio_element_config *config);
 unsigned int sine_element_size(struct audio_element_config *config);
 int sine_element_init(struct audio_element *element, struct audio_element_config *config, struct audio_buffer *buffer);
 

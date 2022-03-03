@@ -60,6 +60,32 @@ static void sine_element_dump(struct audio_element *element)
 	audio_buf_dump(sine->out);
 }
 
+int sine_element_check_config(struct audio_element_config *config)
+{
+	if (config->inputs) {
+		log_err("sine: invalid inputs: %u\n", config->inputs);
+		goto err;
+	}
+
+	if (config->outputs != 1) {
+		log_err("sine: invalid outputs: %u\n", config->outputs);
+		goto err;
+	}
+
+	if ((config->u.sine.amplitude <= 0.0) || (config->u.sine.amplitude > 1.0)) {
+		log_err("sine: invalid amplitude: %f\n", config->u.sine.amplitude);
+		goto err;
+	}
+
+	if ((config->u.sine.freq <= 0.0) || (config->u.sine.freq > config->sample_rate / 2.0))
+		log_warn("sine: invalid frequency: %f (Hz)\n", config->u.sine.freq);
+
+	return 0;
+
+err:
+	return -1;
+}
+
 unsigned int sine_element_size(struct audio_element_config *config)
 {
 	return sizeof(struct sine_element);
@@ -68,13 +94,6 @@ unsigned int sine_element_size(struct audio_element_config *config)
 int sine_element_init(struct audio_element *element, struct audio_element_config *config, struct audio_buffer *buffer)
 {
 	struct sine_element *sine = element->data;
-
-	/* some sanity checks */
-	if (config->inputs)
-		goto err;
-
-	if (config->outputs != 1)
-		goto err;
 
 	element->run = sine_element_run;
 	element->reset = sine_element_reset;
@@ -89,7 +108,4 @@ int sine_element_init(struct audio_element *element, struct audio_element_config
 	sine_element_dump(element);
 
 	return 0;
-
-err:
-	return -1;
 }

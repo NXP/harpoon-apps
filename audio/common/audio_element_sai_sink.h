@@ -12,6 +12,7 @@
 #define SAI_TX_MAX_INSTANCE		6
 #define SAI_TX_MAX_ID			8
 #define SAI_TX_INSTANCE_MAX_LINE	8
+#define SAI_TX_INSTANCE_MAX_CHANNELS	8
 
 /* Fixed mapping between input buffers and sai instances/lines/channels
  * e.g
@@ -42,6 +43,7 @@ struct sai_sink_element_config {
 struct audio_element_config;
 struct audio_element;
 
+int sai_sink_element_check_config(struct audio_element_config *config);
 unsigned int sai_sink_element_size(struct audio_element_config *config);
 int sai_sink_element_init(struct audio_element *element, struct audio_element_config *config, struct audio_buffer *buffer);
 

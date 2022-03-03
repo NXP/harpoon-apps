@@ -272,6 +272,18 @@ static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 	}
 
 	/* Check the configuration of all elements */
+	for (i = 0; i < config->stages; i++) {
+		stage_config = &config->stage[i];
+
+		for (j = 0; j < stage_config->elements; j++) {
+			element_config = &stage_config->element[j];
+
+			if (audio_element_check_config(element_config) < 0) {
+				log_err("stage(%u), element(%u): invalid element configuration\n", i, j);
+				goto err;
+			}
+		}
+	}
 
 	return 0;
 

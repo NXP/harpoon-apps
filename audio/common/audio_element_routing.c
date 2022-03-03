@@ -161,6 +161,24 @@ static void routing_element_dump(struct audio_element *element)
 		audio_buf_dump(routing->out[i].buf);
 }
 
+int routing_element_check_config(struct audio_element_config *config)
+{
+	if (!config->inputs) {
+		log_err("routing: invalid inputs: %u\n", config->inputs);
+		goto err;
+	}
+
+	if (!config->outputs) {
+		log_err("routing: invalid outputs: %u\n", config->outputs);
+		goto err;
+	}
+
+	return 0;
+
+err:
+	return -1;
+}
+
 unsigned int routing_element_size(struct audio_element_config *config)
 {
 	unsigned int size;

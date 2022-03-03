@@ -174,7 +174,7 @@ static void sai_source_element_dump(struct audio_element *element)
 		audio_buf_dump(sai->out[i]);
 }
 
-unsigned int sai_source_map_size(struct audio_element_config *config)
+static unsigned int sai_source_map_size(struct audio_element_config *config)
 {
 	struct sai_rx_config *sai_config;
 	struct sai_rx_line_config *line_config;
@@ -192,6 +192,61 @@ unsigned int sai_source_map_size(struct audio_element_config *config)
 	}
 
 	return map_size;
+}
+
+int sai_source_element_check_config(struct audio_element_config *config)
+{
+	struct sai_rx_config *sai_config;
+	struct sai_rx_line_config *line_config;
+	int i, j;
+
+	if (config->inputs) {
+		log_err("sai source: invalid inputs: %u\n", config->inputs);
+		goto err;
+	}
+
+	if (config->outputs != sai_source_map_size(config)) {
+		log_err("sai source: invalid outputs: %u\n", config->outputs);
+		goto err;
+	}
+
+	if (config->u.sai_source.sai_n > SAI_RX_MAX_INSTANCE) {
+		log_err("sai source: invalid instances: %u\n", config->u.sai_source.sai_n);
+		goto err;
+	}
+
+	for (i = 0; i < config->u.sai_source.sai_n; i++) {
+		sai_config = &config->u.sai_source.sai[i];
+
+		if (sai_config->id >= SAI_RX_MAX_ID) {
+			log_err("sai source: invalid sai: %u\n", sai_config->id);
+			goto err;
+		}
+
+		if (sai_config->line_n > SAI_RX_INSTANCE_MAX_LINE) {
+			log_err("sai source: invalid lines: %u\n", sai_config->line_n);
+			goto err;
+		}
+
+		for (j = 0; j < sai_config->line_n; j++) {
+			line_config = &sai_config->line[j];
+
+			if (line_config->id >= SAI_RX_INSTANCE_MAX_LINE) {
+				log_err("sai source: invalid line: %u\n", line_config->id);
+				goto err;
+			}
+
+			if (line_config->channel_n > SAI_RX_INSTANCE_MAX_CHANNELS) {
+				log_err("sai source: invalid channels: %u\n", line_config->channel_n);
+				goto err;
+			}
+		}
+	}
+
+	return 0;
+
+err:
+	return -1;
 }
 
 unsigned int sai_source_element_size(struct audio_element_config *config)
@@ -212,12 +267,6 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 	struct sai_rx_line_config *line_config;
 	struct sai_source_map *map;
 	int i, j, k, l;
-
-	if (config->inputs)
-		goto err;
-
-	if (config->outputs != sai_source_map_size(config))
-		goto err;
 
 	element->run = sai_source_element_run;
 	element->reset = sai_source_element_reset;

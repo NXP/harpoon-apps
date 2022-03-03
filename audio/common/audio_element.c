@@ -51,6 +51,50 @@ err:
 	audio_element_response(m, HRPN_RESP_STATUS_ERROR);
 }
 
+void audio_element_exit(struct audio_element *element)
+{
+	element->exit(element);
+}
+
+void audio_element_dump(struct audio_element *element)
+{
+	if (element->dump)
+		element->dump(element);
+}
+
+int audio_element_check_config(struct audio_element_config *config)
+{
+	int rc;
+
+	switch (config->type) {
+	case AUDIO_ELEMENT_DTMF_SOURCE:
+		rc = dtmf_element_check_config(config);
+		break;
+
+	case AUDIO_ELEMENT_ROUTING:
+		rc = routing_element_check_config(config);
+		break;
+
+	case AUDIO_ELEMENT_SAI_SINK:
+		rc = sai_sink_element_check_config(config);
+		break;
+
+	case AUDIO_ELEMENT_SAI_SOURCE:
+		rc = sai_source_element_check_config(config);
+		break;
+
+	case AUDIO_ELEMENT_SINE_SOURCE:
+		rc = sine_element_check_config(config);
+		break;
+
+	default:
+		rc = -1;
+		break;
+	}
+
+	return rc;
+}
+
 unsigned int audio_element_data_size(struct audio_element_config *config)
 {
 	unsigned int size;
@@ -82,12 +126,6 @@ unsigned int audio_element_data_size(struct audio_element_config *config)
 	}
 
 	return size;
-}
-
-void audio_element_dump(struct audio_element *element)
-{
-	if (element->dump)
-		element->dump(element);
 }
 
 int audio_element_init(struct audio_element *element, struct audio_element_config *config, struct audio_buffer *buffer)
@@ -129,9 +167,4 @@ int audio_element_init(struct audio_element *element, struct audio_element_confi
 	log_info("done\n");
 
 	return rc;
-}
-
-void audio_element_exit(struct audio_element *element)
-{
-	element->exit(element);
 }
