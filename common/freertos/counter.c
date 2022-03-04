@@ -6,7 +6,6 @@
 
 #include "os/assert.h"
 #include "os/counter.h"
-#include "os/stdio.h"
 
 #include "irq.h"
 
@@ -23,6 +22,9 @@
 #define NB_COUNTERS		(sizeof(gpt_devices) / sizeof(GPT_Type *) - 1)
 /* TODO: support multiple channels */
 #define NB_CHANNELS		1
+
+__WEAK void log_err(const char *format, ...) {};
+__WEAK void log_debug(const char *format, ...) {};
 
 struct counter_alarm {
 	/* TODO: Add a mutex lock to protect both entries below */
@@ -108,7 +110,7 @@ static void gpt_irq_ack(const void *dev, uint8_t chan_id)
 	/* TODO: support multiple channels */
 	if (chan_id != kGPT_OutputCompare_Channel1) {
 		/* TODO: support multiple channels */
-		os_printf("Error: Channel ID (%d) not supported!\n\r", chan_id);
+		log_err("Channel ID (%d) not supported!\n", chan_id);
 
 	} else {
 		GPT_DisableInterrupts((GPT_Type *)dev, kGPT_OutputCompare1InterruptEnable);
@@ -162,10 +164,8 @@ static void counter_init(const void *dev)
 	counter = &counters[gpt_get_index(dev)];
 	counter->dev = dev;
 
-#ifdef DEBUG
-	os_printf("counter %d using GPT dev %p irq %d initialized\r\n",
+	log_debug("counter %d using GPT dev %p irq %d initialized\n",
 			gpt_get_index(dev), dev, irqn);
-#endif
 }
 
 int os_counter_start(const void *dev)
@@ -236,7 +236,7 @@ int os_counter_set_channel_alarm(const void *dev, uint8_t chan_id,
 	uint32_t current, next;
 
 	if (!alarm_cfg) {
-		os_printf("Error: Null pointer for channel ID (%d)\n\r", chan_id);
+		log_err("Null pointer for channel ID (%d)\n", chan_id);
 
 		ret = -1;
 		goto exit;
@@ -244,7 +244,7 @@ int os_counter_set_channel_alarm(const void *dev, uint8_t chan_id,
 
 	if (chan_id != kGPT_OutputCompare_Channel1) {
 		/* TODO: support multiple channels */
-		os_printf("Error: Channel ID (%d) not supported!\n\r", chan_id);
+		log_err("Channel ID (%d) not supported!\n", chan_id);
 
 		ret = -1;
 		goto exit;
@@ -253,7 +253,8 @@ int os_counter_set_channel_alarm(const void *dev, uint8_t chan_id,
 	/* Keep a reference of the alarm config (for callback) */
 	ret = set_alarm(dev, chan_id, alarm_cfg);
 	if (ret) {
-		os_printf("Error: Failed to set counter's alarm for device %p channel %d\n\r", dev, chan_id);
+		log_err("Failed to set counter's alarm for device %p channel %d\n",
+			       dev, chan_id);
 
 		goto exit;
 	}
