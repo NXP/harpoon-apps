@@ -134,9 +134,9 @@ void hist_print(struct hist *hist)
 {
     int i;
 
-    log(INFO, "n_slot %d slot_size %d \n\r", hist->n_slots, hist->slot_size);
+    log(INFO, "n_slot %d slot_size %d \n", hist->n_slots, hist->slot_size);
 
-    log_raw(INFO, "INFO: %s: ", __func__);
+    log_raw(INFO, "%.4s: %-22.s: ", "INFO", __func__);
     for (i = 0; i < (hist->n_slots + 1); i++) {
         log_raw(INFO, "%u ", hist->slots[i]);
     }

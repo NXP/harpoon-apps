@@ -34,7 +34,7 @@ extern log_level_t log_level_config;
 #define log(LEVEL, format, ...) \
   do { \
     if (log_level_config >= LOG_ ## LEVEL) \
-         os_printf("%s: %s: " format "\r", #LEVEL, __func__, ##__VA_ARGS__); \
+         os_printf("%.4s: %-22.22s: " format "\r", #LEVEL, __func__, ##__VA_ARGS__); \
   } while (0)
 
 #define log_crit(...)     log(CRIT, __VA_ARGS__)
