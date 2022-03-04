@@ -127,8 +127,9 @@ void benchmark_task(void *pvParameters)
  * Application functions
  ******************************************************************************/
 
-static void destroy_test_case(struct main_ctx *ctx)
+void destroy_test_case(void *context)
 {
+	struct main_ctx *ctx = context;
 	int hnd_idx;
 
 	if (!ctx->started)
@@ -146,8 +147,9 @@ static void destroy_test_case(struct main_ctx *ctx)
 	ctx->started = false;
 }
 
-static int start_test_case(struct main_ctx *ctx, int test_case_id)
+int start_test_case(void *context, int test_case_id)
 {
+	struct main_ctx *ctx = context;
 	void *dev;
 	void *irq_load_dev = NULL;
 	int hnd_idx = 0;
@@ -229,61 +231,6 @@ err_task:
 
 err:
 	return -1;
-}
-
-static void response(struct mailbox *m, uint32_t status)
-{
-	struct hrpn_resp_latency resp;
-
-	resp.type = HRPN_RESP_TYPE_LATENCY;
-	resp.status = status;
-	mailbox_resp_send(m, &resp, sizeof(resp));
-}
-
-static void command_handler(struct main_ctx *ctx, struct mailbox *m)
-{
-	struct hrpn_command cmd;
-	unsigned int len;
-	int ret;
-
-	len = sizeof(cmd);
-	if (mailbox_cmd_recv(m, &cmd, &len) < 0)
-		return;
-
-	switch (cmd.u.cmd.type) {
-	case HRPN_CMD_TYPE_LATENCY_RUN:
-		if (len != sizeof(struct hrpn_cmd_latency_run)) {
-			response(m, HRPN_RESP_STATUS_ERROR);
-			break;
-		}
-
-		if (cmd.u.latency_run.id >= RT_LATENCY_TEST_CASE_MAX) {
-			response(m, HRPN_RESP_STATUS_ERROR);
-			break;
-		}
-
-		ret = start_test_case(ctx, cmd.u.latency_run.id);
-		if (ret)
-			response(m, HRPN_RESP_STATUS_ERROR);
-		else
-			response(m, HRPN_RESP_STATUS_SUCCESS);
-
-		break;
-
-	case HRPN_CMD_TYPE_LATENCY_STOP:
-		if (len != sizeof(struct hrpn_cmd_latency_stop)) {
-			response(m, HRPN_RESP_STATUS_ERROR);
-			break;
-		}
-
-		destroy_test_case(ctx);
-		response(m, HRPN_RESP_STATUS_SUCCESS);
-		break;
-
-	default:
-		response(m, HRPN_RESP_STATUS_ERROR);
-		break;
-	}
 }
 
 void main_task(void *pvParameters)

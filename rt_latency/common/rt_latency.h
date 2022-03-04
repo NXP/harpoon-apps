@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP.
+ * Copyright 2021-2022 NXP.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -91,7 +91,7 @@ struct rt_latency_ctx {
 	const void *dev;
 	const void *irq_load_dev;
 
-  int tc_load; /* bitmask of the above RT_LATENCY_WITH_xxx test case load conditions */
+	int tc_load; /* bitmask of the above RT_LATENCY_WITH_xxx test case load conditions */
 
 	os_sem_t semaphore; /* used to wake the thread up from IRQ callback */
 	os_sem_t cpu_load_sem; /* used to increase CPU load through semaphore take/give */
@@ -115,5 +115,10 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx);
 void print_stats(struct rt_latency_ctx *ctx);
 void cpu_load(struct rt_latency_ctx *ctx);
 void cache_inval(void);
+void command_handler(void *ctx, struct mailbox *m);
+
+/* OS specific functions */
+int start_test_case(void *context, int test_case_id);
+void destroy_test_case(void *context);
 
 #endif /* _RT_LATENCY_H_ */

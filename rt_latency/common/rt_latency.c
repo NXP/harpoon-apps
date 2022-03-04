@@ -14,6 +14,8 @@
 #include "log.h"
 #include "stats.h"
 
+#include "hrpn_ctrl.h"
+#include "mailbox.h"
 #include "rt_latency.h"
 
 static inline uint32_t calc_diff_ns(const void *dev,
@@ -273,3 +275,57 @@ int rt_latency_init(const void *dev,
 	return err;
 }
 
+static void response(struct mailbox *m, uint32_t status)
+{
+	struct hrpn_resp_latency resp;
+
+	resp.type = HRPN_RESP_TYPE_LATENCY;
+	resp.status = status;
+	mailbox_resp_send(m, &resp, sizeof(resp));
+}
+
+void command_handler(void *ctx, struct mailbox *m)
+{
+	struct hrpn_command cmd;
+	unsigned int len;
+	int ret;
+
+	len = sizeof(cmd);
+	if (mailbox_cmd_recv(m, &cmd, &len) < 0)
+		return;
+
+	switch (cmd.u.cmd.type) {
+	case HRPN_CMD_TYPE_LATENCY_RUN:
+		if (len != sizeof(struct hrpn_cmd_latency_run)) {
+			response(m, HRPN_RESP_STATUS_ERROR);
+			break;
+		}
+
+		if (cmd.u.latency_run.id >= RT_LATENCY_TEST_CASE_MAX) {
+			response(m, HRPN_RESP_STATUS_ERROR);
+			break;
+		}
+
+		ret = start_test_case(ctx, cmd.u.latency_run.id);
+		if (ret)
+			response(m, HRPN_RESP_STATUS_ERROR);
+		else
+			response(m, HRPN_RESP_STATUS_SUCCESS);
+
+		break;
+
+	case HRPN_CMD_TYPE_LATENCY_STOP:
+		if (len != sizeof(struct hrpn_cmd_latency_stop)) {
+			response(m, HRPN_RESP_STATUS_ERROR);
+			break;
+		}
+
+		destroy_test_case(ctx);
+		response(m, HRPN_RESP_STATUS_SUCCESS);
+		break;
+
+	default:
+		response(m, HRPN_RESP_STATUS_ERROR);
+		break;
+	}
+}
