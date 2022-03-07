@@ -5,17 +5,11 @@
  */
 
 #include "console.h"
+#include "cmsis_compiler.h"
 
 void jh_putc(int c)
 {
-	register uint64_t x1 asm("x1") = c;
-
-	asm volatile(
-		"mov x0, #8 \n\t"
-		"hvc #0x4a48"
-		:
-		: "r" (x1)
-		: "x0", "memory");
+	HVC_2(0x4a48, c, 0);
 }
 
 void jh_puts(const char *s)
