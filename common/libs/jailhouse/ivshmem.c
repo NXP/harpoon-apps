@@ -1,6 +1,5 @@
 /*
- * Copyright 2021 NXP
- * All rights reserved.
+ * Copyright 2021-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -70,32 +69,32 @@ struct comm_region {
 
 static uint32_t mmio_read32(void *base, unsigned int offset)
 {
-	return *((volatile uint32_t *)(base + offset));
+	return *((volatile uint32_t *)((uintptr_t)base + offset));
 }
 
 static uint16_t mmio_read16(void *base, unsigned int offset)
 {
-	return *((volatile uint16_t *)(base + offset));
+	return *((volatile uint16_t *)((uintptr_t)base + offset));
 }
 
 static uint8_t mmio_read8(void *base, unsigned int offset)
 {
-	return *((volatile uint8_t *)(base + offset));
+	return *((volatile uint8_t *)((uintptr_t)base + offset));
 }
 
 static void mmio_write32(void *base, unsigned int offset, uint32_t val)
 {
-	*((volatile uint32_t *)(base + offset)) = val;
+	*((volatile uint32_t *)((uintptr_t)base + offset)) = val;
 }
 
 static void mmio_write16(void *base, unsigned int offset, uint16_t val)
 {
-	*((volatile uint16_t *)(base + offset)) = val;
+	*((volatile uint16_t *)((uintptr_t)base + offset)) = val;
 }
 
 static void mmio_write8(void *base, unsigned int offset, uint8_t val)
 {
-	*((volatile uint8_t *)(base + offset)) = val;
+	*((volatile uint8_t *)((uintptr_t)base + offset)) = val;
 }
 
 static uint32_t pci_read_config(void *addr, unsigned int offset, unsigned int size)
@@ -134,14 +133,14 @@ static uint64_t pci_read_config64(void *addr, unsigned int offset)
 
 static void *pci_get_device(void *cfg_base, unsigned int bfd)
 {
-	return cfg_base + (bfd << 12);
+	return (void *)((uintptr_t)cfg_base + (bfd << 12));
 }
 
 static void *pci_find_cap(void *base, uint8_t next, uint8_t id)
 {
 	while (next) {
 		if (pci_read_config(base, next, 1) == id)
-			return base + next;
+			return (void *)((uintptr_t)base + next);
 
 		next = pci_read_config(base, next + 1, 1);
 	}
