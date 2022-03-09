@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "os/assert.h"
+#include "os/mmu.h"
+
 #include "ivshmem.h"
 #include "memory.h"
 #include "log.h"
@@ -154,22 +157,20 @@ int ivshmem_init(unsigned int bfd, struct ivshmem *ivshmem)
 	void *cfg_base;
 	void *pci;
 	void *cap;
-	void *mmio = (void *)PCI_MMIO_BASE;
+	void *mmio;
 	uint8_t next_cap;
-	void *next;
-	uintptr_t addr;
+	uintptr_t next_addr, state;
 	int ret, i;
 
-	/* Get PCI configuration base address from COMM region */
-	comm = (struct comm_region *)HYPERVISOR_COMM_BASE;
-
-	ret = ARM_MMU_AddMap("jh communication", (uintptr_t)HYPERVISOR_COMM_BASE, (uintptr_t)HYPERVISOR_COMM_BASE, KB(4), MT_NORMAL | MT_P_RW_U_RW | MT_NS);
+	ret = os_mmu_map("jh communication", (uint8_t **)&comm,
+			(uintptr_t)HYPERVISOR_COMM_BASE, KB(4),
+			OS_MEM_CACHE_WB | OS_MEM_PERM_RW);
 	if (ret < 0)
 		goto err;
 
-	cfg_base = (void *)comm->pci_mmconfig_base;
-
-	ret = ARM_MMU_AddMap("pci cfg", (uintptr_t)cfg_base, (uintptr_t)cfg_base, KB(1024), MT_NORMAL | MT_P_RW_U_RW | MT_NS);
+	ret = os_mmu_map("pci cfg", (uint8_t **)&cfg_base,
+			(uintptr_t)(comm->pci_mmconfig_base), KB(1024),
+			OS_MEM_CACHE_WB | OS_MEM_PERM_RW);
 	if (ret < 0)
 		goto err;
 
@@ -183,7 +184,9 @@ int ivshmem_init(unsigned int bfd, struct ivshmem *ivshmem)
 	/* Update device BAR0 with our MMIO address */
 	pci_write_config(pci, PCI_CFG_BAR0, PCI_MMIO_BASE, 4);
 
-	ret = ARM_MMU_AddMap("pci mmio", (uintptr_t)PCI_MMIO_BASE, (uintptr_t)PCI_MMIO_BASE, KB(4), MT_NORMAL | MT_P_RW_U_RW | MT_NS);
+	ret = os_mmu_map("pci mmio", (uint8_t **)&mmio,
+			(uintptr_t)PCI_MMIO_BASE, KB(4),
+			OS_MEM_CACHE_WB | OS_MEM_PERM_RW);
 	if (ret < 0)
 		goto err;
 
@@ -197,44 +200,53 @@ int ivshmem_init(unsigned int bfd, struct ivshmem *ivshmem)
 	ivshmem->rw_size = pci_read_config64(cap, IVSHMEM_CAP_RW_SIZE);
 	ivshmem->out_size = pci_read_config64(cap, IVSHMEM_CAP_OUT_SIZE);
 
-	ivshmem->state = (void *)pci_read_config64(cap, IVSHMEM_CAP_ADDR);
-	next = ivshmem->state + ivshmem->state_size;
+	state = (uintptr_t)pci_read_config64(cap, IVSHMEM_CAP_ADDR);
+	next_addr = state + ivshmem->state_size;
 
-	ret = ARM_MMU_AddMap("ivshmem state", (uintptr_t)ivshmem->state, (uintptr_t)ivshmem->state, ivshmem->state_size, MT_NORMAL | MT_P_RO_U_RO | MT_NS);
+	ret = os_mmu_map("ivshmem state", (uint8_t **)&ivshmem->state,
+			state, ivshmem->state_size,
+			OS_MEM_CACHE_WB);
 	if (ret < 0)
 		goto err;
 
 	if (ivshmem->rw_size) {
-		ivshmem->rw = next;
-
-		ret = ARM_MMU_AddMap("ivshmem rw", (uintptr_t)ivshmem->rw, (uintptr_t)ivshmem->rw, ivshmem->state_size, MT_NORMAL | MT_P_RW_U_RW | MT_NS);
+		ret = os_mmu_map("ivshmem rw", (uint8_t **)&ivshmem->rw,
+				(uintptr_t)next_addr, ivshmem->state_size,
+				OS_MEM_CACHE_WB | OS_MEM_PERM_RW);
 		if (ret < 0)
 			goto err;
 
-		next = ivshmem->rw + ivshmem->rw_size;
+		next_addr += ivshmem->rw_size;
 	} else {
 		ivshmem->rw = NULL;
 	}
 
 	if (ivshmem->out_size) {
-		ivshmem->out = next;
-
+		os_assert(ivshmem->peers <= MAX_IV_PEERS,
+				"IVSHMEM peers count(%d) exceed limiation(%d)",
+				ivshmem->peers, MAX_IV_PEERS);
 		for (i = 0; i < ivshmem->peers; i++) {
-			addr = (uintptr_t)(ivshmem->out + i * ivshmem->out_size);
+			next_addr += i * ivshmem->out_size;
 
 			if (i == ivshmem->id)
-				ret = ARM_MMU_AddMap("ivshmem out", addr, addr, ivshmem->out_size, MT_NORMAL | MT_P_RW_U_RW | MT_NS);
+				ret = os_mmu_map("ivshmem out",
+					(uint8_t **)&ivshmem->out[i],
+					next_addr, ivshmem->out_size,
+					OS_MEM_CACHE_WB | OS_MEM_PERM_RW);
 			else
-				ret = ARM_MMU_AddMap("ivshmem in", addr, addr, ivshmem->out_size, MT_NORMAL | MT_P_RO_U_RO | MT_NS);
+				ret = os_mmu_map("ivshmem in",
+					(uint8_t **)&ivshmem->out[i],
+					next_addr, ivshmem->out_size,
+					OS_MEM_CACHE_WB);
 
 			if (ret < 0)
 				goto err;
 		}
 	} else {
-		ivshmem->out = NULL;
+		for (i = 0; i < ivshmem->peers; i++) {
+			ivshmem->out[i] = NULL;
+		}
 	}
-
-	log_info("ivshmem init done\n");
 
 	return 0;
 

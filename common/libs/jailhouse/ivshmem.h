@@ -1,11 +1,12 @@
 /*
- * Copyright 2021 NXP
- * All rights reserved.
+ * Copyright 2021-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #ifndef _IVSHMEM_H_
 #define _IVSHMEM_H_
+
+#define MAX_IV_PEERS	8
 
 struct ivshmem {
 	unsigned int peers;
@@ -14,7 +15,7 @@ struct ivshmem {
 	unsigned int state_size;
 	void *rw;
 	unsigned int rw_size;
-	void *out; /* array of equal size blocks, one per peer */
+	void *out[MAX_IV_PEERS]; /* array of equal size blocks, one per peer */
 	unsigned int out_size;
 };
 
