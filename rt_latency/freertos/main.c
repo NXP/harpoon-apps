@@ -247,7 +247,7 @@ void main_task(void *pvParameters)
 
 	os_assert(mem.out_size, "ivshmem mis-configuration, can not proceed\n");
 
-	mailbox_init(&m, mem.out, mem.out + mem.out_size * mem.id, false);
+	mailbox_init(&m, mem.out[0], mem.out[mem.id], false);
 
 	ctx->started = false;
 
