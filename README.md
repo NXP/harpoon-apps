@@ -52,7 +52,6 @@ It provides a `west` manifest to fetch FreeRTOS as well as the MCUXpresso SDK (i
 │   │   │   │   └── armv8a
 │   │   │   │       ├── common_freertos_core_armv8a.cmake
 │   │   │   │       └── startup.S           <-- ARMv8-A startup code
-│   │   │   ├── counter.c
 │   │   │   ├── FreeRTOSConfig.h
 │   │   │   ├── FreeRTOS_helper.c
 │   │   │   ├── FreeRTOS_tick_config.c
@@ -61,7 +60,7 @@ It provides a `west` manifest to fetch FreeRTOS as well as the MCUXpresso SDK (i
 │   │   │   ├── mmu.h                       <-- glue with the SDK MMU driver
 │   │   │   ├── os                          <-- includes os-specific header files for the os APIs
 │   │   │   │   ├── assert.h
-│   │   │   │   ├── counter.h
+│   │   │   │   ├── counter.{c,h}
 │   │   │   │   ├── semaphore.h
 │   │   │   │   ├── stdio.h
 │   │   │   │   └── unistd.h
