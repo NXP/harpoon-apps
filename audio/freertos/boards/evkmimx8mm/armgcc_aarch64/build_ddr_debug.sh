@@ -2,6 +2,7 @@
 
 # Select codec to be used:
 # CODEC_DEVICE_TYPE="-DCODEC_DEVICE=hifiberry" will enable HiFiBerry Codec
+# CODEC_DEVICE_TYPE="-DCODEC_DEVICE=wm8524" will enable i.MX8M internal Codec
 CODEC_DEVICE_TYPE="-DCODEC_DEVICE=hifiberry"
 
 if [ -d "CMakeFiles" ];then rm -rf CMakeFiles; fi

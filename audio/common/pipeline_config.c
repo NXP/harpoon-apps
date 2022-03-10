@@ -76,7 +76,11 @@ struct audio_pipeline_config pipeline_config = {
 						},
 					},
 					[1] = {
+#ifdef CODEC_HIFIBERRY
 						.id = 5,
+#else
+						.id = 3,
+#endif
 						.line_n = 1,
 						.line = {
 							[0] = {
@@ -128,7 +132,11 @@ struct audio_pipeline_config pipeline_config = {
 						},
 					},
 					[1] = {
+#ifdef CODEC_HIFIBERRY
 						.id = 5,
+#else
+						.id = 3,
+#endif
 						.line_n = 1,
 						.line = {
 							[0] = {

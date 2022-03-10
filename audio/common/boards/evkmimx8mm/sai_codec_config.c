@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -15,6 +15,45 @@
 #include "os/assert.h"
 #include "board.h"
 
+#include "os/stdio.h"
+#ifdef CODEC_WM8524
+
+static codec_handle_t codec_handle;
+
+static void codec_wm8524_setmute(uint32_t mute)
+{
+}
+
+static wm8524_config_t wm8524Config = {
+	.setMute = codec_wm8524_setmute,
+};
+
+static codec_config_t sai_codec_config = {.codecDevType = kCODEC_WM8524,
+	.codecDevConfig = &wm8524Config};
+
+void codec_set_format(uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
+{
+	int32_t err;
+
+	err = CODEC_SetFormat(&codec_handle, mclk, sample_rate, bitwidth);
+	os_assert(err == kStatus_Success, "WM8524 set format failed (err %d)", err);
+}
+
+void codec_setup(void)
+{
+	int32_t err;
+
+	/* Use default setting to init codec */
+	err = CODEC_Init(&codec_handle, &sai_codec_config);
+	os_assert(err == kStatus_Success, "Codec initialization failed (err %d)", err);
+}
+
+void codec_close(void)
+{
+	(void)CODEC_Deinit(&codec_handle);
+}
+
+#else /* CODEC */
 
 static codec_handle_t dac_handle;
 static codec_handle_t adc_handle;
@@ -94,3 +133,5 @@ void codec_close(void)
     err = CODEC_Deinit(&adc_handle);
     os_assert(err == kStatus_Success, "ADC deinitialization failed (err %d)", err);
 }
+
+#endif /* CODEC */
