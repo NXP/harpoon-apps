@@ -35,6 +35,8 @@ set(MCUX_SDK_PROJECT_NAME harpoon_drivers_test.elf)
 
 include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
+    "${AppBoardPath}/clock_config.c"
+    "${AppBoardPath}/pin_mux.c"
     "${AppPath}/src/i2c_test.c"
     "${AppPath}/freertos/main.c"
     "${BoardPath}/board.c"

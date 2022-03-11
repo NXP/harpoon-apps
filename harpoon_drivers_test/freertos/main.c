@@ -10,10 +10,12 @@
 
 /* harpoon-apps includes. */
 #include "board.h"
+#include "clock_config.h"
 #include "i2c_test.h"
 #ifdef I2C_USE_IRQ
 #include "irq.h"
 #endif
+#include "pin_mux.h"
 
 /*******************************************************************************
  * Definitions
@@ -38,6 +40,9 @@ int main(void)
     /* Init board cpu and hardware. */
     BOARD_InitMemory();
     BOARD_InitDebugConsole();
+    BOARD_InitPins();
+
+    board_clock_setup();
 
     xResult = xTaskCreate(test_task, "driver_test_task", configMINIMAL_STACK_SIZE + 100, NULL, test_task_PRIORITY, NULL);
     assert(xResult == pdPASS);
