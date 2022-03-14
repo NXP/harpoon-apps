@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP.
+ * Copyright 2021-2022 NXP
  *
  * Abstract:
  * Linker file for the GNU C Compiler
@@ -24,11 +24,11 @@ MEMORY
   dtcm                  (RW)  : ORIGIN = 0x00800000, LENGTH = 0x00020000 /* 128 kB */
   ocram_text            (RX)  : ORIGIN = 0x00900000, LENGTH = 0x00030000 /* 176 kB */
   ocram_data            (RW)  : ORIGIN = 0x00930000, LENGTH = 0x00030000 /* 176 kB */
-  m_interrupts          (RX)  : ORIGIN = 0xC0000000, LENGTH = 0x00002000 /*  8 kB */
-  m_text                (RX)  : ORIGIN = 0xC0002000, LENGTH = 0x005FE000 /* ~6 MB */
-  m_data                (RW)  : ORIGIN = 0xC0600000, LENGTH = 0x005FE000 /* ~6 MB */
-  m_stacks              (RW)  : ORIGIN = 0xC0BFE000, LENGTH = 0x00002000 /*  8 kB */
-  m_data_nc             (RW)  : ORIGIN = 0xC0C00000, LENGTH = 0x00400000 /*  4 MB */
+  m_interrupts          (RX)  : ORIGIN = 0x93C00000, LENGTH = 0x00002000 /*  8 kB */
+  m_text                (RX)  : ORIGIN = 0x93C02000, LENGTH = 0x005FE000 /* ~6 MB */
+  m_data                (RW)  : ORIGIN = 0x94200000, LENGTH = 0x005FE000 /* ~6 MB */
+  m_stacks              (RW)  : ORIGIN = 0x947FE000, LENGTH = 0x00002000 /*  8 kB */
+  m_data_nc             (RW)  : ORIGIN = 0x94800000, LENGTH = 0x00400000 /*  4 MB */
 }
 
 /* Define output sections */
