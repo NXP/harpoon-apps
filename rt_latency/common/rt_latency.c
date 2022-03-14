@@ -217,12 +217,18 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx)
 		err = os_counter_stop(ctx->irq_load_dev);
 		os_assert(!err, "Failed to stop counter!");
 
+		err = os_counter_cancel_channel_alarm(ctx->irq_load_dev, 0);
+		os_assert(!err, "Failed to cancel counter alarm!");
+
 		err = os_sem_destroy(&ctx->irq_load_sem);
 		os_assert(!err, "Failed to destroy semaphore!");
 	}
 
 	err = os_counter_stop(dev);
 	os_assert(!err, "Failed to stop counter!");
+
+	err = os_counter_cancel_channel_alarm(dev, 0);
+	os_assert(!err, "Failed to cancel counter alarm!");
 
 	err = os_sem_destroy(&ctx->semaphore);
 	os_assert(!err, "Failed to destroy semaphore!");
