@@ -32,5 +32,6 @@ uint64_t os_counter_ticks_to_ns(const void *dev, uint32_t ticks);
 uint32_t os_counter_get_top_value(const void *dev);
 int os_counter_set_channel_alarm(const void *dev, uint8_t chan_id,
           const struct os_counter_alarm_cfg *alarm_cfg);
+int os_counter_cancel_channel_alarm(const void *dev, uint8_t chan_id);
 
 #endif /* #ifndef _COMMON_COUNTER_H_ */

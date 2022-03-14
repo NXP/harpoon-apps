@@ -56,6 +56,11 @@ static inline int os_counter_set_channel_alarm(const void *dev, uint8_t chan_id,
     return counter_set_channel_alarm((const struct device *)dev, chan_id, &a);
 }
 
+static inline int os_counter_cancel_channel_alarm(const void *dev, uint8_t chan_id)
+{
+	return counter_cancel_channel_alarm((const struct device *)dev, chan_id);
+}
+
 static inline int os_counter_start(const void *dev)
 {
     return counter_start((const struct device *)dev);

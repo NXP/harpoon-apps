@@ -273,3 +273,7 @@ exit:
 	return ret;
 }
 
+int os_counter_cancel_channel_alarm(const void *dev, uint8_t chan_id)
+{
+	return 0;
+}
