@@ -10,6 +10,7 @@
 
 /* harpoon-apps includes. */
 #include "board.h"
+#include "board_test.h"
 #include "clock_config.h"
 #include "i2c_test.h"
 #ifdef I2C_USE_IRQ
@@ -78,9 +79,15 @@ static void test_i2c(void)
 #endif
 }
 
+static void common_test_list(void)
+{
+    test_i2c();
+}
+
 static void test_task(void *pvParameters)
 {
-	test_i2c();
+    common_test_list();
+    board_test_list();
 
     for (;;)
         ;
