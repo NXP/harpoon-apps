@@ -7,11 +7,11 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
 
 #include "board.h"
 #include "log.h"
 #include "os/assert.h"
+#include "os/mqueue.h"
 #include "os/semaphore.h"
 
 #include "ivshmem.h"
@@ -40,8 +40,7 @@ struct mode_handler {
 
 struct data_ctx {
 	os_sem_t semaphore;
-
-	QueueHandle_t event_queue_h;
+	os_mqd_t mqueue;
 
 	const struct mode_handler *handler;
 	void *handle;
@@ -104,15 +103,13 @@ static void hardware_setup(void)
 
 static void data_send_event(void *userData, uint8_t status)
 {
-	QueueHandle_t event_queue_h = userData;
-	BaseType_t wake = pdFALSE;
+	os_mqd_t *mqueue = userData;
 	struct event e;
 
 	e.type = EVENT_TYPE_TX_RX;
 	e.data = status;
 
-	xQueueSendToBackFromISR(event_queue_h, &e, &wake);
-	portYIELD_FROM_ISR(wake);
+	os_mq_send(mqueue, &e, OS_MQUEUE_FLAGS_ISR_CONTEXT, 0);
 }
 
 void data_task(void *pvParameters)
@@ -122,7 +119,7 @@ void data_task(void *pvParameters)
 
 	do {
 		/* check event */
-		if (xQueueReceive(ctx->event_queue_h, &e, portMAX_DELAY) != pdTRUE)
+		if (os_mq_receive(&ctx->mqueue, &e, 0, OS_QUEUE_EVENT_TIMEOUT_MAX) < 0)
 			continue;
 
 		os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
@@ -157,7 +154,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 		goto exit;
 
 	cfg.event_send = data_send_event;
-	cfg.event_data = ctx->event_queue_h;
+	cfg.event_data = &ctx->mqueue;
 	cfg.rate = run->frequency;
 	cfg.period = run->period;
 
@@ -171,8 +168,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 
 	/* Send an event to trigger data thread processing */
 	e.type = EVENT_TYPE_START;
-
-	xQueueSendToBack(ctx->event_queue_h, &e, 0);
+	os_mq_send(&ctx->mqueue, &e, 0, 0);
 
 	rc = HRPN_RESP_STATUS_SUCCESS;
 
@@ -277,8 +273,8 @@ void main_task(void *pvParameters)
 	err = os_sem_init(&ctx.semaphore, 1);
 	os_assert(!err, "semaphore initialization failed!");
 
-	ctx.event_queue_h = xQueueCreate(10, sizeof(struct event));
-	os_assert(ctx.event_queue_h, "event queue creation failed");
+	err = os_mq_open(&ctx.mqueue, "audio_mqueue", 10, sizeof(struct event));
+	os_assert(!err, "message queue initialization failed!");
 
 	ctx.handler = NULL;
 
