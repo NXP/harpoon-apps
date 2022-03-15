@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -275,5 +275,21 @@ exit:
 
 int os_counter_cancel_channel_alarm(const void *dev, uint8_t chan_id)
 {
-	return 0;
+	int ret = 0;
+
+	if (chan_id != kGPT_OutputCompare_Channel1) {
+		/* TODO: support multiple channels */
+		log_err("Channel ID (%d) not supported!\n", chan_id);
+
+		ret = -1;
+		goto exit;
+	}
+
+	GPT_DisableInterrupts((GPT_Type *)dev, kGPT_OutputCompare1InterruptEnable);
+	GPT_ClearStatusFlags((GPT_Type *)dev, kGPT_OutputCompare1Flag);
+
+	reset_alarm(dev, chan_id);
+
+exit:
+	return ret;
 }
