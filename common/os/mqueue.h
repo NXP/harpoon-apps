@@ -17,7 +17,7 @@
 #define OS_MQUEUE_FLAGS_ISR_CONTEXT    (1 << 0)
 
 #if defined(OS_ZEPHYR)
-  #include "zephyr/os/queue.h"
+  #include "zephyr/os/mqueue.h"
 #elif defined(FSL_RTOS_FREE_RTOS)
   #include "freertos/os/mqueue.h"
 #endif
