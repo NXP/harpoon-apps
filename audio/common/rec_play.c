@@ -153,6 +153,7 @@ void *rec_play_init(void *parameters)
 	uint32_t rate = DEMO_AUDIO_SAMPLE_RATE;
 	size_t period_bytes;
 	struct rec_play_ctx *ctx;
+	enum codec_id cid;
 
 	if (assign_nonzero_valid_val(period, cfg->period, supported_period) != 0) {
 		log_err("Period %d frames is not supported\n", cfg->period);
@@ -185,8 +186,9 @@ void *rec_play_init(void *parameters)
 
 	sai_setup(ctx);
 
-	codec_setup();
-	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, ctx->sample_rate,
+	cid = DEMO_CODEC_ID;
+	codec_setup(cid);
+	codec_set_format(cid, DEMO_AUDIO_MASTER_CLOCK, ctx->sample_rate,
 			ctx->bit_width);
 
 	log_info("Record and playback started (Sample Rate: %d Hz, Bit Width: %d bits, Period: %d frames)\n",
@@ -201,10 +203,12 @@ err:
 void rec_play_exit(void *parameters)
 {
 	struct rec_play_ctx *ctx = (struct rec_play_ctx*)parameters;
+	enum codec_id cid;
 
 	sai_drv_exit(&ctx->dev);
 
-	codec_close();
+	cid = DEMO_CODEC_ID;
+	codec_close(cid);
 
 	os_free(ctx);
 

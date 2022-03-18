@@ -1,14 +1,13 @@
 #!/bin/sh
 
-# Select codec to be used:
-# CODEC_DEVICE_TYPE="-DCODEC_DEVICE=wm8960" will enable EVK on board codec
-# CODEC_DEVICE_TYPE="-DCODEC_DEVICE=hifiberry" will enable HiFiBerry Codec
-CODEC_DEVICE_TYPE="-DCODEC_DEVICE=hifiberry"
+# Select default codec
+# Supported values: hifiberry, wm8524
+CODEC_PARAMS="-DUSE_CODEC=hifiberry"
 
 if [ -d "CMakeFiles" ];then rm -rf CMakeFiles; fi
 if [ -f "Makefile" ];then rm -f Makefile; fi
 if [ -f "cmake_install.cmake" ];then rm -f cmake_install.cmake; fi
 if [ -f "CMakeCache.txt" ];then rm -f CMakeCache.txt; fi
 
-cmake -DCMAKE_TOOLCHAIN_FILE="../../../../../../mcux-sdk/tools/cmake_toolchain_files/armgcc_aarch64.cmake" -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=ddr_release ${CODEC_DEVICE_TYPE} .
+cmake -DCMAKE_TOOLCHAIN_FILE="../../../../../../mcux-sdk/tools/cmake_toolchain_files/armgcc_aarch64.cmake" -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=ddr_release ${CODEC_PARAMS} .
 make -j $(nproc)

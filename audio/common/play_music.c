@@ -75,6 +75,7 @@ void *play_music_init(void *parameters)
 {
 	struct audio_config *cfg = parameters;
 	struct music_ctx *ctx;
+	enum codec_id cid;
 
 	ctx = os_malloc(sizeof(struct music_ctx));
 	os_assert(ctx, "Playing Music failed with memory allocation error");
@@ -84,8 +85,9 @@ void *play_music_init(void *parameters)
 
 	sai_setup(ctx);
 
-	codec_setup();
-	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
+	cid = DEMO_CODEC_ID;
+	codec_setup(cid);
+	codec_set_format(cid, DEMO_AUDIO_MASTER_CLOCK, PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
 
 	log_info("Playing Music (Sample Rate: %d Hz, Bit Width: %d bits)\n", PLAY_AUDIO_SRATE, PLAY_AUDIO_BITWIDTH);
 
@@ -97,10 +99,12 @@ void *play_music_init(void *parameters)
 void play_music_exit(void *handle)
 {
 	struct music_ctx *ctx = handle;
+	enum codec_id cid;
 
 	sai_drv_exit(&ctx->dev);
 
-	codec_close();
+	cid = DEMO_CODEC_ID;
+	codec_close(cid);
 
 	os_free(ctx);
 

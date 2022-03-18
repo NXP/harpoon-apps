@@ -199,6 +199,7 @@ void *rec_play2_init(void *parameters)
 {
 	struct audio_config *cfg = parameters;
 	struct rec_play2_ctx *ctx;
+	enum codec_id cid;
 
 	ctx = os_malloc(sizeof(struct rec_play2_ctx));
 	os_assert(ctx, "Record and playback failed with memory allocation error");
@@ -213,8 +214,9 @@ void *rec_play2_init(void *parameters)
 	ctx->rx_index = 0U;
 	ctx->recording = false;
 
-	codec_setup();
-	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
+	cid = DEMO_CODEC_ID;
+	codec_setup(cid);
+	codec_set_format(cid, DEMO_AUDIO_MASTER_CLOCK, DEMO_AUDIO_SAMPLE_RATE, DEMO_AUDIO_BIT_WIDTH);
 
 	sai_record_playback(ctx);
 
@@ -224,10 +226,12 @@ void *rec_play2_init(void *parameters)
 void rec_play2_exit(void *handle)
 {
 	struct rec_play2_ctx *ctx = handle;
+	enum codec_id cid;
 
 	sai_drv_exit(&ctx->dev);
 
-	codec_close();
+	cid = DEMO_CODEC_ID;
+	codec_close(cid);
 
 	vTaskDelete(ctx->taskHandle);
 

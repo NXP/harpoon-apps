@@ -117,6 +117,7 @@ void *play_dtmf_init(void *parameters)
 	struct dtmf_ctx *ctx;
 	size_t buffer_bytes;
 	uint32_t rate = DTMF_AUDIO_SRATE;
+	enum codec_id cid;
 
 	if (assign_nonzero_valid_val(rate, cfg->rate, supported_rate) != 0) {
 		log_err("Frequency %d Hz is not supported\n", cfg->rate);
@@ -146,8 +147,9 @@ void *play_dtmf_init(void *parameters)
 
 	sai_setup(ctx, cfg);
 
-	codec_setup();
-	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, ctx->sample_rate, DTMF_AUDIO_BITWIDTH);
+	cid = DEMO_CODEC_ID;
+	codec_setup(cid);
+	codec_set_format(cid, DEMO_AUDIO_MASTER_CLOCK, ctx->sample_rate, DTMF_AUDIO_BITWIDTH);
 
 	log_info("Playing DTMF sequence (Sample Rate: %d Hz, Bit Width: %d bits)\n", ctx->sample_rate, DTMF_AUDIO_BITWIDTH);
 	log_info("\tleft channel:  %s\n", ctx->dtmf_l_seq);
@@ -162,10 +164,12 @@ err:
 void play_dtmf_exit(void *handle)
 {
 	struct dtmf_ctx *ctx = handle;
+	enum codec_id cid;
 
 	sai_drv_exit(&ctx->dev);
 
-	codec_close();
+	cid = DEMO_CODEC_ID;
+	codec_close(cid);
 
 	os_free(ctx);
 

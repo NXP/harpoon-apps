@@ -106,6 +106,7 @@ void *play_pipeline_init(void *parameters)
 	struct pipeline_ctx *ctx;
 	size_t period = DEFAULT_PERIOD;
 	uint32_t rate = DEFAULT_SAMPLE_RATE;
+	enum codec_id cid;
 
 	if (assign_nonzero_valid_val(period, cfg->period, supported_period) != 0) {
 		log_err("Period %d frames is not supported\n", cfg->period);
@@ -140,8 +141,9 @@ void *play_pipeline_init(void *parameters)
 
 	sai_setup(ctx);
 
-	codec_setup();
-	codec_set_format(DEMO_AUDIO_MASTER_CLOCK, rate,
+	cid = DEMO_CODEC_ID;
+	codec_setup(cid);
+	codec_set_format(cid, DEMO_AUDIO_MASTER_CLOCK, rate,
 			ctx->bit_width);
 
 	log_info("Starting pipeline (Sample Rate: %d Hz, Period: %d frames)\n",
@@ -159,12 +161,14 @@ err:
 void play_pipeline_exit(void *handle)
 {
 	struct pipeline_ctx *ctx = handle;
+	enum codec_id cid;
 
 	audio_pipeline_exit(ctx->pipeline);
 
 	sai_drv_exit(&ctx->dev);
 
-	codec_close();
+	cid = DEMO_CODEC_ID;
+	codec_close(cid);
 
 	os_free(ctx);
 

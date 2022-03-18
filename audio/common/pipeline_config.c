@@ -76,10 +76,10 @@ struct audio_pipeline_config pipeline_config = {
 						},
 					},
 					[1] = {
-#ifdef CODEC_HIFIBERRY
-						.id = 5,
-#else
+#if (USE_CODEC_WM8524 == 1) || (USE_CODEC_WM8960 == 1)
 						.id = 3,
+#else
+						.id = 5,
 #endif
 						.line_n = 1,
 						.line = {
@@ -132,10 +132,10 @@ struct audio_pipeline_config pipeline_config = {
 						},
 					},
 					[1] = {
-#ifdef CODEC_HIFIBERRY
-						.id = 5,
-#else
+#if (USE_CODEC_WM8524 == 1) || (USE_CODEC_WM8960 == 1)
 						.id = 3,
+#else
+						.id = 5,
 #endif
 						.line_n = 1,
 						.line = {

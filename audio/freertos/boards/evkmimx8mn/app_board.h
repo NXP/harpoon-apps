@@ -8,25 +8,19 @@
 #ifndef _APP_BOARD_H_
 #define _APP_BOARD_H_
 
-#ifdef CODEC_WM8524
+/* Definitions for WM8524 */
+#define WM8524_SAI			(I2S3)
 
-#define DEMO_SAI			(I2S3)
+#define WM8524_SAI_MASTER_SLAVE		kSAI_Master
 
-/* IMX8MN is master, codec is slave */
-#define DEMO_SAI_MASTER_SLAVE		kSAI_Master
-
-#define DEMO_SAI_CHANNEL		(0)
-#define DEMO_SAI_CLK_FREQ				\
+#define WM8524_SAI_CLK_FREQ				\
     (CLOCK_GetPllFreq(kCLOCK_AudioPll1Ctrl)		\
      / (CLOCK_GetRootPreDivider(kCLOCK_RootSai3))	\
      / (CLOCK_GetRootPostDivider(kCLOCK_RootSai3)))
 
-#else
 
-#define DEMO_SAI			(I2S5)
-
-/* IMX8MN is slave, codec is master */
-#define DEMO_SAI_MASTER_SLAVE		kSAI_Slave
+/* Definitions for Hifiberry */
+#define HIFIBERRY_SAI			(I2S5)
 
 #define BOARD_CODEC_I2C			(I2C3)
 #define BOARD_CODEC_I2C_INSTANCE	(3U)
@@ -40,13 +34,29 @@
 #define PCM186X_I2C_ADDR		(0x4A)
 #define PCM186X_GPIO_LED		(2U)
 
-#define DEMO_SAI_CHANNEL		(0)
-#define DEMO_SAI_CLK_FREQ				\
+#define HIFIBERRY_SAI_MASTER_SLAVE	kSAI_Slave
+
+#define HIFIBERRY_SAI_CLK_FREQ				\
     (CLOCK_GetPllFreq(kCLOCK_AudioPll1Ctrl)		\
      / (CLOCK_GetRootPreDivider(kCLOCK_RootSai5))	\
      / (CLOCK_GetRootPostDivider(kCLOCK_RootSai5)))
 
-#endif /* CODEC */
+
+#if (USE_CODEC_HIFIBERRY == 1)
+#define DEMO_SAI			(HIFIBERRY_SAI)
+#define DEMO_CODEC_ID			(CODEC_ID_HIFIBERRY)
+#define DEMO_SAI_MASTER_SLAVE		(HIFIBERRY_SAI_MASTER_SLAVE)
+#define DEMO_AUDIO_MASTER_CLOCK		(HIFIBERRY_SAI_CLK_FREQ)
+#elif (USE_CODEC_WM8524 == 1)
+#define DEMO_SAI			(WM8524_SAI)
+#define DEMO_CODEC_ID			(CODEC_ID_WM8524)
+#define DEMO_SAI_MASTER_SLAVE		(WM8524_SAI_MASTER_SLAVE)
+#define DEMO_AUDIO_MASTER_CLOCK		(WM8524_SAI_CLK_FREQ)
+#else
+#error "No default codec defined (flag use USE_CODEC_xxx)"
+#endif
+
+#define DEMO_SAI_CHANNEL		(0)
 
 /*set Bclk source to Mclk clock*/
 #define DEMO_SAI_CLOCK_SOURCE		(1U)
@@ -58,6 +68,5 @@
 #define DEMO_AUDIO_DATA_CHANNEL		(2U)
 #define DEMO_AUDIO_BIT_WIDTH		kSAI_WordWidth32bits
 #define DEMO_AUDIO_SAMPLE_RATE		(kSAI_SampleRate44100Hz)
-#define DEMO_AUDIO_MASTER_CLOCK		DEMO_SAI_CLK_FREQ
 
 #endif /* _APP_BOARD_H_ */
