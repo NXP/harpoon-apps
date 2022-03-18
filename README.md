@@ -56,6 +56,7 @@ It provides a `west` manifest to fetch FreeRTOS as well as the MCUXpresso SDK (i
 │   │   │   ├── FreeRTOSConfig.h
 │   │   │   ├── FreeRTOS_helper.c
 │   │   │   ├── FreeRTOS_tick_config.c
+│   │   │   ├── idle.{c,h}                  <-- implementation of idle task
 │   │   │   ├── irq.{c,h}                   <-- contains interrupt handler
 │   │   │   ├── mmu.h                       <-- glue with the SDK MMU driver
 │   │   │   ├── os                          <-- includes os-specific header files for the os APIs
