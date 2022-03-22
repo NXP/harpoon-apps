@@ -18,13 +18,14 @@ SET(CMAKE_STATIC_LIBRARY_SUFFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_PREFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_SUFFIX)
 
+SET(BoardName "evkmimx8mn")
+
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
 SET(SdkDirPath "${ProjDirPath}/../../../../../../mcux-sdk")
 SET(RtosPath "${ProjDirPath}/../../../../../../FreeRTOS-Kernel")
-SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/evkmimx8mn")
+SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/${BoardName}")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(AppPath "${ProjDirPath}/../../../..")
-SET(AppBoardPath "${AppPath}/freertos/boards/evkmimx8mn")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX8MN6")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -48,9 +49,9 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/sai_drv.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
-    "${AppBoardPath}/pin_mux.c"
-    "${AppBoardPath}/sai_clock_config.c"
-    "${AppBoardPath}/sai_codec_config.c"
+    "${AppPath}/common/boards/${BoardName}/pin_mux.c"
+    "${AppPath}/common/boards/${BoardName}/sai_clock_config.c"
+    "${AppPath}/common/boards/${BoardName}/sai_codec_config.c"
     "${AppPath}/common/audio_buffer.c"
     "${AppPath}/common/audio_element.c"
     "${AppPath}/common/audio_element_dtmf.c"
@@ -71,12 +72,12 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}/include
-    ${AppPath}/freertos
+    ${AppPath}/freertos/boards/${BoardName}
     ${AppPath}/common
     ${CommonPath}
     ${CommonPath}/freertos
     ${BoardPath}
-    ${AppBoardPath}
+    ${AppPath}/common/boards/include
     ${SdkDirPath}/devices/MIMX8MN6
 )
 
