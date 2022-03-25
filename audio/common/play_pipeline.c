@@ -142,9 +142,23 @@ void *play_pipeline_init(void *parameters)
 
 	sai_setup(ctx);
 
-	cid = DEMO_CODEC_ID;
+#ifdef WM8960_SAI_CLK_FREQ
+	cid = CODEC_ID_WM8960;
 	codec_setup(cid);
-	codec_set_format(cid, DEMO_AUDIO_MASTER_CLOCK, rate,
+	codec_set_format(cid, WM8960_SAI_CLK_FREQ, rate,
+			ctx->bit_width);
+#endif
+
+#ifdef WM8524_SAI_CLK_FREQ
+	cid = CODEC_ID_WM8524;
+	codec_setup(cid);
+	codec_set_format(cid, WM8524_SAI_CLK_FREQ, rate,
+			ctx->bit_width);
+#endif
+
+	cid = CODEC_ID_HIFIBERRY;
+	codec_setup(cid);
+	codec_set_format(cid, HIFIBERRY_SAI_CLK_FREQ, rate,
 			ctx->bit_width);
 
 	log_info("Starting pipeline (Sample Rate: %d Hz, Period: %d frames)\n",
@@ -168,7 +182,17 @@ void play_pipeline_exit(void *handle)
 
 	sai_drv_exit(&ctx->dev);
 
-	cid = DEMO_CODEC_ID;
+#ifdef WM8960_SAI_CLK_FREQ
+	cid = CODEC_ID_WM8960;
+	codec_close(cid);
+#endif
+
+#ifdef WM8524_SAI_CLK_FREQ
+	cid = CODEC_ID_WM8524;
+	codec_close(cid);
+#endif
+
+	cid = CODEC_ID_HIFIBERRY;
 	codec_close(cid);
 
 	os_free(ctx);
