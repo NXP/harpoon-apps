@@ -1,6 +1,5 @@
 /*
  * Copyright 2021-2022 NXP
- * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -15,6 +14,7 @@
 
 #include "os/assert.h"
 #include "board.h"
+#include "log.h"
 
 static codec_handle_t wm8960_codec_handle;
 static codec_handle_t pcm512x_codec_handle;
@@ -64,44 +64,56 @@ static codec_config_t pcm512x_codec_config = {
 };
 
 static pcm186x_config_t pcm186xConfig = {
-    .i2cConfig = {
-        .codecI2CInstance = BOARD_CODEC_I2C_INSTANCE,
-        .codecI2CSourceClock = BOARD_CODEC_I2C_CLOCK_FREQ
-    },
-    .slaveAddress = PCM186X_I2C_ADDR,
-    .format = {
-        .mclk_HZ = 24576000U,
-        .bitWidth   = kPCM186x_AudioBitWidth32bit
-    },
-    .gpio_led   = PCM186X_GPIO_LED,
+	.i2cConfig = {
+		.codecI2CInstance = BOARD_CODEC_I2C_INSTANCE,
+		.codecI2CSourceClock = BOARD_CODEC_I2C_CLOCK_FREQ
+	},
+	.slaveAddress = PCM186X_I2C_ADDR,
+	.format = {
+		.mclk_HZ = 24576000U,
+		.bitWidth   = kPCM186x_AudioBitWidth32bit
+	},
+	.gpio_led   = PCM186X_GPIO_LED,
 };
 
 static codec_config_t pcm186x_codec_config = {
-    .codecDevType = kCODEC_PCM186X,
-    .codecDevConfig = &pcm186xConfig,
+	.codecDevType = kCODEC_PCM186X,
+	.codecDevConfig = &pcm186xConfig,
 };
 
-void codec_set_format(enum codec_id cid, uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
+int32_t codec_set_format(enum codec_id cid, uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
 {
 	int32_t err;
 
 	if (cid == CODEC_ID_HIFIBERRY) {
 		err = CODEC_SetFormat(&pcm512x_codec_handle, mclk, sample_rate, bitwidth);
-		os_assert(err == kStatus_Success, "PCM5122 set format failed (err %d)", err);
+		if (err != kStatus_Success) {
+			log_err("PCM5122 set format failed (err %d)\n", err);
+			goto end;
+		}
 
 		err = CODEC_SetFormat(&pcm186x_codec_handle, mclk, sample_rate, bitwidth);
-		os_assert(err == kStatus_Success, "PCM1863 set format failed (err %d)", err);
+		if (err != kStatus_Success) {
+			log_err("PCM1863 set format failed (err %d)\n", err);
+			goto end;
+		}
 	}
 	else if (cid == CODEC_ID_WM8960) {
 		err = CODEC_SetFormat(&wm8960_codec_handle, mclk, sample_rate, bitwidth);
-		os_assert(err == kStatus_Success, "WM8960 set format failed (err %d)", err);
+		if (err != kStatus_Success) {
+			log_err("WM8960 set format failed (err %d)\n", err);
+			goto end;
+		}
 	}
 	else {
 		os_assert(0, "Unexpected codec id (%d)", cid);
 	}
+
+end:
+	return err;
 }
 
-void codec_setup(enum codec_id cid)
+int32_t codec_setup(enum codec_id cid)
 {
 	int32_t err;
 
@@ -113,10 +125,16 @@ void codec_setup(enum codec_id cid)
 
 		/* Use default setting to init ADC and DAC */
 		err = CODEC_Init(&pcm512x_codec_handle, &pcm512x_codec_config);
-		os_assert(err == kStatus_Success, "PCM5122 initialisation failed (err %d)", err);
+		if (err != kStatus_Success) {
+			log_err("PCM5122 initialisation failed (err %d)\n", err);
+			goto end;
+		}
 
 		err = CODEC_Init(&pcm186x_codec_handle, &pcm186x_codec_config);
-		os_assert(err == kStatus_Success, "PCM1863 initialisation failed (err %d)", err);
+		if (err != kStatus_Success) {
+			log_err("PCM1863 initialisation failed (err %d)\n", err);
+			goto end;
+		}
 	}
 	else if (cid == CODEC_ID_WM8960) {
 		/* Setup I2C clock */
@@ -126,30 +144,47 @@ void codec_setup(enum codec_id cid)
 
 		/* Use default setting to init codec */
 		err = CODEC_Init(&wm8960_codec_handle, &wm8960_codec_config);
-		os_assert(err == kStatus_Success, "Codec initialisation failed (err %d)", err);
+		if ((err != kStatus_Success) && (err != kStatus_CODEC_NotSupport)) {
+			log_err("WM8960 initialisation failed (err %d)\n", err);
+			goto end;
+		}
 	}
 	else {
 		os_assert(0, "Unexpected codec id (%d)", cid);
 	}
+
+end:
+	return err;
 }
 
-void codec_close(enum codec_id cid)
+int32_t codec_close(enum codec_id cid)
 {
 	int32_t err;
 
 	if (cid == CODEC_ID_HIFIBERRY) {
 		err = CODEC_Deinit(&pcm512x_codec_handle);
-		os_assert(err == kStatus_Success, "PCM5122 deinitialisation failed (err %d)", err);
+		if (err != kStatus_Success) {
+			log_err("PCM5122 deinitialisation failed (err %d)\n", err);
+			goto end;
+		}
 
 		err = CODEC_Deinit(&pcm186x_codec_handle);
-		os_assert(err == kStatus_Success, "PCM1863 deinitialisation failed (err %d)", err);
+		if (err != kStatus_Success) {
+			log_err("PCM1863 deinitialisation failed (err %d)\n", err);
+			goto end;
+		}
 	}
 	else if (cid == CODEC_ID_WM8960) {
 		err = CODEC_Deinit(&wm8960_codec_handle);
-		os_assert(err == kStatus_Success || err == kStatus_CODEC_NotSupport,
-			"WM8960 deinitialisation failed (err %d)", err);
+		if (err != kStatus_Success) {
+			log_err("WM8960 deinitialisation failed (err %d)\n", err);
+			goto end;
+		}
 	}
 	else {
 		os_assert(0, "Unexpected codec id (%d)", cid);
 	}
+
+end:
+	return err;
 }
