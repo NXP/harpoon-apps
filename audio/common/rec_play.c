@@ -141,6 +141,7 @@ static void sai_setup(struct rec_play_ctx *ctx)
 	sai_config.working_mode = SAI_CONTINUE_MODE;
 	/* Set FIFO water mark to be period size of all channels*/
 	sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
+	sai_config.masterSlave = DEMO_SAI_MASTER_SLAVE;
 
 	sai_drv_setup(&ctx->dev, &sai_config);
 }

@@ -67,6 +67,7 @@ static void sai_setup(struct music_ctx *ctx)
 	sai_config.rx_sync_mode = DEMO_SAI_RX_SYNC_MODE;
 	sai_config.tx_callback = tx_callback;
 	sai_config.tx_user_data = ctx;
+	sai_config.masterSlave = DEMO_SAI_MASTER_SLAVE;
 
 	sai_drv_setup(&ctx->dev, &sai_config);
 }

@@ -204,7 +204,7 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 	SAI_GetClassicI2SConfig(&config, sai_config->bit_width, kSAI_Stereo,
 			1U << DEMO_SAI_CHANNEL);
 	config.syncMode    = sai_config->tx_sync_mode;
-	config.masterSlave = DEMO_SAI_MASTER_SLAVE;
+	config.masterSlave = sai_config->masterSlave;
 
 	if (sai_config->fifo_water_mark)
 		config.fifo.fifoWatermark = sai_config->fifo_water_mark;
