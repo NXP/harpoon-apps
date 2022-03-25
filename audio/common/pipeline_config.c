@@ -64,7 +64,7 @@ struct audio_pipeline_config pipeline_config = {
 		.element[4] = {
 			.type = AUDIO_ELEMENT_SAI_SOURCE,
 			.u.sai_source = {
-				.sai_n = 2,
+				.sai_n = 3,
 				.sai = {
 					[0] = {
 						.id = 0,
@@ -76,11 +76,16 @@ struct audio_pipeline_config pipeline_config = {
 						},
 					},
 					[1] = {
-#if (USE_CODEC_WM8524 == 1) || (USE_CODEC_WM8960 == 1)
-						.id = 3,
-#else
 						.id = 5,
-#endif
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 2,
+							},
+						},
+					},
+					[2] = {
+						.id = 3,
 						.line_n = 1,
 						.line = {
 							[0] = {
@@ -90,8 +95,8 @@ struct audio_pipeline_config pipeline_config = {
 					},
 				},
 			},
-			.outputs = 4,
-			.output = {4, },	/* 4 - 7 */
+			.outputs = 6,
+			.output = {4, },	/* 4 - 9 */
 		},
 	},
 
@@ -105,11 +110,11 @@ struct audio_pipeline_config pipeline_config = {
 
 			},
 
-			.inputs = 8,
-			.input = {0, }, 	/* 0 - 7 */
+			.inputs = 10,
+			.input = {0, }, 	/* 0 - 9 */
 
-			.outputs = 4,
-			.output = {8, },	/* 8 - 11 */
+			.outputs = 6,
+			.output = {10, },	/* 10 - 15 */
 		},
 	},
 
@@ -120,7 +125,7 @@ struct audio_pipeline_config pipeline_config = {
 		.element[0] = {
 			.type = AUDIO_ELEMENT_SAI_SINK,
 			.u.sai_sink = {
-				.sai_n = 2,
+				.sai_n = 3,
 				.sai = {
 					[0] = {
 						.id = 0,
@@ -132,11 +137,16 @@ struct audio_pipeline_config pipeline_config = {
 						},
 					},
 					[1] = {
-#if (USE_CODEC_WM8524 == 1) || (USE_CODEC_WM8960 == 1)
-						.id = 3,
-#else
 						.id = 5,
-#endif
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 2,
+							},
+						},
+					},
+					[2] = {
+						.id = 3,
 						.line_n = 1,
 						.line = {
 							[0] = {
@@ -147,12 +157,12 @@ struct audio_pipeline_config pipeline_config = {
 				},
 			},
 
-			.inputs = 4,
-			.input = {8, },		/* 8 - 11 */
+			.inputs = 6,
+			.input = {10, },	/* 10 - 15 */
 		},
 	},
 
-	.buffers = 12,
+	.buffers = 16,
 
-	.buffer_storage = 12,
+	.buffer_storage = 16,
 };
