@@ -251,14 +251,21 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 	/* Currently rx and tx use the same irq number */
 	sai_irq_n = s_saiTxIRQ[sai_id];
 
-	if (sai_config->working_mode == SAI_CONTINUE_MODE)
-		ret = irq_register(sai_irq_n, sai_irq_handler_continuous, dev);
-	else
-		ret = irq_register(sai_irq_n, sai_irq_handler, dev);
-
-	os_assert(!ret, "Failed to register SAI IRQ! (%d)", ret);
-
-	EnableIRQ(sai_irq_n);
+	switch (sai_config->working_mode) {
+		case SAI_RX_IRQ_MODE:
+			ret = irq_register(sai_irq_n, sai_irq_handler_continuous, dev);
+			os_assert(!ret, "Failed to register SAI IRQ! (%d)", ret);
+			EnableIRQ(sai_irq_n);
+			break;
+		case SAI_CALLBACK_MODE:
+			ret = irq_register(sai_irq_n, sai_irq_handler, dev);
+			os_assert(!ret, "Failed to register SAI IRQ! (%d)", ret);
+			EnableIRQ(sai_irq_n);
+			break;
+		case SAI_POLLING_MODE:
+		default:
+			break;
+	}
 
 	return 0;
 }

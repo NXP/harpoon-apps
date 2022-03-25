@@ -27,7 +27,7 @@ struct pipeline_ctx {
 	void (*event_send)(void *, uint8_t);
 	void *event_data;
 
-	struct sai_device dev;
+	struct sai_device dev[2];
 	struct audio_pipeline *pipeline;
 	sai_word_width_t bit_width;
 	sai_sample_rate_t sample_rate;
@@ -53,7 +53,7 @@ static void rx_callback(uint8_t status, void *user_data)
 {
 	struct pipeline_ctx *ctx = (struct pipeline_ctx*)user_data;
 
-	sai_disable_irq(&ctx->dev, true, false);
+	sai_disable_irq(&ctx->dev[0], true, false);
 
 	ctx->stats.callback++;
 
@@ -75,7 +75,7 @@ int play_pipeline_run(void *handle, struct event *e)
 		os_assert(!err, "pipeline couldn't restart");
 	}
 
-	sai_enable_irq(&ctx->dev, true, false);
+	sai_enable_irq(&ctx->dev[0], true, false);
 
 	return err;
 }
@@ -84,21 +84,39 @@ static void sai_setup(struct pipeline_ctx *ctx)
 {
 	struct sai_cfg sai_config;
 
-	sai_config.sai_base = (void *)DEMO_SAI;
+	/* Configure SAI5 */
+	sai_config.sai_base = (void *)I2S5;
 	sai_config.bit_width = ctx->bit_width;
 	sai_config.sample_rate = ctx->sample_rate;
 	sai_config.chan_numbers = ctx->chan_numbers;
-	sai_config.source_clock_hz = DEMO_AUDIO_MASTER_CLOCK;
-	sai_config.tx_sync_mode = DEMO_SAI_TX_SYNC_MODE;
-	sai_config.rx_sync_mode = DEMO_SAI_RX_SYNC_MODE;
-	sai_config.rx_callback = rx_callback;
+	sai_config.source_clock_hz = SAI5_CLK_FREQ;
+	sai_config.tx_sync_mode = SAI5_TX_SYNC_MODE;
+	sai_config.rx_sync_mode = SAI5_RX_SYNC_MODE;
+	sai_config.rx_callback = rx_callback; /* irq handler should only be defined for ctx->dev[0] */
 	sai_config.rx_user_data = ctx;
-	sai_config.working_mode = SAI_CONTINUE_MODE;
-	sai_config.masterSlave = DEMO_SAI_MASTER_SLAVE;
+	sai_config.working_mode = SAI_RX_IRQ_MODE;
+	sai_config.masterSlave = SAI5_MASTER_SLAVE;
 	/* Set FIFO water mark to be period size of all channels*/
 	sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
 
-	sai_drv_setup(&ctx->dev, &sai_config);
+	sai_drv_setup(&ctx->dev[0], &sai_config);
+
+	/* Configure SAI3 */
+	sai_config.sai_base = (void *)I2S3;
+	sai_config.bit_width = ctx->bit_width;
+	sai_config.sample_rate = ctx->sample_rate;
+	sai_config.chan_numbers = ctx->chan_numbers;
+	sai_config.source_clock_hz = SAI3_CLK_FREQ;
+	sai_config.tx_sync_mode = SAI3_TX_SYNC_MODE;
+	sai_config.rx_sync_mode = SAI3_RX_SYNC_MODE;
+	sai_config.rx_callback = NULL;
+	sai_config.rx_user_data = NULL;
+	sai_config.working_mode = SAI_POLLING_MODE;
+	sai_config.masterSlave = SAI3_MASTER_SLAVE;
+	/* Set FIFO water mark to be period size of all channels*/
+	sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
+
+	sai_drv_setup(&ctx->dev[1], &sai_config);
 }
 
 void *play_pipeline_init(void *parameters)
@@ -142,24 +160,13 @@ void *play_pipeline_init(void *parameters)
 
 	sai_setup(ctx);
 
-#ifdef WM8960_SAI_CLK_FREQ
-	cid = CODEC_ID_WM8960;
+	cid = SAI3_CODEC_ID;
 	codec_setup(cid);
-	codec_set_format(cid, WM8960_SAI_CLK_FREQ, rate,
-			ctx->bit_width);
-#endif
+	codec_set_format(cid, SAI3_CLK_FREQ, rate, ctx->bit_width);
 
-#ifdef WM8524_SAI_CLK_FREQ
-	cid = CODEC_ID_WM8524;
+	cid = SAI5_CODEC_ID;
 	codec_setup(cid);
-	codec_set_format(cid, WM8524_SAI_CLK_FREQ, rate,
-			ctx->bit_width);
-#endif
-
-	cid = CODEC_ID_HIFIBERRY;
-	codec_setup(cid);
-	codec_set_format(cid, HIFIBERRY_SAI_CLK_FREQ, rate,
-			ctx->bit_width);
+	codec_set_format(cid, SAI5_CLK_FREQ, rate, ctx->bit_width);
 
 	log_info("Starting pipeline (Sample Rate: %d Hz, Period: %d frames)\n",
 			rate, period);
@@ -180,19 +187,13 @@ void play_pipeline_exit(void *handle)
 
 	audio_pipeline_exit(ctx->pipeline);
 
-	sai_drv_exit(&ctx->dev);
+	sai_drv_exit(&ctx->dev[0]);
+	sai_drv_exit(&ctx->dev[1]);
 
-#ifdef WM8960_SAI_CLK_FREQ
-	cid = CODEC_ID_WM8960;
+	cid = SAI3_CODEC_ID;
 	codec_close(cid);
-#endif
 
-#ifdef WM8524_SAI_CLK_FREQ
-	cid = CODEC_ID_WM8524;
-	codec_close(cid);
-#endif
-
-	cid = CODEC_ID_HIFIBERRY;
+	cid = SAI5_CODEC_ID;
 	codec_close(cid);
 
 	os_free(ctx);

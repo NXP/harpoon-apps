@@ -28,8 +28,9 @@ struct sai_device {
 };
 
 enum sai_mode {
-	SAI_NORMAL_MODE,
-	SAI_CONTINUE_MODE
+	SAI_CALLBACK_MODE,
+	SAI_RX_IRQ_MODE,
+	SAI_POLLING_MODE
 };
 
 struct sai_cfg {

@@ -18,6 +18,9 @@
      / (CLOCK_GetRootPreDivider(kCLOCK_RootSai3))	\
      / (CLOCK_GetRootPostDivider(kCLOCK_RootSai3)))
 
+#define WM8524_SAI_TX_SYNC_MODE		kSAI_ModeAsync
+#define WM8524_SAI_RX_SYNC_MODE		kSAI_ModeSync
+
 
 /* Definitions for Hifiberry */
 #define HIFIBERRY_SAI			(I2S5)
@@ -41,28 +44,40 @@
      / (CLOCK_GetRootPreDivider(kCLOCK_RootSai5))	\
      / (CLOCK_GetRootPostDivider(kCLOCK_RootSai5)))
 
+#define HIFIBERRY_SAI_TX_SYNC_MODE	kSAI_ModeAsync
+#define HIFIBERRY_SAI_RX_SYNC_MODE	kSAI_ModeSync
 
-#if (USE_CODEC_HIFIBERRY == 1)
+
+/* SAI5 definitions */
+#define SAI5_SAI			(I2S5)
+#define SAI5_MASTER_SLAVE		(HIFIBERRY_SAI_MASTER_SLAVE)
+#define SAI5_CLK_FREQ			(HIFIBERRY_SAI_CLK_FREQ)
+#define SAI5_TX_SYNC_MODE		(HIFIBERRY_SAI_TX_SYNC_MODE)
+#define SAI5_RX_SYNC_MODE		(HIFIBERRY_SAI_RX_SYNC_MODE)
+#define SAI5_CODEC_ID                   (CODEC_ID_HIFIBERRY)
+
+/* SAI3 definitions */
+#define SAI3_SAI			(I2S3)
+#define SAI3_MASTER_SLAVE		(WM8524_SAI_MASTER_SLAVE)
+#define SAI3_CLK_FREQ			(WM8524_SAI_CLK_FREQ)
+#define SAI3_TX_SYNC_MODE		(WM8524_SAI_TX_SYNC_MODE)
+#define SAI3_RX_SYNC_MODE		(WM8524_SAI_RX_SYNC_MODE)
+#define SAI3_CODEC_ID                   (CODEC_ID_WM8524)
+
+
+/* Use Hifiberry codec by default for legacy functions */
 #define DEMO_SAI			(HIFIBERRY_SAI)
 #define DEMO_CODEC_ID			(CODEC_ID_HIFIBERRY)
 #define DEMO_SAI_MASTER_SLAVE		(HIFIBERRY_SAI_MASTER_SLAVE)
 #define DEMO_AUDIO_MASTER_CLOCK		(HIFIBERRY_SAI_CLK_FREQ)
-#elif (USE_CODEC_WM8524 == 1)
-#define DEMO_SAI			(WM8524_SAI)
-#define DEMO_CODEC_ID			(CODEC_ID_WM8524)
-#define DEMO_SAI_MASTER_SLAVE		(WM8524_SAI_MASTER_SLAVE)
-#define DEMO_AUDIO_MASTER_CLOCK		(WM8524_SAI_CLK_FREQ)
-#else
-#error "No default codec defined (flag use USE_CODEC_xxx)"
-#endif
+#define DEMO_SAI_TX_SYNC_MODE		(HIFIBERRY_SAI_TX_SYNC_MODE)
+#define DEMO_SAI_RX_SYNC_MODE		(HIFIBERRY_SAI_RX_SYNC_MODE)
 
 #define DEMO_SAI_CHANNEL		(0)
 
 /*set Bclk source to Mclk clock*/
 #define DEMO_SAI_CLOCK_SOURCE		(1U)
 
-#define DEMO_SAI_TX_SYNC_MODE		kSAI_ModeAsync
-#define DEMO_SAI_RX_SYNC_MODE		kSAI_ModeSync
 #define DEMO_SAI_MCLK_OUTPUT		true
 
 #define DEMO_AUDIO_DATA_CHANNEL		(2U)

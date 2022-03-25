@@ -138,7 +138,7 @@ static void sai_setup(struct rec_play_ctx *ctx)
 	sai_config.rx_sync_mode = DEMO_SAI_RX_SYNC_MODE;
 	sai_config.rx_callback = rx_tx_callback;
 	sai_config.rx_user_data = ctx;
-	sai_config.working_mode = SAI_CONTINUE_MODE;
+	sai_config.working_mode = SAI_RX_IRQ_MODE;
 	/* Set FIFO water mark to be period size of all channels*/
 	sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
 	sai_config.masterSlave = DEMO_SAI_MASTER_SLAVE;
