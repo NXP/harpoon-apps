@@ -35,8 +35,11 @@ static const uintptr_t sai_clock_root[] = {0, kCLOCK_RootSai2,
 static const uintptr_t sai_clock[] = {0, kCLOCK_Sai2,
 	kCLOCK_Sai3, 0, kCLOCK_Sai5, kCLOCK_Sai6, kCLOCK_Sai7};
 
-void board_clock_setup(uint8_t sai_id)
+void sai_clock_setup(void)
 {
+	int active_sai[] = {3, 5};
+	int i;
+
 	/* init AUDIO PLL1 run at 393216000HZ */
 	CLOCK_InitAudioPll1(&g_audioPll1Config);
 	/* init AUDIO PLL2 run at 361267200HZ */
@@ -44,9 +47,11 @@ void board_clock_setup(uint8_t sai_id)
 
 	CLOCK_EnableRoot(kCLOCK_RootAudioAhb);
 
-	/* Set SAI source to AUDIO PLL1 393216000HZ*/
-	CLOCK_SetRootMux(sai_clock_root[sai_id - 1], kCLOCK_SaiRootmuxAudioPll1);
-	/* Set root clock to 393216000HZ / 16 = 24.576MHz */
-	CLOCK_SetRootDivider(sai_clock_root[sai_id - 1], 1U, 16U);
-	CLOCK_EnableClock(sai_clock[sai_id - 1]);
+	for (i = 0; i < ARRAY_SIZE(active_sai); i++) {
+		/* Set SAI source to AUDIO PLL1 393216000HZ */
+		CLOCK_SetRootMux(sai_clock_root[active_sai[i] - 1], kCLOCK_SaiRootmuxAudioPll1);
+		/* Set root clock to 393216000HZ / 16 = 24.576MHz */
+		CLOCK_SetRootDivider(sai_clock_root[active_sai[i] - 1], 1U, 16U);
+		CLOCK_EnableClock(sai_clock[active_sai[i] - 1]);
+	}
 }

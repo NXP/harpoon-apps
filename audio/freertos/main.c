@@ -23,8 +23,6 @@
 
 static void hardware_setup(void)
 {
-	uint8_t sai_id = get_sai_id(DEMO_SAI);
-
 	BOARD_InitMemory();
 
 	BOARD_InitDebugConsole();
@@ -33,7 +31,7 @@ static void hardware_setup(void)
 
 	BOARD_InitPins();
 
-	board_clock_setup(sai_id);
+	sai_clock_setup();
 }
 
 static void data_task(void *pvParameters)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -42,8 +42,11 @@ const ccm_analog_frac_pll_config_t g_saiPLLConfig = {
 static const uintptr_t sai_clock_root[] = {kCLOCK_RootSai1, kCLOCK_RootSai2,
 	kCLOCK_RootSai3, 0, kCLOCK_RootSai5, kCLOCK_RootSai6, kCLOCK_RootSai7};
 
-void board_clock_setup(uint8_t sai_id)
+void sai_clock_setup()
 {
+	int active_sai[] = {3, 5};
+	int i;
+
 	/* init AUDIO PLL1 run at 393216000HZ */
 	CLOCK_InitAudioPll1(&g_audioPll1Config);
 	/* init AUDIO PLL2 run at 361267200HZ */
@@ -74,8 +77,10 @@ void board_clock_setup(uint8_t sai_id)
 	/* init SAI PLL run at 361267200HZ */
 	AUDIOMIX_InitAudioPll(AUDIOMIX, &g_saiPLLConfig);
 
-	/* Set SAI source to AUDIO PLL1 393216000HZ*/
-	CLOCK_SetRootMux(sai_clock_root[sai_id - 1], kCLOCK_SaiRootmuxAudioPll1);
-	/* Set root clock to 393216000HZ / 16 = 24.576MHz */
-	CLOCK_SetRootDivider(sai_clock_root[sai_id - 1], 1U, 16U);
+	for (i = 0; i < ARRAY_SIZE(active_sai); i++) {
+		/* Set SAI source to AUDIO PLL1 393216000HZ */
+		CLOCK_SetRootMux(sai_clock_root[active_sai[i] - 1], kCLOCK_SaiRootmuxAudioPll1);
+		/* Set root clock to 393216000HZ / 16 = 24.576MHz */
+		CLOCK_SetRootDivider(sai_clock_root[active_sai[i] - 1], 1U, 16U);
+	}
 }
