@@ -49,7 +49,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${BoardPath}/mmu.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/boards/${BoardName}/sai_clock_config.c"
-    "${AppPath}/common/boards/${BoardName}/sai_codec_config.c"
+    "${AppPath}/common/boards/${BoardName}/codec_config.c"
     "${SdkBoardPath}/drivers/fsl_audiomix.c"
     "${AppPath}/common/audio.c"
     "${AppPath}/common/audio_buffer.c"

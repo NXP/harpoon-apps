@@ -11,7 +11,7 @@
 #include "os/assert.h"
 #include "os/stdlib.h"
 #include "sai_drv.h"
-#include "sai_codec_config.h"
+#include "codec_config.h"
 #include "audio.h"
 
 #define PLAY_AUDIO_SRATE	44100 /* default sampling rate */

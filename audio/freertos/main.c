@@ -13,8 +13,6 @@
 
 #include "pin_mux.h"
 #include "sai_clock_config.h"
-#include "sai_codec_config.h"
-#include "sai_drv.h"
 
 #include "audio_entry.h"
 

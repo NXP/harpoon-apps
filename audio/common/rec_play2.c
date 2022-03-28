@@ -13,7 +13,7 @@
 #include "os/semaphore.h"
 #include "os/stdlib.h"
 #include "sai_drv.h"
-#include "sai_codec_config.h"
+#include "codec_config.h"
 #include "audio.h"
 
 #define FRAME_BYTES	(DEMO_AUDIO_DATA_CHANNEL * DEMO_AUDIO_BIT_WIDTH / 8)

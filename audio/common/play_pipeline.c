@@ -12,7 +12,7 @@
 #include "audio_pipeline.h"
 #include "audio.h"
 #include "log.h"
-#include "sai_codec_config.h"
+#include "codec_config.h"
 #include "sai_drv.h"
 
 extern struct audio_pipeline_config pipeline_config;

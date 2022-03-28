@@ -10,7 +10,7 @@
 #include "os/stdlib.h"
 #include "sai_drv.h"
 #include "dtmf_wave.h"
-#include "sai_codec_config.h"
+#include "codec_config.h"
 #include "audio.h"
 
 #define DTMF_AUDIO_SRATE 44100 /* default sampling rate */

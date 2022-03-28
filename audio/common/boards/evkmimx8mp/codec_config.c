@@ -10,27 +10,36 @@
 #include "fsl_pcm186x.h"
 #include "fsl_pcm512x.h"
 
-#include "sai_codec_config.h"
+#include "codec_config.h"
 
 #include "os/assert.h"
 #include "board.h"
 #include "log.h"
 
-static codec_handle_t wm8524_codec_handle;
+static codec_handle_t wm8960_codec_handle;
 static codec_handle_t pcm512x_codec_handle;
 static codec_handle_t pcm186x_codec_handle;
 
-static void codec_wm8524_setmute(uint32_t mute)
-{
-}
-
-static wm8524_config_t wm8524Config = {
-	.setMute = codec_wm8524_setmute,
+static wm8960_config_t wm8960Config = {
+	.i2cConfig = {
+		.codecI2CInstance = BOARD_CODEC_I2C_INSTANCE,
+		.codecI2CSourceClock = BOARD_CODEC_I2C_CLOCK_FREQ},
+	.route     = kWM8960_RoutePlaybackandRecord,
+	.leftInputSource = kWM8960_InputDifferentialMicInput3,
+	.playSource      = kWM8960_PlaySourceDAC,
+	.slaveAddress    = WM8960_I2C_ADDR,
+	.bus             = kWM8960_BusI2S,
+	.format          = {
+		.mclk_HZ    = 24576000U,
+		.sampleRate = kWM8960_AudioSampleRate44100Hz,
+		.bitWidth   = kWM8960_AudioBitWidth32bit
+	},
+	.master_slave    = false,
 };
 
-static codec_config_t wm8524_codec_config = {
-	.codecDevType = kCODEC_WM8524,
-	.codecDevConfig = &wm8524Config
+static codec_config_t wm8960_codec_config = {
+	.codecDevType = kCODEC_WM8960,
+	.codecDevConfig = &wm8960Config
 };
 
 static pcm512x_config_t pcm512xConfig = {
@@ -89,10 +98,10 @@ int32_t codec_set_format(enum codec_id cid, uint32_t mclk, uint32_t sample_rate,
 			goto end;
 		}
 	}
-	else if (cid == CODEC_ID_WM8524) {
-		err = CODEC_SetFormat(&wm8524_codec_handle, mclk, sample_rate, bitwidth);
+	else if (cid == CODEC_ID_WM8960) {
+		err = CODEC_SetFormat(&wm8960_codec_handle, mclk, sample_rate, bitwidth);
 		if (err != kStatus_Success) {
-			log_err("WM8524 set format failed (err %d)\n", err);
+			log_err("WM8960 set format failed (err %d)\n", err);
 			goto end;
 		}
 	}
@@ -106,7 +115,7 @@ end:
 
 int32_t codec_setup(enum codec_id cid)
 {
-	int32_t err = 0;
+	int32_t err;
 
 	if (cid == CODEC_ID_HIFIBERRY) {
 		/* Setup I2C clock */
@@ -127,11 +136,16 @@ int32_t codec_setup(enum codec_id cid)
 			goto end;
 		}
 	}
-	else if (cid == CODEC_ID_WM8524) {
+	else if (cid == CODEC_ID_WM8960) {
+		/* Setup I2C clock */
+		CLOCK_SetRootMux(kCLOCK_RootI2c3, kCLOCK_I2cRootmuxSysPll1Div5); /* Set I2C source to SysPLL1 Div5 160MHZ */
+		CLOCK_SetRootDivider(kCLOCK_RootI2c3, 1U, 10U);                  /* Set root clock to 160MHZ / 10 = 16MHZ */
+		CLOCK_EnableClock(kCLOCK_I2c3);
+
 		/* Use default setting to init codec */
-		err = CODEC_Init(&wm8524_codec_handle, &wm8524_codec_config);
+		err = CODEC_Init(&wm8960_codec_handle, &wm8960_codec_config);
 		if ((err != kStatus_Success) && (err != kStatus_CODEC_NotSupport)) {
-			log_err("WM8524 initialisation failed (err %d)\n", err);
+			log_err("WM8960 initialisation failed (err %d)\n", err);
 			goto end;
 		}
 	}
@@ -160,10 +174,10 @@ int32_t codec_close(enum codec_id cid)
 			goto end;
 		}
 	}
-	else if (cid == CODEC_ID_WM8524) {
-		err = CODEC_Deinit(&wm8524_codec_handle);
-		if ((err != kStatus_Success) && (err != kStatus_CODEC_NotSupport)) {
-			log_err("WM8524 deinitialisation failed (err %d)\n", err);
+	else if (cid == CODEC_ID_WM8960) {
+		err = CODEC_Deinit(&wm8960_codec_handle);
+		if (err != kStatus_Success) {
+			log_err("WM8960 deinitialisation failed (err %d)\n", err);
 			goto end;
 		}
 	}

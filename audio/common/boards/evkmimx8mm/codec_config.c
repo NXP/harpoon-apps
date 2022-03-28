@@ -10,7 +10,7 @@
 #include "fsl_pcm186x.h"
 #include "fsl_pcm512x.h"
 
-#include "sai_codec_config.h"
+#include "codec_config.h"
 
 #include "os/assert.h"
 #include "board.h"
