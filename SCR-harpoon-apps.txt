@@ -1,10 +1,7 @@
 NXP Software Content Register
 
 Release: Harpoon Apps
-Version: 2.0.1
-
-This file is an addendum to MCUX_2.10.0/SW-Content-Register.txt:
-https://github.com/NXPmicro/mcux-sdk/blob/MCUX_2.10.0/SW-Content-Register.txt
+Version: 2.1
 
 --------------------------------------------
 Package:                     Harpoon Apps
@@ -16,6 +13,23 @@ Description and comments:    Harpoon application examples
                              SDK-based examples to show how to use peripheral
                              drivers, integrate middleware and execute application
                              inside jailhouse cells on a ARM Cortex-A53 core.
-Release Location:            https://github.com/NXPmicro/harpoon-apps
+Release Location:            https://github.com/NXPmicro/harpoon-apps (tag harpoon_2.1.0)
 Origin:                      NXP (BSD-3-Clause)
+--------------------------------------------
+Package:                     MCUXpresso_SDK
+Outgoing License:            LA_OPT_NXP_Software_License - Additional distribution license granted - Section 2.3 applies
+License File:                mcux-sdk/LA_OPT_NXP_Software_License.txt
+Type of Content:             source code
+Description and comments:    Full SDK including device system files,
+                             middleware components, board peripheral drivers, etc.
+Release Location:            https://github.com/NXPmicro/mcux-sdk branch feature/aarch64_support (tag MCUX_2.11.0_aarch64_0.1)
+Origin:                      NXP (LA_OPT_NXP_Software_License)
+--------------------------------------------
+Package:                     FreeRTOS-Kernel
+Outgoing License:            MIT
+License File:                FreeRTOS-Kernel/License.md
+Type of Content:             source code
+Description and comments:    IoT operating system for microcontrollers with added ARM Cortex-A53 support
+Release Location:            https://github.com/NXPmicro/FreeRTOS-Kernel.git (tag MCUX_2.11.0_aarch64_0.1)
+Origin:                      Amazon (MIT)
 --------------------------------------------
