@@ -1,12 +1,16 @@
 /*
  * Copyright 2021-2022 NXP
- * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "fsl_common.h"
 #include "fsl_audiomix.h"
+
+#include "os/assert.h"
+#include "codec_config.h"
+#include "sai_drv.h"
+#include "sai_config.h"
 
 /*******************************************************************************
  * Definitions
@@ -42,15 +46,37 @@ const ccm_analog_frac_pll_config_t g_saiPLLConfig = {
 static const uintptr_t sai_clock_root[] = {kCLOCK_RootSai1, kCLOCK_RootSai2,
 	kCLOCK_RootSai3, 0, kCLOCK_RootSai5, kCLOCK_RootSai6, kCLOCK_RootSai7};
 
-void sai_clock_setup()
+void sai_clock_setup(void)
 {
-	int active_sai[] = {3, 5};
 	int i;
 
-	/* init AUDIO PLL1 run at 393216000HZ */
-	CLOCK_InitAudioPll1(&g_audioPll1Config);
-	/* init AUDIO PLL2 run at 361267200HZ */
-	CLOCK_InitAudioPll2(&g_audioPll2Config);
+	if (sai_active_list_nelems == 0)
+		os_assert(false, "No SAI enabled!");
+
+	/* Init Audio PLLs */
+	for (i = 0; i < sai_active_list_nelems; i++) {
+		bool apll1_enabled = false, apll2_enabled = false;
+
+		switch (sai_active_list[i].audio_pll) {
+			case kCLOCK_AudioPll1Ctrl:
+				/* init AUDIO PLL1 run at 393216000HZ */
+				if (apll1_enabled == false) {
+					CLOCK_InitAudioPll1(&g_audioPll1Config);
+					apll1_enabled = true;
+				}
+				break;
+			case kCLOCK_AudioPll2Ctrl:
+				/* init AUDIO PLL2 run at 361267200HZ */
+				if (apll2_enabled == false) {
+					CLOCK_InitAudioPll2(&g_audioPll2Config);
+					apll2_enabled = true;
+				}
+				break;
+			default:
+				os_assert(false, "Invalid Audio PLL! (%d)", sai_active_list[i].audio_pll);
+				break;
+		}
+	}
 
 	CLOCK_EnableRoot(kCLOCK_RootAudioAhb);
 	/* Enable Audio clock to power on the audiomix domain*/
@@ -77,10 +103,36 @@ void sai_clock_setup()
 	/* init SAI PLL run at 361267200HZ */
 	AUDIOMIX_InitAudioPll(AUDIOMIX, &g_saiPLLConfig);
 
-	for (i = 0; i < ARRAY_SIZE(active_sai); i++) {
-		/* Set SAI source to AUDIO PLL1 393216000HZ */
-		CLOCK_SetRootMux(sai_clock_root[active_sai[i] - 1], kCLOCK_SaiRootmuxAudioPll1);
+	/* Enable SAI clocks */
+	for (i = 0; i < sai_active_list_nelems; i++) {
+		int sai_id;
+		uint32_t root_mux_apll;
+
+		sai_id = get_sai_id(sai_active_list[i].sai_base);
+		os_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
+
+		/* Set SAI source to AUDIO PLL 393216000HZ */
+		switch (sai_active_list[i].audio_pll) {
+			case kCLOCK_AudioPll1Ctrl:
+				root_mux_apll = kCLOCK_SaiRootmuxAudioPll1;
+				break;
+			case kCLOCK_AudioPll2Ctrl:
+				root_mux_apll = kCLOCK_SaiRootmuxAudioPll2;
+				break;
+			default:
+				os_assert(false, "Invalid Audio PLL! (%d)", sai_active_list[i].audio_pll);
+				break;
+		}
+		CLOCK_SetRootMux(sai_clock_root[sai_id - 1], root_mux_apll);
+
 		/* Set root clock to 393216000HZ / 16 = 24.576MHz */
-		CLOCK_SetRootDivider(sai_clock_root[active_sai[i] - 1], 1U, 16U);
+		CLOCK_SetRootDivider(sai_clock_root[sai_id - 1],
+				sai_active_list[i].audio_pll_mul,
+				sai_active_list[i].audio_pll_div);
 	}
+}
+
+uint32_t get_sai_clock_root(uint32_t id)
+{
+	return sai_clock_root[id];
 }

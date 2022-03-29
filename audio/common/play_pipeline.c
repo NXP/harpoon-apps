@@ -13,7 +13,9 @@
 #include "audio.h"
 #include "log.h"
 #include "codec_config.h"
+#include "sai_clock_config.h"
 #include "sai_drv.h"
+#include "sai_config.h"
 
 extern struct audio_pipeline_config pipeline_config;
 
@@ -27,7 +29,7 @@ struct pipeline_ctx {
 	void (*event_send)(void *, uint8_t);
 	void *event_data;
 
-	struct sai_device dev[2];
+	struct sai_device dev[SAI_TX_MAX_INSTANCE];
 	struct audio_pipeline *pipeline;
 	sai_word_width_t bit_width;
 	sai_sample_rate_t sample_rate;
@@ -83,40 +85,53 @@ int play_pipeline_run(void *handle, struct event *e)
 static void sai_setup(struct pipeline_ctx *ctx)
 {
 	struct sai_cfg sai_config;
+	int i;
 
-	/* Configure SAI5 */
-	sai_config.sai_base = (void *)I2S5;
-	sai_config.bit_width = ctx->bit_width;
-	sai_config.sample_rate = ctx->sample_rate;
-	sai_config.chan_numbers = ctx->chan_numbers;
-	sai_config.source_clock_hz = SAI5_CLK_FREQ;
-	sai_config.tx_sync_mode = SAI5_TX_SYNC_MODE;
-	sai_config.rx_sync_mode = SAI5_RX_SYNC_MODE;
-	sai_config.rx_callback = rx_callback; /* irq handler should only be defined for ctx->dev[0] */
-	sai_config.rx_user_data = ctx;
-	sai_config.working_mode = SAI_RX_IRQ_MODE;
-	sai_config.masterSlave = SAI5_MASTER_SLAVE;
-	/* Set FIFO water mark to be period size of all channels*/
-	sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
+	/* Configure each active SAI */
+	for (i = 0; i < sai_active_list_nelems; i++) {
+		uint32_t sai_clock_root;
+		int sai_id;
+		sai_config.sai_base = sai_active_list[i].sai_base;
+		sai_config.bit_width = ctx->bit_width;
+		sai_config.sample_rate = ctx->sample_rate;
+		sai_config.chan_numbers = ctx->chan_numbers;
 
-	sai_drv_setup(&ctx->dev[0], &sai_config);
+		sai_id = get_sai_id(sai_active_list[i].sai_base);
+		os_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
 
-	/* Configure SAI3 */
-	sai_config.sai_base = (void *)I2S3;
-	sai_config.bit_width = ctx->bit_width;
-	sai_config.sample_rate = ctx->sample_rate;
-	sai_config.chan_numbers = ctx->chan_numbers;
-	sai_config.source_clock_hz = SAI3_CLK_FREQ;
-	sai_config.tx_sync_mode = SAI3_TX_SYNC_MODE;
-	sai_config.rx_sync_mode = SAI3_RX_SYNC_MODE;
-	sai_config.rx_callback = NULL;
-	sai_config.rx_user_data = NULL;
-	sai_config.working_mode = SAI_POLLING_MODE;
-	sai_config.masterSlave = SAI3_MASTER_SLAVE;
-	/* Set FIFO water mark to be period size of all channels*/
-	sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
+		sai_clock_root = get_sai_clock_root(sai_id - 1);
+		sai_config.source_clock_hz = CLOCK_GetPllFreq(sai_active_list[i].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
 
-	sai_drv_setup(&ctx->dev[1], &sai_config);
+		sai_config.tx_sync_mode = sai_active_list[i].tx_sync_mode;
+		sai_config.rx_sync_mode = sai_active_list[i].rx_sync_mode;
+
+		if (i == 0) {
+			/* First SAI instance used as IRQ source */
+			sai_config.rx_callback = rx_callback;
+			sai_config.rx_user_data = ctx;
+			sai_config.working_mode = SAI_RX_IRQ_MODE;
+		} else {
+			sai_config.rx_callback = NULL;
+			sai_config.rx_user_data = NULL;
+			sai_config.working_mode = SAI_POLLING_MODE;
+		}
+
+		sai_config.masterSlave = sai_active_list[i].masterSlave;
+		/* Set FIFO water mark to be period size of all channels*/
+		sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
+
+		sai_drv_setup(&ctx->dev[i], &sai_config);
+	}
+}
+
+static void sai_close(struct pipeline_ctx *ctx)
+{
+	int i;
+
+	/* Close each active SAI */
+	for (i = 0; i < sai_active_list_nelems; i++) {
+		sai_drv_exit(&ctx->dev[i]);
+	}
 }
 
 void *play_pipeline_init(void *parameters)
@@ -126,6 +141,7 @@ void *play_pipeline_init(void *parameters)
 	size_t period = DEFAULT_PERIOD;
 	uint32_t rate = DEFAULT_SAMPLE_RATE;
 	enum codec_id cid;
+	int i;
 
 	if (assign_nonzero_valid_val(period, cfg->period, supported_period) != 0) {
 		log_err("Period %d frames is not supported\n", cfg->period);
@@ -160,13 +176,24 @@ void *play_pipeline_init(void *parameters)
 
 	sai_setup(ctx);
 
-	cid = SAI3_CODEC_ID;
-	codec_setup(cid);
-	codec_set_format(cid, SAI3_CLK_FREQ, rate, ctx->bit_width);
+	/* Configure each active codec */
+	for (i = 0; i < sai_active_list_nelems; i++) {
+		uint32_t sai_clock_root;
+		uint32_t mclk;
+		int32_t ret;
+		int sai_id;
 
-	cid = SAI5_CODEC_ID;
-	codec_setup(cid);
-	codec_set_format(cid, SAI5_CLK_FREQ, rate, ctx->bit_width);
+		cid = sai_active_list[i].cid;
+		ret = codec_setup(cid);
+		if (ret != kStatus_Success)
+			continue;
+
+		sai_id = get_sai_id(sai_active_list[i].sai_base);
+		os_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
+		sai_clock_root = get_sai_clock_root(sai_id - 1);
+		mclk = CLOCK_GetPllFreq(sai_active_list[i].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
+		codec_set_format(cid, mclk, rate, ctx->bit_width);
+	}
 
 	log_info("Starting pipeline (Sample Rate: %d Hz, Period: %d frames)\n",
 			rate, period);
@@ -183,18 +210,14 @@ err:
 void play_pipeline_exit(void *handle)
 {
 	struct pipeline_ctx *ctx = handle;
-	enum codec_id cid;
+	int i;
 
 	audio_pipeline_exit(ctx->pipeline);
 
-	sai_drv_exit(&ctx->dev[0]);
-	sai_drv_exit(&ctx->dev[1]);
+	sai_close(ctx);
 
-	cid = SAI3_CODEC_ID;
-	codec_close(cid);
-
-	cid = SAI5_CODEC_ID;
-	codec_close(cid);
+	for (i = 0; i < sai_active_list_nelems; i++)
+		codec_close(sai_active_list[i].cid);
 
 	os_free(ctx);
 

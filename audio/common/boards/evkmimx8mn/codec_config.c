@@ -134,6 +134,7 @@ int32_t codec_setup(enum codec_id cid)
 			log_err("WM8524 initialisation failed (err %d)\n", err);
 			goto end;
 		}
+		err = kStatus_Success;
 	}
 	else {
 		os_assert(0, "Unexpected codec id (%d)", cid);
