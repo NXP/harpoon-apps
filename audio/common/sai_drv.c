@@ -12,10 +12,6 @@
 #include "os/assert.h"
 #include "sai_drv.h"
 
-#ifdef PLAT_WITH_AUDIOMIX
-#include "fsl_audiomix.h"
-#endif
-
 static I2S_Type *const s_saiBases[] = I2S_BASE_PTRS;
 
 static const IRQn_Type s_saiTxIRQ[] = I2S_TX_IRQS;
@@ -217,11 +213,6 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 	SAI_TxSetFIFOErrorContinue(sai, false);
 	SAI_RxSetFIFOErrorContinue(sai, false);
 
-#ifdef PLAT_WITH_AUDIOMIX
-	/* SAI bit clock source */
-	AUDIOMIX_AttachClk(AUDIOMIX, kAUDIOMIX_Attach_SAI3_MCLK1_To_SAI3_ROOT);
-	AUDIOMIX_AttachClk(AUDIOMIX, kAUDIOMIX_Attach_SAI5_MCLK1_To_SAI5_ROOT);
-#endif
 	/* set bit clock divider */
 	SAI_TxSetBitClockRate(sai, sai_config->source_clock_hz,
 			sai_config->sample_rate, sai_config->bit_width,

@@ -7,6 +7,7 @@
 #include "fsl_common.h"
 #include "fsl_audiomix.h"
 
+#include "app_board.h"
 #include "os/assert.h"
 #include "codec_config.h"
 #include "sai_drv.h"
@@ -45,6 +46,16 @@ const ccm_analog_frac_pll_config_t g_saiPLLConfig = {
 
 static const uintptr_t sai_clock_root[] = {kCLOCK_RootSai1, kCLOCK_RootSai2,
 	kCLOCK_RootSai3, 0, kCLOCK_RootSai5, kCLOCK_RootSai6, kCLOCK_RootSai7};
+
+static const uintptr_t audiomix_sai_mclk1[] = {
+	kAUDIOMIX_Attach_SAI1_MCLK1_To_SAI1_ROOT,
+	kAUDIOMIX_Attach_SAI2_MCLK1_To_SAI2_ROOT,
+	kAUDIOMIX_Attach_SAI3_MCLK1_To_SAI3_ROOT,
+	0,
+	kAUDIOMIX_Attach_SAI5_MCLK1_To_SAI5_ROOT,
+	kAUDIOMIX_Attach_SAI6_MCLK1_To_SAI6_ROOT,
+	kAUDIOMIX_Attach_SAI7_MCLK1_To_SAI7_ROOT,
+};
 
 void sai_clock_setup(void)
 {
@@ -129,6 +140,9 @@ void sai_clock_setup(void)
 		CLOCK_SetRootDivider(sai_clock_root[sai_id - 1],
 				sai_active_list[i].audio_pll_mul,
 				sai_active_list[i].audio_pll_div);
+
+		/* SAI bit clock source */
+		AUDIOMIX_AttachClk(AUDIOMIX, audiomix_sai_mclk1[sai_id - 1]);
 	}
 }
 

@@ -84,6 +84,4 @@
 #define DEMO_AUDIO_BIT_WIDTH		kSAI_WordWidth32bits
 #define DEMO_AUDIO_SAMPLE_RATE		(kSAI_SampleRate44100Hz)
 
-#define PLAT_WITH_AUDIOMIX
-
 #endif /* _APP_BOARD_H_ */
