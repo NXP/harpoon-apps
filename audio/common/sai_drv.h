@@ -48,6 +48,7 @@ struct sai_cfg {
 	uint8_t fifo_water_mark;
 	enum sai_mode working_mode;
 	uint32_t masterSlave;
+	uint32_t msel;
 };
 
 uint32_t get_sai_id(I2S_Type *base);

@@ -20,6 +20,7 @@ const struct sai_active_config sai_active_list[] = {
 		.audio_pll_div = 16,
 		.tx_sync_mode = SAI5_TX_SYNC_MODE,
 		.rx_sync_mode = SAI5_RX_SYNC_MODE,
+		.msel = kSAI_BclkSourceMclkDiv,		/* MCLK1 */
 		.cid = CODEC_ID_HIFIBERRY,
 	},
 	{
@@ -30,6 +31,7 @@ const struct sai_active_config sai_active_list[] = {
 		.audio_pll_div = 16,
 		.tx_sync_mode = SAI3_TX_SYNC_MODE,
 		.rx_sync_mode = SAI3_RX_SYNC_MODE,
+		.msel = kSAI_BclkSourceMclkDiv,		/* MCLK1 */
 		.cid = CODEC_ID_WM8524,
 	},
 };

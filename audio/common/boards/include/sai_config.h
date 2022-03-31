@@ -9,6 +9,7 @@
 struct sai_active_config {
 	void *sai_base;
 	uint32_t masterSlave;
+	uint32_t msel;
 	clock_pll_ctrl_t audio_pll;
 	uint32_t audio_pll_mul;
 	uint32_t audio_pll_div;

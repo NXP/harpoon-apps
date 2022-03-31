@@ -104,6 +104,7 @@ static void sai_setup(struct pipeline_ctx *ctx)
 
 		sai_config.tx_sync_mode = sai_active_list[i].tx_sync_mode;
 		sai_config.rx_sync_mode = sai_active_list[i].rx_sync_mode;
+		sai_config.msel = sai_active_list[i].msel;
 
 		if (i == 0) {
 			/* First SAI instance used as IRQ source */
