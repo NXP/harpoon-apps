@@ -180,6 +180,32 @@ static inline bool __sai_tx_error(void *base)
 	return (((((I2S_Type *)base)->TCSR) & (uint32_t)I2S_TCSR_FEF_MASK) != 0U);
 }
 
+static inline unsigned int __sai_rx_level(void *base, unsigned int line)
+{
+	uint8_t wfp, rfp;
+	uint32_t rfr;
+
+	rfr = ((I2S_Type *)base)->RFR[line];
+
+	wfp = (rfr & I2S_RFR_WFP_MASK) >> I2S_RFR_WFP_SHIFT;
+	rfp = (rfr & I2S_RFR_RFP_MASK) >> I2S_RFR_RFP_SHIFT;
+
+	return (uint8_t)(wfp - rfp);
+}
+
+static inline unsigned int __sai_tx_level(void *base, unsigned int line)
+{
+	uint8_t wfp, rfp;
+	uint32_t tfr;
+
+	tfr = ((I2S_Type *)base)->TFR[line];
+
+	wfp = (tfr & I2S_TFR_WFP_MASK) >> I2S_TFR_WFP_SHIFT;
+	rfp = (tfr & I2S_TFR_RFP_MASK) >> I2S_TFR_RFP_SHIFT;
+
+	return (uint8_t)(wfp - rfp);
+}
+
 static inline void *__sai_rx_fifo_addr(void *base, unsigned int line)
 {
 	return (void *)SAI_RxGetDataRegisterAddress(base, line);
