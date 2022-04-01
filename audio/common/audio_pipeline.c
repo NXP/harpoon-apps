@@ -349,7 +349,7 @@ static unsigned int audio_buffer_storage_size(struct audio_pipeline_config *conf
 
 	for (i = 0; i < config->buffer_storage; i++) {
 		if (!config->storage[i].base)
-			size += config->storage[i].periods * config->period;
+			size += config->storage[i].periods * config->period * sizeof(int32_t);
 	}
 
 	return size;
