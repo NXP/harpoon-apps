@@ -8,6 +8,7 @@
 #include "os/counter.h"
 
 #include "irq.h"
+#include "log.h"
 
 #include "fsl_device_registers.h"
 #include "fsl_gpt.h"
@@ -22,9 +23,6 @@
 #define NB_COUNTERS		(sizeof(gpt_devices) / sizeof(GPT_Type *) - 1)
 /* TODO: support multiple channels */
 #define NB_CHANNELS		1
-
-__WEAK void log_err(const char *format, ...) {};
-__WEAK void log_debug(const char *format, ...) {};
 
 struct counter_alarm {
 	/* TODO: Add a mutex lock to protect both entries below */
