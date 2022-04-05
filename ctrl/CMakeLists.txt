@@ -15,6 +15,7 @@ set(CMAKE_MODULE_PATH
 add_executable(harpoon_ctrl
    audio_pipeline.c
    common.c
+   industrial.c
    ivshmem.c
    main.c
 )

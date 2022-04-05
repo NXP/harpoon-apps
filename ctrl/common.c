@@ -13,7 +13,7 @@
 
 #include "common.h"
 
-extern const struct cmd_handler command_handler[5];
+extern const struct cmd_handler command_handler[7];
 
 int command(struct mailbox *m, void *cmd, unsigned int cmd_len, unsigned int resp_type, void *resp, unsigned int *resp_len, unsigned int timeout_ms)
 {

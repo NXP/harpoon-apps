@@ -24,6 +24,11 @@ void audio_pipeline_usage(void);
 void audio_element_routing_usage(void);
 void audio_element_usage(void);
 
+int can_main(int argc, char *argv[], struct mailbox *m);
+int ethernet_main(int argc, char *argv[], struct mailbox *m);
+void can_usage(void);
+void ethernet_usage(void);
+
 static void latency_usage(void)
 {
 	printf(
@@ -205,6 +210,9 @@ const struct cmd_handler command_handler[] = {
 	{ "pipeline", audio_pipeline_main, audio_pipeline_usage },
 	{ "element", audio_element_main, audio_element_usage },
 	{ "routing", audio_element_routing_main, audio_element_routing_usage },
+
+	{ "can", can_main, can_usage },
+	{ "ethernet", ethernet_main, ethernet_usage },
 };
 
 int main(int argc, char *argv[])
