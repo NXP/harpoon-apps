@@ -29,6 +29,13 @@ enum {
 	HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_CONNECT = 0x400,
 	HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_DISCONNECT = 0x401,
 	HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING = 0x4ff,
+
+	HRPN_CMD_TYPE_INDUSTRIAL = 0x500,
+	HRPN_CMD_TYPE_CAN_RUN = 0x580,
+	HRPN_CMD_TYPE_CAN_STOP,
+	HRPN_CMD_TYPE_ETHERNET_RUN = 0x600,
+	HRPN_CMD_TYPE_ETHERNET_STOP,
+	HRPN_RESP_TYPE_INDUSTRIAL = 0x6ff,
 };
 
 enum {
@@ -67,6 +74,21 @@ struct hrpn_resp_audio {
 	uint32_t status;
 };
 
+/* Industrial application commands */
+struct hrpn_cmd_industrial_run {
+	uint32_t type;
+	uint32_t mode;
+};
+
+struct hrpn_cmd_industrial_stop {
+	uint32_t type;
+};
+
+struct hrpn_resp_industrial {
+	uint32_t type;
+	uint32_t status;
+};
+
 
 struct hrpn_cmd {
 	uint32_t type;
@@ -85,6 +107,8 @@ struct hrpn_command {
 		struct hrpn_cmd_audio_run audio_run;
 		struct hrpn_cmd_audio_stop audio_stop;
 		struct hrpn_cmd_audio_pipeline audio_pipeline;
+		struct hrpn_cmd_industrial_run industrial_run;
+		struct hrpn_cmd_industrial_stop industrial_stop;
 	} u;
 };
 
@@ -93,6 +117,7 @@ struct hrpn_response {
 		struct hrpn_resp resp;
 		struct hrpn_resp_latency latency;
 		struct hrpn_resp_audio audio;
+		struct hrpn_resp_industrial industrial;
 	} u;
 };
 
