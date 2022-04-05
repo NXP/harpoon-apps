@@ -1,7 +1,7 @@
 /*
  * FreeRTOS V202012.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -112,4 +112,16 @@ static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
     Note that, as the array is necessarily of type StackType_t,
     configTIMER_TASK_STACK_DEPTH is specified in words, not bytes. */
     *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+}
+
+void vApplicationStackOverflowHook( TaskHandle_t xTask,
+                                    char *pcTaskName )
+{
+    PRINTF("Stack overflow: task %s\n\r", pcTaskName);
+
+    taskENTER_CRITICAL();
+
+    for( ;; );
+
+    taskEXIT_CRITICAL();
 }
