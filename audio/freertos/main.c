@@ -69,7 +69,7 @@ int main(void)
 	log_info("Audio application started!\n");
 
 	xResult = xTaskCreate(main_task, "main_task",
-			configMINIMAL_STACK_SIZE + 100, NULL,
+			configMINIMAL_STACK_SIZE + 200, NULL,
 			main_task_PRIORITY, NULL);
 	os_assert(xResult == pdPASS, "main task creation failed");
 
