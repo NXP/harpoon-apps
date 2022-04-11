@@ -4,8 +4,6 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-#include "FreeRTOS.h"
-
 #include "os/assert.h"
 #include "os/math.h"
 #include "os/stdlib.h"
