@@ -239,7 +239,7 @@ int dtmf_element_check_config(struct audio_element_config *config)
 	}
 
 	if (strlen(config->u.dtmf.sequence) < 1) {
-		log_err("dtmf: invalid sequence length: %u\n", strlen(config->u.dtmf.sequence));
+		log_err("dtmf: invalid sequence length: %zu\n", strlen(config->u.dtmf.sequence));
 		goto err;
 	}
 

@@ -196,7 +196,7 @@ void *play_pipeline_init(void *parameters)
 		codec_set_format(cid, mclk, rate, ctx->bit_width);
 	}
 
-	log_info("Starting pipeline (Sample Rate: %d Hz, Period: %d frames)\n",
+	log_info("Starting pipeline (Sample Rate: %d Hz, Period: %zd frames)\n",
 			rate, period);
 
 	return ctx;
