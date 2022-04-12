@@ -9,6 +9,7 @@
 #include "os/mqueue.h"
 #include "os/semaphore.h"
 #include "os/stdlib.h"
+#include "os/string.h"
 #include "os/unistd.h"
 
 #include "idle.h"

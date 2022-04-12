@@ -7,6 +7,7 @@
 #include "os/assert.h"
 #include "os/math.h"
 #include "os/stdlib.h"
+#include "os/string.h"
 
 #include "audio_format.h"
 
