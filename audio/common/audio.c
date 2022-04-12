@@ -11,8 +11,8 @@
 #include "os/stdlib.h"
 #include "os/string.h"
 #include "os/unistd.h"
+#include "os/cpu_load.h"
 
-#include "idle.h"
 #include "ivshmem.h"
 #include "mailbox.h"
 #include "hrpn_ctrl.h"
@@ -241,7 +241,7 @@ void audio_control_loop(void *context)
 		count--;
 		if (!count) {
 			audio_stats(ctx);
-			cpu_load_stats();
+			os_cpu_load_stats();
 			count = STATS_COUNT;
 		}
 
