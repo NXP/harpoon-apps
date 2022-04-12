@@ -200,7 +200,7 @@ static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 
 			for (k = 0; k < element_config->inputs; k++) {
 				if (element_config->input[k] >= config->buffers) {
-					log_err("stage(%u), element(%u): input(%u) \n", i, j, k, element_config->input[k]);
+					log_err("stage(%u), element(%u): input(%u) references invalid buffer(%u)\n", i, j, k, element_config->input[k]);
 					goto err;
 				}
 			}
@@ -269,7 +269,7 @@ static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 			log_warn("storage(%u) not referenced\n", i);
 
 		if (buffer > 1)
-			log_warn("storage(%u) referenced by %u buffers\n", buffer);
+			log_warn("storage(%u) referenced by %u buffers\n", i, buffer);
 	}
 
 	/* Check the configuration of all elements */
