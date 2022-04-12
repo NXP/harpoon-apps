@@ -1,14 +1,12 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2017 NXP
+ * Copyright 2016-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #ifndef _MUSIC_H_
 #define _MUSIC_H_
-
-#include "fsl_common.h"
 
 #if defined(__GNUC__) /* GNU Compiler */
 #ifndef __ALIGN_END
