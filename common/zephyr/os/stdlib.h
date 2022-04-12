@@ -6,6 +6,8 @@
 #ifndef _ZEPHYR_STDLIB_H_
 #define _ZEPHYR_STDLIB_H_
 
+#include <kernel.h>
+
 #define os_malloc(x)	k_malloc(x)
 #define os_free(x)	k_free(x)
 
