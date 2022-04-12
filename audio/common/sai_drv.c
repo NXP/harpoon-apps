@@ -8,7 +8,7 @@
 #include "fsl_sai.h"
 
 #include "app_board.h"
-#include "irq.h"
+#include "os/irq.h"
 #include "os/assert.h"
 #include "sai_drv.h"
 
@@ -245,14 +245,14 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 
 	switch (sai_config->working_mode) {
 		case SAI_RX_IRQ_MODE:
-			ret = irq_register(sai_irq_n, sai_irq_handler_continuous, dev);
+			ret = os_irq_register(sai_irq_n, sai_irq_handler_continuous, dev, 0);
 			os_assert(!ret, "Failed to register SAI IRQ! (%d)", ret);
-			EnableIRQ(sai_irq_n);
+			os_irq_enable(sai_irq_n);
 			break;
 		case SAI_CALLBACK_MODE:
-			ret = irq_register(sai_irq_n, sai_irq_handler, dev);
+			ret = os_irq_register(sai_irq_n, sai_irq_handler, dev, 0);
 			os_assert(!ret, "Failed to register SAI IRQ! (%d)", ret);
-			EnableIRQ(sai_irq_n);
+			os_irq_enable(sai_irq_n);
 			break;
 		case SAI_POLLING_MODE:
 		default:
