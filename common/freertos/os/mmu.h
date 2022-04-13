@@ -53,6 +53,7 @@
 static inline int os_mmu_map(const char *name, uint8_t **virt, uintptr_t phys, size_t size, uint32_t attrs)
 {
 	uint32_t flags = 0;
+	int rc;
 
 	switch (attrs & OS_MEM_CACHE_MASK) {
 	case OS_MEM_CACHE_NONE:
@@ -90,11 +91,14 @@ static inline int os_mmu_map(const char *name, uint8_t **virt, uintptr_t phys, s
 	flags |= MT_RW_AP_ELx;
 
 	/* Use phys vs virt 1:1 mapping */
-	ARM_MMU_AddMap(name, phys, phys, size, flags);
+	rc = ARM_MMU_AddMap(name, phys, phys, size, flags);
+	if (rc < 0)
+		goto out;
 
 	*virt = (uint8_t *)phys;
 
-	return 0;
+out:
+	return rc;
 }
 
 static inline int os_mmu_unmap(uintptr_t virt, size_t size)
