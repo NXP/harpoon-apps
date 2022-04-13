@@ -15,6 +15,15 @@
  * Caching mode definitions. These are mutually exclusive.
  */
 
+/* Device memory with nGnRnE */
+#define OS_MEM_DEVICE_nGnRnE	5
+
+/* Device memory with nGnRE */
+#define OS_MEM_DEVICE_nGnRE	4
+
+/* Device memory with GRE */
+#define OS_MEM_DEVICE_GRE	3
+
 /* No caching. */
 #define OS_MEM_CACHE_NONE	2
 
@@ -39,15 +48,6 @@
 
 /* Region will be accessible to user mode */
 #define OS_MEM_PERM_USER	(1 << 5)
-
-/* Device memory with nGnRnE */
-#define OS_MEM_DEVICE_nGnRnE	(1 << 6)
-
-/* Device memory with nGnRE */
-#define OS_MEM_DEVICE_nGnRE	(1 << 7)
-
-/* Device memory with GRE */
-#define OS_MEM_DEVICE_GRE	(1 << 8)
 
 
 static inline int os_mmu_map(const char *name, uint8_t **virt, uintptr_t phys, size_t size, uint32_t attrs)
