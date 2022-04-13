@@ -264,7 +264,7 @@ void *audio_control_init(void)
 	os_assert(!err, "ivshmem initialization failed, cannot proceed\n");
 	os_assert(mem->out_size, "ivshmem mis-configuration, cannot proceed\n");
 
-	mailbox_init(&audio_ctx->mb, mem->out, mem->out + mem->out_size * mem->id, false);
+	mailbox_init(&audio_ctx->mb, mem->out[0], mem->out[mem->id], false);
 	os_assert(!err, "mailbox initialization failed!");
 
 	err = os_sem_init(&audio_ctx->semaphore, 1);
