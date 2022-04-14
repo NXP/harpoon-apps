@@ -10,6 +10,9 @@ manifest:
 
   # Please add items below in reverse alphabetical order
   projects:
+    - name: zephyr
+      revision: feature/aarch64_support
+      import: true
     - name: mcux-sdk
       revision: 46d44c68e6cb7f97a68e6a1f75aaf4337dba90b5
     - name: FreeRTOS-Kernel
