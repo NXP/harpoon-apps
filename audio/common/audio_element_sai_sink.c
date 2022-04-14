@@ -26,12 +26,22 @@ struct sai_input {
 	unsigned int mask;		/* format conversion */
 };
 
+struct sai_line {
+	void *base;
+	unsigned int id;
+	unsigned int sai_id;
+	unsigned int min;
+	unsigned int max;
+};
+
 struct sai_sink_element {
 	unsigned int map_n;
 	struct sai_sink_map *map;
 	unsigned int in_n;
 	struct sai_input *in;
 	unsigned int sai_n;
+	struct sai_line *line;
+	unsigned int line_n;
 	void **base;
 	bool started;
 };
@@ -64,6 +74,8 @@ static void sai_sink_element_fifo_write(struct audio_element *element)
 static int sai_sink_element_run(struct audio_element *element)
 {
 	struct sai_sink_element *sai = element->data;
+	struct sai_line *line;
+	unsigned int level;
 	int i, j;
 
 #if 0
@@ -96,10 +108,22 @@ static int sai_sink_element_run(struct audio_element *element)
 #endif
 
 	if (sai->started) {
-		/* Check for SAI Tx Fifo errors */
-		for (i = 0; i < sai->sai_n; i++)
-			if (__sai_tx_error(sai->base[i]))
+		/* Check SAI Tx Fifo level */
+		for (i = 0; i < sai->line_n; i++) {
+			line = &sai->line[i];
+
+			level = __sai_tx_level(line->base, line->id);
+
+			if (level <= line->min) {
+				/* tx underflow */
 				goto err;
+			}
+
+			if (level >= line->max) {
+				/* tx overflow */
+				goto err;
+			}
+		}
 	} else {
 		audio_sample_t val = AUDIO_SAMPLE_SILENCE;
 
@@ -154,6 +178,9 @@ static void sai_sink_element_dump(struct audio_element *element)
 	for (i = 0; i < sai->map_n; i++)
 		log_info("    %p => %p\n", sai->map[i].in, sai->map[i].tx_fifo);
 
+	for (i = 0; i < sai->line_n; i++)
+		log_info("line: %u, sai(%u, %u)\n", i, sai->line[i].sai_id, sai->line[i].id);
+
 	for (i = 0; i < sai->in_n; i++)
 		audio_buf_dump(sai->in[i].buf);
 }
@@ -176,6 +203,21 @@ static unsigned int sai_sink_map_size(struct audio_element_config *config)
 	}
 
 	return map_size;
+}
+
+static unsigned int sai_sink_line_size(struct audio_element_config *config)
+{
+	struct sai_tx_config *sai_config;
+	unsigned int line_size = 0;
+	int i;
+
+	for (i = 0; i < config->u.sai_sink.sai_n; i++) {
+		sai_config = &config->u.sai_sink.sai[i];
+
+		line_size += sai_config->line_n;
+	}
+
+	return line_size;
 }
 
 int sai_sink_element_check_config(struct audio_element_config *config)
@@ -244,6 +286,7 @@ unsigned int sai_sink_element_size(struct audio_element_config *config)
 
 	size = sizeof(struct sai_sink_element);
 	size += sai_sink_map_size(config) * (sizeof(struct sai_sink_map) + sizeof(struct sai_input));
+	size += sai_sink_line_size(config) * sizeof(struct sai_line);
 	size += config->u.sai_source.sai_n * sizeof(void *);
 
 	return size;
@@ -255,6 +298,7 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 	struct sai_tx_config *sai_config;
 	struct sai_tx_line_config *line_config;
 	struct sai_sink_map *map;
+	struct sai_line *line;
 	int i, j, k, l;
 
 	element->run = sai_sink_element_run;
@@ -267,12 +311,15 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 	sai->map_n = sai_sink_map_size(config);
 	sai->in_n = sai->map_n;
 	sai->sai_n = config->u.sai_sink.sai_n;
+	sai->line_n = sai_sink_line_size(config);
 
 	sai->map = (struct sai_sink_map *)((uint8_t *)sai + sizeof(struct sai_sink_element));
 	sai->in = (struct sai_input *)((uint8_t *)sai->map + sai->map_n * sizeof(struct sai_sink_map));
-	sai->base = (void **)((uint8_t *)sai->in + sai->in_n * sizeof(struct sai_input));
+	sai->line = (struct sai_line *)((uint8_t *)sai->in + sai->in_n * sizeof(struct sai_input));
+	sai->base = (void **)((uint8_t *)sai->line + sai->line_n * sizeof(struct sai_line));
 
 	l = 0;
+	line = &sai->line[0];
 	for (i = 0; i < config->u.sai_sink.sai_n; i++) {
 		sai_config = &config->u.sai_sink.sai[i];
 
@@ -282,6 +329,14 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 
 		for (j = 0; j < sai_config->line_n; j++) {
 			line_config = &sai_config->line[j];
+
+			line->base = sai->base[i];
+			line->id = line_config->id;
+			line->sai_id = sai_config->id;
+
+			line->min = 0;
+			line->max = line_config->channel_n * element->period + 1;
+			line++;
 
 			for (k = 0; k < line_config->channel_n; k++) {
 				map = &sai->map[l];
