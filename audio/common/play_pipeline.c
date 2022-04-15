@@ -7,7 +7,7 @@
 #include "os/assert.h"
 #include "os/stdlib.h"
 
-#include "board.h"
+#include "app_board.h"
 
 #include "audio_pipeline.h"
 #include "audio.h"

@@ -7,7 +7,7 @@
 
 #include "fsl_sai.h"
 
-#include "board.h"
+#include "app_board.h"
 #include "irq.h"
 #include "os/assert.h"
 #include "sai_drv.h"

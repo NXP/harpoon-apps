@@ -7,7 +7,7 @@
 #include "fsl_common.h"
 #include "fsl_sai.h"
 
-#include "board.h"
+#include "app_board.h"
 #include "codec_config.h"
 #include "sai_config.h"
 

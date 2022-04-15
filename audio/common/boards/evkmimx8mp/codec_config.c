@@ -13,7 +13,7 @@
 #include "codec_config.h"
 
 #include "os/assert.h"
-#include "board.h"
+#include "app_board.h"
 #include "log.h"
 
 static codec_handle_t wm8960_codec_handle;

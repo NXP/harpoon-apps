@@ -79,6 +79,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonPath}/freertos
     ${BoardPath}
     ${AppPath}/common/boards/include
+    ${AppPath}/common/boards/${BoardName}
     ${SdkDirPath}/devices/MIMX8ML8
 )
 

@@ -8,7 +8,7 @@
 #include "log.h"
 #include "task.h"
 
-#include "board.h"
+#include "app_board.h"
 #include "os/assert.h"
 #include "os/semaphore.h"
 #include "os/stdlib.h"
