@@ -80,6 +80,7 @@ void *play_music_init(void *parameters)
 
 	ctx = os_malloc(sizeof(struct music_ctx));
 	os_assert(ctx, "Playing Music failed with memory allocation error");
+	memset(ctx, 0, sizeof(struct music_ctx));
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;

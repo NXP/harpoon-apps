@@ -204,6 +204,7 @@ void *rec_play2_init(void *parameters)
 
 	ctx = os_malloc(sizeof(struct rec_play2_ctx));
 	os_assert(ctx, "Record and playback failed with memory allocation error");
+	memset(ctx, 0, sizeof(struct rec_play2_ctx));
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;

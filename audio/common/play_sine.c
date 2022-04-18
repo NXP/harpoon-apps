@@ -81,6 +81,7 @@ void *play_sine_init(void *parameters)
 
 	ctx = os_malloc(sizeof(struct sine_ctx));
 	os_assert(ctx, "Playing Sine failed with memory allocation error");
+	memset(ctx, 0, sizeof(struct sine_ctx));
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
