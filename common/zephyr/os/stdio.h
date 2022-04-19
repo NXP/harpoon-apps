@@ -9,5 +9,6 @@
 #include <sys/printk.h>
 
 #define os_printf(...)         printk(__VA_ARGS__)
+#define os_vprintf(fmt, ap)    vprintk(fmt, ap)
 
 #endif /* #ifndef _ZEPHYR_STDIO_H_ */
