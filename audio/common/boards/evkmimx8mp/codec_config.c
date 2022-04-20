@@ -106,6 +106,7 @@ int32_t codec_set_format(enum codec_id cid, uint32_t mclk, uint32_t sample_rate,
 		}
 	}
 	else {
+		err = -1;
 		os_assert(0, "Unexpected codec id (%d)", cid);
 	}
 
@@ -151,6 +152,7 @@ int32_t codec_setup(enum codec_id cid)
 		err = kStatus_Success;
 	}
 	else {
+		err = -1;
 		os_assert(0, "Unexpected codec id (%d)", cid);
 	}
 
@@ -183,6 +185,7 @@ int32_t codec_close(enum codec_id cid)
 		}
 	}
 	else {
+		err = -1;
 		os_assert(0, "Unexpected codec id (%d)", cid);
 	}
 
