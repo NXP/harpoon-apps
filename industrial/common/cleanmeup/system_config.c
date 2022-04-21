@@ -1,0 +1,78 @@
+/*
+ * Copyright 2019 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+#include "system_config.h"
+//#include "storage.h"
+#include <stdio.h>
+
+extern struct system_config system_cfg;
+
+struct board_config *system_config_get_board(void)
+{
+    return (struct board_config *)&system_cfg.board;
+}
+
+//TODO:NEEDS proper implementation
+struct net_config *system_config_get_net(int port_id)
+{
+//    char port[10];
+
+    if (port_id >= BOARD_NUM_PORTS)
+        return NULL;
+
+//    snprintf(port, 10, "/port%u", port_id);
+//    if (storage_cd(port) == 0) {
+//        storage_read_mac_address("hw_addr", system_cfg.net[port_id].hw_addr);
+//        storage_read_ipv4_address("ip_addr", system_cfg.net[port_id].ip_addr);
+//        storage_read_ipv4_address("net_mask", system_cfg.net[port_id].net_mask);
+//        storage_read_ipv4_address("gw_addr", system_cfg.net[port_id].gw_addr);
+//
+//        storage_cd("/");
+//    }
+
+    return &system_cfg.net[port_id];
+}
+
+//TODO:NEEDS proper implementation
+struct avb_app_config *system_config_get_avb_app(void)
+{
+    struct avb_app_config *config = &system_cfg.app.avb_app_config;
+
+//    if (storage_cd("/avb_app") == 0) {
+//        storage_read_uint("mclock_role", &config->mclock_role);
+//
+//        storage_cd("/");
+//    }
+
+    return config;
+}
+
+//TODO:NEEDS proper implementation
+struct tsn_app_config *system_config_get_tsn_app(void)
+{
+    struct tsn_app_config *config = &system_cfg.app.tsn_app_config;
+
+//    if (storage_cd("/tsn_app") == 0) {
+//        storage_read_uint("mode", &config->mode);
+//        storage_read_uint("role", &config->role);
+//        storage_read_uint("num_io_devices", &config->num_io_devices);
+//        storage_read_float("motor_offset", &config->motor_offset);
+//        storage_read_uint("control_strategy", &config->control_strategy);
+//        storage_read_uint("use_st", &config->use_st);
+//        storage_read_uint("use_fp", &config->use_fp);
+//        storage_read_uint("cmd_client", &config->cmd_client);
+//
+//        if (config->mode == SERIAL)
+//            config->period_ns = APP_PERIOD_SERIAL_DEFAULT;
+//
+//        storage_read_uint("period_ns", &config->period_ns);
+//
+//        storage_cd("/");
+//    }
+
+    return config;
+}
+

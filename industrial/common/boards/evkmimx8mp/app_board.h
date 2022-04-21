@@ -12,6 +12,9 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+#define BOARD_NET_TX_CACHEABLE
+#define BOARD_NET_RX_CACHEABLE
+
 #define BOARD_NUM_PORTS      1
 /* PHY configuration */
 #define BOARD_NUM_PHY        2
@@ -44,6 +47,7 @@
 #define BOARD_ENET0_MII_MODE    kENET_QOS_RgmiiMode
 #define BOARD_ENET0_DRV_TYPE    ENET_QOS_t
 #define BOARD_ENET0_DRV_BASE    ENET_QOS_BASE
+#define BOARD_ENET0_DRV_IRQ     ENET_QOS_IRQn
 
 #define BOARD_ENET0_1588_TIMER_CHANNEL_0      kENET_QOS_PtpPpsIstance0
 #define BOARD_ENET0_1588_TIMER_CHANNEL_1      kENET_QOS_PtpPpsIstance2
@@ -57,6 +61,7 @@
 #define BOARD_ENET1_MII_MODE    kENET_RmiiMode
 #define BOARD_ENET1_DRV_TYPE    ENET_t
 #define BOARD_ENET1_DRV_BASE    ENET1_BASE
+#define BOARD_ENET1_DRV_IRQ     ENET1_IRQn
 
 #define BOARD_ENET1_1588_TIMER_CHANNEL_0      kENET_PtpTimerChannel1
 #define BOARD_ENET1_1588_TIMER_CHANNEL_1      kENET_PtpTimerChannel3
@@ -74,5 +79,8 @@
 #define BOARD_GPT_1_CHANNEL          kGPT_InputCapture_Channel2
 #define BOARD_GPT_1_INTERRUPT_MASK   kGPT_InputCapture2InterruptEnable
 #define BOARD_GPT_1_STATUS_FLAG_MASK kGPT_InputCapture2Flag
+
+#define BOARD_GPT_1_CLK_EXT_FREQ    24000000U
+#define BOARD_GPT_1_CLK_SOURCE_TYPE kGPT_ClockSource_Periph
 
 #endif /* _APP_BOARD_H_ */

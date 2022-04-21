@@ -42,4 +42,4 @@ void x##_ctrl(struct hrpn_cmd_ethernet *cmd, unsigned int len, \
 }
 
 STUB_INDUSTRIAL_USE_CASE(can);
-STUB_INDUSTRIAL_USE_CASE(ethernet); /* FIXME: Enable ethernet with ENET */
+STUB_INDUSTRIAL_USE_CASE(ethernet_avb_tsn);

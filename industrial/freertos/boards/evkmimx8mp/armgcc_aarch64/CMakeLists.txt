@@ -47,6 +47,11 @@ set(MCUX_SDK_PROJECT_NAME industrial.elf)
 
 include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
+    "${AppPath}/avb_tsn/tsn_app/alarm_task.c"
+    "${AppPath}/avb_tsn/tsn_app/configs.c"
+    "${AppPath}/avb_tsn/tsn_app/cyclic_task.c"
+    "${AppPath}/avb_tsn/tsn_app/tsn_task.c"
+    "${AppPath}/avb_tsn/tsn_app/tsn_tasks_config.c"
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
@@ -55,10 +60,16 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/industrial.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
+
+    # TODO - remove those files
+    "${AppPath}/common/cleanmeup/enet_qos_drv.c"
+    "${AppPath}/common/cleanmeup/system_config.c"
+    "${AppPath}/common/cleanmeup/tsn_app_test.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}
+    ${AppPath}/avb_tsn/tsn_app
     ${AppPath}/common
     ${AppPath}/common/boards/${BoardName}
     ${AppPath}/freertos
