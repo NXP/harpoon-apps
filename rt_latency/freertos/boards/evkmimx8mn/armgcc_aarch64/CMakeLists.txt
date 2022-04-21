@@ -47,6 +47,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}/freertos
     ${CommonPath}
     ${CommonPath}/freertos
+    ${CommonPath}/libs
     ${CommonPath}/libs/stats
     ${BoardPath}
     ${AppBoardPath}

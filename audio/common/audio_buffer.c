@@ -5,7 +5,7 @@
  */
 
 #include "audio_buffer.h"
-#include "log.h"
+#include "logging/log.h"
 
 /*
  * Audio buffer structure (circular) with single writter/reader.

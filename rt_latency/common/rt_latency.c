@@ -11,7 +11,7 @@
 #include "os/semaphore.h"
 #include "os/unistd.h"
 
-#include "log.h"
+#include "logging/log.h"
 #include "stats.h"
 
 #include "hrpn_ctrl.h"

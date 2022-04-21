@@ -9,7 +9,7 @@
 
 #include "audio_pipeline.h"
 #include "hrpn_ctrl.h"
-#include "log.h"
+#include "logging/log.h"
 #include "mailbox.h"
 
 #define MAX_PIPELINES	4

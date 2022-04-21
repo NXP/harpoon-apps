@@ -7,7 +7,7 @@
 #include "audio_element.h"
 #include "audio_pipeline.h"
 #include "hrpn_ctrl.h"
-#include "log.h"
+#include "logging/log.h"
 #include "mailbox.h"
 
 static void audio_element_response(struct mailbox *m, uint32_t status)

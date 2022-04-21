@@ -9,7 +9,7 @@
 #include "audio_element_routing.h"
 #include "audio_element.h"
 #include "hrpn_ctrl.h"
-#include "log.h"
+#include "logging/log.h"
 #include "mailbox.h"
 
 struct routing_output {

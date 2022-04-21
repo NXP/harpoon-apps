@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "log.h"
+#include "libs/logging/log.h"
 #include "stats.h"
 
 void stats_reset(struct stats *s)

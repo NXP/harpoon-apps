@@ -7,7 +7,7 @@
 #include "audio_element_sai_sink.h"
 #include "audio_element.h"
 #include "audio_format.h"
-#include "log.h"
+#include "logging/log.h"
 
 #include "sai_drv.h"
 

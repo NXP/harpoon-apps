@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #include "app_board.h"
-#include "log.h"
+#include "logging/log.h"
 #include "os/assert.h"
 #include "os/stdlib.h"
 #include "sai_drv.h"

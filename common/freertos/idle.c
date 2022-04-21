@@ -5,7 +5,7 @@
  */
 
 #include "FreeRTOS.h"
-#include "log.h"
+#include "logging/log.h"
 
 static uint64_t cpu_idle = 0, cpu_busy = 0;
 uint64_t cpu_load_work_begin;

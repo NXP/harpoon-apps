@@ -9,7 +9,7 @@
 
 #include "ivshmem.h"
 #include "memory.h"
-#include "log.h"
+#include "libs/logging/log.h"
 
 /* Jailhouse COMM */
 struct jailhouse_console {

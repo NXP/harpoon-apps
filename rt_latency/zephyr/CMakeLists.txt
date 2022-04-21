@@ -12,6 +12,7 @@ zephyr_include_directories(
 	${AppPath}/zephyr/include
 	${CommonPath}
 	${CommonPath}/zephyr/boards
+	${CommonPath}/libs
 	${CommonPath}/libs/jailhouse
 	${CommonPath}/libs/logging
 	${CommonPath}/libs/mailbox

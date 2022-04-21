@@ -6,7 +6,7 @@
  */
 
 #include "app_board.h"
-#include "log.h"
+#include "logging/log.h"
 #include "music.h"
 #include "os/assert.h"
 #include "os/stdlib.h"

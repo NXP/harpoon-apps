@@ -10,7 +10,7 @@
 #include "audio_element.h"
 #include "audio_buffer.h"
 #include "audio_format.h"
-#include "log.h"
+#include "logging/log.h"
 
 struct sine_element {
 	struct audio_buffer *out;
