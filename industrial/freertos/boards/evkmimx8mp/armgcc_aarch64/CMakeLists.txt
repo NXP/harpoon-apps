@@ -79,6 +79,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonPath}/libs
     ${BoardPath}
     ${AppBoardPath}
+    ${GenAVBPath}/include
     ${GenAVBPath}/include/genavb
     ${GenAVBPath}/include/freertos
     ${SdkDirPath}/devices/MIMX8ML8
@@ -88,6 +89,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
+    ${CommonPath}/libs/avb_tsn
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/hlog
     ${CommonPath}/libs/jailhouse
@@ -134,6 +136,7 @@ include(driver_mdio-enet-qos)
 include(driver_phy-common)
 include(driver_phy-device-rtl8211f)
 
+include(lib_avb_tsn)
 include(lib_ctrl)
 include(lib_jailhouse)
 include(lib_hlog)
