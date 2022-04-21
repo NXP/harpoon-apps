@@ -29,6 +29,15 @@ SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX8ML8")
 
+SET(GenAVBPath "${ProjDirPath}/../../../../../../gen_avb_sdk")
+SET(GenAVBBuildPath "${CMAKE_CURRENT_BINARY_DIR}/gen_avb_build")
+SET(FREERTOS_SDK ${SdkDirPath})
+SET(FREERTOS_DIR ${RtosPath})
+SET(FREERTOS_APPS "${ProjDirPath}/../../../../..")
+SET(TARGET "freertos_imx8mp_ca53")
+SET(CONFIG "endpoint_tsn")
+ADD_SUBDIRECTORY(${GenAVBPath} "${GenAVBBuildPath}")
+
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
@@ -59,7 +68,10 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonPath}/libs
     ${BoardPath}
     ${AppBoardPath}
+    ${GenAVBPath}/include/genavb
+    ${GenAVBPath}/include/freertos
     ${SdkDirPath}/devices/MIMX8ML8
+    ${SdkDirPath}/drivers/enet_qos
 )
 
 set(CMAKE_MODULE_PATH
@@ -72,6 +84,14 @@ set(CMAKE_MODULE_PATH
     ${RtosPath}
     ${SdkDirPath}
 )
+
+add_library(avb-core-lib STATIC IMPORTED)
+set_target_properties(avb-core-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/libstack-core.a)
+
+add_library(srp-lib STATIC IMPORTED)
+set_target_properties(srp-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/srp)
+
+add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-freertos srp-lib)
 
 # include entry for cmake components
 
@@ -89,9 +109,18 @@ include(component_lists)
 include(component_serial_manager)
 include(component_serial_manager_uart)
 
+include(driver_cache_armv8a)
 include(driver_clock)
 include(driver_common)
+include(driver_enet_qos)
+include(driver_gpt)
+include(driver_igpio)
 include(driver_iuart)
+include(driver_mdio-common)
+include(driver_mdio-enet)
+include(driver_mdio-enet-qos)
+include(driver_phy-common)
+include(driver_phy-device-rtl8211f)
 
 include(lib_ctrl)
 include(lib_jailhouse)
@@ -107,6 +136,12 @@ include(utility_debug_console)
 include(utilities_misc_utilities)
 
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
+
+target_link_libraries(srp-lib INTERFACE stack-freertos)
+
+target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE avb-core-lib)
+
+target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE stack-freertos)
 
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE m)
 
