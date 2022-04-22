@@ -21,6 +21,7 @@
 #define CONFIG_STATS_LWIP           0
 #define CONFIG_STATS_ASYNC          1
 
+#if CONFIG_STATS_CPU_LOAD
 struct TasksCPULoad_Ctx {
     TaskStatus_t __TaskStatusArray[2][STATS_MAX_TASKS];
     TaskStatus_t *TaskStatusArray;
@@ -28,6 +29,7 @@ struct TasksCPULoad_Ctx {
     uint32_t LastTotalTime;
     BaseType_t LastNbTasks;
 };
+#endif
 
 struct Async_Msg {
     void (*Func)(void *Data);

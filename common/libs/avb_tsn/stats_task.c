@@ -5,9 +5,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "fsl_debug_console.h"
 #include "board.h"
 #include "clock_config.h"
+#include "log.h"
 #include "stats.h"
 
 #include "FreeRTOS.h"
