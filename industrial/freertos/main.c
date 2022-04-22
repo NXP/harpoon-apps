@@ -85,7 +85,7 @@ static int create_task(unsigned int use_case_id, void *data)
 		t->nb_threads, t->priority, t->name);
 
 	xResult = xTaskCreate(data_task, t->name,
-		configMINIMAL_STACK_SIZE + 100, data,
+		configMINIMAL_STACK_SIZE + 800, data,
 		t->priority, NULL);
 
 	return !(xResult == pdPASS);
