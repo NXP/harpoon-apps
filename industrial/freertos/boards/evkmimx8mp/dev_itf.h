@@ -49,8 +49,12 @@ static inline uint32_t dev_get_enet_1588_freq(void *base)
 {
     if (base == ENET1)
         return CLOCK_GetRootClockFreq(kCLOCK_RootEnetTimer);
-    else if (base == ENET_QOS)
-        return CLOCK_GetRootClockFreq(kCLOCK_RootEnetQosTimer);
+    else if (base == ENET_QOS){
+        return CLOCK_GetPllFreq(kCLOCK_SystemPll2Ctrl) / 10 /
+            CLOCK_GetRootPreDivider(kCLOCK_RootEnetQosTimer) /
+            CLOCK_GetRootPostDivider(kCLOCK_RootEnetQosTimer);
+
+    }
     else
         return 0;
 }
