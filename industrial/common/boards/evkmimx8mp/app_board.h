@@ -25,10 +25,10 @@
 #define BOARD_PHY0_MDIO_OPS     &enet_ops         /* MDIO MAC controller operations. */
 #define BOARD_PHY0_OPS          &phyrtl8211f_ops   /* PHY operations. */
 
-#define BOARD_PHY0_TX_LATENCY_100M (650)
-#define BOARD_PHY0_RX_LATENCY_100M (650)
-#define BOARD_PHY0_TX_LATENCY_1G   (330)
-#define BOARD_PHY0_RX_LATENCY_1G   (330)
+#define BOARD_PHY0_TX_LATENCY_100M (650) /* FIXME - Needs calibration, comes from RT1170 which has same phy */
+#define BOARD_PHY0_RX_LATENCY_100M (650) /* FIXME - Needs calibration, comes from RT1170 which has same phy */
+#define BOARD_PHY0_TX_LATENCY_1G   (184)
+#define BOARD_PHY0_RX_LATENCY_1G   (569)
 
 /* Use ENET QOS */
 #define BOARD_USE_ENET_QOS      (1)
@@ -39,10 +39,10 @@
 #define BOARD_PHY1_MDIO_OPS     &enet_qos_ops     /* MDIO MAC controller operations. */
 #define BOARD_PHY1_OPS          &phyrtl8211f_ops  /* PHY operations. */
 
-#define BOARD_PHY1_TX_LATENCY_100M (650)
-#define BOARD_PHY1_RX_LATENCY_100M (650)
-#define BOARD_PHY1_TX_LATENCY_1G   (330)
-#define BOARD_PHY1_RX_LATENCY_1G   (330)
+#define BOARD_PHY1_TX_LATENCY_100M (650) /* FIXME - Needs calibration, comes from RT1170 which has same phy */
+#define BOARD_PHY1_RX_LATENCY_100M (650) /* FIXME - Needs calibration, comes from RT1170 which has same phy */
+#define BOARD_PHY1_TX_LATENCY_1G   (184)
+#define BOARD_PHY1_RX_LATENCY_1G   (569)
 
 #define BOARD_ENET0_MII_MODE    kENET_QOS_RgmiiMode
 #define BOARD_ENET0_DRV_TYPE    ENET_QOS_t
