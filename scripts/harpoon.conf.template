@@ -1,5 +1,5 @@
 ROOT_CELL=/usr/share/jailhouse/cells/%TEMPLATE_SOC%.cell
 INMATE_CELL=/usr/share/jailhouse/cells/%TEMPLATE_SOC%-freertos-audio.cell
-INMATE_BIN=/usr/share/harpoon/inmates/audio.bin
+INMATE_BIN=/usr/share/harpoon/inmates/freertos/audio.bin
 INMATE_ENTRY_ADDRESS=%TEMPLATE_ENTRY%
 INMATE_NAME=freertos
