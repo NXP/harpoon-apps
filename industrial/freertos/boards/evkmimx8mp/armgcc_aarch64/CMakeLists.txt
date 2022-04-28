@@ -41,6 +41,10 @@ ADD_SUBDIRECTORY(${GenAVBPath} "${GenAVBBuildPath}")
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
+# Overwrite unsupported configurations
+add_compile_options(-DSERIAL_MODE=0)
+add_compile_options(-DBUILD_MOTOR=0)
+
 project(industrial)
 
 set(MCUX_SDK_PROJECT_NAME industrial.elf)
@@ -57,14 +61,11 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/can.c"
     "${AppPath}/common/ethernet.c"
+    "${AppPath}/common/ethernet_avb_tsn.c"
     "${AppPath}/common/industrial.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
-
-    # TODO - remove those files
-    "${AppPath}/common/cleanmeup/enet_qos_drv.c"
-    "${AppPath}/common/cleanmeup/system_config.c"
-    "${AppPath}/common/cleanmeup/tsn_app_test.c"
+    "${AppBoardPath}/hardware_enet_qos.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE

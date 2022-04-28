@@ -44,10 +44,10 @@ const struct industrial_use_case use_cases[] =
 		},
 		.ops = {
 			[0] = {
-				.init = ethernet_init,
-				.exit = ethernet_exit,
-				.run = ethernet_run,
-				.stats = ethernet_stats,
+				.init = ethernet_avb_tsn_init,
+				.exit = ethernet_avb_tsn_exit,
+				.run = ethernet_avb_tsn_run,
+				.stats = ethernet_avb_tsn_stats,
 			},
 		},
 	},

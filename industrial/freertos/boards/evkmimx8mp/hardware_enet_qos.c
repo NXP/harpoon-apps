@@ -1,13 +1,11 @@
 /*
 * Copyright 2022 NXP
-* All rights reserved.
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
 
-#include "enet_qos_drv.h"
+#include "hardware_enet_qos.h"
 #include "fsl_gpio.h"
-#include "fsl_iomuxc.h"
 
 void ENET_QOS_SetSYSControl(enet_qos_mii_mode_t miiMode)
 {

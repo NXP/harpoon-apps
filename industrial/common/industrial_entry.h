@@ -74,10 +74,10 @@ int can_run(void *priv, struct event *e);
 void can_stats(void *priv);
 void can_exit(void *priv);
 
-void *ethernet_init(void *parameters);
-int ethernet_run(void *priv, struct event *e);
-void ethernet_stats(void *priv);
-void ethernet_exit(void *priv);
+void *ethernet_avb_tsn_init(void *parameters);
+int ethernet_avb_tsn_run(void *priv, struct event *e);
+void ethernet_avb_tsn_stats(void *priv);
+void ethernet_avb_tsn_exit(void *priv);
 
 void *industrial_control_init(int nb_use_cases);
 void *industrial_get_data_ctx(struct industrial_ctx *ctx, int use_case_id);
