@@ -92,6 +92,7 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/hlog
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/mailbox
+    ${CommonPath}/libs/stats
     ${RtosPath}
     ${SdkDirPath}
 )
@@ -137,6 +138,7 @@ include(lib_ctrl)
 include(lib_jailhouse)
 include(lib_hlog)
 include(lib_mailbox)
+include(lib_stats)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)

@@ -8,7 +8,8 @@
 #include "cyclic_task.h"
 #include "tsn_tasks_config.h"
 
-#include "stats_task.h"
+#include "stats/stats.h"
+#include "avb_tsn/stats_task.h"
 #include "avb_tsn/log.h"
 #include "avb_tsn/types.h"
 

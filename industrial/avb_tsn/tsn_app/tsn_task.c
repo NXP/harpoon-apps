@@ -7,7 +7,7 @@
 
 #include "tsn_task.h"
 
-#include "stats_task.h"
+#include "avb_tsn/stats_task.h"
 #include "avb_tsn/log.h"
 #include "avb_tsn/types.h"
 
