@@ -8,7 +8,7 @@
 #include "os/counter.h"
 
 #include "irq.h"
-#include "libs/logging/log.h"
+#include "hlog.h"
 
 #include "fsl_device_registers.h"
 #include "fsl_gpt.h"

@@ -52,7 +52,6 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}/freertos
     ${CommonPath}
     ${CommonPath}/freertos
-    ${CommonPath}/libs
     ${BoardPath}
     ${AppBoardPath}
     ${SdkDirPath}/devices/MIMX8MM6
@@ -61,7 +60,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
-    ${CommonPath}/libs/logging
+    ${CommonPath}/libs/hlog
     ${RtosPath}
     ${SdkDirPath}
 )
@@ -77,7 +76,7 @@ include(device_system_ca53)
 include(common_freertos)
 include(common_freertos_core_armv8a)
 
-include(lib_logging)
+include(lib_hlog)
 
 include(component_iuart_adapter)
 include(component_lists)

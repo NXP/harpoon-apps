@@ -14,7 +14,7 @@
 
 #include "os/assert.h"
 #include "app_board.h"
-#include "logging/log.h"
+#include "hlog.h"
 
 static codec_handle_t wm8524_codec_handle;
 static codec_handle_t pcm512x_codec_handle;

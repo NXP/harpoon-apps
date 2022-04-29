@@ -12,9 +12,8 @@ zephyr_include_directories(
 	${AppPath}/zephyr/include
 	${CommonPath}
 	${CommonPath}/zephyr/boards
-	${CommonPath}/libs
 	${CommonPath}/libs/jailhouse
-	${CommonPath}/libs/logging
+	${CommonPath}/libs/hlog
 	${CommonPath}/libs/mailbox
 	${CommonPath}/libs/ctrl
 	${ProjDirPath}
@@ -25,7 +24,7 @@ set(MCUX_SDK_PROJECT_NAME app)
 set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/jailhouse
-    ${CommonPath}/libs/logging
+    ${CommonPath}/libs/hlog
     ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/stats
 )
@@ -34,7 +33,7 @@ zephyr_compile_definitions(OS_ZEPHYR)
 
 include(lib_stats)
 include(lib_jailhouse)
-include(lib_logging)
+include(lib_hlog)
 include(lib_mailbox)
 include(lib_ctrl)
 

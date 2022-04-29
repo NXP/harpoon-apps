@@ -12,7 +12,7 @@
 #include "os/assert.h"
 
 #include "ivshmem.h"
-#include "logging/log.h"
+#include "hlog.h"
 #include "mailbox.h"
 #include "rt_latency.h"
 

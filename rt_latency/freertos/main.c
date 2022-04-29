@@ -23,7 +23,7 @@
 #include "stats.h"
 #include "ivshmem.h"
 #include "hrpn_ctrl.h"
-#include "logging/log.h"
+#include "hlog.h"
 #include "mailbox.h"
 #include "version.h"
 

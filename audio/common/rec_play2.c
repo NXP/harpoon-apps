@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #include "FreeRTOS.h"
-#include "logging/log.h"
+#include "hlog.h"
 #include "task.h"
 
 #include "app_board.h"

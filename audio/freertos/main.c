@@ -8,7 +8,7 @@
 #include "task.h"
 
 #include "board.h"
-#include "logging/log.h"
+#include "hlog.h"
 #include "os/assert.h"
 
 #include "pin_mux.h"

@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "log.h"
+#include "hlog.h"
 
 /** Current log level configuration */
-log_level_t log_level_config = LOG_INFO;
+hlog_level_t hlog_level_config = LOG_INFO;

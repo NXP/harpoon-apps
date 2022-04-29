@@ -11,7 +11,7 @@
 #include "audio_element_dtmf.h"
 #include "audio_element.h"
 #include "audio_format.h"
-#include "logging/log.h"
+#include "hlog.h"
 
 #define USEC_PER_SEC	1000000
 

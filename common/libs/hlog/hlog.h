@@ -4,8 +4,8 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-#ifndef _LOG_H_
-#define _LOG_H_
+#ifndef _HLOG_H_
+#define _HLOG_H_
 
 #include "os/stdio.h"
 
@@ -18,10 +18,10 @@ typedef enum {
   LOG_DEBUG,
 
   LOG_LEVEL_MAX
-} log_level_t;
+} hlog_level_t;
 
 /** Current log level configuration */
-extern log_level_t log_level_config;
+extern hlog_level_t hlog_level_config;
 
 /** Logging macros definitions
  *
@@ -33,7 +33,7 @@ extern log_level_t log_level_config;
  */
 #define log(LEVEL, format, ...) \
   do { \
-    if (log_level_config >= LOG_ ## LEVEL) \
+    if (hlog_level_config >= LOG_ ## LEVEL) \
          os_printf("%-4.4s: %-22.22s: " format "\r", #LEVEL, __func__, ##__VA_ARGS__); \
   } while (0)
 
@@ -45,17 +45,17 @@ extern log_level_t log_level_config;
 
 #define log_raw(LEVEL, ...) \
   do { \
-    if (log_level_config >= LOG_ ## LEVEL) \
+    if (hlog_level_config >= LOG_ ## LEVEL) \
          os_printf(__VA_ARGS__); \
   } while (0)
 
 #define log_raw_info(...) log_raw(INFO, __VA_ARGS__)
 
 /** Set current log level configuration */
-static inline void log_level_config_set(log_level_t log_level)
+static inline void hlog_level_config_set(hlog_level_t hlog_level)
 {
-    if (log_level < LOG_LEVEL_MAX)
-        log_level_config = log_level;
+    if (hlog_level < LOG_LEVEL_MAX)
+        hlog_level_config = hlog_level;
 }
 
-#endif /* _LOG_H_ */
+#endif /* _HLOG_H_ */

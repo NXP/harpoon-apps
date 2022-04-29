@@ -11,7 +11,7 @@
 
 #include "audio_pipeline.h"
 #include "audio.h"
-#include "logging/log.h"
+#include "hlog.h"
 #include "codec_config.h"
 #include "sai_clock_config.h"
 #include "sai_drv.h"

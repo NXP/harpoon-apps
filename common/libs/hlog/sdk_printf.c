@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "log.h"
+#include "hlog.h"
 #include "sdk_printf.h"
 
 int sdk_printf(const char *fmt_s, ...)

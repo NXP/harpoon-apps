@@ -76,7 +76,6 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}/common
     ${CommonPath}
     ${CommonPath}/freertos
-    ${CommonPath}/libs
     ${BoardPath}
     ${AppPath}/common/boards/include
     ${AppPath}/common/boards/${BoardName}
@@ -87,7 +86,7 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
     ${CommonPath}/libs/jailhouse
-    ${CommonPath}/libs/logging
+    ${CommonPath}/libs/hlog
     ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/ctrl
     ${RtosPath}
@@ -106,7 +105,7 @@ include(common_freertos)
 include(common_freertos_core_armv8a)
 
 include(lib_jailhouse)
-include(lib_logging)
+include(lib_hlog)
 include(lib_mailbox)
 include(lib_ctrl)
 
