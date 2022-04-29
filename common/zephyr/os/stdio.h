@@ -8,7 +8,22 @@
 
 #include <sys/printk.h>
 
-#define os_printf(...)         printk(__VA_ARGS__)
-#define os_vprintf(fmt, ap)    vprintk(fmt, ap)
+static inline int os_printf(const char *fmt_s, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt_s);
+    vprintk(fmt_s, ap);
+    va_end(ap);
+
+    return 0;
+}
+
+static inline int os_vprintf(const char *fmt_s, va_list ap)
+{
+    vprintk(fmt_s, ap);
+
+    return 0;
+}
 
 #endif /* #ifndef _ZEPHYR_STDIO_H_ */

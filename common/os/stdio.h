@@ -13,4 +13,7 @@
   #include "freertos/os/stdio.h"
 #endif
 
+int os_printf(const char *fmt_s, ...);
+int os_vprintf(const char *fmt_s, va_list ap);
+
 #endif /* #ifndef _COMMON_STDIO_H_ */
