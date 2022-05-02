@@ -18,7 +18,7 @@ struct sai_active_config {
 	enum codec_id cid;
 };
 
-extern const struct sai_active_config sai_active_list[];
-extern const int32_t sai_active_list_nelems;
+extern struct sai_active_config sai_active_list[];
+extern int32_t sai_active_list_nelems;
 
 #endif /* _SAI_CONFIG_H_ */

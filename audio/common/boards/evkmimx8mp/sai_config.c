@@ -11,7 +11,7 @@
 #include "codec_config.h"
 #include "sai_config.h"
 
-const struct sai_active_config sai_active_list[] = {
+struct sai_active_config sai_active_list[] = {
 	{
 		.sai_base = SAI5_SAI,
 		.masterSlave = SAI5_MASTER_SLAVE,
@@ -36,4 +36,4 @@ const struct sai_active_config sai_active_list[] = {
 	},
 };
 
-const int32_t sai_active_list_nelems = ARRAY_SIZE(sai_active_list);
+int32_t sai_active_list_nelems = ARRAY_SIZE(sai_active_list);

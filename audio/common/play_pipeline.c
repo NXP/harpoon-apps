@@ -91,6 +91,9 @@ static void sai_setup(struct pipeline_ctx *ctx)
 	for (i = 0; i < sai_active_list_nelems; i++) {
 		uint32_t sai_clock_root;
 		int sai_id;
+		enum codec_id cid;
+		int32_t ret;
+
 		sai_config.sai_base = sai_active_list[i].sai_base;
 		sai_config.bit_width = ctx->bit_width;
 		sai_config.sample_rate = ctx->sample_rate;
@@ -115,6 +118,22 @@ static void sai_setup(struct pipeline_ctx *ctx)
 			sai_config.rx_callback = NULL;
 			sai_config.rx_user_data = NULL;
 			sai_config.working_mode = SAI_POLLING_MODE;
+		}
+
+		/* Configure attached codec */
+		cid = sai_active_list[i].cid;
+		ret = codec_setup(cid);
+		if (ret != kStatus_Success) {
+			if ((i == 0) && (sai_active_list[i].masterSlave == kSAI_Slave)) {
+				/* First SAI in the list manages interrupts: it cannot be
+				 * slave if no codec is connected
+				 */
+				log_info("No codec found on SAI%d, forcing master mode\n",
+						get_sai_id(sai_active_list[i].sai_base));
+				sai_active_list[i].masterSlave = kSAI_Master;
+			}
+		} else {
+			codec_set_format(cid, sai_config.source_clock_hz, sai_config.sample_rate, ctx->bit_width);
 		}
 
 		sai_config.masterSlave = sai_active_list[i].masterSlave;
@@ -142,8 +161,6 @@ void *play_pipeline_init(void *parameters)
 	struct pipeline_ctx *ctx;
 	size_t period = DEFAULT_PERIOD;
 	uint32_t rate = DEFAULT_SAMPLE_RATE;
-	enum codec_id cid;
-	int i;
 
 	if (assign_nonzero_valid_val(period, cfg->period, supported_period) != 0) {
 		log_err("Period %d frames is not supported\n", cfg->period);
@@ -181,25 +198,6 @@ void *play_pipeline_init(void *parameters)
 	ctx->event_data = cfg->event_data;
 
 	sai_setup(ctx);
-
-	/* Configure each active codec */
-	for (i = 0; i < sai_active_list_nelems; i++) {
-		uint32_t sai_clock_root;
-		uint32_t mclk;
-		int32_t ret;
-		int sai_id;
-
-		cid = sai_active_list[i].cid;
-		ret = codec_setup(cid);
-		if (ret != kStatus_Success)
-			continue;
-
-		sai_id = get_sai_id(sai_active_list[i].sai_base);
-		os_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
-		sai_clock_root = get_sai_clock_root(sai_id - 1);
-		mclk = CLOCK_GetPllFreq(sai_active_list[i].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
-		codec_set_format(cid, mclk, rate, ctx->bit_width);
-	}
 
 	log_info("Starting pipeline (Sample Rate: %d Hz, Period: %u frames)\n",
 			rate, (uint32_t)period);
