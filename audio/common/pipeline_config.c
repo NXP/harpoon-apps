@@ -6,7 +6,7 @@
 
 #include "audio_pipeline.h"
 
-struct audio_pipeline_config pipeline_config = {
+const struct audio_pipeline_config pipeline_config = {
 	.stages = 3,
 
 	.stage[0] = {

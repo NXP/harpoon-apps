@@ -17,7 +17,7 @@
 #include "sai_drv.h"
 #include "sai_config.h"
 
-extern struct audio_pipeline_config pipeline_config;
+extern const struct audio_pipeline_config pipeline_config;
 
 #define DEFAULT_PERIOD		8
 #define DEFAULT_SAMPLE_RATE	48000
@@ -138,6 +138,7 @@ static void sai_close(struct pipeline_ctx *ctx)
 void *play_pipeline_init(void *parameters)
 {
 	struct audio_config *cfg = parameters;
+	struct audio_pipeline_config *pipeline_cfg;
 	struct pipeline_ctx *ctx;
 	size_t period = DEFAULT_PERIOD;
 	uint32_t rate = DEFAULT_SAMPLE_RATE;
@@ -154,15 +155,19 @@ void *play_pipeline_init(void *parameters)
 		goto err;
 	}
 
-	ctx = os_malloc(sizeof(struct pipeline_ctx));
+	ctx = os_malloc(sizeof(struct pipeline_ctx) + sizeof(pipeline_config));
 	os_assert(ctx, "Audio pipeline failed with memory allocation error");
 	memset(ctx, 0, sizeof(struct pipeline_ctx));
 
-	/* override pipeline configuration */
-	pipeline_config.sample_rate = rate;
-	pipeline_config.period = period;
+	pipeline_cfg = (struct audio_pipeline_config *)(ctx + 1);
 
-	ctx->pipeline = audio_pipeline_init(&pipeline_config);
+	memcpy(pipeline_cfg, &pipeline_config, sizeof(pipeline_config));
+
+	/* override pipeline configuration */
+	pipeline_cfg->sample_rate = rate;
+	pipeline_cfg->period = period;
+
+	ctx->pipeline = audio_pipeline_init(pipeline_cfg);
 	if (!ctx->pipeline)
 		goto err_init;
 
