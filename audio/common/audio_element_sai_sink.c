@@ -11,6 +11,8 @@
 
 #include "sai_drv.h"
 
+#define SAI_TX_FIFO_PERIODS	2
+
 struct sai_sink_map {
 	volatile uint32_t *tx_fifo;	/* sai tx fifo address */
 	struct audio_buffer *in;	/* input audio buffer address */
@@ -226,6 +228,11 @@ int sai_sink_element_check_config(struct audio_element_config *config)
 
 			if (line_config->channel_n > SAI_TX_INSTANCE_MAX_CHANNELS) {
 				log_err("sai sink: invalid channels: %u\n", line_config->channel_n);
+				goto err;
+			}
+
+			if ((SAI_TX_FIFO_PERIODS * line_config->channel_n * config->period) > SAI_TX_MAX_FIFO_SIZE) {
+				log_err("sai sink: invalid tx fifo size: %u\n", SAI_TX_FIFO_PERIODS * line_config->channel_n * config->period);
 				goto err;
 			}
 		}

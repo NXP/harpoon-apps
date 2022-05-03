@@ -13,6 +13,7 @@
 #define SAI_RX_MAX_ID			8
 #define SAI_RX_INSTANCE_MAX_LINE	8
 #define SAI_RX_INSTANCE_MAX_CHANNELS	8
+#define SAI_RX_MAX_FIFO_SIZE		128
 
 /* Fixed mapping between sai instances/lines/channels and output buffers
  * e.g

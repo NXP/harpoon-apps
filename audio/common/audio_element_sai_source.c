@@ -11,6 +11,8 @@
 
 #include "sai_drv.h"
 
+#define SAI_RX_FIFO_PERIODS	2
+
 /*
  Sai source
 
@@ -233,6 +235,13 @@ int sai_source_element_check_config(struct audio_element_config *config)
 				log_err("sai source: invalid channels: %u\n", line_config->channel_n);
 				goto err;
 			}
+
+			if ((SAI_RX_FIFO_PERIODS * line_config->channel_n * config->period) > SAI_RX_MAX_FIFO_SIZE) {
+				log_err("sai source: invalid rx fifo size: %u\n",
+					SAI_RX_FIFO_PERIODS * line_config->channel_n * config->period);
+				goto err;
+			}
+
 		}
 	}
 

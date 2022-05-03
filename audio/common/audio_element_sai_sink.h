@@ -13,6 +13,7 @@
 #define SAI_TX_MAX_ID			8
 #define SAI_TX_INSTANCE_MAX_LINE	8
 #define SAI_TX_INSTANCE_MAX_CHANNELS	8
+#define SAI_TX_MAX_FIFO_SIZE		128
 
 /* Fixed mapping between input buffers and sai instances/lines/channels
  * e.g
