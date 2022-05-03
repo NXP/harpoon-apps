@@ -30,8 +30,6 @@ use case 3
 
 */
 
-extern uint32_t sai_dummy[65];
-
 struct sai_source_map {
 	volatile uint32_t *rx_fifo;	/* sai rx fifo address */
 	struct audio_buffer *out;	/* output audio buffer address */
@@ -55,14 +53,6 @@ struct sai_source_element {
 	void **base;
 	bool started;
 };
-
-static void *sai_baseaddr(unsigned int id)
-{
-	if (!id)
-		return &sai_dummy;
-
-	return __sai_base(id);
-}
 
 static int sai_source_element_run(struct audio_element *element)
 {
@@ -142,8 +132,7 @@ static void sai_source_element_reset(struct audio_element *element)
 	int i;
 
 	for (i = 0; i < sai->sai_n; i++) {
-		if (sai->base[i] != &sai_dummy)
-			__sai_rx_reset(sai->base[i]);
+		__sai_rx_reset(sai->base[i]);
 	}
 
 	for (i = 0; i < sai->out_n; i++)
@@ -285,7 +274,7 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 	for (i = 0; i < config->u.sai_source.sai_n; i++) {
 		sai_config = &config->u.sai_source.sai[i];
 
-		sai->base[i] = sai_baseaddr(sai_config->id);
+		sai->base[i] = __sai_base(sai_config->id);
 		if (!sai->base[i])
 			goto err;
 

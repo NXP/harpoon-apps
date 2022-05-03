@@ -64,18 +64,9 @@ const struct audio_pipeline_config pipeline_config = {
 		.element[4] = {
 			.type = AUDIO_ELEMENT_SAI_SOURCE,
 			.u.sai_source = {
-				.sai_n = 3,
+				.sai_n = 2,
 				.sai = {
 					[0] = {
-						.id = 0,
-						.line_n = 1,
-						.line = {
-							[0] = {
-								.channel_n = 2,
-							},
-						},
-					},
-					[1] = {
 						.id = 5,
 						.line_n = 1,
 						.line = {
@@ -84,7 +75,7 @@ const struct audio_pipeline_config pipeline_config = {
 							},
 						},
 					},
-					[2] = {
+					[1] = {
 						.id = 3,
 						.line_n = 1,
 						.line = {
@@ -95,8 +86,8 @@ const struct audio_pipeline_config pipeline_config = {
 					},
 				},
 			},
-			.outputs = 6,
-			.output = {4, },	/* 4 - 9 */
+			.outputs = 4,
+			.output = {4, },	/* 4 - 7 */
 		},
 	},
 
@@ -110,11 +101,11 @@ const struct audio_pipeline_config pipeline_config = {
 
 			},
 
-			.inputs = 10,
-			.input = {0, }, 	/* 0 - 9 */
+			.inputs = 8,
+			.input = {0, }, 	/* 0 - 7 */
 
-			.outputs = 6,
-			.output = {10, },	/* 10 - 15 */
+			.outputs = 4,
+			.output = {8, },	/* 8 - 11 */
 		},
 	},
 
@@ -125,18 +116,9 @@ const struct audio_pipeline_config pipeline_config = {
 		.element[0] = {
 			.type = AUDIO_ELEMENT_SAI_SINK,
 			.u.sai_sink = {
-				.sai_n = 3,
+				.sai_n = 2,
 				.sai = {
 					[0] = {
-						.id = 0,
-						.line_n = 1,
-						.line = {
-							[0] = {
-								.channel_n = 2,
-							},
-						},
-					},
-					[1] = {
 						.id = 5,
 						.line_n = 1,
 						.line = {
@@ -145,7 +127,7 @@ const struct audio_pipeline_config pipeline_config = {
 							},
 						},
 					},
-					[2] = {
+					[1] = {
 						.id = 3,
 						.line_n = 1,
 						.line = {
@@ -157,12 +139,12 @@ const struct audio_pipeline_config pipeline_config = {
 				},
 			},
 
-			.inputs = 6,
-			.input = {10, },	/* 10 - 15 */
+			.inputs = 4,
+			.input = {8, },	/* 8 - 11 */
 		},
 	},
 
-	.buffers = 16,
+	.buffers = 12,
 
-	.buffer_storage = 16,
+	.buffer_storage = 12,
 };

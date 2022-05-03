@@ -34,16 +34,6 @@ struct sai_sink_element {
 	bool started;
 };
 
-uint32_t sai_dummy[65] = {0};
-
-static void *sai_baseaddr(unsigned int id)
-{
-	if (!id)
-		return &sai_dummy;
-
-	return __sai_base(id);
-}
-
 static int sai_sink_element_run(struct audio_element *element)
 {
 	struct sai_sink_element *sai = element->data;
@@ -118,10 +108,8 @@ static int sai_sink_element_run(struct audio_element *element)
 			/* FIXME */
 			/* If some SAI's are only used for Rx, they will be missing below */
 			/* For multi SAI sync, we should enable the asynchronous/master one last */
-			if (sai->base[i] != &sai_dummy) {
-				__sai_enable_rx(sai->base[i], false);
-				__sai_enable_tx(sai->base[i], false);
-			}
+			__sai_enable_rx(sai->base[i], false);
+			__sai_enable_tx(sai->base[i], false);
 		}
 
 		sai->started = true;
@@ -142,8 +130,7 @@ static void sai_sink_element_reset(struct audio_element *element)
 	int i;
 
 	for (i = 0; i < sai->sai_n; i++) {
-		if (sai->base[i] != &sai_dummy)
-			__sai_tx_reset(sai->base[i]);
+		__sai_tx_reset(sai->base[i]);
 	}
 
 	sai->started = false;
@@ -282,7 +269,7 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 	for (i = 0; i < config->u.sai_sink.sai_n; i++) {
 		sai_config = &config->u.sai_sink.sai[i];
 
-		sai->base[i] = sai_baseaddr(sai_config->id);
+		sai->base[i] = __sai_base(sai_config->id);
 		if (!sai->base[i])
 			goto err;
 
