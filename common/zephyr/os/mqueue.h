@@ -7,6 +7,8 @@
 #ifndef _ZEPHYR_MQUEUE_H_
 #define _ZEPHYR_MQUEUE_H_
 
+#include "os/assert.h"
+
 #include <kernel.h>
 
 typedef struct k_msgq os_mqd_t;
