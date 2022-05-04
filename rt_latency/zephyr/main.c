@@ -248,7 +248,7 @@ void main(void)
 
 	log_info("running\n");
 
-	memset(ctx, sizeof(struct main_ctx), 0);
+	memset(ctx, 0, sizeof(*ctx));
 
 	rc = ivshmem_init(0, &mem);
 	os_assert(!rc, "ivshmem initialization failed, can not proceed\n");
