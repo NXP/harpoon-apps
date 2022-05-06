@@ -7,6 +7,7 @@
 #ifndef _INDUSTRIAL_H_
 #define _INDUSTRIAL_H_
 
+#include "hrpn_ctrl.h"
 #include "industrial_entry.h"
 
 #include <stdint.h>
@@ -21,5 +22,8 @@ enum industrial_event {
 	EVENT_TYPE_TX_RX,
 	EVENT_TYPE_START
 };
+
+void ethernet_ctrl(struct hrpn_cmd_ethernet *cmd, unsigned int len,
+	       struct mailbox *m, void *priv);
 
 #endif /* _INDUSTRIAL_H_ */

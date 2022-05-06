@@ -35,6 +35,7 @@ enum {
 	HRPN_CMD_TYPE_CAN_STOP,
 	HRPN_CMD_TYPE_ETHERNET_RUN = 0x600,
 	HRPN_CMD_TYPE_ETHERNET_STOP,
+	HRPN_CMD_TYPE_ETHERNET_SET_MAC_ADDR,
 	HRPN_RESP_TYPE_INDUSTRIAL = 0x6ff,
 };
 
@@ -89,6 +90,25 @@ struct hrpn_resp_industrial {
 	uint32_t status;
 };
 
+struct hrpn_cmd_ethernet_addr {
+	uint8_t address[6];
+};
+
+struct hrpn_cmd_ethernet_common {
+	uint32_t type;		/* command type */
+};
+
+struct hrpn_cmd_ethernet_set_mac_addr {
+	uint32_t type;		/* command type */
+	struct hrpn_cmd_ethernet_addr mac;
+};
+
+struct hrpn_cmd_ethernet {
+	union {
+    struct hrpn_cmd_ethernet_common common;
+    struct hrpn_cmd_ethernet_set_mac_addr set_mac_addr;
+	} u;
+};
 
 struct hrpn_cmd {
 	uint32_t type;
@@ -109,6 +129,7 @@ struct hrpn_command {
 		struct hrpn_cmd_audio_pipeline audio_pipeline;
 		struct hrpn_cmd_industrial_run industrial_run;
 		struct hrpn_cmd_industrial_stop industrial_stop;
+		struct hrpn_cmd_ethernet ethernet;
 	} u;
 };
 

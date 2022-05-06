@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -21,6 +22,7 @@ void ethernet_usage(void)
 {
 	printf(
 		"\nIndustrial ethernet options:\n"
+		"\t-a <mac_addr>  set hardware MAC address (default 91:e0:f0:00:fe:70)\n"
 		"\t-r             run ethernet\n"
 		"\t-s             stop ethernet\n"
 	);
@@ -73,6 +75,31 @@ static int ethernet_stop(struct mailbox *m)
 	return default_stop(m, HRPN_CMD_TYPE_ETHERNET_STOP);
 }
 
+static int ethernet_set_mac_address(struct mailbox *m, uint8_t mac_addr[6])
+{
+	struct hrpn_cmd_ethernet_set_mac_addr set_mac_addr;
+	struct hrpn_resp_industrial resp;
+	unsigned int len;
+
+	set_mac_addr.type = HRPN_CMD_TYPE_ETHERNET_SET_MAC_ADDR;
+	memcpy(set_mac_addr.mac.address, mac_addr, sizeof(set_mac_addr.mac.address));
+	len = sizeof(resp);
+
+	return command(m, &set_mac_addr, sizeof(set_mac_addr), HRPN_RESP_TYPE_INDUSTRIAL, &resp, &len, COMMAND_TIMEOUT);
+}
+
+static int read_mac_address(char *buf, uint8_t *mac)
+{
+#define NB_OCTETS	6
+    int canary = 3 * NB_OCTETS - 1; /* octets + ":" separators */
+    int rc;
+
+    buf[canary] = '\0';
+    rc = sscanf(buf, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
+
+    return (rc == NB_OCTETS) ? 0 : -1;
+}
+
 static int industrial_main(int option, char *optarg, struct mailbox *m,
 	int (*run)(struct mailbox *), int (*stop)(struct mailbox *))
 {
@@ -113,11 +140,21 @@ out:
 
 int ethernet_main(int argc, char *argv[], struct mailbox *m)
 {
+	uint8_t mac_addr[6];
 	int option;
 	int rc = 0;
 
-	while ((option = getopt(argc, argv, "rsv")) != -1) {
+	while ((option = getopt(argc, argv, "a:rsv")) != -1) {
 		switch (option) {
+		case 'a':
+			if (read_mac_address(optarg, mac_addr) < 0) {
+				printf("Invalid MAC address\n");
+				rc = -1;
+				goto out;
+			}
+			ethernet_set_mac_address(m, mac_addr);
+			break;
+
 		default:
 			rc = industrial_main(option, optarg, m, ethernet_run, ethernet_stop);
 			break;

@@ -178,6 +178,12 @@ static void industrial_command_handler(struct industrial_ctx *ctx)
 
 		break;
 
+	case HRPN_CMD_TYPE_ETHERNET_SET_MAC_ADDR:
+		data = industrial_get_data_ctx(ctx, INDUSTRIAL_USE_CASE_ETHERNET);
+		ethernet_ctrl(&cmd.u.ethernet, len, mb, data);
+
+		break;
+
 	default:
 		response(mb, HRPN_RESP_STATUS_ERROR);
 		break;
