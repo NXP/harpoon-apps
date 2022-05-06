@@ -108,8 +108,6 @@ static int32_t enet_receive(uint32_t *length)
 void enet_test(void)
 {
     uint32_t tx_pass_cnt, rx_pass_cnt, rx_err_cnt, rx_empty_cnt;
-    const clock_ip_name_t enet_clock[] = ENET_CLOCKS;
-    uint32_t instance = ENET_GetInstance(ENET);
     enet_buffer_config_t buffer_config = {0};
     uint32_t enet_ipg_freq, length, count;
     phy_config_t phy_config = {0};
@@ -136,7 +134,6 @@ void enet_test(void)
     buffer_config.txMaintainEnable = true;
     buffer_config.txFrameInfo = NULL;
 
-    CLOCK_EnableClock(enet_clock[instance]);
     enet_ipg_freq = CLOCK_GetFreq(kCLOCK_EnetIpgClk);
 
     ENET_GetDefaultConfig(&config);
