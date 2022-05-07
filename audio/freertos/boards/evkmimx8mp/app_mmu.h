@@ -25,10 +25,6 @@
 			      I2C3_BASE, KB(64),			\
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),	\
 									\
-	MMU_REGION_FLAT_ENTRY("IOMUXC",					\
-			      IOMUXC_BASE, KB(64),			\
-			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),	\
-									\
 	MMU_REGION_FLAT_ENTRY("SAI1",					\
 			      I2S1_BASE, KB(64),			\
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),	\

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -19,10 +19,6 @@
 						\
 	MMU_REGION_FLAT_ENTRY("FLEXCAN1",			\
 			      FLEXCAN1_BASE, KB(64),		\
-			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS), \
-						\
-	MMU_REGION_FLAT_ENTRY("IOMUXC",					\
-			      IOMUXC_BASE, KB(64),			\
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
 
 #endif /* _APP_MMU_H_ */

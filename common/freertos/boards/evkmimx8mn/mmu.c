@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 NXP
+ * Copyright 2020-2022 NXP
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -92,6 +92,10 @@ static const struct ARM_MMU_region mmu_regions[] = {
 
 	MMU_REGION_FLAT_ENTRY("CCM",
 			      CCM_BASE, KB(64),
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
+
+	MMU_REGION_FLAT_ENTRY("IOMUXC",
+			      IOMUXC_BASE, KB(64),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
 
 	MMU_REGION_FLAT_ENTRY("UART2",
