@@ -67,10 +67,10 @@ const static struct mode_handler handler[] =
 		.stats = rec_play_stats,
 	},
 	[4] = {
-		.init = rec_play2_init,
-		.exit = rec_play2_exit,
-		.run = rec_play2_run,
-		.stats = rec_play2_stats,
+		.init = NULL,
+		.exit = NULL,
+		.run = NULL,
+		.stats = NULL,
 	},
 	[5] = {
 		.init = play_pipeline_init,
@@ -131,7 +131,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	if (ctx->handler)
 		goto exit;
 
-	if (run->id >= ARRAY_SIZE(handler))
+	if (run->id >= ARRAY_SIZE(handler) || !handler[run->id].init)
 		goto exit;
 
 	cfg.event_send = data_send_event;

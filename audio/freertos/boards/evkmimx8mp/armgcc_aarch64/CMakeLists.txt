@@ -68,7 +68,6 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/play_pipeline.c"
     "${AppPath}/common/play_sine.c"
     "${AppPath}/common/rec_play.c"
-    "${AppPath}/common/rec_play2.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
