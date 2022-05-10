@@ -5,12 +5,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "fsl_sai.h"
-
 #include "app_board.h"
 #include "os/irq.h"
 #include "os/assert.h"
 #include "sai_drv.h"
+
+#include "fsl_sai.h"
 
 static I2S_Type *const s_saiBases[] = I2S_BASE_PTRS;
 
