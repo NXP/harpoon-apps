@@ -8,6 +8,7 @@
 #define _FREERTOS_IRQ_H_
 
 #include <irq.h>
+#include "fsl_common.h"
 
 static inline int os_irq_register(unsigned int irq, void (*func)(void *data),
 		void *data, unsigned int prio)
