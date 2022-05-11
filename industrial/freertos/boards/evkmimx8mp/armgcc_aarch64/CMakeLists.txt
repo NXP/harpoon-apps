@@ -67,6 +67,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
     "${AppBoardPath}/hardware_enet_qos.c"
+    "${AppBoardPath}/hardware_flexcan.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
@@ -128,6 +129,7 @@ include(component_serial_manager_uart)
 include(driver_cache_armv8a)
 include(driver_clock)
 include(driver_common)
+include(driver_flexcan)
 include(driver_enet_qos)
 include(driver_gpt)
 include(driver_igpio)

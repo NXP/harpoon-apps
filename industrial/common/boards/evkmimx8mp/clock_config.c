@@ -36,7 +36,20 @@ static void clock_setup_enet_qos(void)
 	CLOCK_EnableClock(kCLOCK_Gpt2);
 }
 
+static void clock_setup_flexcan(void)
+{
+	CLOCK_DisableClock(kCLOCK_Can1);
+
+	/* Set FLEXCAN1 source to SYSTEM PLL1 800MHZ */
+	CLOCK_SetRootMux(kCLOCK_RootFlexCan1, kCLOCK_FlexCanRootmuxSysPll1);
+	/* Set root clock to 800MHZ / 10 = 80MHZ */
+	CLOCK_SetRootDivider(kCLOCK_RootFlexCan1, 2U, 5U);
+
+	CLOCK_EnableClock(kCLOCK_Can1);
+}
+
 void board_clock_setup(void)
 {
 	clock_setup_enet_qos();
+	clock_setup_flexcan();
 }
