@@ -15,7 +15,11 @@
 
 void can_usage(void)
 {
-	/* TODO */
+	printf(
+		"\nIndustrial CAN options:\n"
+		"\t-r             run CAN (pinpong)\n"
+		"\t-s             stop CAN\n"
+	);
 }
 
 void ethernet_usage(void)
