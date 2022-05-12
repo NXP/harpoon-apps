@@ -29,7 +29,9 @@ void ethernet_usage(void)
 	printf(
 		"\nIndustrial ethernet options:\n"
 		"\t-a <mac_addr>  set hardware MAC address (default 91:e0:f0:00:fe:70)\n"
-		"\t-r             run ethernet\n"
+		"\t-r <id>        run ethernet mode id:\n"
+		"\t               0 - genAVB/TSN stack (imx8mp ENET_QOS)\n"
+		"\t               1 - mcux-sdk API (im8m{m,n} ENET)\n"
 		"\t-s             stop ethernet\n"
 	);
 }
@@ -150,11 +152,12 @@ out:
 
 int ethernet_main(int argc, char *argv[], struct mailbox *m)
 {
+	unsigned int mode;
 	uint8_t mac_addr[6];
 	int option;
 	int rc = 0;
 
-	while ((option = getopt(argc, argv, "a:rsv")) != -1) {
+	while ((option = getopt(argc, argv, "a:r:sv")) != -1) {
 		switch (option) {
 		case 'a':
 			if (read_mac_address(optarg, mac_addr) < 0) {
@@ -166,7 +169,10 @@ int ethernet_main(int argc, char *argv[], struct mailbox *m)
 			break;
 
 		case 'r':
-			rc = ethernet_run(m, 0);
+			if (strtoul_check(optarg, NULL, 0, &mode) < 0) {
+				printf("Invalid mode\n");
+			}
+			rc = ethernet_run(m, mode);
 			break;
 
 		default:

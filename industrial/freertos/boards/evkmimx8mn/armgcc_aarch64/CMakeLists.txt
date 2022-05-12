@@ -9,6 +9,9 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.1.1)
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
+# ENABLE DRIVER CACHE CONTROL
+ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
+
 # ENABLE ASM
 ENABLE_LANGUAGE(ASM)
 
@@ -43,6 +46,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/boards/${BoardName}/stub.c"
     "${AppPath}/common/ethernet.c"
+    "${AppPath}/common/ethernet_sdk_enet.c"
     "${AppPath}/common/industrial.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
@@ -89,9 +93,13 @@ include(component_lists)
 include(component_serial_manager)
 include(component_serial_manager_uart)
 
+include(driver_cache_armv8a)
 include(driver_clock)
 include(driver_common)
+include(driver_enet)
 include(driver_iuart)
+include(driver_mdio-enet)
+include(driver_phy-device-ar8031)
 
 include(lib_ctrl)
 include(lib_jailhouse)

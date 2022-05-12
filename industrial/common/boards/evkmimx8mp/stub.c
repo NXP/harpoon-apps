@@ -5,3 +5,5 @@
  */
 
 #include "stub.h"
+
+STUB_INDUSTRIAL_USE_CASE(ethernet_sdk_enet);

@@ -61,6 +61,12 @@ const struct industrial_use_case use_cases[] =
 				.run = ethernet_avb_tsn_run,
 				.stats = ethernet_avb_tsn_stats,
 			},
+			[1] = {
+				.init = ethernet_sdk_enet_init,
+				.exit = ethernet_sdk_enet_exit,
+				.run = ethernet_sdk_enet_run,
+				.stats = ethernet_sdk_enet_stats,
+			},
 		},
 	},
 };
