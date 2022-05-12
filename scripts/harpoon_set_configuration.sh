@@ -2,7 +2,7 @@
 
 function usage ()
 {
-	echo "harpoon_set_configuration.sh <audio | industrial | latency>"
+	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | industrial | latency>"
 }
 
 function detect_machine ()
@@ -21,43 +21,49 @@ function detect_machine ()
 
 CONF_FILE=/etc/harpoon/harpoon.conf
 
-if [ ! $# -eq 1 ]; then
+if [ ! $# -eq 2 ]; then
 	usage
 	exit 1
 fi
 
 detect_machine
 
-if [ -z $SOC ]; then
-	echo "Unexpected SOC: " $(cat /sys/devices/soc0/soc_id)
+RTOS="$1"
+if [[ "$RTOS" != "freertos" && "$RTOS" != "zephyr" ]]; then
+	usage
 	exit 2
 fi
 
-if [ $1 == "audio" ]; then
+if [ -z $SOC ]; then
+	echo "Unexpected SOC: " "$(cat /sys/devices/soc0/soc_id)"
+	exit 3
+fi
+
+if [ "$2" == "audio" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-freertos-audio.cell
-	INMATE_BIN=/usr/share/harpoon/inmates/freertos/audio.bin
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-audio.cell
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
-	INMATE_NAME=freertos
+	INMATE_NAME=${RTOS}
 	EOF
-elif [ $1 == "industrial" ]; then
+elif [ "$2" == "industrial" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-freertos-industrial.cell
-	INMATE_BIN=/usr/share/harpoon/inmates/freertos/industrial.bin
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-industrial.cell
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/industrial.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
-	INMATE_NAME=freertos
+	INMATE_NAME=${RTOS}
 	EOF
-elif [ $1 == "latency" ]; then
+elif [ "$2" == "latency" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-freertos.cell
-	INMATE_BIN=/usr/share/harpoon/inmates/freertos/rt_latency.bin
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}.cell
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/rt_latency.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
-	INMATE_NAME=freertos
+	INMATE_NAME=${RTOS}
 	EOF
 else
 	usage
-	exit 2
+	exit 4
 fi
