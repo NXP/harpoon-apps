@@ -66,10 +66,12 @@ struct industrial_use_case {
 	 * Possibility to add more in the future if we decide to have more than
 	 * one software path for a given hardware resource.
 	 */
-	struct mode_operations ops[1];
+	struct mode_operations ops[3];
 };
 
-void *can_init(void *parameters);
+void *can_init_loopback(void *parameters);
+void *can_init_interrupt(void *parameters);
+void *can_init_pingpong(void *parameters);
 int can_run(void *priv, struct event *e);
 void can_stats(void *priv);
 void can_exit(void *priv);

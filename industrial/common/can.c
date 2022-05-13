@@ -880,7 +880,7 @@ int can_run(void *priv, struct event *e)
 	return 0;
 }
 
-void *can_init(void *parameters)
+static void *can_init(void *parameters, uint32_t test_type)
 {
 	struct industrial_config *cfg = parameters;
 	struct can_ctx *ctx;
@@ -901,15 +901,50 @@ void *can_init(void *parameters)
 
 	hardware_flexcan_init();
 
-	/* FIXME - Get node_type from ctrl app parameter */
+	/* FIXME - Get node_type from ctrl app parameters */
 	ctx->node_type = 'b';
+	log_info("node %c\n", ctx->node_type);
+	log_info("test type %d\n", test_type);
 
-	/* FIXME - will eventually come from 'mode' value */
-	ctx->test_type = '3';
+	ctx->test_type = test_type;
 
 	test_flexcan_setup(ctx);
 exit:
 	return ctx;
+}
+
+void *can_init_loopback(void *parameters)
+{
+	log_info("********* FLEXCAN Loopback EXAMPLE *********\n");
+	log_info("    Message format: Standard (11 bit id)\n");
+	log_info("    Loopback Mode: Enabled\n");
+	log_info("*********************************************\n\n");
+
+	return can_init(parameters, 1);
+}
+
+void *can_init_interrupt(void *parameters)
+{
+	log_info("********* FLEXCAN Interrupt EXAMPLE *********\n");
+	log_info("    Message format: Standard (11 bit id)\n");
+	log_info("    Message buffer %d used for Rx.\n", RX_MESSAGE_BUFFER_NUM);
+	log_info("    Message buffer %d used for Tx.\n", TX_MESSAGE_BUFFER_NUM);
+	log_info("    Interrupt Mode: Enabled\n");
+	log_info("    Operation Mode: TX and RX --> Normal\n");
+	log_info("*********************************************\n\n");
+
+	return can_init(parameters, 2);
+}
+
+void *can_init_pingpong(void *parameters)
+{
+	log_info("********* FLEXCAN PingPong Buffer Example *********\n");
+	log_info("    Message format: Standard (11 bit id)\n");
+	log_info("    Node B Message buffer %d to %d used as Rx queue 1.\n", RX_QUEUE_BUFFER_BASE, RX_QUEUE_BUFFER_END_1);
+	log_info("    Node B Message buffer %d to %d used as Rx queue 2.\n", RX_QUEUE_BUFFER_END_1 + 1U, RX_QUEUE_BUFFER_END_2);
+	log_info("    Node A Message buffer %d used as Tx.\n", TX_MESSAGE_BUFFER_NUM);
+
+	return can_init(parameters, 3);
 }
 
 void can_exit(void *priv)

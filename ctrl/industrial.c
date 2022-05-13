@@ -16,8 +16,10 @@
 void can_usage(void)
 {
 	printf(
-		"\nIndustrial CAN options:\n"
-		"\t-r             run CAN (pinpong)\n"
+		"\t-r <id>        run CAN mode id:\n"
+		"\t               0 - loopback\n"
+		"\t               1 - interrupt\n"
+		"\t               2 - pingpong\n"
 		"\t-s             stop CAN\n"
 	);
 }
@@ -59,9 +61,9 @@ static int default_stop(struct mailbox *m, uint32_t type)
 	return command(m, &stop, sizeof(stop), HRPN_RESP_TYPE_INDUSTRIAL, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int can_run(struct mailbox *m)
+static int can_run(struct mailbox *m, uint32_t mode)
 {
-	return default_run(m, HRPN_CMD_TYPE_CAN_RUN, 0);
+	return default_run(m, HRPN_CMD_TYPE_CAN_RUN, mode);
 }
 
 static int can_stop(struct mailbox *m)
@@ -69,9 +71,9 @@ static int can_stop(struct mailbox *m)
 	return default_stop(m, HRPN_CMD_TYPE_CAN_STOP);
 }
 
-static int ethernet_run(struct mailbox *m)
+static int ethernet_run(struct mailbox *m, uint32_t mode)
 {
-	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, 0);
+	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, mode);
 }
 
 static int ethernet_stop(struct mailbox *m)
@@ -105,15 +107,11 @@ static int read_mac_address(char *buf, uint8_t *mac)
 }
 
 static int industrial_main(int option, char *optarg, struct mailbox *m,
-	int (*run)(struct mailbox *), int (*stop)(struct mailbox *))
+	int (*stop)(struct mailbox *))
 {
 	int rc = 0;
 
 	switch (option) {
-	case 'r':
-		rc = run(m);
-		break;
-
 	case 's':
 		rc = stop(m);
 		break;
@@ -128,13 +126,21 @@ static int industrial_main(int option, char *optarg, struct mailbox *m,
 
 int can_main(int argc, char *argv[], struct mailbox *m)
 {
+	unsigned int mode;
 	int option;
 	int rc = 0;
 
-	while ((option = getopt(argc, argv, "rsv")) != -1) {
+	while ((option = getopt(argc, argv, "r:sv")) != -1) {
 		switch (option) {
+		case 'r':
+			if (strtoul_check(optarg, NULL, 0, &mode) < 0) {
+				printf("Invalid mode\n");
+			}
+			rc = can_run(m, mode);
+			break;
+
 		default:
-			rc = industrial_main(option, optarg, m, can_run, can_stop);
+			rc = industrial_main(option, optarg, m, can_stop);
 			break;
 		}
 	}
@@ -159,8 +165,12 @@ int ethernet_main(int argc, char *argv[], struct mailbox *m)
 			ethernet_set_mac_address(m, mac_addr);
 			break;
 
+		case 'r':
+			rc = ethernet_run(m, 0);
+			break;
+
 		default:
-			rc = industrial_main(option, optarg, m, ethernet_run, ethernet_stop);
+			rc = industrial_main(option, optarg, m, ethernet_stop);
 			break;
 		}
 	}
