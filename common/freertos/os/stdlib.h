@@ -1,6 +1,5 @@
 /*
- * Copyright 2021 NXP
- * All rights reserved.
+ * Copyright 2021-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,7 +8,14 @@
 
 #include "FreeRTOS.h"
 
-#define os_malloc(x)	pvPortMalloc(x)
-#define os_free(x)	vPortFree(x)
+static inline void *os_malloc(size_t size)
+{
+	return pvPortMalloc(size);
+}
+
+static inline void os_free(void *ptr)
+{
+	vPortFree(ptr);
+}
 
 #endif /* #ifndef _FREERTOS_STDLIB_H_ */

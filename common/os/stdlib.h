@@ -1,6 +1,5 @@
 /*
- * Copyright 2021 NXP
- * All rights reserved.
+ * Copyright 2021-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -12,5 +11,8 @@
 #elif defined(FSL_RTOS_FREE_RTOS)
   #include "freertos/os/stdlib.h"
 #endif
+
+void *os_malloc(size_t size);
+void os_free(void *ptr);
 
 #endif /* #ifndef _COMMON_STDLIB_H_ */

@@ -8,7 +8,14 @@
 
 #include <kernel.h>
 
-#define os_malloc(x)	k_malloc(x)
-#define os_free(x)	k_free(x)
+static inline void *os_malloc(size_t size)
+{
+	return k_malloc(size);
+}
+
+static inline void os_free(void *ptr)
+{
+	k_free(ptr);
+}
 
 #endif /* #ifndef _ZEPHYR_STDLIB_H_ */
