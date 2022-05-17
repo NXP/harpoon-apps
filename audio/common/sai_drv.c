@@ -180,7 +180,7 @@ uint32_t get_sai_id(I2S_Type *base)
 	}
 
 	/* Can't find SAI instance, hang here */
-	os_assert(false, "Can't find SAI instance (%x)", (uintptr_t)base);
+	os_assert(false, "Can't find SAI instance (%p)", base);
 }
 
 int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
