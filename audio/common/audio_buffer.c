@@ -11,7 +11,7 @@
  * Audio buffer structure (circular) with single writter/reader.
  * Audio buffer uses linear memory storage.
  * When configuring pipeline, it's possible to re-use storage (and avoid memory copies).
- * Audio buffer has a fixed sample format (32bit, S32_LE). Format conversion done in source/sink elements.
+ * Audio buffer has a compile time fixed sample format (64bit, double). Format conversion done in source/sink elements.
  * Audio buffer api's/variables all in sample units
  * Audio buffer size is a power of two.
  *
@@ -33,7 +33,7 @@ void audio_buf_dump(struct audio_buffer *buf)
 		  buf, buf->base, buf->size, buf->size_mask, buf->read, buf->write);
 }
 
-void audio_buf_init(struct audio_buffer *buf, int32_t *base, unsigned int size)
+void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size)
 {
 	buf->base = base;
 	buf->size = size;
@@ -73,7 +73,7 @@ bool audio_buf_empty(struct audio_buffer *buf)
 	return (buf->read == buf->write);
 }
 
-void audio_buf_write(struct audio_buffer *buf, int32_t *samples, unsigned int len)
+void audio_buf_write(struct audio_buffer *buf, audio_sample_t *samples, unsigned int len)
 {
 	int i;
 
@@ -83,7 +83,19 @@ void audio_buf_write(struct audio_buffer *buf, int32_t *samples, unsigned int le
 	}
 }
 
-void audio_buf_read(struct audio_buffer *buf, int32_t *samples, unsigned int len)
+void audio_buf_write_head(struct audio_buffer *buf, audio_sample_t *samples, unsigned int len)
+{
+	unsigned int read;
+	int i;
+
+	read = buf->read = (buf->read - len) & buf->size_mask;
+	for (i = 0; i < len; i++) {
+		buf->base[read] = samples[i];
+		read  = (read + 1) & buf->size_mask;
+	}
+}
+
+void audio_buf_read(struct audio_buffer *buf, audio_sample_t *samples, unsigned int len)
 {
 	int i;
 

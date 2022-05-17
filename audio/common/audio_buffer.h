@@ -11,35 +11,38 @@
 #include "os/stdbool.h"
 #include "os/stdio.h"
 
+#include "audio_format.h"
+
 /* Configuration */
 struct audio_buffer_config {
 	unsigned int storage;	/* storage array index */
 };
 
 struct audio_buffer_storage_config {
-	int32_t *base;		/* if NULL allocate on init */
+	audio_sample_t *base;	/* if NULL allocate on init */
 	unsigned int periods;	/* used to determine the size */
 };
 
 /* Run Time */
 struct audio_buffer {
-	int32_t *base;		/* always 32bit per sample, S32_LE format */
+	audio_sample_t *base;
 	unsigned int read;	/* in units of samples */
 	unsigned int write;	/* in units of samples */
 	unsigned int size;	/* in units of samples */
 	unsigned int size_mask;
 };
 
-void audio_buf_init(struct audio_buffer *buf, int32_t *base, unsigned int size);
+void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size);
 unsigned int audio_buf_avail(struct audio_buffer *buf);
 unsigned int audio_buf_free(struct audio_buffer *buf);
 bool audio_buf_full(struct audio_buffer *buf);
 bool audio_buf_empty(struct audio_buffer *buf);
-void audio_buf_write(struct audio_buffer *buf, int32_t *samples, unsigned int len);
-void audio_buf_read(struct audio_buffer *buf, int32_t *samples, unsigned int len);
+void audio_buf_write(struct audio_buffer *buf, audio_sample_t *samples, unsigned int len);
+void audio_buf_write_head(struct audio_buffer *buf, audio_sample_t *samples, unsigned int len);
+void audio_buf_read(struct audio_buffer *buf, audio_sample_t *samples, unsigned int len);
 void audio_buf_dump(struct audio_buffer *buf);
 
-static inline void __audio_memcpy(int32_t *dst, int32_t *src, unsigned int len)
+static inline void __audio_memcpy(audio_sample_t *dst, audio_sample_t *src, unsigned int len)
 {
 	int i;
 
@@ -79,24 +82,34 @@ static inline void __audio_memcpy(int32_t *dst, int32_t *src, unsigned int len)
 	}
 }
 
-static inline int32_t *audio_buf_write_addr(struct audio_buffer *buf)
+static inline audio_sample_t *audio_buf_write_addr(struct audio_buffer *buf, unsigned int offset)
 {
-	return &buf->base[buf->write];
+	return &buf->base[buf->write + offset];
 }
 
-static inline int32_t *audio_buf_read_addr(struct audio_buffer *buf)
+static inline audio_sample_t *audio_buf_read_addr(struct audio_buffer *buf, unsigned int offset)
 {
-	return &buf->base[buf->read];
+	return &buf->base[buf->read + offset];
 }
 
-static inline void __audio_buf_write(struct audio_buffer *buf, unsigned int offset, int32_t *samples, unsigned int len)
+static inline void __audio_buf_write(struct audio_buffer *buf, unsigned int offset, audio_sample_t *samples, unsigned int len)
 {
-	__audio_memcpy(&buf->base[buf->write + offset], samples, len);
+	__audio_memcpy(audio_buf_write_addr(buf, offset), samples, len);
 }
 
-static inline void __audio_buf_read(struct audio_buffer *buf, unsigned int offset, int32_t *samples, unsigned int len)
+static inline void __audio_buf_write_uint32(struct audio_buffer *buf, unsigned int offset, uint32_t val)
 {
-	__audio_memcpy(samples, &buf->base[buf->read + offset], len);
+	*(uint32_t *)audio_buf_write_addr(buf, offset) = val;
+}
+
+static inline void __audio_buf_read(struct audio_buffer *buf, unsigned int offset, audio_sample_t *samples, unsigned int len)
+{
+	__audio_memcpy(samples, audio_buf_read_addr(buf, offset), len);
+}
+
+static inline uint32_t __audio_buf_read_uint32(struct audio_buffer *buf, unsigned int offset)
+{
+	return *(uint32_t *)audio_buf_read_addr(buf, offset);
 }
 
 static inline void __audio_buf_copy(struct audio_buffer *dst, struct audio_buffer *src, unsigned int len)

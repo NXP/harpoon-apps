@@ -41,7 +41,6 @@ struct sai_output {
 	bool invert;			/* format conversion */
 	unsigned int shift;		/* format conversion */
 	unsigned int mask;		/* format conversion */
-	int32_t val;			/* silence sample, in source format */
 };
 
 struct sai_source_element {
@@ -58,7 +57,7 @@ static int sai_source_element_run(struct audio_element *element)
 {
 	struct sai_source_element *sai = element->data;
 	struct sai_source_map *map;
-	int32_t val;
+	uint32_t val;
 	int i, j;
 
 #if 0
@@ -95,29 +94,36 @@ static int sai_source_element_run(struct audio_element *element)
 			if (__sai_rx_error(sai->base[i]))
 				goto err;
 
+		/* Fill output buffer with fifo data */
 		for (i = 0; i < element->period; i++) {
 			for (j = 0; j < sai->map_n; j++) {
 				map = &sai->map[j];
 
 				val = *map->rx_fifo;
 
-				__audio_buf_write(map->out, i, &val, 1);
+				__audio_buf_write_uint32(map->out, i, val);
 			}
 		}
+
+		for (i = 0; i < sai->out_n; i++) {
+			if (sai->out[i].convert)
+				audio_convert_from(audio_buf_write_addr(sai->out[i].buf, 0), element->period, sai->out[i].invert, sai->out[i].mask, sai->out[i].shift);
+
+			audio_buf_write_update(sai->out[i].buf, element->period);
+		}
+
 	} else {
+		audio_sample_t val = AUDIO_SAMPLE_SILENCE;
+
 		/* Fill output buffer with silence */
-		for (i = 0; i < sai->out_n; i++)
+		for (i = 0; i < sai->out_n; i++) {
 			for (j = 0; j < element->period; j++)
-				__audio_buf_write(sai->out[i].buf, j, &sai->out[i].val, 1);
+				__audio_buf_write(sai->out[i].buf, j, &val, 1);
+
+			audio_buf_write_update(sai->out[i].buf, element->period);
+		}
 
 		sai->started = true;
-	}
-
-	for (i = 0; i < sai->out_n; i++) {
-		if (sai->out[i].convert)
-			audio_convert_from(audio_buf_write_addr(sai->out[i].buf), element->period, sai->out[i].invert, sai->out[i].mask, sai->out[i].shift);
-
-		audio_buf_write_update(sai->out[i].buf, element->period);
 	}
 
 	return 0;
@@ -293,8 +299,10 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 
 	for (i = 0; i < sai->out_n; i++) {
 		sai->out[i].buf = &buffer[config->output[i]];
-		sai->out[i].convert = false;
-		sai->out[i].val = 0;
+		sai->out[i].convert = true;
+		sai->out[i].invert = false;
+		sai->out[i].shift = 0;
+		sai->out[i].mask = 0xffffffff;
 	}
 
 	sai_source_element_dump(element);

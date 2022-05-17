@@ -45,12 +45,12 @@ enum {
 static void dtmf_generate_sinewave(struct dtmf_element *dtmf, unsigned int samples)
 {
 	double v;
-	int32_t w;
+	audio_sample_t w;
 	int i;
 
 	for (i = 0; i < samples; i++) {
 		v = dtmf->amplitude * (sin((i + dtmf->phase) * dtmf->dphase1) + sin((i + dtmf->phase) * dtmf->dphase2)) / 2.0;
-		w = audio_double_to_int32(v);
+		w = audio_double_to_sample(v);
 
 		__audio_buf_write(dtmf->out, i, &w, 1);
 	}
@@ -63,7 +63,7 @@ static void dtmf_generate_sinewave(struct dtmf_element *dtmf, unsigned int sampl
 static void dtmf_generate_silence(struct dtmf_element *dtmf, unsigned int samples)
 {
 	int i;
-	int32_t silence = 0;
+	audio_sample_t silence = AUDIO_SAMPLE_SILENCE;
 
 	for (i = 0; i < samples; i++)
 		__audio_buf_write(dtmf->out, i, &silence, 1);

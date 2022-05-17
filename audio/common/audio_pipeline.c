@@ -350,7 +350,7 @@ static unsigned int audio_buffer_storage_size(struct audio_pipeline_config *conf
 
 	for (i = 0; i < config->buffer_storage; i++) {
 		if (!config->storage[i].base)
-			size += config->storage[i].periods * config->period * sizeof(int32_t);
+			size += config->storage[i].periods * config->period * sizeof(audio_sample_t);
 	}
 
 	return size;
@@ -446,7 +446,7 @@ static void audio_pipeline_buffer_init(struct audio_pipeline *pipeline, struct a
 {
 	uint8_t *stage_base, *element_base, *element_data_base, *buffer_base, *buffer_storage_base;
 	unsigned int storage_id;
-	int32_t *base;
+	audio_sample_t *base;
 	unsigned int size;
 	int i;
 
@@ -462,7 +462,7 @@ static void audio_pipeline_buffer_init(struct audio_pipeline *pipeline, struct a
 	for (i = 0; i < config->buffers; i++) {
 		storage_id = config->buffer[i].storage;
 
-		base = (int32_t *)buffer_storage_base + audio_buffer_storage_off(config, storage_id);
+		base = (audio_sample_t *)buffer_storage_base + audio_buffer_storage_off(config, storage_id);
 		size = config->storage[storage_id].periods * config->period;
 
 		audio_buf_init(&pipeline->buffer[i], base, size);

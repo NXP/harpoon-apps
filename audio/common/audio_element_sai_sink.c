@@ -34,11 +34,34 @@ struct sai_sink_element {
 	bool started;
 };
 
-static int sai_sink_element_run(struct audio_element *element)
+static void sai_sink_element_fifo_write(struct audio_element *element)
 {
 	struct sai_sink_element *sai = element->data;
 	struct sai_sink_map *map;
-	int32_t val;
+	int i, j;
+
+	/* Fill fifo with input buffer data */
+
+	for (i = 0; i < sai->in_n; i++) {
+		if (sai->in[i].convert)
+				audio_convert_to(audio_buf_read_addr(sai->in[i].buf, 0), element->period, sai->in[i].invert, sai->in[i].mask, sai->in[i].shift);
+	}
+
+	for (i = 0; i < element->period; i++) {
+		for (j = 0; j < sai->map_n; j++) {
+			map = &sai->map[j];
+
+			*map->tx_fifo = __audio_buf_read_uint32(map->in, i);
+		}
+	}
+
+	for (i = 0; i < sai->in_n; i++)
+		audio_buf_read_update(sai->in[i].buf, element->period);
+}
+
+static int sai_sink_element_run(struct audio_element *element)
+{
+	struct sai_sink_element *sai = element->data;
 	int i, j;
 
 #if 0
@@ -76,32 +99,18 @@ static int sai_sink_element_run(struct audio_element *element)
 			if (__sai_tx_error(sai->base[i]))
 				goto err;
 	} else {
-		/* Fill SAI Tx Fifo with silence */
-		for (i = 0; i < element->period; i++) {
-			for (j = 0; j < sai->map_n; j++) {
-				map = &sai->map[j];
+		audio_sample_t val = AUDIO_SAMPLE_SILENCE;
 
-				val = 0;
-
-				*map->tx_fifo = val;
-			}
+		/* Fill head of input buffer with silence */
+		for (i = 0; i < sai->in_n; i++) {
+			for (j = 0; j < element->period; j++)
+				audio_buf_write_head(sai->in[i].buf, &val, 1);
 		}
+
+		sai_sink_element_fifo_write(element);
 	}
 
-	for (i = 0; i < sai->in_n; i++) {
-		if (sai->in[i].convert)
-			audio_convert_to(audio_buf_read_addr(sai->in[i].buf), element->period, sai->in[i].invert, sai->in[i].mask, sai->in[i].shift);
-	}
-
-	for (i = 0; i < element->period; i++) {
-		for (j = 0; j < sai->map_n; j++) {
-			map = &sai->map[j];
-
-			__audio_buf_read(map->in, i, &val, 1);
-
-			*map->tx_fifo = val;
-		}
-	}
+	sai_sink_element_fifo_write(element);
 
 	if (!sai->started) {
 		for (i = 0; i < sai->sai_n; i++) {
@@ -114,9 +123,6 @@ static int sai_sink_element_run(struct audio_element *element)
 
 		sai->started = true;
 	}
-
-	for (i = 0; i < sai->in_n; i++)
-		audio_buf_read_update(sai->in[i].buf, element->period);
 
 	return 0;
 
@@ -288,7 +294,10 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 
 	for (i = 0; i < sai->in_n; i++) {
 		sai->in[i].buf = &buffer[config->input[i]];
-		sai->in[i].convert = false;
+		sai->in[i].convert = true;
+		sai->in[i].invert = false;
+		sai->in[i].shift = 0;
+		sai->in[i].mask = 0xffffffff;
 	}
 
 	sai_sink_element_dump(element);

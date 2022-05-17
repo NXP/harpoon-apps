@@ -9,7 +9,11 @@
 #include "os/stdlib.h"
 #include "os/string.h"
 
-#include "audio_format.h"
+static int32_t audio_double_to_int32(double v)
+{
+	/* [-1.0, 1.0] -> [-0x7fffffff, 0x7fffffff] */
+	return (int32_t)(v * 0x7fffffff);
+}
 
 static void generate_sinewave(uint32_t *buf, int lfreq, int rfreq,
 		uint32_t sample_rate, uint32_t duration_us, uint32_t *phase)

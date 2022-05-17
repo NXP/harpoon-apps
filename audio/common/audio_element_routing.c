@@ -8,6 +8,7 @@
 
 #include "audio_element_routing.h"
 #include "audio_element.h"
+#include "audio_format.h"
 #include "hrpn_ctrl.h"
 #include "hlog.h"
 #include "mailbox.h"
@@ -186,7 +187,7 @@ unsigned int routing_element_size(struct audio_element_config *config)
 	size = sizeof(struct routing_element);
 	size += (config->inputs + 1) * sizeof(struct audio_buffer *);
 	size += config->outputs * sizeof(struct routing_output);
-	size += sizeof(int32_t) * config->period;
+	size += sizeof(audio_sample_t) * config->period;
 
 	return size;
 }
@@ -194,8 +195,8 @@ unsigned int routing_element_size(struct audio_element_config *config)
 int routing_element_init(struct audio_element *element, struct audio_element_config *config, struct audio_buffer *buffer)
 {
 	struct routing_element *routing = element->data;
-	int32_t *silence_storage;
-	int32_t val;
+	audio_sample_t *silence_storage;
+	audio_sample_t val;
 	int i;
 
 	if (os_sem_init(&routing->semaphore, 1))
@@ -211,7 +212,7 @@ int routing_element_init(struct audio_element *element, struct audio_element_con
 
 	routing->in = (struct audio_buffer **)((uint8_t *)routing + sizeof(struct routing_element));
 	routing->out = (struct routing_output *)((uint8_t *)routing->in + (config->inputs + 1) * sizeof(struct audio_buffer *));
-	silence_storage = (int32_t *)((uint8_t *)routing->out + config->outputs * sizeof(struct routing_output));
+	silence_storage = (audio_sample_t *)((uint8_t *)routing->out + config->outputs * sizeof(struct routing_output));
 
 	for (i = 0; i < routing->inputs; i++)
 		routing->in[i] = &buffer[config->input[i]];
@@ -227,7 +228,7 @@ int routing_element_init(struct audio_element *element, struct audio_element_con
 
 	audio_buf_init(&routing->silence, silence_storage, element->period);
 
-	val = 0;
+	val = AUDIO_SAMPLE_SILENCE;
 	for (i = 0; i < element->period; i++)
 		audio_buf_write(&routing->silence, &val, 1);
 

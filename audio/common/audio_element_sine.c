@@ -25,12 +25,12 @@ static int sine_element_run(struct audio_element *element)
 {
 	struct sine_element *sine = element->data;
         double v;
-	int32_t w;
+	audio_sample_t w;
 	int i;
 
 	for (i = 0; i < element->period; i++) {
 		v = sine->amplitude * sin(sine->phase * sine->dphase);
-		w = audio_double_to_int32(v);
+		w = audio_double_to_sample(v);
 
 		__audio_buf_write(sine->out, i, &w, 1);
 		sine->phase++;
