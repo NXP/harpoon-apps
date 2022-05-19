@@ -41,5 +41,11 @@ void x##_ctrl(struct hrpn_cmd_ethernet *cmd, unsigned int len, \
 	log_err("not supported\n"); \
 }
 
-STUB_INDUSTRIAL_USE_CASE(can);
-STUB_INDUSTRIAL_USE_CASE(ethernet_avb_tsn);
+/*
+ * Usage:
+ *
+ * STUB_INDUSTRIAL_USE_CASE(<component>);
+ *
+ * to stub the entry functions for a specific <component> that
+ * is not supported by some hardware.
+ */

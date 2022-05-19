@@ -59,6 +59,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
+    "${AppPath}/common/boards/${BoardName}/stub.c"
     "${AppPath}/common/can.c"
     "${AppPath}/common/ethernet.c"
     "${AppPath}/common/ethernet_avb_tsn.c"

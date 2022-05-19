@@ -41,9 +41,9 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
+    "${AppPath}/common/boards/${BoardName}/stub.c"
     "${AppPath}/common/ethernet.c"
     "${AppPath}/common/industrial.c"
-    "${AppPath}/common/stub.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
 )
