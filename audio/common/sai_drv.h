@@ -172,12 +172,12 @@ static inline void __sai_enable_tx(void *base, bool enable_irq)
 
 static inline bool __sai_rx_error(void *base)
 {
-	return (((((I2S_Type *)base)->RCSR) & (uint32_t)I2S_RCSR_FEF_MASK) != 0UL);
+	return (((((I2S_Type *)base)->RCSR) & (uint32_t)I2S_RCSR_FEF_MASK) != 0U);
 }
 
 static inline bool __sai_tx_error(void *base)
 {
-	return (((((I2S_Type *)base)->TCSR) & (uint32_t)I2S_TCSR_FEF_MASK) != 0UL);
+	return (((((I2S_Type *)base)->TCSR) & (uint32_t)I2S_TCSR_FEF_MASK) != 0U);
 }
 
 static inline void *__sai_rx_fifo_addr(void *base, unsigned int line)
