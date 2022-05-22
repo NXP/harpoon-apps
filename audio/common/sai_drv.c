@@ -17,6 +17,46 @@ static I2S_Type *const s_saiBases[] = I2S_BASE_PTRS;
 static const IRQn_Type s_saiTxIRQ[] = I2S_TX_IRQS;
 
 
+static bool __sai_rx_is_sync(void *base)
+{
+	return ((((I2S_Type *)base)->RCR2 & I2S_RCR2_SYNC_MASK) != 0U);
+}
+
+static bool __sai_tx_is_sync(void *base)
+{
+	return ((((I2S_Type *)base)->TCR2 & I2S_TCR2_SYNC_MASK) != 0U);
+}
+
+static bool __sai_rx_is_enabled(void *base)
+{
+	return ((((I2S_Type *)base)->RCSR & I2S_RCSR_RE_MASK) != 0U);
+}
+
+static bool __sai_tx_is_enabled(void *base)
+{
+	return ((((I2S_Type *)base)->TCSR & I2S_TCSR_TE_MASK) != 0U);
+}
+
+static void __sai_rx_enable(void *base)
+{
+	((I2S_Type *)base)->RCSR = ((((I2S_Type *)base)->RCSR & 0xFFE3FFFFU) | I2S_RCSR_RE_MASK);
+}
+
+static void __sai_tx_enable(void *base)
+{
+	((I2S_Type *)base)->TCSR = ((((I2S_Type *)base)->TCSR & 0xFFE3FFFFU) | I2S_TCSR_TE_MASK);
+}
+
+static void __sai_rx_disable(void *base)
+{
+	((I2S_Type *)base)->RCSR = ((((I2S_Type *)base)->RCSR & 0xFFE3FFFFU) & (~I2S_RCSR_RE_MASK));
+}
+
+static void __sai_tx_disable(void *base)
+{
+	((I2S_Type *)base)->TCSR = ((((I2S_Type *)base)->TCSR & 0xFFE3FFFFU) & (~I2S_TCSR_TE_MASK));
+}
+
 int sai_read(struct sai_device *dev, uint8_t *addr, size_t len)
 {
 	sai_transfer_t xfer;
