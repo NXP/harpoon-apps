@@ -125,6 +125,9 @@ static int sai_source_element_run(struct audio_element *element)
 			audio_buf_write_update(sai->out[i].buf, element->period);
 		}
 
+		for (i = 0; i < sai->sai_n; i++)
+			__sai_enable_rx(sai->base[i], false);
+
 		sai->started = true;
 	}
 

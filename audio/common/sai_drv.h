@@ -75,6 +75,10 @@ void sai_disable_rx(struct sai_device *dev);
 
 void sai_disable_tx(struct sai_device *dev);
 
+void __sai_enable_rx(void *base, bool enable_irq);
+
+void __sai_enable_tx(void *base, bool enable_irq);
+
 void __sai_disable_rx(void *base);
 
 void __sai_disable_tx(void *base);
@@ -134,24 +138,6 @@ static inline void __sai_disable_irq(void *base, bool rx_irq, bool tx_irq)
 				I2S_TCSR_FEIE_MASK | I2S_TCSR_FWIE_MASK);
 #endif
 	}
-}
-
-static inline void __sai_enable_rx(void *base, bool enable_irq)
-{
-	if (enable_irq)
-		__sai_enable_irq(base, true, false);
-
-	/* Enable Rx transfer */
-	SAI_RxEnable(base, true);
-}
-
-static inline void __sai_enable_tx(void *base, bool enable_irq)
-{
-	if (enable_irq)
-		__sai_enable_irq(base, false, true);
-
-	/* Enable Tx transfer */
-	SAI_TxEnable(base, true);
 }
 
 static inline bool __sai_rx_error(void *base)

@@ -115,13 +115,8 @@ static int sai_sink_element_run(struct audio_element *element)
 	sai_sink_element_fifo_write(element);
 
 	if (!sai->started) {
-		for (i = 0; i < sai->sai_n; i++) {
-			/* FIXME */
-			/* If some SAI's are only used for Rx, they will be missing below */
-			/* For multi SAI sync, we should enable the asynchronous/master one last */
-			__sai_enable_rx(sai->base[i], false);
+		for (i = 0; i < sai->sai_n; i++)
 			__sai_enable_tx(sai->base[i], false);
-		}
 
 		sai->started = true;
 	}

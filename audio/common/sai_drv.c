@@ -57,6 +57,32 @@ static void __sai_tx_disable(void *base)
 	((I2S_Type *)base)->TCSR = ((((I2S_Type *)base)->TCSR & 0xFFE3FFFFU) & (~I2S_TCSR_TE_MASK));
 }
 
+void __sai_enable_rx(void *base, bool enable_irq)
+{
+	if (enable_irq)
+		__sai_enable_irq(base, true, false);
+
+	/* For sync Rx/Tx, enable is done in Tx enable */
+	if (!__sai_tx_is_sync(base) && !__sai_rx_is_sync(base))
+		__sai_rx_enable(base);
+}
+
+void __sai_enable_tx(void *base, bool enable_irq)
+{
+	if (enable_irq)
+		__sai_enable_irq(base, false, true);
+
+	if (__sai_tx_is_sync(base)) {
+		__sai_tx_enable(base);
+		__sai_rx_enable(base);
+	} else if (__sai_rx_is_sync(base)) {
+		__sai_rx_enable(base);
+		__sai_tx_enable(base);
+	} else {
+		__sai_tx_enable(base);
+	}
+}
+
 void __sai_disable_rx(void *base)
 {
 	/* For sync Rx, disable is done in Tx disable */
