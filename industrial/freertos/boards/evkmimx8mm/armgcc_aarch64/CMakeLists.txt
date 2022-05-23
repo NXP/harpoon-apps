@@ -12,6 +12,9 @@ SET (Tutorial_VERSION_MINOR 0)
 # ENABLE DRIVER CACHE CONTROL
 ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
 
+# ENABLE ENET 1588
+ADD_DEFINITIONS(-DENET_ENHANCEDBUFFERDESCRIPTOR_MODE=1)
+
 # ENABLE ASM
 ENABLE_LANGUAGE(ASM)
 
@@ -32,8 +35,21 @@ SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX8MM6")
 
+SET(GenAVBPath "${ProjDirPath}/../../../../../../gen_avb_sdk")
+SET(GenAVBBuildPath "${CMAKE_CURRENT_BINARY_DIR}/gen_avb_build")
+SET(FREERTOS_SDK ${SdkDirPath})
+SET(FREERTOS_DIR ${RtosPath})
+SET(FREERTOS_APPS "${ProjDirPath}/../../../../..")
+SET(TARGET "freertos_imx8mm_ca53")
+SET(CONFIG "endpoint_tsn")
+ADD_SUBDIRECTORY(${GenAVBPath} "${GenAVBBuildPath}")
+
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
+
+# Overwrite unsupported configurations
+add_compile_options(-DSERIAL_MODE=0)
+add_compile_options(-DBUILD_MOTOR=0)
 
 project(industrial)
 
@@ -41,11 +57,18 @@ set(MCUX_SDK_PROJECT_NAME industrial.elf)
 
 include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
+    "${AppPath}/avb_tsn/tsn_app/alarm_task.c"
+    "${AppPath}/avb_tsn/tsn_app/configs.c"
+    "${AppPath}/avb_tsn/tsn_app/cyclic_task.c"
+    "${AppPath}/avb_tsn/tsn_app/tsn_task.c"
+    "${AppPath}/avb_tsn/tsn_app/tsn_tasks_config.c"
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
+    "${AppPath}/common/boards/${BoardName}/hardware_ethernet.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/boards/${BoardName}/stub.c"
     "${AppPath}/common/ethernet.c"
+    "${AppPath}/common/ethernet_avb_tsn.c"
     "${AppPath}/common/ethernet_sdk_enet.c"
     "${AppPath}/common/industrial.c"
     "${BoardPath}/board.c"
@@ -54,6 +77,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}
+    ${AppPath}/avb_tsn/tsn_app
     ${AppPath}/common
     ${AppPath}/common/boards/${BoardName}
     ${AppPath}/freertos
@@ -63,19 +87,33 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonPath}/libs
     ${BoardPath}
     ${AppBoardPath}
+    ${GenAVBPath}/include
+    ${GenAVBPath}/include/genavb
+    ${GenAVBPath}/include/freertos
     ${SdkDirPath}/devices/MIMX8MM6
+    ${SdkDirPath}/drivers/enet
 )
 
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
+    ${CommonPath}/libs/avb_tsn
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/hlog
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/mailbox
+    ${CommonPath}/libs/stats
     ${RtosPath}
     ${SdkDirPath}
 )
+
+add_library(avb-core-lib STATIC IMPORTED)
+set_target_properties(avb-core-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/libstack-core.a)
+
+add_library(srp-lib STATIC IMPORTED)
+set_target_properties(srp-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/srp)
+
+add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-freertos srp-lib)
 
 # include entry for cmake components
 
@@ -97,14 +135,20 @@ include(driver_cache_armv8a)
 include(driver_clock)
 include(driver_common)
 include(driver_enet)
+include(driver_gpt)
+include(driver_igpio)
 include(driver_iuart)
+include(driver_mdio-common)
 include(driver_mdio-enet)
+include(driver_phy-common)
 include(driver_phy-device-ar8031)
 
+include(lib_avb_tsn)
 include(lib_ctrl)
 include(lib_jailhouse)
 include(lib_hlog)
 include(lib_mailbox)
+include(lib_stats)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
@@ -115,6 +159,12 @@ include(utility_debug_console)
 include(utilities_misc_utilities)
 
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
+
+target_link_libraries(srp-lib INTERFACE stack-freertos)
+
+target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE avb-core-lib)
+
+target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE stack-freertos)
 
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE m)
 

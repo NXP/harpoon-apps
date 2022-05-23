@@ -13,8 +13,8 @@
 #include "avb_tsn/genavb.h"
 #include "avb_tsn/stats_task.h"
 #include "cyclic_task.h"
-#include "hardware_ethernet.h"
 #include "ethernet.h"
+#include "hardware_ethernet.h"
 #include "industrial.h"
 
 #include "os/irq.h"
@@ -27,6 +27,7 @@
 #define STATS_PERIOD_MS 2000
 
 extern void ENET_QOS_DriverIRQHandler(void);
+extern void ENET_DriverIRQHandler(void);
 extern void BOARD_GPT_0_IRQ_HANDLER(void);
 extern void BOARD_GPT_1_IRQ_HANDLER(void);
 

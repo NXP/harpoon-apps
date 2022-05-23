@@ -34,8 +34,8 @@ void ethernet_usage(void)
 		"\nIndustrial ethernet options:\n"
 		"\t-a <mac_addr>  set hardware MAC address (default 91:e0:f0:00:fe:70)\n"
 		"\t-r <id>        run ethernet mode id:\n"
-		"\t               0 - genAVB/TSN stack (imx8mp ENET_QOS)\n"
-		"\t               1 - mcux-sdk API (im8m{m,n} ENET)\n"
+		"\t               0 - genAVB/TSN stack\n"
+		"\t               1 - mcux-sdk API (imx8m{m,n} ENET)\n"
 		"\t-s             stop ethernet\n"
 	);
 }
