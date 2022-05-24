@@ -62,6 +62,12 @@ void audio_element_dump(struct audio_element *element)
 		element->dump(element);
 }
 
+void audio_element_stats(struct audio_element *element)
+{
+	if (element->stats)
+		element->stats(element);
+}
+
 int audio_element_check_config(struct audio_element_config *config)
 {
 	int rc;

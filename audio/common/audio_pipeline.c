@@ -712,3 +712,20 @@ void audio_pipeline_dump(struct audio_pipeline *pipeline)
 		}
 	}
 }
+
+void audio_pipeline_stats(struct audio_pipeline *pipeline)
+{
+	struct audio_pipeline_stage *stage;
+	struct audio_element *element;
+	int i, j;
+
+	for (i = 0; i < pipeline->stages; i++) {
+		stage = &pipeline->stage[i];
+
+		for (j = 0; j < stage->elements; j++) {
+			element = &stage->element[j];
+
+			audio_element_stats(element);
+		}
+	}
+}

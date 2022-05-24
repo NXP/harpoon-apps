@@ -49,6 +49,8 @@ void play_pipeline_stats(void *handle)
 
 	log_info("callback: %llu, run: %llu, err: %llu\n", ctx->stats.callback, ctx->stats.run,
 		ctx->stats.err);
+
+	audio_pipeline_stats(ctx->pipeline);
 }
 
 static void rx_callback(uint8_t status, void *user_data)

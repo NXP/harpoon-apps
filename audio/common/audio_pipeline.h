@@ -74,5 +74,6 @@ int audio_pipeline_run(struct audio_pipeline *pipeline);
 void audio_pipeline_exit(struct audio_pipeline *pipeline);
 void audio_pipeline_reset(struct audio_pipeline *pipeline);
 void audio_pipeline_dump(struct audio_pipeline *pipeline);
+void audio_pipeline_stats(struct audio_pipeline *pipeline);
 
 #endif /* _AUDIO_PIPELINE_H_ */
