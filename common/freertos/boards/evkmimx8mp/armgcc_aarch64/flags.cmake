@@ -4,8 +4,7 @@ SET(CMAKE_ASM_FLAGS_DEBUG " \
     -D__STARTUP_INITIALIZE_NONCACHEDATA \
     -DGUEST \
     -g \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -fno-common \
@@ -20,8 +19,7 @@ SET(CMAKE_ASM_FLAGS_RELEASE " \
     -D__STARTUP_CLEAR_BSS \
     -D__STARTUP_INITIALIZE_NONCACHEDATA \
     -DGUEST \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -fno-common \
@@ -37,8 +35,7 @@ SET(CMAKE_ASM_FLAGS_DDR_DEBUG " \
     -D__STARTUP_INITIALIZE_NONCACHEDATA \
     -DGUEST \
     -g \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -fno-common \
@@ -53,8 +50,7 @@ SET(CMAKE_ASM_FLAGS_DDR_RELEASE " \
     -D__STARTUP_CLEAR_BSS \
     -D__STARTUP_INITIALIZE_NONCACHEDATA \
     -DGUEST \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -fno-common \
@@ -69,8 +65,7 @@ SET(CMAKE_ASM_FLAGS_RAM_RELEASE " \
     -D__STARTUP_CLEAR_BSS \
     -D__STARTUP_INITIALIZE_NONCACHEDATA \
     -DGUEST \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -fno-common \
@@ -87,8 +82,7 @@ SET(CMAKE_ASM_FLAGS_FLASH_DEBUG " \
     -D__STARTUP_INITIALIZE_NONCACHEDATA \
     -DGUEST \
     -g \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -fno-common \
@@ -109,8 +103,7 @@ SET(CMAKE_C_FLAGS_DEBUG " \
     -DFSL_RTOS_FREE_RTOS \
     -g \
     -O0 \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -MMD \
@@ -132,8 +125,7 @@ SET(CMAKE_C_FLAGS_RELEASE " \
     -DPRINTF_ADVANCED_ENABLE=1 \
     -DFSL_RTOS_FREE_RTOS \
     -O3 \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -MMD \
@@ -156,8 +148,7 @@ SET(CMAKE_C_FLAGS_DDR_DEBUG " \
     -DFSL_RTOS_FREE_RTOS \
     -g \
     -O0 \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -MMD \
@@ -179,8 +170,7 @@ SET(CMAKE_C_FLAGS_DDR_RELEASE " \
     -DPRINTF_ADVANCED_ENABLE=1 \
     -DFSL_RTOS_FREE_RTOS \
     -O3 \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -MMD \
@@ -204,8 +194,7 @@ SET(CMAKE_C_FLAGS_FLASH_DEBUG " \
     -DFSL_RTOS_FREE_RTOS \
     -g \
     -O0 \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -MMD \
@@ -227,8 +216,7 @@ SET(CMAKE_CXX_FLAGS_DEBUG " \
     -DPRINTF_ADVANCED_ENABLE=1 \
     -g \
     -O0 \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -MMD \
@@ -250,8 +238,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE " \
     -DPRINTF_FLOAT_ENABLE=1 \
     -DPRINTF_ADVANCED_ENABLE=1 \
     -O3 \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -MMD \
@@ -274,8 +261,7 @@ SET(CMAKE_CXX_FLAGS_DDR_DEBUG " \
     -DPRINTF_ADVANCED_ENABLE=1 \
     -g \
     -O0 \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -MMD \
@@ -297,8 +283,7 @@ SET(CMAKE_CXX_FLAGS_DDR_RELEASE " \
     -DPRINTF_FLOAT_ENABLE=1 \
     -DPRINTF_ADVANCED_ENABLE=1 \
     -O3 \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -MMD \
@@ -320,8 +305,7 @@ SET(CMAKE_CXX_FLAGS_RAM_RELEASE " \
     -DPRINTF_FLOAT_ENABLE=1 \
     -DPRINTF_ADVANCED_ENABLE=1 \
     -O3 \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
     -MMD \
@@ -336,8 +320,7 @@ SET(CMAKE_CXX_FLAGS_RAM_RELEASE " \
 ")
 SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " \
     -g \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     --specs=nosys.specs \
     -fno-common \
@@ -358,8 +341,7 @@ SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " \
     -T${BoardPath}/armgcc_aarch64/MIMX8ML8xxxxx_ca53_ram.ld -static \
 ")
 SET(CMAKE_EXE_LINKER_FLAGS_RELEASE " \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     --specs=nosys.specs \
     -fno-common \
@@ -381,8 +363,7 @@ SET(CMAKE_EXE_LINKER_FLAGS_RELEASE " \
 ")
 SET(CMAKE_EXE_LINKER_FLAGS_DDR_DEBUG " \
     -g \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     --specs=nosys.specs \
     -fno-common \
@@ -403,8 +384,7 @@ SET(CMAKE_EXE_LINKER_FLAGS_DDR_DEBUG " \
     -T${BoardPath}/armgcc_aarch64/MIMX8ML8xxxxx_ca53_ddr_ram.ld -static \
 ")
 SET(CMAKE_EXE_LINKER_FLAGS_DDR_RELEASE " \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     --specs=nosys.specs \
     -fno-common \
@@ -425,8 +405,7 @@ SET(CMAKE_EXE_LINKER_FLAGS_DDR_RELEASE " \
     -T${BoardPath}/armgcc_aarch64/MIMX8ML8xxxxx_ca53_ddr_ram.ld -static \
 ")
 SET(CMAKE_EXE_LINKER_FLAGS_RAM_RELEASE " \
-    -march=armv8.1-a \
-    -mtune=cortex-a53 \
+    -mcpu=cortex-a53 \
     -Wall \
     --specs=nosys.specs \
     -fno-common \
