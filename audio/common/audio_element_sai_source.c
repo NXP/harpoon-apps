@@ -51,6 +51,8 @@ struct sai_line {
 	unsigned int sai_id;
 	unsigned int min;
 	unsigned int max;
+	unsigned int underflow;
+	unsigned int overflow;
 };
 
 struct sai_source_element {
@@ -111,11 +113,13 @@ static int sai_source_element_run(struct audio_element *element)
 
 			if (level <= line->min) {
 				/* rx underflow */
+				line->underflow++;
 				goto err;
 			}
 
 			if (level >= line->max) {
 				/* rx overflow */
+				line->overflow++;
 				goto err;
 			}
 		}
@@ -196,6 +200,20 @@ static void sai_source_element_dump(struct audio_element *element)
 
 	for (i = 0; i < sai->out_n; i++)
 		audio_buf_dump(sai->out[i].buf);
+}
+
+static void sai_source_element_stats(struct audio_element *element)
+{
+	struct sai_source_element *sai = element->data;
+	int i;
+
+	for (i = 0; i < sai->line_n; i++) {
+		log_info("rx line: %u, sai(%u, %u)\n",
+			 i, sai->line[i].sai_id, sai->line[i].id);
+
+		log_info("  underflow: %u, overflow: %u\n",
+			sai->line[i].underflow, sai->line[i].overflow);
+	}
 }
 
 static unsigned int sai_source_map_size(struct audio_element_config *config)
@@ -320,6 +338,7 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 	element->reset = sai_source_element_reset;
 	element->exit = sai_source_element_exit;
 	element->dump = sai_source_element_dump;
+	element->stats = sai_source_element_stats;
 
 	sai->started = false;
 

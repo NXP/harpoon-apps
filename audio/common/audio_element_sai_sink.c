@@ -32,6 +32,8 @@ struct sai_line {
 	unsigned int sai_id;
 	unsigned int min;
 	unsigned int max;
+	unsigned int underflow;
+	unsigned int overflow;
 };
 
 struct sai_sink_element {
@@ -116,11 +118,13 @@ static int sai_sink_element_run(struct audio_element *element)
 
 			if (level <= line->min) {
 				/* tx underflow */
+				line->underflow++;
 				goto err;
 			}
 
 			if (level >= line->max) {
 				/* tx overflow */
+				line->overflow++;
 				goto err;
 			}
 		}
@@ -183,6 +187,20 @@ static void sai_sink_element_dump(struct audio_element *element)
 
 	for (i = 0; i < sai->in_n; i++)
 		audio_buf_dump(sai->in[i].buf);
+}
+
+static void sai_sink_element_stats(struct audio_element *element)
+{
+	struct sai_sink_element *sai = element->data;
+	int i;
+
+	for (i = 0; i < sai->line_n; i++) {
+		log_info("tx line: %u, sai(%u, %u)\n",
+			 i, sai->line[i].sai_id, sai->line[i].id);
+
+		log_info("  underflow: %u, overflow: %u\n",
+			sai->line[i].underflow, sai->line[i].overflow);
+	}
 }
 
 static unsigned int sai_sink_map_size(struct audio_element_config *config)
@@ -305,6 +323,7 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 	element->reset = sai_sink_element_reset;
 	element->exit = sai_sink_element_exit;
 	element->dump = sai_sink_element_dump;
+	element->stats = sai_sink_element_stats;
 
 	sai->started = false;
 
