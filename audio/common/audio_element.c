@@ -77,6 +77,10 @@ int audio_element_check_config(struct audio_element_config *config)
 		rc = dtmf_element_check_config(config);
 		break;
 
+	case AUDIO_ELEMENT_PLL:
+		rc = pll_element_check_config(config);
+		break;
+
 	case AUDIO_ELEMENT_ROUTING:
 		rc = routing_element_check_config(config);
 		break;
@@ -108,6 +112,10 @@ unsigned int audio_element_data_size(struct audio_element_config *config)
 	switch (config->type) {
 	case AUDIO_ELEMENT_DTMF_SOURCE:
 		size = dtmf_element_size(config);
+		break;
+
+	case AUDIO_ELEMENT_PLL:
+		size = pll_element_size(config);
 		break;
 
 	case AUDIO_ELEMENT_ROUTING:
@@ -147,6 +155,10 @@ int audio_element_init(struct audio_element *element, struct audio_element_confi
 	switch (config->type) {
 	case AUDIO_ELEMENT_DTMF_SOURCE:
 		rc = dtmf_element_init(element, config, buffer);
+		break;
+
+	case AUDIO_ELEMENT_PLL:
+		rc = pll_element_init(element, config, buffer);
 		break;
 
 	case AUDIO_ELEMENT_ROUTING:

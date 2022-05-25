@@ -8,6 +8,7 @@
 #define _AUDIO_ELEMENT_H_
 
 #include "audio_element_dtmf.h"
+#include "audio_element_pll.h"
 #include "audio_element_routing.h"
 #include "audio_element_sai_sink.h"
 #include "audio_element_sai_source.h"
@@ -24,6 +25,7 @@ enum {
 	AUDIO_ELEMENT_SAI_SINK,
 	AUDIO_ELEMENT_SAI_SOURCE,
 	AUDIO_ELEMENT_SINE_SOURCE,
+	AUDIO_ELEMENT_PLL,
 };
 
 /* Configuration */
@@ -41,6 +43,7 @@ struct audio_element_config {
 
 	union {
 		struct dtmf_element_config dtmf;
+		struct pll_element_config pll;
 		struct routing_element_config routing;
 		struct sai_sink_element_config sai_sink;
 		struct sai_source_element_config sai_source;
