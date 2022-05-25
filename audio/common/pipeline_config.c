@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "fsl_clock.h"
 #include "audio_pipeline.h"
 
 const struct audio_pipeline_config pipeline_config = {
@@ -111,7 +112,7 @@ const struct audio_pipeline_config pipeline_config = {
 
 	.stage[2] = {
 
-		.elements = 1,
+		.elements = 2,
 
 		.element[0] = {
 			.type = AUDIO_ELEMENT_SAI_SINK,
@@ -141,6 +142,15 @@ const struct audio_pipeline_config pipeline_config = {
 
 			.inputs = 4,
 			.input = {8, },	/* 8 - 11 */
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_PLL,
+			.u.pll = {
+				.src_sai_id = 5,
+				.dst_sai_id = 3,
+				.pll_id = kCLOCK_AudioPll1Ctrl,
+			},
 		},
 	},
 
