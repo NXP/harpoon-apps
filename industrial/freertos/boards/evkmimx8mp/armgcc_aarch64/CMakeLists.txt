@@ -58,6 +58,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/avb_tsn/tsn_app/tsn_tasks_config.c"
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
+    "${AppPath}/common/boards/${BoardName}/hardware_flexcan.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/boards/${BoardName}/stub.c"
     "${AppPath}/common/can.c"
@@ -67,7 +68,6 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
     "${AppBoardPath}/hardware_enet_qos.c"
-    "${AppBoardPath}/hardware_flexcan.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
