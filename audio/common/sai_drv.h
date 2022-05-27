@@ -186,4 +186,14 @@ static inline void *__sai_tx_fifo_addr(void *base, unsigned int line)
 	return (void *)SAI_TxGetDataRegisterAddress(base, line);
 }
 
+static inline uint32_t __sai_rx_bitclock(void *base)
+{
+	return ((I2S_Type *)base)->RBCR;
+}
+
+static inline uint32_t __sai_tx_bitclock(void *base)
+{
+	return ((I2S_Type *)base)->TBCR;
+}
+
 #endif /* _SAI_DRV_H_ */
