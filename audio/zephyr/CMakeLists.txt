@@ -27,6 +27,7 @@ zephyr_include_directories(
 	${CommonPath}/libs/hlog
 	${CommonPath}/libs/jailhouse
 	${CommonPath}/libs/mailbox
+	${CommonPath}/libs/stats
 	${CommonPath}/zephyr/boards
 	${ProjDirPath}
 	)
