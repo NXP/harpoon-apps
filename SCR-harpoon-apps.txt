@@ -33,3 +33,19 @@ Description and comments:    IoT operating system for microcontrollers with adde
 Release Location:            https://github.com/NXPmicro/FreeRTOS-Kernel.git (tag MCUX_2.11.0_aarch64_0.1)
 Origin:                      Amazon (MIT)
 --------------------------------------------
+Package:                     Zephyr
+Outgoing License:            Apache-2.0
+License File:                zephyr/LICENSE
+Type of Content:             source code
+Description and comments:    Open source scalable real-time operating system
+Release Location:            https://github.com/NXPmicro/zephyr.git (tag harpoon_2.1.0)
+Origin:                      https://github.com/zephyrproject-rtos/zephyr.git
+--------------------------------------------
+Package:                     hal_nxp
+Outgoing License:            LA_OPT_NXP_Software_License - Additional distribution license granted - Section 2.3 applies
+License File:                modules/hal/mcux/mcux-sdk/LA_OPT_NXP_Software_License.txt
+Type of Content:             source code
+Description and comments:    SDK files for Zephyr
+Release Location:            https://github.com/NXPmicro/hal_nxp.git (tag harpoon_2.1.0)
+Origin:                      https://github.com/NXPmicro/hal_nxp.git
+--------------------------------------------
