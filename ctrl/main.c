@@ -47,7 +47,7 @@ static void audio_usage(void)
 		"\t               Will use default frequency 44100Hz if not specified\n"
 		"\t-p <frames>    audio processing period (in frames)\n"
 		"\t               Supporting 2, 4, 8, 16, 32 frames\n"
-		"\t               Will use default period 32 frames if not specified\n"
+		"\t               Will use default period 8 frames if not specified\n"
 		"\t-r <id>        run audio mode id:\n"
 		"\t               0 - dtmf playback\n"
 		"\t               1 - music playback\n"
