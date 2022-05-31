@@ -45,6 +45,10 @@ static struct play_pipeline_config play_pipeline_dtmf_config = {
 	.cfg = &pipeline_dtmf_config,
 };
 
+static struct play_pipeline_config play_pipeline_sine_config = {
+	.cfg = &pipeline_sine_config,
+};
+
 static struct play_pipeline_config play_pipeline_full_config = {
 	.cfg = &pipeline_full_config,
 };
@@ -65,10 +69,11 @@ const static struct mode_handler handler[] =
 		.stats = play_music_stats,
 	},
 	[2] = {
-		.init = play_sine_init,
-		.exit = play_sine_exit,
-		.run = play_sine_run,
-		.stats = play_sine_stats,
+		.init = play_pipeline_init,
+		.exit = play_pipeline_exit,
+		.run = play_pipeline_run,
+		.stats = play_pipeline_stats,
+		.data = &play_pipeline_sine_config,
 	},
 	[3] = {
 		.init = rec_play_init,
