@@ -20,6 +20,7 @@
 
 #define DEFAULT_PERIOD		8
 #define DEFAULT_SAMPLE_RATE	48000
+#define USE_TX_IRQ		1
 
 static const int supported_period[] = {2, 4, 8, 16, 32};
 static const uint32_t supported_rate[] = {44100, 48000, 88200, 96000, 176400, 192000};
@@ -56,7 +57,11 @@ static void rx_callback(uint8_t status, void *user_data)
 {
 	struct pipeline_ctx *ctx = (struct pipeline_ctx*)user_data;
 
+#if USE_TX_IRQ
+	sai_disable_irq(&ctx->dev[0], false, true);
+#else
 	sai_disable_irq(&ctx->dev[0], true, false);
+#endif
 
 	ctx->stats.callback++;
 
@@ -78,7 +83,11 @@ int play_pipeline_run(void *handle, struct event *e)
 		os_assert(!err, "pipeline couldn't restart");
 	}
 
+#if USE_TX_IRQ
+	sai_enable_irq(&ctx->dev[0], false, true);
+#else
 	sai_enable_irq(&ctx->dev[0], true, false);
+#endif
 
 	return err;
 }
@@ -157,7 +166,11 @@ static void sai_setup(struct pipeline_ctx *ctx)
 			pll_disable = false;
 
 		/* Set FIFO water mark to be period size of all channels*/
+#if USE_TX_IRQ
+		sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers - 1;
+#else
 		sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
+#endif
 
 		sai_drv_setup(&ctx->dev[i], &sai_config);
 	}
