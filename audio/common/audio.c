@@ -27,6 +27,7 @@ struct mode_handler {
 	void (*exit)(void *);
 	void (*stats)(void *);
 	int (*run)(void *, struct event *e);
+	void *data;
 };
 
 struct data_ctx {
@@ -38,6 +39,10 @@ struct data_ctx {
 
 	const struct mode_handler *handler;
 	void *handle;
+};
+
+static struct play_pipeline_config play_pipeline_full_config = {
+	.cfg = &pipeline_full_config,
 };
 
 const static struct mode_handler handler[] =
@@ -77,6 +82,7 @@ const static struct mode_handler handler[] =
 		.exit = play_pipeline_exit,
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
+		.data = &play_pipeline_full_config,
 	}
 };
 
@@ -138,6 +144,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	cfg.event_data = &ctx->mqueue;
 	cfg.rate = run->frequency;
 	cfg.period = run->period;
+	cfg.data = handler[run->id].data;
 
 	ctx->handle = handler[run->id].init(&cfg);
 	if (!ctx->handle)

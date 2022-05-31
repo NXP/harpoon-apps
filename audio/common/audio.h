@@ -8,12 +8,18 @@
 #ifndef _AUDIO_H_
 #define _AUDIO_H_
 
+struct play_pipeline_config {
+	const struct audio_pipeline_config *cfg;
+};
+
 struct audio_config {
 	uint32_t rate;
 	uint32_t period;
 
 	void (*event_send)(void *, uint8_t);
 	void *event_data;
+
+	void *data;
 };
 
 struct event {
@@ -49,6 +55,8 @@ void play_music_exit(void *handle);
 void play_sine_exit(void *handle);
 void rec_play_exit(void *handle);
 void play_pipeline_exit(void *handle);
+
+extern const struct audio_pipeline_config pipeline_full_config;
 
 /* assign_nonzero_valid_val(): Validate and assign nonzero value.
  * "value" == 0: "var" use default vale, return 0;

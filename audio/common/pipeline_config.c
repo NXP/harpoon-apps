@@ -7,7 +7,7 @@
 #include "fsl_clock.h"
 #include "audio_pipeline.h"
 
-const struct audio_pipeline_config pipeline_config = {
+const struct audio_pipeline_config pipeline_full_config = {
 	.stages = 3,
 
 	.stage[0] = {
