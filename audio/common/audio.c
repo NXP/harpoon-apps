@@ -41,6 +41,10 @@ struct data_ctx {
 	void *handle;
 };
 
+static struct play_pipeline_config play_pipeline_dtmf_config = {
+	.cfg = &pipeline_dtmf_config,
+};
+
 static struct play_pipeline_config play_pipeline_full_config = {
 	.cfg = &pipeline_full_config,
 };
@@ -48,10 +52,11 @@ static struct play_pipeline_config play_pipeline_full_config = {
 const static struct mode_handler handler[] =
 {
 	[0] = {
-		.init = play_dtmf_init,
-		.exit = play_dtmf_exit,
-		.run = play_dtmf_run,
-		.stats = play_dtmf_stats,
+		.init = play_pipeline_init,
+		.exit = play_pipeline_exit,
+		.run = play_pipeline_run,
+		.stats = play_pipeline_stats,
+		.data = &play_pipeline_dtmf_config,
 	},
 	[1] = {
 		.init = play_music_init,

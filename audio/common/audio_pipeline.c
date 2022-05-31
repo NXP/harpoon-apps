@@ -232,8 +232,7 @@ static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 		output = audio_pipeline_count_output(config, 0, i);
 
 		if (input > 1) {
-			log_err("buffer(%u) referenced by %u inputs\n", i, input);
-			goto err;
+			log_warn("buffer(%u) referenced by %u inputs\n", i, input);
 		}
 
 		if (output > 1) {
