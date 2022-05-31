@@ -120,6 +120,94 @@ const struct audio_pipeline_config pipeline_dtmf_config = {
 	.buffer_storage = 4,
 };
 
+
+const struct audio_pipeline_config pipeline_loopback_config = {
+	.stages = 2,
+
+	.stage[0] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SOURCE,
+			.u.sai_source = {
+				.sai_n = 2,
+				.sai = {
+					[0] = {
+						.id = 5,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 2,
+							},
+						},
+					},
+					[1] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 2,
+							},
+						},
+					},
+				},
+			},
+			.outputs = 4,
+			.output = {0, },	/* 0 - 3 */
+		},
+	},
+
+	.stage[1] = {
+
+		.elements = 2,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SINK,
+			.u.sai_sink = {
+				.sai_n = 2,
+				.sai = {
+					[0] = {
+						.id = 5,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 2,
+							},
+						},
+					},
+					[1] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 2,
+							},
+						},
+					},
+				},
+			},
+
+			.inputs = 4,
+			.input = {0, },	/* 0 - 3 */
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_PLL,
+			.u.pll = {
+				.src_sai_id = 5,
+				.dst_sai_id = 3,
+				.pll_id = kCLOCK_AudioPll1Ctrl,
+			},
+		},
+	},
+
+	.buffers = 4,
+
+	.buffer_storage = 4,
+};
+
+
 const struct audio_pipeline_config pipeline_sine_config = {
 	.stages = 2,
 
@@ -216,7 +304,6 @@ const struct audio_pipeline_config pipeline_sine_config = {
 
 	.buffer_storage = 4,
 };
-
 
 const struct audio_pipeline_config pipeline_full_config = {
 	.stages = 3,

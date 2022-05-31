@@ -58,6 +58,7 @@ void play_pipeline_exit(void *handle);
 
 extern const struct audio_pipeline_config pipeline_dtmf_config;
 extern const struct audio_pipeline_config pipeline_sine_config;
+extern const struct audio_pipeline_config pipeline_loopback_config;
 extern const struct audio_pipeline_config pipeline_full_config;
 
 /* assign_nonzero_valid_val(): Validate and assign nonzero value.
