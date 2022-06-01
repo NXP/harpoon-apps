@@ -327,3 +327,8 @@ int cyclic_task_init(struct cyclic_task *c_task,
 err:
     return -1;
 }
+
+void cyclic_task_exit(struct cyclic_task *c_task)
+{
+    tsn_task_unregister(&c_task->task);
+}

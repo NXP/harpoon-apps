@@ -125,6 +125,14 @@ err:
     return -1;
 }
 
+void alarm_task_monitor_exit(struct alarm_task *a_task)
+{
+    tsn_task_unregister(&a_task->task);
+
+    if (a_task->queue.handle)
+        vQueueDelete(a_task->queue.handle);
+}
+
 int alarm_task_io_init(struct alarm_task *a_task)
 {
     struct tsn_task_params *params = &a_task->params;
@@ -152,3 +160,7 @@ err:
     return -1;
 }
 
+void alarm_task_io_exit(struct alarm_task *a_task)
+{
+    tsn_task_unregister(&a_task->task);
+}

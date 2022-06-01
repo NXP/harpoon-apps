@@ -31,7 +31,9 @@ struct alarm_task {
 int alarm_task_monitor_init(struct alarm_task *a_task,
                             void (*net_rx_func)(void *ctx, int msg_id, int src_id, void *buf, int len),
                             void *ctx);
+void alarm_task_monitor_exit(struct alarm_task *a_task);
 int alarm_task_io_init(struct alarm_task *a_task);
+void alarm_task_io_exit(struct alarm_task *a_task);
 int alarm_net_transmit(struct alarm_task *a_task, int msg_id, void *buf, int len);
 
 #endif /* _ALARM_TASK_H_ */

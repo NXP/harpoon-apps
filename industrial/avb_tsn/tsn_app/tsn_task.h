@@ -145,6 +145,7 @@ static inline void *tsn_net_sock_buf(struct net_socket *socket)
 int tsn_task_register(struct tsn_task **task, struct tsn_task_params *params,
                       int id, void (*main_loop)(void *), void *ctx,
                       void (*timer_callback)(void *, int));
+void tsn_task_unregister(struct tsn_task **task);
 int tsn_task_start(struct tsn_task *task);
 void tsn_task_stop(struct tsn_task *task);
 int tsn_net_receive_set_cb(struct net_socket *sock,

@@ -51,6 +51,7 @@ struct cyclic_task {
 int cyclic_task_init(struct cyclic_task *c_task,
                      void (*net_rx_func)(void *ctx, int msg_id, int src_id, void *buf, int len),
                      void (*loop_func)(void *ctx, int timer_status), void *ctx);
+void cyclic_task_exit(struct cyclic_task *c_task);
 int cyclic_task_start(struct cyclic_task *);
 void cyclic_task_stop(struct cyclic_task *);
 int cyclic_net_transmit(struct cyclic_task *c_task, int msg_id, void *buf, int len);

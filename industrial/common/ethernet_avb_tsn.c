@@ -41,9 +41,14 @@ static struct io_device_ctx *io_device_h = NULL;
 static struct serial_iodevice_ctx serial_iodev;
 #endif
 
-static struct cyclic_task *opt_io_device_task;
+struct ethernet_avb_tsn_ctx {
+	struct gavb_pps pps;
+	struct cyclic_task *c_task;
+	struct cyclic_task *opt_io_device_task;
+	struct alarm_task *a_task;
+};
+
 static char *app_mode_names[] = {"MOTOR_NETWORK", "MOTOR_LOCAL", "NETWORK_ONLY", "SERIAL"};
-static struct gavb_pps pps;
 
 extern struct system_config system_cfg;
 
@@ -92,11 +97,10 @@ void ethernet_avb_tsn_stats(void *priv)
 int ethernet_avb_tsn_run(void *priv, struct event *e)
 {
 	struct ethernet_ctx *ctx = priv;
-	struct cyclic_task *c_task = NULL;
-	struct alarm_task *a_task = NULL;
 	const struct tsn_app_config *config;
+	struct ethernet_avb_tsn_ctx *avb_tsn_ctx;
 
-	(void)ctx;
+	avb_tsn_ctx = (struct ethernet_avb_tsn_ctx *)(ctx + 1);
 
 	config = system_config_get_tsn_app();
 	if (!config) {
@@ -114,8 +118,8 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 		goto exit;
 	}
 
-	a_task = tsn_conf_get_alarm_task(config->role);
-	if (!a_task) {
+	avb_tsn_ctx->a_task = tsn_conf_get_alarm_task(config->role);
+	if (!avb_tsn_ctx->a_task) {
 		log_err("tsn_conf_get_alarm_task() failed\n");
 		goto exit;
 	}
@@ -146,28 +150,28 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 	}
 
 	if (config->mode == MOTOR_LOCAL) {
-		c_task = tsn_conf_get_cyclic_task(0);
-		if (!c_task) {
+		avb_tsn_ctx->c_task = tsn_conf_get_cyclic_task(0);
+		if (!avb_tsn_ctx->c_task) {
 			log_err("tsn_conf_get_cyclic_task() failed\n");
 			goto exit;
 		}
 
-		cyclic_task_set_period(c_task, config->period_ns);
+		cyclic_task_set_period(avb_tsn_ctx->c_task, config->period_ns);
 
-		c_task->num_peers = 0;
-		c_task->params.clk_id = GENAVB_CLOCK_MONOTONIC;
+		avb_tsn_ctx->c_task->num_peers = 0;
+		avb_tsn_ctx->c_task->params.clk_id = GENAVB_CLOCK_MONOTONIC;
 
-		opt_io_device_task = tsn_conf_get_cyclic_task(1);
-		if (!opt_io_device_task) {
+		avb_tsn_ctx->opt_io_device_task = tsn_conf_get_cyclic_task(1);
+		if (!avb_tsn_ctx->opt_io_device_task) {
 			log_err("tsn_conf_get_cyclic_task() failed\n");
 			goto exit;
 		}
-		opt_io_device_task->num_peers = 0;
-		opt_io_device_task->params.clk_id = GENAVB_CLOCK_MONOTONIC;
+		avb_tsn_ctx->opt_io_device_task->num_peers = 0;
+		avb_tsn_ctx->opt_io_device_task->params.clk_id = GENAVB_CLOCK_MONOTONIC;
 
-		cyclic_task_set_period(opt_io_device_task, config->period_ns);
+		cyclic_task_set_period(avb_tsn_ctx->opt_io_device_task, config->period_ns);
 
-		if (io_device_init(&io_device1, opt_io_device_task, 1, true) < 0) {
+		if (io_device_init(&io_device1, avb_tsn_ctx->opt_io_device_task, 1, true) < 0) {
 			log_err("Local io_device initialization failed\n");
 			goto exit;
 		}
@@ -179,37 +183,37 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 	log_info("BUILD_MOTOR disabled, MOTOR_NETWORK and MOTOR_LOCAL modes cannot be used\n");
 #endif /* BUILD_MOTOR */
 	{
-		c_task = tsn_conf_get_cyclic_task(config->role);
-		if (!c_task) {
+		avb_tsn_ctx->c_task = tsn_conf_get_cyclic_task(config->role);
+		if (!avb_tsn_ctx->c_task) {
 			log_err("tsn_conf_get_cyclic_task() failed\n");
 			goto exit;
 		}
 
-		cyclic_task_set_period(c_task, config->period_ns);
+		cyclic_task_set_period(avb_tsn_ctx->c_task, config->period_ns);
 	}
 
-	if (gavb_pps_init(&pps, c_task->params.clk_id) < 0)
+	if (gavb_pps_init(&avb_tsn_ctx->pps, avb_tsn_ctx->c_task->params.clk_id) < 0)
 		log_err("gavb_pps_init() error,pps timer could not be started\n");
 
-	if (c_task->type == CYCLIC_CONTROLLER) {
-		c_task->num_peers = config->num_io_devices;
-		a_task->num_peers = config->num_io_devices;
+	if (avb_tsn_ctx->c_task->type == CYCLIC_CONTROLLER) {
+		avb_tsn_ctx->c_task->num_peers = config->num_io_devices;
+		avb_tsn_ctx->a_task->num_peers = config->num_io_devices;
 	}
 
-	c_task->params.use_st = config->use_st;
-	c_task->params.use_fp = config->use_fp;
+	avb_tsn_ctx->c_task->params.use_st = config->use_st;
+	avb_tsn_ctx->c_task->params.use_fp = config->use_fp;
 
 #if BUILD_MOTOR == 1
 	if (config->mode == MOTOR_NETWORK || config->mode == MOTOR_LOCAL) {
-		if (c_task->type == CYCLIC_CONTROLLER) {
-			if (controller_init(&ctrl1, c_task, config->mode == MOTOR_LOCAL,
+		if (avb_tsn_ctx->c_task->type == CYCLIC_CONTROLLER) {
+			if (controller_init(&ctrl1, avb_tsn_ctx->c_task, config->mode == MOTOR_LOCAL,
 					(control_strategies_t)config->control_strategy, (bool)config->cmd_client) < 0) {
 				log_err("Controller initialization failed\n");
 				goto exit;
 			}
 			ctrl_h = &ctrl1;
-		} else if (c_task->type == CYCLIC_IO_DEVICE) {
-			if (io_device_init(&io_device1, c_task, 1, false) < 0) {
+		} else if (avb_tsn_ctx->c_task->type == CYCLIC_IO_DEVICE) {
+			if (io_device_init(&io_device1, avb_tsn_ctx->c_task, 1, false) < 0) {
 				log_err("io_device initialization failed\n");
 				goto exit;
 			}
@@ -224,32 +228,32 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 	{
 #if SERIAL_MODE == 1
 		if (config->mode == SERIAL) {
-			c_task->params.task_period_ns = APP_PERIOD_SERIAL_DEFAULT;
-			c_task->params.task_period_offset_ns = NET_DELAY_OFFSET_SERIAL_DEFAULT;
-			c_task->params.transfer_time_ns = NET_DELAY_OFFSET_SERIAL_DEFAULT;
+			avb_tsn_ctx->c_task->params.task_period_ns = APP_PERIOD_SERIAL_DEFAULT;
+			avb_tsn_ctx->c_task->params.task_period_offset_ns = NET_DELAY_OFFSET_SERIAL_DEFAULT;
+			avb_tsn_ctx->c_task->params.transfer_time_ns = NET_DELAY_OFFSET_SERIAL_DEFAULT;
 
-			if (serial_iodevice_init(&serial_iodev, c_task) < 0) {
+			if (serial_iodevice_init(&serial_iodev, avb_tsn_ctx->c_task) < 0) {
 				log_err("serial_iodevice_init() failed\n");
 				goto exit;
 			}
 		} else
 #endif
-			cyclic_task_init(c_task, NULL, null_loop, c_task);
+			cyclic_task_init(avb_tsn_ctx->c_task, NULL, null_loop, avb_tsn_ctx->c_task);
 	}
 
-	cyclic_task_start(c_task);
+	cyclic_task_start(avb_tsn_ctx->c_task);
 
-	if (opt_io_device_task)
-		cyclic_task_start(opt_io_device_task);
+	if (avb_tsn_ctx->opt_io_device_task)
+		cyclic_task_start(avb_tsn_ctx->opt_io_device_task);
 
-	if (a_task->type == ALARM_MONITOR)
-		alarm_task_monitor_init(a_task, NULL, NULL);
-	else if (a_task->type == ALARM_IO_DEVICE) {
-		alarm_task_io_init(a_task);
+	if (avb_tsn_ctx->a_task->type == ALARM_MONITOR)
+		alarm_task_monitor_init(avb_tsn_ctx->a_task, NULL, NULL);
+	else if (avb_tsn_ctx->a_task->type == ALARM_IO_DEVICE) {
+		alarm_task_io_init(avb_tsn_ctx->a_task);
 
 		while (true) {
 			os_msleep(10000);
-			alarm_net_transmit(a_task, 0, NULL, 0);
+			alarm_net_transmit(avb_tsn_ctx->a_task, 0, NULL, 0);
 		}
 	}
 
@@ -257,19 +261,59 @@ exit:
 	return 0;
 }
 
+void ethernet_avb_tsn_exit(void *priv)
+{
+	struct ethernet_ctx *ctx = priv;
+	struct ethernet_avb_tsn_ctx *avb_tsn_ctx;
+
+	avb_tsn_ctx = (struct ethernet_avb_tsn_ctx *)(ctx + 1);
+
+	if (avb_tsn_ctx->a_task) {
+		if (avb_tsn_ctx->a_task->type == ALARM_MONITOR)
+			alarm_task_monitor_exit(avb_tsn_ctx->a_task);
+		else if (avb_tsn_ctx->a_task->type == ALARM_IO_DEVICE)
+			alarm_task_io_exit(avb_tsn_ctx->a_task);
+	}
+
+	if (avb_tsn_ctx->opt_io_device_task)
+		cyclic_task_stop(avb_tsn_ctx->opt_io_device_task);
+
+	if (avb_tsn_ctx->c_task) {
+		cyclic_task_stop(avb_tsn_ctx->c_task);
+		cyclic_task_exit(avb_tsn_ctx->c_task);
+	}
+
+	gavb_pps_exit(&avb_tsn_ctx->pps);
+	gavb_port_stats_exit(0);
+
+	if (gavb_stack_exit()) {
+		log_err("gavb_stack_exit() failed\n");
+	}
+
+	irq_unregister(BOARD_GPT_1_IRQ);
+	irq_unregister(BOARD_GPT_0_IRQ);
+	irq_unregister(BOARD_ENET0_DRV_IRQ);
+
+	os_free(ctx);
+
+	log_info("end\n");
+}
+
 void *ethernet_avb_tsn_init(void *parameters)
 {
 	struct industrial_config *cfg = parameters;
+	struct ethernet_avb_tsn_ctx *avb_tsn_ctx;
 	struct ethernet_ctx *ctx;
 
-	ctx = os_malloc(sizeof(struct ethernet_ctx));
+	ctx = os_malloc(sizeof(*ctx) + sizeof(*avb_tsn_ctx));
 	if (!ctx) {
 		log_err("Memory allocation error\n");
 
 		goto exit;
 	}
 
-	memset(ctx, 0, sizeof(struct ethernet_ctx));
+	avb_tsn_ctx = (struct ethernet_avb_tsn_ctx *)(ctx + 1);
+	memset(ctx, 0, sizeof(*ctx) + sizeof(*avb_tsn_ctx));
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
@@ -287,15 +331,4 @@ void *ethernet_avb_tsn_init(void *parameters)
 
 exit:
 	return ctx;
-}
-
-void ethernet_avb_tsn_exit(void *priv)
-{
-	struct ethernet_ctx *ctx = priv;
-
-	/* FIXME stop application */
-
-	os_free(ctx);
-
-	log_info("end\n");
 }

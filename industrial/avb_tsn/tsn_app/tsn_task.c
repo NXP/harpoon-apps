@@ -758,3 +758,20 @@ err_free:
 err:
     return -1;
 }
+
+void tsn_task_unregister(struct tsn_task **task)
+{
+    /* timer_destroy */
+    if ((*task)->timer)
+        genavb_timer_destroy((*task)->timer);
+
+    /* task_delete */
+    if ((*task)->handle)
+        vTaskDelete((*task)->handle);
+
+    /* net_exit */
+    tsn_task_net_exit(*task);
+
+    /* err_free */
+    vPortFree(*task);
+}
