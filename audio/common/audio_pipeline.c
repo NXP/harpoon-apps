@@ -80,15 +80,18 @@ static void audio_pipeline_response(struct mailbox *m, uint32_t status)
 {
 	struct hrpn_resp_audio_pipeline resp;
 
-	resp.type = HRPN_RESP_TYPE_AUDIO_PIPELINE;
-	resp.status = status;
-	mailbox_resp_send(m, &resp, sizeof(resp));
+	if (m) {
+		resp.type = HRPN_RESP_TYPE_AUDIO_PIPELINE;
+		resp.status = status;
+		mailbox_resp_send(m, &resp, sizeof(resp));
+	}
 }
 
-void audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, struct mailbox *m)
+int audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, struct mailbox *m)
 {
 	struct audio_pipeline *pipeline = NULL;
 	struct audio_element *element = NULL;
+	int rc = 0;
 
 	/* search for matching pipeline id */
 	if (len >= sizeof(struct hrpn_cmd_audio_pipeline_common))
@@ -112,15 +115,17 @@ void audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, 
 		if (pipeline && (len >= sizeof(struct hrpn_cmd_audio_element_common)))
 			element = audio_pipeline_element_find(pipeline, cmd->u.element.u.common.element.type, cmd->u.element.u.common.element.id);
 
-		audio_element_ctrl(element, &cmd->u.element, len, m);
+		rc = audio_element_ctrl(element, &cmd->u.element, len, m);
 
 		break;
 	}
 
-	return;
+	return rc;
 
 err:
 	audio_pipeline_response(m, HRPN_RESP_STATUS_ERROR);
+
+	return -1;
 }
 
 static unsigned int audio_pipeline_count_input(struct audio_pipeline_config *config, unsigned int stage, unsigned int input)

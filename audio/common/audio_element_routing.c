@@ -31,12 +31,14 @@ static void routing_element_response(struct mailbox *m, uint32_t status)
 {
 	struct hrpn_resp_audio_element_routing resp;
 
-	resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING;
-	resp.status = status;
-	mailbox_resp_send(m, &resp, sizeof(resp));
+	if (m) {
+		resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING;
+		resp.status = status;
+		mailbox_resp_send(m, &resp, sizeof(resp));
+	}
 }
 
-void routing_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_routing *cmd, unsigned int len, struct mailbox *m)
+int routing_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_routing *cmd, unsigned int len, struct mailbox *m)
 {
 	struct routing_element *routing;
 	unsigned int output, input;
@@ -90,10 +92,12 @@ void routing_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_e
 
 	routing_element_response(m, HRPN_RESP_STATUS_SUCCESS);
 
-	return;
+	return 0;
 
 err:
 	routing_element_response(m, HRPN_RESP_STATUS_ERROR);
+
+	return -1;
 }
 
 static int routing_element_run(struct audio_element *element)

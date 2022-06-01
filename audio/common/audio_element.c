@@ -14,13 +14,17 @@ static void audio_element_response(struct mailbox *m, uint32_t status)
 {
 	struct hrpn_resp_audio_element resp;
 
-	resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT;
-	resp.status = status;
-	mailbox_resp_send(m, &resp, sizeof(resp));
+	if (m) {
+		resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT;
+		resp.status = status;
+		mailbox_resp_send(m, &resp, sizeof(resp));
+	}
 }
 
-void audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element *cmd, unsigned int len, struct mailbox *m)
+int audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element *cmd, unsigned int len, struct mailbox *m)
 {
+	int rc = 0;
+
 	switch (cmd->u.common.type) {
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_DUMP:
 		if (len != sizeof(struct hrpn_cmd_audio_element_dump))
@@ -37,7 +41,7 @@ void audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_ele
 
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_CONNECT:
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_DISCONNECT:
-		routing_element_ctrl(element, &cmd->u.routing, len, m);
+		rc = routing_element_ctrl(element, &cmd->u.routing, len, m);
 		break;
 
 	default:
@@ -45,10 +49,12 @@ void audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_ele
 		break;
 	}
 
-	return;
+	return rc;
 
 err:
 	audio_element_response(m, HRPN_RESP_STATUS_ERROR);
+
+	return -1;
 }
 
 void audio_element_exit(struct audio_element *element)
