@@ -94,6 +94,11 @@ err:
     return -1;
 }
 
+void gavb_pps_exit(struct gavb_pps *pps)
+{
+    genavb_timer_destroy(pps->t);
+}
+
 static char *domain_cfg_param_file(uint8_t instance, char *param, char *buf, size_t size)
 {
     if (!instance)
@@ -295,6 +300,17 @@ err:
         vPortFree(stats->names);
 
     return -1;
+}
+
+void gavb_port_stats_exit(unsigned int port_id)
+{
+    struct port_stats *stats = &port_stats[port_id];
+
+    if (stats->values)
+        vPortFree(stats->values);
+
+    if (stats->names)
+        vPortFree(stats->names);
 }
 
 struct port_stats *gavb_port_stats_get(unsigned int port_id)

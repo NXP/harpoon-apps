@@ -24,8 +24,10 @@ struct gavb_pps {
 };
 
 int gavb_pps_init(struct gavb_pps *pps, genavb_clock_id_t clk_id);
+void gavb_pps_exit(struct gavb_pps *pps);
 struct port_stats *gavb_port_stats_get(unsigned int port_id);
 int gavb_port_stats_init(unsigned int port_id);
+void gavb_port_stats_exit(unsigned int port_id);
 int gavb_log_level(char *component_str, char *level_str);
 struct genavb_handle *get_genavb_handle(void);
 int gavb_stack_init(void);
