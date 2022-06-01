@@ -52,6 +52,12 @@ struct hrpn_cmd_audio_element_routing {
 	} u;
 };
 
+struct hrpn_cmd_audio_element_pll {
+	union {
+		struct hrpn_cmd_audio_element_common common;
+	} u;
+};
+
 struct hrpn_cmd_audio_element_dump {
 	uint32_t type;		/* command type */
 	struct hrpn_cmd_audio_pipeline_id pipeline;
@@ -67,6 +73,7 @@ struct hrpn_cmd_audio_element {
 	union {
 		struct hrpn_cmd_audio_element_common common;
 		struct hrpn_cmd_audio_element_routing routing;
+		struct hrpn_cmd_audio_element_pll pll;
 		struct hrpn_cmd_audio_element_dump dump;
 	} u;
 };

@@ -4,9 +4,13 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "os/semaphore.h"
+
 #include "audio_element_pll.h"
 #include "audio_element.h"
 #include "hlog.h"
+#include "hrpn_ctrl.h"
+#include "mailbox.h"
 #include "stats.h"
 
 #include "sai_drv.h"
@@ -31,6 +35,9 @@ struct pll_element {
 
 	int state;
 	unsigned int sample_count;
+
+	os_sem_t semaphore;
+	bool enabled;
 
 	uint32_t src_bcr;
 	uint32_t dst_bcr;
@@ -57,6 +64,8 @@ struct pll_element {
 
 extern const ccm_analog_frac_pll_config_t g_audioPll1Config;
 extern const ccm_analog_frac_pll_config_t g_audioPll2Config;
+
+static void pll_element_reset(struct audio_element *element);
 
 #define FracPLL_FDIV_CTL1_Offset (8U)
 
@@ -100,11 +109,73 @@ exit:
 	return;
 }
 
+static void pll_element_response(struct mailbox *m, uint32_t status)
+{
+	struct hrpn_resp_audio_element resp;
+
+	if (m) {
+		resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT_PLL;
+		resp.status = status;
+		mailbox_resp_send(m, &resp, sizeof(resp));
+	}
+}
+
+int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_pll *cmd, unsigned int len, struct mailbox *m)
+{
+	struct pll_element *pll;
+
+	if (!element)
+		goto err;
+
+	if (element->type != AUDIO_ELEMENT_PLL)
+		goto err;
+
+	pll = element->data;
+
+	switch (cmd->u.common.type) {
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ENABLE:
+		os_sem_take(&pll->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+
+		pll_element_reset(element);
+		pll->enabled = true;
+
+		os_sem_give(&pll->semaphore, 0);
+
+		break;
+
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_DISABLE:
+		os_sem_take(&pll->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+
+		pll->enabled = false;
+
+		os_sem_give(&pll->semaphore, 0);
+
+		break;
+
+	default:
+		goto err;
+		break;
+	}
+
+	pll_element_response(m, HRPN_RESP_STATUS_SUCCESS);
+
+	return 0;
+
+err:
+	pll_element_response(m, HRPN_RESP_STATUS_ERROR);
+	return -1;
+}
+
 static int pll_element_run(struct audio_element *element)
 {
 	struct pll_element *pll = element->data;
 	uint32_t src_bcr, dst_bcr, mask;
 	int64_t bclk_err, dt_bclk, bclk_ppb, err;
+
+	os_sem_take(&pll->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+
+	if (!pll->enabled)
+		goto out;
 
 	pll->count++;
 	if (pll->count < pll->period)
@@ -191,6 +262,8 @@ exit:
 	pll->count = 0;
 
 out:
+	os_sem_give(&pll->semaphore, 0);
+
 	return 0;
 }
 
@@ -219,7 +292,7 @@ static void pll_element_dump(struct audio_element *element)
 {
 	struct pll_element *pll = element->data;
 
-	log_info("pll(%p/%p), period: %u\n", pll, element, pll->period);
+	log_info("pll(%p/%p), enabled: %u, period: %u\n", pll, element, pll->enabled, pll->period);
 }
 
 static void pll_element_stats(struct audio_element *element)
@@ -254,12 +327,16 @@ int pll_element_init(struct audio_element *element, struct audio_element_config 
 	struct pll_element *pll = element->data;
 	struct pll_element_config *pll_config = &config->u.pll;
 
+	if (os_sem_init(&pll->semaphore, 1))
+		goto err;
+
 	element->run = pll_element_run;
 	element->reset = pll_element_reset;
 	element->exit = pll_element_exit;
 	element->dump = pll_element_dump;
 	element->stats = pll_element_stats;
 
+	pll->enabled = true;
 	pll->period = (PLL_SAMPLING_PERIOD_MS * element->sample_rate) / element->period / 1000;
 	pll->prev_bclk_ppb = 0;
 	pll->_kp = 4;
@@ -279,4 +356,7 @@ int pll_element_init(struct audio_element *element, struct audio_element_config 
 	pll_element_dump(element);
 
 	return 0;
+
+err:
+	return -1;
 }

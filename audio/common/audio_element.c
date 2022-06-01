@@ -44,6 +44,11 @@ int audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_elem
 		rc = routing_element_ctrl(element, &cmd->u.routing, len, m);
 		break;
 
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ENABLE:
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_DISABLE:
+		rc = pll_element_ctrl(element, &cmd->u.pll, len, m);
+		break;
+
 	default:
 		goto err;
 		break;

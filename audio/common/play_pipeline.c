@@ -12,6 +12,7 @@
 #include "audio_pipeline.h"
 #include "audio.h"
 #include "hlog.h"
+#include "hrpn_ctrl.h"
 #include "codec_config.h"
 #include "sai_clock_config.h"
 #include "sai_drv.h"
@@ -84,9 +85,23 @@ int play_pipeline_run(void *handle, struct event *e)
 	return err;
 }
 
+static void pll_adjust_disable(struct pipeline_ctx *ctx)
+{
+	struct hrpn_cmd_audio_element_pll cmd;
+
+	/* need to disable PLL audio element */
+	cmd.u.common.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_DISABLE;
+	cmd.u.common.pipeline.id = 0;
+	cmd.u.common.element.type = AUDIO_ELEMENT_PLL;
+	cmd.u.common.element.id = 0;
+
+	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&cmd, sizeof(cmd), NULL);
+}
+
 static void sai_setup(struct pipeline_ctx *ctx)
 {
 	struct sai_cfg sai_config;
+	bool pll_disable = true;
 	int i;
 
 	/* Configure each active SAI */
@@ -139,11 +154,18 @@ static void sai_setup(struct pipeline_ctx *ctx)
 		}
 
 		sai_config.masterSlave = sai_active_list[i].masterSlave;
+
+		if (sai_config.masterSlave == kSAI_Slave)
+			pll_disable = false;
+
 		/* Set FIFO water mark to be period size of all channels*/
 		sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
 
 		sai_drv_setup(&ctx->dev[i], &sai_config);
 	}
+
+	if (pll_disable)
+		pll_adjust_disable(ctx);
 }
 
 static void sai_close(struct pipeline_ctx *ctx)
