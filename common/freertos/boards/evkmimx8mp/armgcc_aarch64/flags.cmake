@@ -169,7 +169,7 @@ SET(CMAKE_C_FLAGS_DDR_RELEASE " \
     -DPRINTF_FLOAT_ENABLE=1 \
     -DPRINTF_ADVANCED_ENABLE=1 \
     -DFSL_RTOS_FREE_RTOS \
-    -O3 \
+    -O2 \
     -mcpu=cortex-a53 \
     -Wall \
     -Wno-address-of-packed-member \
