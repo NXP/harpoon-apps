@@ -83,6 +83,7 @@ struct hrpn_resp_audio {
 struct hrpn_cmd_industrial_run {
 	uint32_t type;
 	uint32_t mode;
+	uint32_t role;
 };
 
 struct hrpn_cmd_industrial_stop {

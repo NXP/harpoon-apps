@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 struct industrial_config {
+	unsigned int role; /* node_type for CAN, controller/endpoint for ethernet */
 
 	void (*event_send)(void *, uint8_t);
 	void *event_data;

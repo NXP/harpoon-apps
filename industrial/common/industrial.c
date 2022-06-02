@@ -89,6 +89,7 @@ static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run 
 
 	cfg.event_send = data_send_event;
 	cfg.event_data = &data->mqueue;
+	cfg.role = on->role;
 
 	data->priv = uc->ops[on->mode].init(&cfg);
 	if (!data->priv)

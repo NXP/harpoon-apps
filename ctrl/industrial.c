@@ -16,10 +16,14 @@
 void can_usage(void)
 {
 	printf(
+		"\nIndustrial CAN options:\n"
 		"\t-r <id>        run CAN mode id:\n"
 		"\t               0 - loopback\n"
 		"\t               1 - interrupt\n"
 		"\t               2 - pingpong\n"
+		"\t-n <node_type> acting as node 'A' or 'B' (default 'A')\n"
+		"\t               0 - node 'A'\n"
+		"\t               1 - node 'B'\n"
 		"\t-s             stop CAN\n"
 	);
 }
@@ -36,7 +40,7 @@ void ethernet_usage(void)
 	);
 }
 
-static int default_run(struct mailbox *m, uint32_t type, uint32_t mode)
+static int default_run(struct mailbox *m, uint32_t type, uint32_t mode, uint32_t role)
 {
 	struct hrpn_cmd_industrial_run run;
 	struct hrpn_response resp;
@@ -44,6 +48,7 @@ static int default_run(struct mailbox *m, uint32_t type, uint32_t mode)
 
 	run.type = type;
 	run.mode = mode;
+	run.role = role;
 
 	len = sizeof(resp);
 
@@ -63,9 +68,9 @@ static int default_stop(struct mailbox *m, uint32_t type)
 	return command(m, &stop, sizeof(stop), HRPN_RESP_TYPE_INDUSTRIAL, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int can_run(struct mailbox *m, uint32_t mode)
+static int can_run(struct mailbox *m, uint32_t mode, uint32_t role)
 {
-	return default_run(m, HRPN_CMD_TYPE_CAN_RUN, mode);
+	return default_run(m, HRPN_CMD_TYPE_CAN_RUN, mode, role);
 }
 
 static int can_stop(struct mailbox *m)
@@ -75,7 +80,7 @@ static int can_stop(struct mailbox *m)
 
 static int ethernet_run(struct mailbox *m, uint32_t mode)
 {
-	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, mode);
+	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, mode, 0);
 }
 
 static int ethernet_stop(struct mailbox *m)
@@ -129,16 +134,23 @@ static int industrial_main(int option, char *optarg, struct mailbox *m,
 int can_main(int argc, char *argv[], struct mailbox *m)
 {
 	unsigned int mode;
+	unsigned int role = 0;
 	int option;
 	int rc = 0;
+	bool is_run_cmd = false;
 
-	while ((option = getopt(argc, argv, "r:sv")) != -1) {
+	while ((option = getopt(argc, argv, "r:sn:v")) != -1) {
 		switch (option) {
 		case 'r':
 			if (strtoul_check(optarg, NULL, 0, &mode) < 0) {
 				printf("Invalid mode\n");
 			}
-			rc = can_run(m, mode);
+			is_run_cmd = true;
+			break;
+		case 'n':
+			if (strtoul_check(optarg, NULL, 16, &role) < 0) {
+				printf("Invalid role\n");
+			}
 			break;
 
 		default:
@@ -146,6 +158,9 @@ int can_main(int argc, char *argv[], struct mailbox *m)
 			break;
 		}
 	}
+	/* Run the case after we get all parameters */
+	if (is_run_cmd)
+		rc = can_run(m, mode, role);
 out:
 	return rc;
 }

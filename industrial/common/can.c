@@ -56,6 +56,11 @@
 /* RX MB ID after mask. */
 #define RX_MB_ID_AFTER_MASK (RX_MB_ID_MASK & TX_MB_ID)
 
+enum {
+	CAN_NODE_A = 0,
+	CAN_NODE_B,
+};
+
 struct can_ctx {
 	void (*event_send)(void *, uint8_t);
 	void *event_data;
@@ -406,7 +411,7 @@ static void test_flexcan_setup(struct can_ctx *ctx)
     log_info("enter\n");
 
     /* Select mailbox ID. */
-    if ((node_type == 'A') || (node_type == 'a'))
+    if (node_type == CAN_NODE_A)
     {
         ctx->txIdentifier = 0x321;
         ctx->rxIdentifier = 0x123;
@@ -485,7 +490,7 @@ static void test_flexcan_setup(struct can_ctx *ctx)
 #endif
 #endif
 
-    log_info("Init CAN with clock freq %d", EXAMPLE_CAN_CLK_FREQ);
+    log_info("init CAN with clock freq %lu Hz\n", EXAMPLE_CAN_CLK_FREQ);
 #if (defined(USE_CANFD) && USE_CANFD)
     FLEXCAN_FDInit(EXAMPLE_CAN, &flexcanConfig, EXAMPLE_CAN_CLK_FREQ, BYTES_IN_MB, true);
 #else
@@ -550,7 +555,7 @@ static void test_flexcan_setup(struct can_ctx *ctx)
 #else
         FLEXCAN_SetTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
 #endif
-        if ((node_type == 'A') || (node_type == 'a'))
+        if (node_type == CAN_NODE_A)
         {
             log_info("Press any key to trigger one-shot transmission\n\n");
             ctx->frame.dataByte0 = 0;
@@ -562,7 +567,7 @@ static void test_flexcan_setup(struct can_ctx *ctx)
     }
     else if (test_type == 3)
     {
-        if ((node_type == 'A') || (node_type == 'a'))
+        if (node_type == CAN_NODE_A)
         {
             /* Setup Tx Message Buffer. */
 #if (defined(USE_CANFD) && USE_CANFD)
@@ -621,7 +626,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
 
     log_info("enter\n");
 
-    if ((node_type == 'A') || (node_type == 'a') || test_type == 1)
+    if ((node_type == CAN_NODE_A) || (test_type == 1))
     {
         ctx->frame.id     = FLEXCAN_ID_STD(ctx->txIdentifier);
         ctx->frame.format = (uint8_t)kFLEXCAN_FrameFormatStandard;
@@ -865,11 +870,8 @@ int can_run(void *priv, struct event *e)
 {
 	struct can_ctx *ctx = priv;
 
-	log_info("FLEXCAN PingPong Buffer - node %C\n", ctx->node_type);
-	log_info("    Message format: Standard (11 bit id)\n");
-	log_info("    Node B Message buffer %d to %d used as Rx queue 1.\n", RX_QUEUE_BUFFER_BASE, RX_QUEUE_BUFFER_END_1);
-	log_info("    Node B Message buffer %d to %d used as Rx queue 2.\n", RX_QUEUE_BUFFER_END_1 + 1U, RX_QUEUE_BUFFER_END_2);
-	log_info("    Node A Message buffer %d used as Tx.\n", TX_MESSAGE_BUFFER_NUM);
+	log_info("FLEXCAN running: type %d node %c\n",
+		       ctx->test_type, ctx->node_type ? 'B' : 'A');
 
 	test_flexcan_transmit(ctx);
 
@@ -879,7 +881,15 @@ int can_run(void *priv, struct event *e)
 static void *can_init(void *parameters, uint32_t test_type)
 {
 	struct industrial_config *cfg = parameters;
-	struct can_ctx *ctx;
+	uint32_t node_type = cfg->role;
+	struct can_ctx *ctx = NULL;
+
+	/* sanity check */
+	if (node_type != CAN_NODE_A && node_type != CAN_NODE_B) {
+		log_err("Invalid role (node type): %d\n", node_type);
+
+		goto exit;
+	}
 
 	ctx = os_malloc(sizeof(struct can_ctx));
 	if (!ctx) {
@@ -892,17 +902,13 @@ static void *can_init(void *parameters, uint32_t test_type)
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
+	ctx->node_type = node_type;
+	ctx->test_type = test_type;
 
-	log_info("enter\n");
+	log_debug("node %c\n", ctx->node_type ? 'B' : 'A');
+	log_debug("test type %d\n", test_type);
 
 	hardware_flexcan_init();
-
-	/* FIXME - Get node_type from ctrl app parameters */
-	ctx->node_type = 'b';
-	log_info("node %c\n", ctx->node_type);
-	log_info("test type %d\n", test_type);
-
-	ctx->test_type = test_type;
 
 	test_flexcan_setup(ctx);
 exit:
