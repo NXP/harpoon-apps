@@ -700,7 +700,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             ctx->txXfer.framefd = &ctx->frame;
             (void)FLEXCAN_TransferFDSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
 #else
-            ctx->txXfer.ctx->frame = &ctx->frame;
+            ctx->txXfer.frame = &ctx->frame;
             (void)FLEXCAN_TransferSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
 #endif
 
@@ -717,7 +717,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             ctx->rxXfer.framefd = &ctx->frame;
             (void)FLEXCAN_TransferFDReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
 #else
-            ctx->rxXfer.ctx->frame = &ctx->frame;
+            ctx->rxXfer.frame = &ctx->frame;
             (void)FLEXCAN_TransferReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
 #endif
 
@@ -788,7 +788,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             ctx->rxXfer.framefd = &ctx->frame;
             (void)FLEXCAN_TransferFDReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
 #else
-            ctx->rxXfer.ctx->frame = &ctx->frame;
+            ctx->rxXfer.frame = &ctx->frame;
             (void)FLEXCAN_TransferReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
 #endif
 
@@ -808,7 +808,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             ctx->txXfer.framefd = &ctx->frame;
             (void)FLEXCAN_TransferFDSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
 #else
-            ctx->txXfer.ctx->frame = &ctx->frame;
+            ctx->txXfer.frame = &ctx->frame;
             (void)FLEXCAN_TransferSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
 #endif
 
