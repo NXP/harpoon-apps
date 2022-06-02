@@ -408,7 +408,7 @@ static void test_flexcan_setup(struct can_ctx *ctx)
     flexcan_rx_mb_config_t mbConfig;
     uint32_t i;
 
-    log_info("enter\n");
+    log_debug("enter\n");
 
     /* Select mailbox ID. */
     if (node_type == CAN_NODE_A)
@@ -614,7 +614,7 @@ static void test_flexcan_setup(struct can_ctx *ctx)
             log_info("Start to Wait data from Node A\n\n");
         }
     }
-    log_info("end\n");
+    log_debug("end\n");
 }
 
 static void test_flexcan_transmit(struct can_ctx *ctx)
@@ -624,7 +624,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
     static uint32_t TxCount = 1;
     uint32_t i;
 
-    log_info("enter\n");
+    log_debug("enter\n");
 
     if ((node_type == CAN_NODE_A) || (test_type == 1))
     {
@@ -672,7 +672,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             {
             }
 
-            log_info("\nReceived message from MB%d\n", RX_MESSAGE_BUFFER_NUM);
+            log_info("Received message from MB%d\n", RX_MESSAGE_BUFFER_NUM);
 #if (defined(USE_CANFD) && USE_CANFD)
             for (i = 0; i < DWORD_IN_MB; i++)
             {
@@ -690,7 +690,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             FLEXCAN_DisableMbInterrupts(EXAMPLE_CAN, (uint32_t)1U << RX_MESSAGE_BUFFER_NUM);
 #endif
 
-            log_info("\n==FlexCAN loopback functional example -- Finish.==\n");
+            log_info("==FlexCAN loopback functional example -- Finish.==\n");
 
         } else if (test_type == 2) {
             GETCHAR();
@@ -732,7 +732,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             ctx->frame.dataByte0++;
             ctx->frame.dataByte1 = 0x55;
 
-            log_info("\n==FlexCAN interrupt functional example -- Finish.==\n");
+            log_info("==FlexCAN interrupt functional example -- Finish.==\n");
         } else if (test_type == 3) {
             uint8_t index  = 0;
             uint32_t times = 0;
@@ -763,7 +763,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
                 TxCount++;
             }
             log_info("Transmission done.\n\n");
-            log_info("\n==FlexCAN PingPong functional example -- Finish.==\n");
+            log_info("==FlexCAN PingPong functional example -- Finish.==\n");
         }
     }
     else
@@ -817,7 +817,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             };
             ctx->txComplete = false;
 
-            log_info("\n==FlexCAN interrupt functional example -- Finish.==\n");
+            log_info("==FlexCAN interrupt functional example -- Finish.==\n");
         } else if (test_type == 3) {
             while (true)
             {
@@ -850,7 +850,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
                 }
                 log_info("Wait Node A to trigger the next 8 messages!\n\n");
             }
-            log_info("\n==FlexCAN PingPong functional example -- Finish.==\n");
+            log_info("==FlexCAN PingPong functional example -- Finish.==\n");
         }
     }
     os_irq_unregister(EXAMPLE_FLEXCAN_IRQn);
