@@ -22,7 +22,7 @@ struct irq_handler {
 static struct irq_handler handler[NR_IRQS];
 
 
-int irq_register(int nr, void (*func)(void *data), void *data)
+int irq_register(int nr, void (*func)(void *data), void *data, unsigned int prio)
 {
 	struct irq_handler *hdlr;
 	int ret = -1;
@@ -36,6 +36,9 @@ int irq_register(int nr, void (*func)(void *data), void *data)
 
 	hdlr->func = func;
 	hdlr->data = data;
+
+	if (prio)
+		GIC_SetPriority(nr, prio);
 
 	ret = 0;
 

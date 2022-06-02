@@ -12,4 +12,10 @@
   #include "freertos/os/irq.h"
 #endif
 
+int os_irq_register(unsigned int irq, void (*func)(void *data),
+		void *data, unsigned int prio);
+int os_irq_unregister(unsigned int irq);
+void os_irq_enable(unsigned int irq);
+void os_irq_disable(unsigned int irq);
+
 #endif /* #ifndef _COMMON_IRQ_H_ */

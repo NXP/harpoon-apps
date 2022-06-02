@@ -6,8 +6,8 @@
 
 #include "os/assert.h"
 #include "os/counter.h"
+#include "os/irq.h"
 
-#include "irq.h"
 #include "hlog.h"
 
 #include "fsl_device_registers.h"
@@ -155,9 +155,9 @@ static void counter_init(const void *dev)
 	gptConfig.divider = 1;
 	GPT_Init((GPT_Type *)(dev), &gptConfig);
 
-	ret = irq_register(irqn, gpt_irq_handler, (void *)dev);
+	ret = os_irq_register(irqn, gpt_irq_handler, (void *)dev, 0);
 	os_assert(!ret, "Failed to register counter's IRQ! (%d)", ret);
-	EnableIRQ(irqn);
+	os_irq_enable(irqn);
 
 	counter = &counters[gpt_get_index(dev)];
 	counter->dev = dev;

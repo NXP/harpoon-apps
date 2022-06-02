@@ -322,9 +322,9 @@ void *ethernet_avb_tsn_init(void *parameters)
 
 	enet_qos_hardware_init();
 
-	irq_register(BOARD_ENET0_DRV_IRQ, (void (*)(void(*)))ENET_QOS_DriverIRQHandler, NULL);
-	irq_register(BOARD_GPT_0_IRQ, (void (*)(void(*)))BOARD_GPT_0_IRQ_HANDLER, NULL);
-	irq_register(BOARD_GPT_1_IRQ, (void (*)(void(*)))BOARD_GPT_1_IRQ_HANDLER, NULL);
+	os_irq_register(BOARD_ENET0_DRV_IRQ, (void (*)(void(*)))ENET_QOS_DriverIRQHandler, NULL, 0);
+	os_irq_register(BOARD_GPT_0_IRQ, (void (*)(void(*)))BOARD_GPT_0_IRQ_HANDLER, NULL, 0);
+	os_irq_register(BOARD_GPT_1_IRQ, (void (*)(void(*)))BOARD_GPT_1_IRQ_HANDLER, NULL, 0);
 
 	if (STATS_TaskInit(NULL, NULL, STATS_PERIOD_MS) < 0)
 		log_err("STATS_TaskInit() failed\n");

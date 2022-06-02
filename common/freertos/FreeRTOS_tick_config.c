@@ -90,7 +90,7 @@ void vConfigureTickInterrupt( void )
     GIC_SetRedistPriority(VirtualTimer_IRQn,
                 portLOWEST_USABLE_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
 
-    irq_register(VirtualTimer_IRQn, VirtualTimer_IRQn_Handler, NULL);
+    irq_register(VirtualTimer_IRQn, VirtualTimer_IRQn_Handler, NULL, 0);
 
     /* Enable the interrupt in the GIC. */
     GIC_EnableInterface();

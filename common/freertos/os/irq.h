@@ -13,7 +13,7 @@
 static inline int os_irq_register(unsigned int irq, void (*func)(void *data),
 		void *data, unsigned int prio)
 {
-	return irq_register(irq, func, data);
+	return irq_register(irq, func, data, prio);
 }
 
 static inline int os_irq_unregister(unsigned int irq)

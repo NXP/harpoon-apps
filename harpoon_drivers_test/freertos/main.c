@@ -67,7 +67,7 @@ static void test_i2c(void)
 {
 #ifdef I2C_USE_IRQ
     /* Register I2C3 interrupt */
-    irq_register(I2C3_IRQn, i2c_irq_handler, NULL);
+    irq_register(I2C3_IRQn, i2c_irq_handler, NULL, 0);
 #endif
 
     /* Run i2c tests */

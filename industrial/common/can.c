@@ -9,8 +9,8 @@
 #include "hardware_flexcan.h"
 #include "hlog.h"
 #include "industrial.h"
-#include "irq.h"
 
+#include "os/irq.h"
 #include "os/stdlib.h"
 #include "os/string.h"
 
@@ -511,9 +511,8 @@ static void test_flexcan_setup(struct can_ctx *ctx)
         FLEXCAN_SetTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
 #endif
 
-        GIC_SetInterfacePriorityMask(0xf0);
         /* Enable Rx Message Buffer interrupt. */
-        irq_register(EXAMPLE_FLEXCAN_IRQn, EXAMPLE_FLEXCAN_IRQHandler, ctx);
+        os_irq_register(EXAMPLE_FLEXCAN_IRQn, EXAMPLE_FLEXCAN_IRQHandler, ctx, 0xe1);
 
         /* Enable receive interrupt for Rx queue 1 & 2 end Message Buffer. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
@@ -521,8 +520,7 @@ static void test_flexcan_setup(struct can_ctx *ctx)
 #else
         FLEXCAN_EnableMbInterrupts(EXAMPLE_CAN, (uint32_t)1U << RX_MESSAGE_BUFFER_NUM);
 #endif
-        GIC_SetPriority(EXAMPLE_FLEXCAN_IRQn, 0xe1);
-        (void)EnableIRQ(EXAMPLE_FLEXCAN_IRQn);
+        os_irq_enable(EXAMPLE_FLEXCAN_IRQn);
     }
     else if (test_type == 2)
     {
@@ -530,9 +528,8 @@ static void test_flexcan_setup(struct can_ctx *ctx)
         /* Create FlexCAN handle structure and set call back function. */
         FLEXCAN_TransferCreateHandle(EXAMPLE_CAN, &ctx->flexcanHandle, flexcan_callback, ctx);
 
-        irq_register(EXAMPLE_FLEXCAN_IRQn, test_flexcan_irq_handler, ctx);
-        GIC_SetPriority(EXAMPLE_FLEXCAN_IRQn, 0xe1);
-        (void)EnableIRQ(EXAMPLE_FLEXCAN_IRQn);
+        os_irq_register(EXAMPLE_FLEXCAN_IRQn, test_flexcan_irq_handler, ctx, 0xe1);
+        os_irq_enable(EXAMPLE_FLEXCAN_IRQn);
 
         /* Set Rx Masking mechanism. */
         FLEXCAN_SetRxMbGlobalMask(EXAMPLE_CAN, FLEXCAN_RX_MB_STD_MASK(ctx->rxIdentifier, 0, 0));
@@ -582,7 +579,7 @@ static void test_flexcan_setup(struct can_ctx *ctx)
                                                   (uint32_t)kFLEXCAN_ErrorInterruptEnable |
                                                   (uint32_t)kFLEXCAN_RxWarningInterruptEnable);
             /* Register interrupt. */
-            irq_register(EXAMPLE_FLEXCAN_IRQn, test_flexcan_irq_handler, ctx);
+            os_irq_register(EXAMPLE_FLEXCAN_IRQn, test_flexcan_irq_handler, ctx, 0xe1);
             /* Setup Rx Message Buffer. */
             mbConfig.format = kFLEXCAN_FrameFormatStandard;
             mbConfig.type   = kFLEXCAN_FrameTypeData;
@@ -607,8 +604,7 @@ static void test_flexcan_setup(struct can_ctx *ctx)
             FLEXCAN_EnableMbInterrupts(EXAMPLE_CAN, (uint32_t)1U << RX_QUEUE_BUFFER_END_1);
             FLEXCAN_EnableMbInterrupts(EXAMPLE_CAN, (uint32_t)1U << RX_QUEUE_BUFFER_END_2);
 #endif
-            GIC_SetPriority(EXAMPLE_FLEXCAN_IRQn, 0xe1);
-            (void)EnableIRQ(EXAMPLE_FLEXCAN_IRQn);
+            os_irq_enable(EXAMPLE_FLEXCAN_IRQn);
 
             log_info("Start to Wait data from Node A\n\n");
         }
@@ -852,7 +848,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             log_info("\n==FlexCAN PingPong functional example -- Finish.==\n");
         }
     }
-    irq_unregister(EXAMPLE_FLEXCAN_IRQn);
+    os_irq_unregister(EXAMPLE_FLEXCAN_IRQn);
 
     log_info("end\n");
 }

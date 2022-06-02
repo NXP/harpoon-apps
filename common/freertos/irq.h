@@ -8,7 +8,7 @@
 #ifndef _IRQ_H_
 #define _IRQ_H_
 
-int irq_register(int nr, void (*func)(void *data), void *data);
+int irq_register(int nr, void (*func)(void *data), void *data, unsigned int prio);
 int irq_unregister(int nr);
 
 #endif /* _IRQ_H_ */
