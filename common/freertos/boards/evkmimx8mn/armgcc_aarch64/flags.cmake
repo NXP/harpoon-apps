@@ -21,6 +21,7 @@ SET(CMAKE_ASM_FLAGS_RELEASE " \
     -DGUEST \
     -mcpu=cortex-a53 \
     -Wall \
+    -Werror \
     -Wno-address-of-packed-member \
     -fno-common \
     -ffunction-sections \
@@ -52,6 +53,7 @@ SET(CMAKE_ASM_FLAGS_DDR_RELEASE " \
     -DGUEST \
     -mcpu=cortex-a53 \
     -Wall \
+    -Werror \
     -Wno-address-of-packed-member \
     -fno-common \
     -ffunction-sections \
@@ -67,6 +69,7 @@ SET(CMAKE_ASM_FLAGS_RAM_RELEASE " \
     -DGUEST \
     -mcpu=cortex-a53 \
     -Wall \
+    -Werror \
     -Wno-address-of-packed-member \
     -fno-common \
     -ffunction-sections \
@@ -135,6 +138,7 @@ SET(CMAKE_C_FLAGS_RELEASE " \
     -O3 \
     -mcpu=cortex-a53 \
     -Wall \
+    -Werror \
     -Wno-address-of-packed-member \
     -MMD \
     -MP \
@@ -188,6 +192,7 @@ SET(CMAKE_C_FLAGS_DDR_RELEASE " \
     -O3 \
     -mcpu=cortex-a53 \
     -Wall \
+    -Werror \
     -Wno-address-of-packed-member \
     -MMD \
     -MP \
@@ -268,6 +273,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE " \
     -O3 \
     -mcpu=cortex-a53 \
     -Wall \
+    -Werror \
     -Wno-address-of-packed-member \
     -MMD \
     -MP \
@@ -321,6 +327,7 @@ SET(CMAKE_CXX_FLAGS_DDR_RELEASE " \
     -O3 \
     -mcpu=cortex-a53 \
     -Wall \
+    -Werror \
     -Wno-address-of-packed-member \
     -MMD \
     -MP \
