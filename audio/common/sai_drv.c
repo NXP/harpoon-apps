@@ -295,11 +295,15 @@ uint32_t get_sai_id(I2S_Type *base)
 
 	for (i = 0; i < ARRAY_SIZE(s_saiBases); i++) {
 		if (s_saiBases[i] == base)
-			return i;
+			break;
 	}
 
-	/* Can't find SAI instance, hang here */
-	os_assert(false, "Can't find SAI instance (%p)", base);
+	if (i >= ARRAY_SIZE(s_saiBases)) {
+		/* Can't find SAI instance, hang here */
+		os_assert(false, "Can't find SAI instance (%p)", base);
+	}
+
+	return i;
 }
 
 int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
