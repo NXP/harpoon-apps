@@ -15,6 +15,8 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+#define BOARD_NET_TX_CACHEABLE
+#define BOARD_NET_RX_CACHEABLE
 
 #define BOARD_NUM_PORTS      1
 /* PHY configuration */
