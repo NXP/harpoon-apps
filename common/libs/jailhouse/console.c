@@ -9,7 +9,7 @@
 
 void jh_putc(int c)
 {
-	HVC_2(0x4a48, c, 0);
+	HVC_2(0x4a48, 8, c);
 }
 
 void jh_puts(const char *s)
