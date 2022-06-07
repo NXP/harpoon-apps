@@ -9,6 +9,9 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.1.1)
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
+# ENABLE DRIVER CACHE CONTROL
+ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
+
 # ENABLE ASM
 ENABLE_LANGUAGE(ASM)
 
@@ -58,6 +61,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/avb_tsn/tsn_app/tsn_tasks_config.c"
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
+    "${AppPath}/common/boards/${BoardName}/hardware_ethernet.c"
     "${AppPath}/common/boards/${BoardName}/hardware_flexcan.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/boards/${BoardName}/stub.c"
@@ -67,7 +71,6 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/industrial.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
-    "${AppBoardPath}/hardware_enet_qos.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE

@@ -4,7 +4,7 @@
 * SPDX-License-Identifier: BSD-3-Clause
 */
 
-#include "hardware_enet_qos.h"
+#include "hardware_ethernet.h"
 #include "fsl_gpio.h"
 
 void ENET_QOS_SetSYSControl(enet_qos_mii_mode_t miiMode)
@@ -12,7 +12,7 @@ void ENET_QOS_SetSYSControl(enet_qos_mii_mode_t miiMode)
     IOMUXC_GPR->GPR1 |= IOMUXC_GPR_GPR1_GPR_ENET_QOS_INTF_SEL(miiMode); /* Set this bit to enable ENET_QOS clock generation. */
 }
 
-void enet_qos_hardware_init(void)
+void hardware_ethernet_init(void)
 {
     gpio_pin_config_t gpio_config = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
 

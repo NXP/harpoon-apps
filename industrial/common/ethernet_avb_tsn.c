@@ -13,7 +13,7 @@
 #include "avb_tsn/genavb.h"
 #include "avb_tsn/stats_task.h"
 #include "cyclic_task.h"
-#include "hardware_enet_qos.h"
+#include "hardware_ethernet.h"
 #include "ethernet.h"
 #include "industrial.h"
 
@@ -320,9 +320,9 @@ void *ethernet_avb_tsn_init(void *parameters)
 
 	log_info("%s\n", __func__);
 
-	enet_qos_hardware_init();
+	hardware_ethernet_init();
 
-	os_irq_register(BOARD_ENET0_DRV_IRQ, (void (*)(void(*)))ENET_QOS_DriverIRQHandler, NULL, 0);
+	os_irq_register(BOARD_ENET0_DRV_IRQ, (void (*)(void(*)))BOARD_ENET0_DRV_IRQ_HND, NULL, 0);
 	os_irq_register(BOARD_GPT_0_IRQ, (void (*)(void(*)))BOARD_GPT_0_IRQ_HANDLER, NULL, 0);
 	os_irq_register(BOARD_GPT_1_IRQ, (void (*)(void(*)))BOARD_GPT_1_IRQ_HANDLER, NULL, 0);
 
