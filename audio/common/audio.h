@@ -33,19 +33,15 @@ enum {
 };
 
 void *play_music_init(void *parameters);
-void *rec_play_init(void *parameters);
 void *play_pipeline_init(void *parameters);
 
 int play_music_run(void *handle, struct event *e);
-int rec_play_run(void *handle, struct event *e);
 int play_pipeline_run(void *handle, struct event *e);
 
 void play_music_stats(void *handle);
-void rec_play_stats(void *handle);
 void play_pipeline_stats(void *handle);
 
 void play_music_exit(void *handle);
-void rec_play_exit(void *handle);
 void play_pipeline_exit(void *handle);
 
 extern const struct audio_pipeline_config pipeline_dtmf_config;
