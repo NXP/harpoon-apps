@@ -80,7 +80,6 @@ target_sources(app PRIVATE
 	       ${AppPath}/common/pipeline_config.c
 	       ${AppPath}/common/play_music.c
 	       ${AppPath}/common/play_pipeline.c
-	       ${AppPath}/common/play_sine.c
 	       ${AppPath}/common/rec_play.c
 	       ${AppPath}/common/sai_drv.c
 	       )
