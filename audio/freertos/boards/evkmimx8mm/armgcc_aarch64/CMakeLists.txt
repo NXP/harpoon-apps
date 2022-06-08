@@ -62,7 +62,6 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/audio_element_sine.c"
     "${AppPath}/common/audio_pipeline.c"
     "${AppPath}/common/pipeline_config.c"
-    "${AppPath}/common/play_music.c"
     "${AppPath}/common/play_pipeline.c"
 )
 

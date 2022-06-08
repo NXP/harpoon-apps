@@ -78,7 +78,6 @@ target_sources(app PRIVATE
 	       ${AppPath}/common/boards/${BoardName}/sai_clock_config.c
 	       ${AppPath}/common/boards/${BoardName}/sai_config.c
 	       ${AppPath}/common/pipeline_config.c
-	       ${AppPath}/common/play_music.c
 	       ${AppPath}/common/play_pipeline.c
 	       ${AppPath}/common/sai_drv.c
 	       )

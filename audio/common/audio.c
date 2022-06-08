@@ -67,10 +67,10 @@ const static struct mode_handler handler[] =
 		.data = &play_pipeline_dtmf_config,
 	},
 	[1] = {
-		.init = play_music_init,
-		.exit = play_music_exit,
-		.run = play_music_run,
-		.stats = play_music_stats,
+		.init = NULL,
+		.exit = NULL,
+		.run = NULL,
+		.stats = NULL,
 	},
 	[2] = {
 		.init = play_pipeline_init,

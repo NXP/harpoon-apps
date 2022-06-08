@@ -50,7 +50,6 @@ static void audio_usage(void)
 		"\t               Will use default period 8 frames if not specified\n"
 		"\t-r <id>        run audio mode id:\n"
 		"\t               0 - dtmf playback\n"
-		"\t               1 - music playback\n"
 		"\t               2 - sine wave playback\n"
 		"\t               3 - playback & recording (loopback)\n"
 		"\t               5 - audio pipeline\n"
