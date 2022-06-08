@@ -115,6 +115,8 @@ void main_task(void *pvParameters)
 	void *context = NULL;
 	int i, ret;
 
+	log_info("Industrial application started!\n");
+
 	context = industrial_control_init(nb_use_cases);
 
 	for (i = 0; i < nb_use_cases; i++) {
@@ -134,8 +136,6 @@ int main(void)
 	BaseType_t xResult;
 
 	hardware_setup();
-
-	log_info("Industrial application started!\n");
 
 	xResult = xTaskCreate(main_task, "main_task",
 			configMINIMAL_STACK_SIZE + 800, NULL,

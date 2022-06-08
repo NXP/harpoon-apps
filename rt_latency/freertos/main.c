@@ -240,6 +240,8 @@ void main_task(void *pvParameters)
 	struct mailbox m;
 	int rc;
 
+	log_info("Harpoon v%s\n", VERSION);
+
 	log_info("running\n");
 
 	rc = ivshmem_init(0, &mem);
@@ -269,8 +271,6 @@ int main(void)
 	/* Init board cpu and hardware. */
 	BOARD_InitMemory();
 	BOARD_InitDebugConsole();
-
-	log_info("Harpoon v%s\n", VERSION);
 
 	/* Test cases scheduler task */
 	xResult = xTaskCreate(main_task, "main_task",

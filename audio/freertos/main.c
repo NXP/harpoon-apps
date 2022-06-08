@@ -44,6 +44,8 @@ void main_task(void *pvParameters)
 	void *context;
 	BaseType_t xResult;
 
+	log_info("Audio application started!\n");
+
 	context = audio_control_init();
 	os_assert(context, "control initialization failed!");
 
@@ -61,8 +63,6 @@ int main(void)
 	BaseType_t xResult;
 
 	hardware_setup();
-
-	log_info("Audio application started!\n");
 
 	xResult = xTaskCreate(main_task, "main_task",
 			configMINIMAL_STACK_SIZE + 200, NULL,
