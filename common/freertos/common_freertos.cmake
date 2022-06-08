@@ -10,6 +10,7 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/irq.c
     ${CMAKE_CURRENT_LIST_DIR}/os/counter.c
     ${CMAKE_CURRENT_LIST_DIR}/os/mqueue.c
+    ${CMAKE_CURRENT_LIST_DIR}/uart.c
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
