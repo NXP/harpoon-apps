@@ -289,6 +289,8 @@ int cyclic_task_init(struct cyclic_task *c_task,
     if (!params->use_st)
         params->tx_params[0].addr.priority = QOS_NETWORK_CONTROL_PRIORITY;
 
+    params->num_rx_socket = 0;
+
     for (i = 0; i < c_task->num_peers; i++) {
         rx_stream = tsn_conf_get_stream(c_task->rx_socket[i].stream_id);
         if (!rx_stream)
