@@ -77,9 +77,7 @@ target_sources(app PRIVATE
 	       ${AppPath}/common/boards/${BoardName}/pin_mux.c
 	       ${AppPath}/common/boards/${BoardName}/sai_clock_config.c
 	       ${AppPath}/common/boards/${BoardName}/sai_config.c
-	       ${AppPath}/common/dtmf_wave.c
 	       ${AppPath}/common/pipeline_config.c
-	       ${AppPath}/common/play_dtmf.c
 	       ${AppPath}/common/play_music.c
 	       ${AppPath}/common/play_pipeline.c
 	       ${AppPath}/common/play_sine.c

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -32,25 +32,21 @@ enum {
 	EVENT_TYPE_START
 };
 
-void *play_dtmf_init(void *parameters);
 void *play_music_init(void *parameters);
 void *play_sine_init(void *parameters);
 void *rec_play_init(void *parameters);
 void *play_pipeline_init(void *parameters);
 
-int play_dtmf_run(void *handle, struct event *e);
 int play_music_run(void *handle, struct event *e);
 int play_sine_run(void *handle, struct event *e);
 int rec_play_run(void *handle, struct event *e);
 int play_pipeline_run(void *handle, struct event *e);
 
-void play_dtmf_stats(void *handle);
 void play_music_stats(void *handle);
 void play_sine_stats(void *handle);
 void rec_play_stats(void *handle);
 void play_pipeline_stats(void *handle);
 
-void play_dtmf_exit(void *handle);
 void play_music_exit(void *handle);
 void play_sine_exit(void *handle);
 void rec_play_exit(void *handle);
