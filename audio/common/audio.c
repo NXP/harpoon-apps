@@ -67,32 +67,20 @@ const static struct mode_handler handler[] =
 		.data = &play_pipeline_dtmf_config,
 	},
 	[1] = {
-		.init = NULL,
-		.exit = NULL,
-		.run = NULL,
-		.stats = NULL,
-	},
-	[2] = {
 		.init = play_pipeline_init,
 		.exit = play_pipeline_exit,
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
 		.data = &play_pipeline_sine_config,
 	},
-	[3] = {
+	[2] = {
 		.init = play_pipeline_init,
 		.exit = play_pipeline_exit,
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
 		.data = &play_pipeline_loopback_config,
 	},
-	[4] = {
-		.init = NULL,
-		.exit = NULL,
-		.run = NULL,
-		.stats = NULL,
-	},
-	[5] = {
+	[3] = {
 		.init = play_pipeline_init,
 		.exit = play_pipeline_exit,
 		.run = play_pipeline_run,
