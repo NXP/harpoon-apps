@@ -143,11 +143,12 @@ static void industrial_command_handler(struct industrial_ctx *ctx)
 	case HRPN_CMD_TYPE_CAN_RUN:
 		if (!data)
 			data = industrial_get_data_ctx(ctx, INDUSTRIAL_USE_CASE_CAN);
+#ifndef CONFIG_IND_DISABLE_ENET
 		/* fallthrough */
 	case HRPN_CMD_TYPE_ETHERNET_RUN:
 		if (!data)
 			data = industrial_get_data_ctx(ctx, INDUSTRIAL_USE_CASE_ETHERNET);
-
+#endif
 		if (len != sizeof(struct hrpn_cmd_industrial_run)) {
 			response(mb, HRPN_RESP_STATUS_ERROR);
 			break;
@@ -164,10 +165,11 @@ static void industrial_command_handler(struct industrial_ctx *ctx)
 		if (!data)
 			data = industrial_get_data_ctx(ctx, INDUSTRIAL_USE_CASE_CAN);
 		/* fallthrough */
+#ifndef CONFIG_IND_DISABLE_ENET
 	case HRPN_CMD_TYPE_ETHERNET_STOP:
 		if (!data)
 			data = industrial_get_data_ctx(ctx, INDUSTRIAL_USE_CASE_ETHERNET);
-
+#endif
 		if (len != sizeof(struct hrpn_cmd_industrial_stop)) {
 			response(mb, HRPN_RESP_STATUS_ERROR);
 			break;
@@ -179,11 +181,13 @@ static void industrial_command_handler(struct industrial_ctx *ctx)
 
 		break;
 
+#ifndef CONFIG_IND_DISABLE_ENET
 	case HRPN_CMD_TYPE_ETHERNET_SET_MAC_ADDR:
 		data = industrial_get_data_ctx(ctx, INDUSTRIAL_USE_CASE_ETHERNET);
 		ethernet_ctrl(&cmd.u.ethernet, len, mb, data);
 
 		break;
+#endif
 
 	default:
 		response(mb, HRPN_RESP_STATUS_ERROR);

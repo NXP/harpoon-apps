@@ -7,6 +7,7 @@
 #ifndef _APP_BOARD_H_
 #define _APP_BOARD_H_
 
+#ifndef CONFIG_IND_DISABLE_ENET
 #include "fsl_enet_qos.h"
 
 /*******************************************************************************
@@ -83,5 +84,7 @@
 
 #define BOARD_GPT_1_CLK_EXT_FREQ    24000000U
 #define BOARD_GPT_1_CLK_SOURCE_TYPE kGPT_ClockSource_Periph
+
+#endif /* CONFIG_IND_DISABLE_ENET */
 
 #endif /* _APP_BOARD_H_ */
