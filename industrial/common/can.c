@@ -693,8 +693,6 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             log_info("==FlexCAN loopback functional example -- Finish.==\n");
 
         } else if (test_type == 2) {
-            GETCHAR();
-
             ctx->txXfer.mbIdx = (uint8_t)TX_MESSAGE_BUFFER_NUM;
 #if (defined(USE_CANFD) && USE_CANFD)
             ctx->txXfer.framefd = &ctx->frame;
@@ -734,21 +732,9 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
 
             log_info("==FlexCAN interrupt functional example -- Finish.==\n");
         } else if (test_type == 3) {
-            uint8_t index  = 0;
-            uint32_t times = 0;
-            log_info("Please input the number of CAN/CANFD messages to be send and end with enter.\n");
-            while (index != 0x0D)
-            {
-                index = GETCHAR();
-                if ((index >= '0') && (index <= '9'))
-                {
-                    (void)PUTCHAR(index);
-                    times = times * 10 + (index - 0x30U);
-                }
-            }
-            log_info("\n");
+            uint32_t times = 50;
 
-            for (i = 1; i <= times; i++)
+            for (i = 0; i < times; i++)
             {
 #if (defined(USE_CANFD) && USE_CANFD)
                 (void)FLEXCAN_TransferFDSendBlocking(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, &ctx->frame);
