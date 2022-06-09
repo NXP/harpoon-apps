@@ -21,6 +21,8 @@ struct audio_pipeline_stage_config {
 };
 
 struct audio_pipeline_config {
+	char *name;
+
 	unsigned int period;
 
 	unsigned int sample_rate;

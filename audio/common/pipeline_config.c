@@ -8,6 +8,9 @@
 #include "audio_pipeline.h"
 
 const struct audio_pipeline_config pipeline_dtmf_config = {
+
+	.name = "DTMF pipeline",
+
 	.stages = 2,
 
 	.stage[0] = {
@@ -122,6 +125,9 @@ const struct audio_pipeline_config pipeline_dtmf_config = {
 
 
 const struct audio_pipeline_config pipeline_loopback_config = {
+
+	.name = "Loopback pipeline",
+
 	.stages = 2,
 
 	.stage[0] = {
@@ -209,6 +215,9 @@ const struct audio_pipeline_config pipeline_loopback_config = {
 
 
 const struct audio_pipeline_config pipeline_sine_config = {
+
+	.name = "Sinewave pipeline",
+
 	.stages = 2,
 
 	.stage[0] = {
@@ -306,6 +315,9 @@ const struct audio_pipeline_config pipeline_sine_config = {
 };
 
 const struct audio_pipeline_config pipeline_full_config = {
+
+	.name = "Full audio pipeline",
+
 	.stages = 3,
 
 	.stage[0] = {

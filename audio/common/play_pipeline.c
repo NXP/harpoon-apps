@@ -235,8 +235,8 @@ void *play_pipeline_init(void *parameters)
 
 	sai_setup(ctx);
 
-	log_info("Starting pipeline (Sample Rate: %d Hz, Period: %u frames)\n",
-			rate, (uint32_t)period);
+	log_info("Starting %s (Sample Rate: %d Hz, Period: %u frames)\n",
+			pipeline_cfg->name, rate, (uint32_t)period);
 
 	return ctx;
 
