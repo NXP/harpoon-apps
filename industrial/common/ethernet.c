@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "board.h"
 #include "ethernet.h"
+#include "app_board.h"
 #include "hrpn_ctrl.h"
 #include "industrial.h"
 

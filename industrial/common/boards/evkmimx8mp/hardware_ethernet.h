@@ -8,6 +8,7 @@
 #define _HARDWARE_ETHERNET_H_
 
 #include "fsl_enet_qos_mdio.h"
+#include "fsl_phyrtl8211f.h"
 
 void ENET_QOS_SetSYSControl(enet_qos_mii_mode_t miiMode);
 

@@ -25,6 +25,7 @@ K_THREAD_STACK_DEFINE(ctrl_stack, STACK_SIZE);
 struct z_thread_stack_element *data_stacks[] =
 {
 	[INDUSTRIAL_USE_CASE_CAN] = data_stack1,
+	[INDUSTRIAL_USE_CASE_ETHERNET] = data_stack2,
 };
 
 
@@ -54,6 +55,28 @@ const struct industrial_use_case use_cases[] =
 				.exit = can_exit,
 				.run = can_run,
 				.stats = can_stats,
+			},
+		},
+	},
+
+	[INDUSTRIAL_USE_CASE_ETHERNET] = {
+		.thread = {
+			.name = "ethernet_event",
+			.nb_threads = 1,
+			.priority = 1,
+		},
+		.ops = {
+			[0] = {
+				.init = NULL,
+				.exit = NULL,
+				.run = NULL,
+				.stats = NULL,
+			},
+			[1] = {
+				.init = ethernet_sdk_enet_init,
+				.exit = ethernet_sdk_enet_exit,
+				.run = ethernet_sdk_enet_run,
+				.stats = ethernet_sdk_enet_stats,
 			},
 		},
 	},

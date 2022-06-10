@@ -7,7 +7,6 @@
 #ifndef _APP_BOARD_H_
 #define _APP_BOARD_H_
 
-#ifndef CONFIG_IND_DISABLE_ENET
 #include "fsl_enet_qos.h"
 #include "fsl_gpt.h"
 
@@ -68,6 +67,10 @@ unsigned int BOARD_GPT_clk_src(void *base);
 unsigned int BOARD_GPT_clk_freq(void *base);
 int BOARD_NetPort_Get_MAC(unsigned int port, uint8_t *mac);
 
-#endif /* CONFIG_IND_DISABLE_ENET */
+#define EXAMPLE_ENET_QOS_BASE   ENET_QOS
+#define EXAMPLE_PHY_ADDR        0x01U
+#define EXAMPLE_ENET_QOS_OPS    enet_qos_ops
+#define EXAMPLE_PHY             phyrtl8211f_ops
+#define EXAMPLE_ENET_QOS_IRQ    ENET_QOS_IRQn
 
 #endif /* _APP_BOARD_H_ */
