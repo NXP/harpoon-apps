@@ -26,8 +26,18 @@
 
 #define STATS_PERIOD_MS 2000
 
-extern void ENET_QOS_DriverIRQHandler(void);
-extern void ENET_DriverIRQHandler(void);
+extern void BOARD_ENET0_DRV_IRQ0_HND(void);
+
+#ifdef BOARD_ENET0_DRV_IRQ1_HND
+extern void BOARD_ENET0_DRV_IRQ1_HND(void);
+#endif
+#ifdef BOARD_ENET0_DRV_IRQ2_HND
+extern void BOARD_ENET0_DRV_IRQ2_HND(void);
+#endif
+#ifdef BOARD_ENET0_DRV_IRQ3_HND
+extern void BOARD_ENET0_DRV_IRQ3_HND(void);
+#endif
+
 extern void BOARD_GPT_0_IRQ_HANDLER(void);
 extern void BOARD_GPT_1_IRQ_HANDLER(void);
 
@@ -293,7 +303,17 @@ void ethernet_avb_tsn_exit(void *priv)
 
 	irq_unregister(BOARD_GPT_1_IRQ);
 	irq_unregister(BOARD_GPT_0_IRQ);
-	irq_unregister(BOARD_ENET0_DRV_IRQ);
+	irq_unregister(BOARD_ENET0_DRV_IRQ0);
+
+#ifdef BOARD_ENET0_DRV_IRQ1_HND
+	irq_unregister(BOARD_ENET0_DRV_IRQ1);
+#endif
+#ifdef BOARD_ENET0_DRV_IRQ2_HND
+	irq_unregister(BOARD_ENET0_DRV_IRQ2);
+#endif
+#ifdef BOARD_ENET0_DRV_IRQ3_HND
+	irq_unregister(BOARD_ENET0_DRV_IRQ3);
+#endif
 
 	os_free(ctx);
 
@@ -323,7 +343,18 @@ void *ethernet_avb_tsn_init(void *parameters)
 
 	hardware_ethernet_init();
 
-	os_irq_register(BOARD_ENET0_DRV_IRQ, (void (*)(void(*)))BOARD_ENET0_DRV_IRQ_HND, NULL, 0);
+	os_irq_register(BOARD_ENET0_DRV_IRQ0, (void (*)(void(*)))BOARD_ENET0_DRV_IRQ0_HND, NULL, 0);
+
+#ifdef BOARD_ENET0_DRV_IRQ1_HND
+	os_irq_register(BOARD_ENET0_DRV_IRQ1, (void (*)(void(*)))BOARD_ENET0_DRV_IRQ1_HND, NULL, 0);
+#endif
+#ifdef BOARD_ENET0_DRV_IRQ2_HND
+	os_irq_register(BOARD_ENET0_DRV_IRQ2, (void (*)(void(*)))BOARD_ENET0_DRV_IRQ2_HND, NULL, 0);
+#endif
+#ifdef BOARD_ENET0_DRV_IRQ3_HND
+	os_irq_register(BOARD_ENET0_DRV_IRQ3, (void (*)(void(*)))BOARD_ENET0_DRV_IRQ3_HND, NULL, 0);
+#endif
+
 	os_irq_register(BOARD_GPT_0_IRQ, (void (*)(void(*)))BOARD_GPT_0_IRQ_HANDLER, NULL, 0);
 	os_irq_register(BOARD_GPT_1_IRQ, (void (*)(void(*)))BOARD_GPT_1_IRQ_HANDLER, NULL, 0);
 
