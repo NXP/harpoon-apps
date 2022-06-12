@@ -24,7 +24,10 @@ static void clock_setup_enet_qos(void)
 	CLOCK_SetRootDivider(kCLOCK_RootEnetQosTimer, 1U, 1U);
 
 	CLOCK_EnableClock(kCLOCK_Enet_Qos);
+}
 
+static void clock_setup_gpt(void)
+{
 	CLOCK_DisableClock(kCLOCK_Gpt1);
 	CLOCK_SetRootMux(kCLOCK_RootGpt1, kCLOCK_GptRootmuxOsc24M);
 	CLOCK_SetRootDivider(kCLOCK_RootGpt1, 1U, 1U);
@@ -52,4 +55,5 @@ void board_clock_setup(void)
 {
 	clock_setup_enet_qos();
 	clock_setup_flexcan();
+	clock_setup_gpt();
 }
