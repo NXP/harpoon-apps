@@ -18,7 +18,10 @@
 #define BOARD_NET_TX_CACHEABLE
 #define BOARD_NET_RX_CACHEABLE
 
-#define BOARD_NUM_PORTS      1
+/* Network Port configuration */
+#define BOARD_NUM_PORTS        1
+#define BOARD_NUM_ENET_PORTS   1
+
 /* PHY configuration */
 #define BOARD_NUM_PHY        1
 
@@ -31,12 +34,10 @@
 #define BOARD_PHY0_TX_LATENCY_100M (810)          /* FIXME - Needs calibration */
 #define BOARD_PHY0_RX_LATENCY_100M (810)          /* FIXME - Needs calibration */
 
-/* Use ENET QOS */
-#define BOARD_USE_ENET_QOS      (0)
-
 #define BOARD_ENET0_MII_MODE    kENET_RgmiiMode
 #define BOARD_ENET0_DRV_TYPE    ENET_t
 #define BOARD_ENET0_DRV_BASE    ENET_BASE
+#define BOARD_ENET0_DRV_INDEX	(0)
 #define BOARD_ENET0_DRV_IRQ     ENET_IRQn
 #define BOARD_ENET0_DRV_IRQ_HND ENET_DriverIRQHandler
 
