@@ -25,14 +25,6 @@
 			      GPIO5_BASE, KB(64),			\
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),  \
 									\
-	MMU_REGION_FLAT_ENTRY("GPT1",					\
-			      GPT1_BASE, KB(64),			\
-			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),  \
-									\
-	MMU_REGION_FLAT_ENTRY("GPT2",					\
-			      GPT2_BASE, KB(64),			\
-			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),  \
-									\
 	MMU_REGION_FLAT_ENTRY("IOMUXC_GPR",				\
 			      IOMUXC_GPR_BASE, KB(64),			\
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),  \

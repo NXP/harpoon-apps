@@ -94,20 +94,24 @@ static const struct ARM_MMU_region mmu_regions[] = {
 			      CCM_BASE, KB(64),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
 
+	MMU_REGION_FLAT_ENTRY("GIC",
+			      GIC_DISTRIBUTOR_BASE, KB(1024),
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
+
+	MMU_REGION_FLAT_ENTRY("GPT1",
+			      GPT1_BASE, KB(64),
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
+
+	MMU_REGION_FLAT_ENTRY("GPT2",
+			      GPT2_BASE, KB(64),
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
+
 	MMU_REGION_FLAT_ENTRY("IOMUXC",
 			      IOMUXC_BASE, KB(64),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
 
-	MMU_REGION_FLAT_ENTRY("UART2",
-			      UART2_BASE, KB(4),
-			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
-
 	MMU_REGION_FLAT_ENTRY("UART4",
 			      UART4_BASE, KB(4),
-			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
-
-	MMU_REGION_FLAT_ENTRY("GIC",
-			      GIC_DISTRIBUTOR_BASE, KB(1024),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
 
 #ifdef APP_MMU_ENTRIES
