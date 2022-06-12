@@ -15,7 +15,9 @@
  */
 static inline uint32_t dev_get_enet_core_freq(void *base)
 {
-    return CLOCK_GetFreq(kCLOCK_IpgClk);
+    return CLOCK_GetPllFreq(kCLOCK_SystemPll1Ctrl) / 3 /
+        CLOCK_GetRootPreDivider(kCLOCK_RootEnetAxi) /
+        CLOCK_GetRootPostDivider(kCLOCK_RootEnetAxi);
 }
 
 /*
@@ -23,7 +25,9 @@ static inline uint32_t dev_get_enet_core_freq(void *base)
  */
 static inline uint32_t dev_get_enet_1588_freq(void *base)
 {
-    return CLOCK_GetFreq(kCLOCK_EnetIpgClk);
+    return CLOCK_GetPllFreq(kCLOCK_SystemPll2Ctrl) / 10 /
+        CLOCK_GetRootPreDivider(kCLOCK_RootEnetTimer) /
+        CLOCK_GetRootPostDivider(kCLOCK_RootEnetTimer);
 }
 
 /*

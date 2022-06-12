@@ -16,9 +16,12 @@
  */
 static inline uint32_t dev_get_enet_core_freq(void *base)
 {
-    return CLOCK_GetPllFreq(kCLOCK_SystemPll2Ctrl) / 8 /
-        CLOCK_GetRootPreDivider(kCLOCK_RootEnetQos) /
-        CLOCK_GetRootPostDivider(kCLOCK_RootEnetQos);
+    if (base == ENET_QOS)
+        return CLOCK_GetPllFreq(kCLOCK_SystemPll2Ctrl) / 8 /
+            CLOCK_GetRootPreDivider(kCLOCK_RootEnetQos) /
+            CLOCK_GetRootPostDivider(kCLOCK_RootEnetQos);
+    else
+        return 0;
 }
 
 /*
@@ -47,14 +50,10 @@ static inline uint32_t dev_get_gpt_ipg_freq(void *base)
  */
 static inline uint32_t dev_get_enet_1588_freq(void *base)
 {
-    if (base == ENET1)
-        return CLOCK_GetRootClockFreq(kCLOCK_RootEnetTimer);
-    else if (base == ENET_QOS){
+    if (base == ENET_QOS)
         return CLOCK_GetPllFreq(kCLOCK_SystemPll2Ctrl) / 10 /
             CLOCK_GetRootPreDivider(kCLOCK_RootEnetQosTimer) /
             CLOCK_GetRootPostDivider(kCLOCK_RootEnetQosTimer);
-
-    }
     else
         return 0;
 }
