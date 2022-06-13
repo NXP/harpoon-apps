@@ -34,7 +34,6 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 .
 ├── harpoon-apps
 │   ├── common                              <-- source code common to all applications
-│   │   ├── cpu.h
 │   │   ├── freertos
 │   │   │   ├── boards
 │   │   │   │   ├── evkmimx8mm
@@ -72,6 +71,7 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   │       └── stats.h
 │   │   ├── os                              <-- includes standard/posix header files os APIs
 │   │   │   ├── assert.h
+│   │   │   ├── cache.h
 │   │   │   ├── counter.h
 │   │   │   ├── semaphore.h
 │   │   │   ├── stdio.h
