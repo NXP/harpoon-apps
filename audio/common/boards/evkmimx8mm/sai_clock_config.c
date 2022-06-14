@@ -47,29 +47,8 @@ void sai_clock_setup(void)
 		os_assert(false, "No SAI enabled!");
 
 	/* Init Audio PLLs */
-	for (i = 0; i < sai_active_list_nelems; i++) {
-		bool apll1_enabled = false, apll2_enabled = false;
-
-		switch (sai_active_list[i].audio_pll) {
-			case kCLOCK_AudioPll1Ctrl:
-				/* init AUDIO PLL1 run at 393216000HZ */
-				if (apll1_enabled == false) {
-					CLOCK_InitAudioPll1(&g_audioPll1Config);
-					apll1_enabled = true;
-				}
-				break;
-			case kCLOCK_AudioPll2Ctrl:
-				/* init AUDIO PLL2 run at 361267200HZ */
-				if (apll2_enabled == false) {
-					CLOCK_InitAudioPll2(&g_audioPll2Config);
-					apll2_enabled = true;
-				}
-				break;
-			default:
-				os_assert(false, "Invalid Audio PLL! (%d)", sai_active_list[i].audio_pll);
-				break;
-		}
-	}
+	CLOCK_InitAudioPll1(&g_audioPll1Config);
+	CLOCK_InitAudioPll2(&g_audioPll2Config);
 
 	CLOCK_EnableRoot(kCLOCK_RootAudioAhb);
 
@@ -101,6 +80,46 @@ void sai_clock_setup(void)
 				sai_active_list[i].audio_pll_div);
 		CLOCK_EnableClock(sai_clock[sai_id - 1]);
 	}
+}
+
+static uint32_t __get_pll_rootmux_from_srate(uint32_t srate)
+{
+	uint32_t root_mux_apll;
+
+	if (srate % 44100 == 0) {
+		/* Audio PLL for frequencies multiple of 44100 Hz */
+		root_mux_apll = kCLOCK_SaiRootmuxAudioPll2;
+	} else {
+		/* Audio PLL for frequencies multiple of 48000 Hz */
+		root_mux_apll = kCLOCK_SaiRootmuxAudioPll1;
+	}
+
+	return root_mux_apll;
+}
+
+static uint32_t __get_pll_from_srate(uint32_t srate)
+{
+	uint32_t apll;
+
+	if (srate % 44100 == 0) {
+		/* Audio PLL for frequencies multiple of 44100 Hz */
+		apll = kCLOCK_AudioPll2Ctrl;
+	} else {
+		/* Audio PLL for frequencies multiple of 48000 Hz */
+		apll = kCLOCK_AudioPll1Ctrl;
+	}
+
+	return apll;
+}
+
+uint32_t sai_select_audio_pll_mux(int sai_id, int srate)
+{
+	uint32_t root_mux_apll;
+
+	root_mux_apll = __get_pll_rootmux_from_srate(srate);
+	CLOCK_SetRootMux(sai_clock_root[sai_id - 1], root_mux_apll);
+
+	return __get_pll_from_srate(srate);
 }
 
 uint32_t get_sai_clock_root(uint32_t id)
