@@ -36,6 +36,9 @@ void ethernet_usage(void)
 		"\t-r <id>        run ethernet mode id:\n"
 		"\t               0 - genAVB/TSN stack\n"
 		"\t               1 - mcux-sdk API (imx8m{m,n} ENET)\n"
+		"\t-i <role>      for genAVB/TSN: endpoint role (default 'controller', if not specified)\n"
+		"\t               0 - role is 'IO device 0'\n"
+		"\t               1 - role is 'IO device 1'\n"
 		"\t-s             stop ethernet\n"
 	);
 }
@@ -78,9 +81,9 @@ static int can_stop(struct mailbox *m)
 	return default_stop(m, HRPN_CMD_TYPE_CAN_STOP);
 }
 
-static int ethernet_run(struct mailbox *m, uint32_t mode)
+static int ethernet_run(struct mailbox *m, uint32_t mode, uint32_t role)
 {
-	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, mode, 0);
+	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, mode, role);
 }
 
 static int ethernet_stop(struct mailbox *m)
@@ -168,11 +171,13 @@ out:
 int ethernet_main(int argc, char *argv[], struct mailbox *m)
 {
 	unsigned int mode;
+	unsigned int role = 0;
 	uint8_t mac_addr[6];
 	int option;
 	int rc = 0;
+	bool is_run_cmd = false;
 
-	while ((option = getopt(argc, argv, "a:r:sv")) != -1) {
+	while ((option = getopt(argc, argv, "a:r:si:v")) != -1) {
 		switch (option) {
 		case 'a':
 			if (read_mac_address(optarg, mac_addr) < 0) {
@@ -182,12 +187,17 @@ int ethernet_main(int argc, char *argv[], struct mailbox *m)
 			}
 			ethernet_set_mac_address(m, mac_addr);
 			break;
-
 		case 'r':
 			if (strtoul_check(optarg, NULL, 0, &mode) < 0) {
 				printf("Invalid mode\n");
 			}
-			rc = ethernet_run(m, mode);
+			is_run_cmd = true;
+			break;
+		case 'i':
+			if (strtoul_check(optarg, NULL, 16, &role) < 0) {
+				printf("Invalid role\n");
+			}
+			role += 1; /* IO_DEVICE_0 offset */
 			break;
 
 		default:
@@ -195,6 +205,9 @@ int ethernet_main(int argc, char *argv[], struct mailbox *m)
 			break;
 		}
 	}
+	/* Run the case after we get all parameters */
+	if (is_run_cmd)
+		rc = ethernet_run(m, mode, role);
 out:
 	return rc;
 }

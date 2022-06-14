@@ -63,7 +63,7 @@ static char *app_mode_names[] = {"MOTOR_NETWORK", "MOTOR_LOCAL", "NETWORK_ONLY",
 
 extern struct system_config system_cfg;
 
-static struct tsn_app_config *system_config_get_tsn_app(void)
+static struct tsn_app_config *system_config_get_tsn_app(struct ethernet_ctx *ctx)
 {
     struct tsn_app_config *config = &system_cfg.app.tsn_app_config;
 
@@ -85,6 +85,9 @@ static struct tsn_app_config *system_config_get_tsn_app(void)
 
         storage_cd("/");
     }
+#else
+	config->role = ctx->role;
+
 #endif /* (ENABLE_STORAGE == 1) */
 
     return config;
@@ -113,7 +116,7 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 
 	avb_tsn_ctx = (struct ethernet_avb_tsn_ctx *)(ctx + 1);
 
-	config = system_config_get_tsn_app();
+	config = system_config_get_tsn_app(ctx);
 	if (!config) {
 		log_err("system_config_get_tsn_app() failed\n");
 		goto exit;
@@ -324,7 +327,15 @@ void *ethernet_avb_tsn_init(void *parameters)
 {
 	struct industrial_config *cfg = parameters;
 	struct ethernet_avb_tsn_ctx *avb_tsn_ctx;
-	struct ethernet_ctx *ctx;
+	struct ethernet_ctx *ctx = NULL;
+	uint32_t role = cfg->role;
+
+	/* sanity check */
+	if (role >= MAX_TASKS_ID) {
+		log_err("Invalid role: %d\n", role);
+
+		goto exit;
+	}
 
 	ctx = os_malloc(sizeof(*ctx) + sizeof(*avb_tsn_ctx));
 	if (!ctx) {
@@ -338,6 +349,7 @@ void *ethernet_avb_tsn_init(void *parameters)
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
+	ctx->role = role;
 
 	log_info("%s\n", __func__);
 

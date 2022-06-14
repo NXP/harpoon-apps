@@ -15,6 +15,7 @@ struct ethernet_ctx {
 	void *event_data;
 
 	uint8_t hw_addr[6];
+	uint32_t role;
 };
 
 #endif /* _INDUSTRIAL_ETHERNET_H_ */
