@@ -16,6 +16,7 @@ struct ethernet_ctx {
 
 	uint8_t mac_addr[6];
 	uint32_t role;
+	bool loopback;
 };
 
 #endif /* _INDUSTRIAL_ETHERNET_H_ */

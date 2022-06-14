@@ -148,7 +148,7 @@ static void ENET_QOS_BuildFrame(struct ethernet_ctx *ctx)
     os_dcache_data_range((uintptr_t)g_frame[2], ENET_QOS_FRAME_LENGTH, OS_CACHE_WB);
 }
 
-void ENET_QOS_IntCallback(
+static void ENET_QOS_IntCallback(
     ENET_QOS_Type *base, enet_qos_handle_t *handle, enet_qos_event_t event, uint8_t channel, void *userData)
 {
     uint32_t length = 0U;
@@ -220,12 +220,12 @@ void ENET_QOS_IntCallback(
     }
 }
 
-void enet_qos_test_irq_handler(void *data)
+static void enet_qos_test_irq_handler(void *data)
 {
-	ENET_QOS_CommonIRQHandler(EXAMPLE_ENET_QOS_BASE, &g_handle);
+    ENET_QOS_CommonIRQHandler(EXAMPLE_ENET_QOS_BASE, &g_handle);
 }
 
-void enet_qos_prepare_configuration(enet_qos_config_t *config, enet_qos_ptp_config_t *ptpConfig,
+static void enet_qos_prepare_configuration(enet_qos_config_t *config, enet_qos_ptp_config_t *ptpConfig,
         enet_qos_multiqueue_config_t *multiQueue, enet_qos_rxp_config_t *rxpConfig,
         phy_handle_t *phyHandle, uint32_t refClock)
 {
@@ -360,7 +360,7 @@ void enet_qos_prepare_configuration(enet_qos_config_t *config, enet_qos_ptp_conf
     };
 }
 
-int enet_qos_phy_init(phy_handle_t *phyHandle, mdio_handle_t *mdioHandle)
+static int enet_qos_phy_init(phy_handle_t *phyHandle, mdio_handle_t *mdioHandle, bool loopback)
 {
     phy_config_t phyConfig = {0};
     status_t status;
@@ -369,10 +369,21 @@ int enet_qos_phy_init(phy_handle_t *phyHandle, mdio_handle_t *mdioHandle)
     bool autonego = false;
 
     phyConfig.phyAddr = EXAMPLE_PHY_ADDR;
-    phyConfig.autoNeg = true;
 
     mdioHandle->resource.csrClock_Hz = CLOCK_GetFreq(kCLOCK_EnetIpgClk);
 
+    if (loopback) {
+        phyConfig.autoNeg = false;
+        phyConfig.speed = kPHY_Speed1000M;
+        status = PHY_Init(phyHandle, &phyConfig);
+        os_assert(status == kStatus_Success, "PHY initialization failed\r\n");
+        /* Enable loopback mode */
+        PHY_EnableLoopback(phyHandle, kPHY_LocalLoop, kPHY_Speed1000M, true);
+        goto init_done;
+    }
+
+    phyConfig.autoNeg = true;
+    PHY_EnableLoopback(phyHandle, kPHY_LocalLoop, kPHY_Speed1000M, false);
     do
     {
         status = PHY_Init(phyHandle, &phyConfig);
@@ -397,13 +408,14 @@ int enet_qos_phy_init(phy_handle_t *phyHandle, mdio_handle_t *mdioHandle)
         }
     } while (!(link && autonego));
 
+init_done:
     /* Wait a moment for PHY status to be stable. */
     SDK_DelayAtLeastUs(PHY_STABILITY_DELAY_US, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
 
     return kStatus_Success;
 }
 
-int enet_qos_prepare_buffers(enet_qos_buffer_config_t *buffConfig)
+static int enet_qos_prepare_buffers(enet_qos_buffer_config_t *buffConfig)
 {
     uint8_t index = 0;
     uint8_t ringId = 0;
@@ -428,7 +440,7 @@ int enet_qos_prepare_buffers(enet_qos_buffer_config_t *buffConfig)
             if (buff)
             {
                 /* Clean the alloc buffer to avoid there's any dirty data. */
-		os_dcache_data_range((uintptr_t)buff, ENET_QOS_RXBUFF_SIZE, OS_CACHE_WB);
+                os_dcache_data_range((uintptr_t)buff, ENET_QOS_RXBUFF_SIZE, OS_CACHE_WB);
 
                 rxbuffer[ringId][index] = (uint32_t)(uintptr_t)buff;
             }
@@ -461,7 +473,7 @@ int enet_qos_prepare_buffers(enet_qos_buffer_config_t *buffConfig)
     return kStatus_Success;
 }
 
-void enet_qos_free_buffers(void)
+static void enet_qos_free_buffers(void)
 {
     uint8_t index = 0;
     uint8_t ringId = 0;
@@ -480,10 +492,9 @@ void enet_qos_free_buffers(void)
 
 void ethernet_sdk_enet_stats(void *priv)
 {
-	struct ethernet_ctx *ctx = priv;
+   struct ethernet_ctx *ctx = priv;
 
-	(void)ctx;
-	log_info("not implemented\n");
+   (void)ctx;
 }
 
 int ethernet_sdk_enet_run(void *priv, struct event *e)
@@ -511,6 +522,15 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
     log_info("#                  #\r\n");
     log_info("####################\r\n");
 
+    g_rxIndex  = 0;
+    g_rxIndex1 = 0;
+    g_rxIndex2 = 0;
+    g_txIndex = 0;
+    g_txIndex1 = 0;
+    g_txIndex2 = 0;
+    g_txSuccessFlag = false;
+    g_rxSuccessFlag = false;
+
     /* Register ENET_QOS interrupts */
     os_irq_register(EXAMPLE_ENET_QOS_IRQ, enet_qos_test_irq_handler, NULL, 0);
 
@@ -527,7 +547,7 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
 
     /* Initialize PHY and wait until auto-negotiation is over. */
     log_info("Wait for PHY init...\r\n");
-    ret = enet_qos_phy_init(&phyHandle, &mdioHandle);
+    ret = enet_qos_phy_init(&phyHandle, &mdioHandle, ctx->loopback);
     if (ret != kStatus_Success)
     {
         log_info("Unable to initialize phy: %d\r\n", ret);
@@ -592,13 +612,21 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
     /* Start with Ring 2 because ring(queue) 2 has higher priority on tx DMA channel.
     tx Ring N uses DMA channel N and channel N has higher priority than N-1. */
     ringId = 2;
-    while (!g_rxSuccessFlag && (timeout > 0))
+    while (timeout > 0)
     {
         timeout--;
         if (testTxNum < ENET_QOS_TRANSMIT_DATA_NUM)
         {
-	        /* Send a multicast frame when the PHY is link up. */
-            PHY_GetLinkStatus(&phyHandle, &link);
+            if (ctx->loopback)
+            {
+                link = true;
+            }
+            else
+            {
+                /* Send a multicast frame when the PHY is link up. */
+                PHY_GetLinkStatus(&phyHandle, &link);
+            }
+
             if (link)
             {
                 testTxNum++;
@@ -609,6 +637,20 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
                 ringId = (ringId + 2) % 3;
             }
         }
+        else
+        {
+            if (ctx->loopback)
+            {
+                if (g_rxSuccessFlag)
+                    break;
+            }
+            else
+            {
+                if (g_txSuccessFlag)
+                    break;
+            }
+        }
+
         if (timeout < 5)
             log_info("%s - Timing out: %d\r\n", __func__, timeout);
     }
@@ -618,58 +660,93 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
     enet_qos_free_buffers();
     os_irq_unregister(EXAMPLE_ENET_QOS_IRQ);
 
-    if (g_txSuccessFlag)
-    {
-        log_info("The frame transmitted from the ring 0, 1, 2 is %d, %d, %d!\r\n", g_txIndex, g_txIndex1, g_txIndex2);
-        log_info("%d frames transmitted succeed!\r\n", ENET_QOS_TRANSMIT_DATA_NUM);
-        g_txSuccessFlag = false;
-    }
-    if (g_rxSuccessFlag)
-    {
-        log_info("The frames successfully received from the ring 0, 1, 2 is %d, %d, %d!\r\n", g_rxIndex, g_rxIndex1,
-               g_rxIndex2);
-    }
+    log_info("The frames transmitted from the ring 0, 1, 2 is %d, %d, %d, total %d frames!\r\n",
+        g_txIndex, g_txIndex1, g_txIndex2, g_txIndex + g_txIndex1 + g_txIndex2);
+    log_info("The frames received from the ring 0, 1, 2 is %d, %d, %d, total %d frames!\r\n",
+        g_rxIndex, g_rxIndex1, g_rxIndex2, g_rxIndex + g_rxIndex + g_rxIndex2);
 
-    if (timeout <= 0)
+    if (ctx->loopback)
     {
-        log_info("ENET QOS TXRX Loopback FAILED\r\n");
-        return -1;
+        if (g_rxSuccessFlag && g_txSuccessFlag)
+        {
+            log_info("ENET QOS TXRX Loopback Test PASSED\r\n");
+        }
+        else
+        {
+            log_info("ENET QOS TXRX Loopback Test FAILED\r\n");
+            return -1;
+        }
     }
     else
     {
-        log_info("ENET QOS TXRX Loopback PASSED\r\n");
-        return 0;
+        if (timeout <=0)
+        {
+            log_info("ENET QOS TXRX Test FAILED\r\n");
+            return -1;
+        }
+        else
+        {
+            log_info("ENET QOS TXRX Test Done\r\n");
+        }
     }
+
+    return 0;
+}
+
+static void *enet_qos_init(void *parameters, bool loopback)
+{
+    struct industrial_config *cfg = parameters;
+    struct ethernet_ctx *ctx;
+
+    ctx = os_malloc(sizeof(struct ethernet_ctx));
+    if (!ctx)
+    {
+        log_err("Memory allocation error\n");
+        goto exit;
+    }
+
+    memset(ctx, 0, sizeof(struct ethernet_ctx));
+
+    ctx->event_send = cfg->event_send;
+    ctx->event_data = cfg->event_data;
+    ctx->loopback = loopback;
+
+    log_info("%s\n", __func__);
+
+exit:
+    return ctx;
 }
 
 void *ethernet_sdk_enet_init(void *parameters)
 {
-	struct industrial_config *cfg = parameters;
-	struct ethernet_ctx *ctx;
+    return enet_qos_init(parameters, false);
+}
 
-	ctx = os_malloc(sizeof(struct ethernet_ctx));
-	if (!ctx) {
-		log_err("Memory allocation error\n");
-
-		goto exit;
-	}
-
-	memset(ctx, 0, sizeof(struct ethernet_ctx));
-
-	ctx->event_send = cfg->event_send;
-	ctx->event_data = cfg->event_data;
-
-	log_info("%s\n", __func__);
-
-exit:
-	return ctx;
+void *ethernet_sdk_enet_loopback_init(void *parameters)
+{
+    return enet_qos_init(parameters, true);
 }
 
 void ethernet_sdk_enet_exit(void *priv)
 {
-	struct ethernet_ctx *ctx = priv;
+    struct ethernet_ctx *ctx = priv;
 
-	os_free(ctx);
+    os_free(ctx);
 
-	log_info("end\n");
+    log_info("end\n");
+}
+
+inline void ethernet_sdk_enet_loopback_exit(void *priv)
+{
+    ethernet_sdk_enet_exit(priv);
+}
+
+inline int ethernet_sdk_enet_loopback_run(void *priv, struct event *e)
+{
+    return ethernet_sdk_enet_run(priv, e);
+}
+
+inline void ethernet_sdk_enet_loopback_stats(void *priv)
+{
+    ethernet_sdk_enet_stats(priv);
 }

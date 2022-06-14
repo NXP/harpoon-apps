@@ -82,9 +82,15 @@ void ethernet_avb_tsn_stats(void *priv);
 void ethernet_avb_tsn_exit(void *priv);
 
 void *ethernet_sdk_enet_init(void *parameters);
+void *ethernet_sdk_enet_init_loopback(void *parameters);
 int ethernet_sdk_enet_run(void *priv, struct event *e);
 void ethernet_sdk_enet_stats(void *priv);
 void ethernet_sdk_enet_exit(void *priv);
+
+void *ethernet_sdk_enet_loopback_init(void *parameters);
+int ethernet_sdk_enet_loopback_run(void *priv, struct event *e);
+void ethernet_sdk_enet_loopback_stats(void *priv);
+void ethernet_sdk_enet_loopback_exit(void *priv);
 
 void *industrial_control_init(int nb_use_cases);
 void *industrial_get_data_ctx(struct industrial_ctx *ctx, int use_case_id);
