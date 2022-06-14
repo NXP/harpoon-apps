@@ -152,6 +152,17 @@ int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_elemen
 
 		break;
 
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ID:
+		os_sem_take(&pll->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+
+		pll->pll_id = cmd->pll_id;
+
+		pll_element_reset(element);
+
+		os_sem_give(&pll->semaphore, 0);
+
+		break;
+
 	default:
 		goto err;
 		break;

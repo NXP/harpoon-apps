@@ -56,6 +56,7 @@ struct hrpn_cmd_audio_element_pll {
 	union {
 		struct hrpn_cmd_audio_element_common common;
 	} u;
+	uint32_t pll_id;
 };
 
 struct hrpn_cmd_audio_element_dump {

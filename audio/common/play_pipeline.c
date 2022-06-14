@@ -105,6 +105,20 @@ static void pll_adjust_disable(struct pipeline_ctx *ctx)
 	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&cmd, sizeof(cmd), NULL);
 }
 
+static void pll_adjust_set_pll_id(struct pipeline_ctx *ctx, uint32_t pll_id)
+{
+	struct hrpn_cmd_audio_element_pll cmd;
+
+	/* PLL element needs to know the sampling rate to determine the input PLL */
+	cmd.u.common.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ID;
+	cmd.u.common.pipeline.id = 0;
+	cmd.u.common.element.type = AUDIO_ELEMENT_PLL;
+	cmd.u.common.element.id = 0;
+	cmd.pll_id = pll_id;
+
+	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&cmd, sizeof(cmd), NULL);
+}
+
 static void sai_setup(struct pipeline_ctx *ctx)
 {
 	struct sai_cfg sai_config;
@@ -113,7 +127,7 @@ static void sai_setup(struct pipeline_ctx *ctx)
 
 	/* Configure each active SAI */
 	for (i = 0; i < sai_active_list_nelems; i++) {
-		uint32_t sai_clock_root;
+		uint32_t sai_clock_root, pll_id;
 		int sai_id;
 		enum codec_id cid;
 		int32_t ret;
@@ -173,6 +187,9 @@ static void sai_setup(struct pipeline_ctx *ctx)
 #endif
 
 		sai_drv_setup(&ctx->dev[i], &sai_config);
+
+		pll_id = sai_select_audio_pll_mux(sai_id, sai_config.sample_rate);
+		pll_adjust_set_pll_id(ctx, pll_id);
 	}
 
 	if (pll_disable)

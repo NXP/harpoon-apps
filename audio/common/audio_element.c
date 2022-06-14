@@ -46,6 +46,7 @@ int audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_elem
 
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ENABLE:
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_DISABLE:
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ID:
 		rc = pll_element_ctrl(element, &cmd->u.pll, len, m);
 		break;
 
