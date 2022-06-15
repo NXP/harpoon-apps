@@ -133,6 +133,16 @@ void alarm_task_monitor_exit(struct alarm_task *a_task)
         vQueueDelete(a_task->queue.handle);
 }
 
+static void main_alarm_io(void *data)
+{
+    struct alarm_task *a_task = data;
+
+    while (true) {
+        vTaskDelay(pdMS_TO_TICKS(10000));
+        alarm_net_transmit(a_task, 0, NULL, 0);
+    }
+}
+
 int alarm_task_io_init(struct alarm_task *a_task)
 {
     struct tsn_task_params *params = &a_task->params;
@@ -148,7 +158,7 @@ int alarm_task_io_init(struct alarm_task *a_task)
     params->tx_params[0].addr.port = 0;
     params->num_tx_socket = 1;
 
-    rc = tsn_task_register(&a_task->task, params, a_task->id, NULL, NULL, NULL);
+    rc = tsn_task_register(&a_task->task, params, a_task->id, main_alarm_io, a_task, NULL);
     if (rc < 0) {
         ERR("tsn_task_register rc = %d\n", __func__, rc);
         goto err;
