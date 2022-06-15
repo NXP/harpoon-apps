@@ -19,7 +19,6 @@
 
 #include "os/irq.h"
 #include "os/stdlib.h"
-#include "os/unistd.h"
 
 #include "system_config.h"
 #include "tsn_tasks_config.h"
@@ -262,14 +261,8 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 
 	if (avb_tsn_ctx->a_task->type == ALARM_MONITOR)
 		alarm_task_monitor_init(avb_tsn_ctx->a_task, NULL, NULL);
-	else if (avb_tsn_ctx->a_task->type == ALARM_IO_DEVICE) {
+	else if (avb_tsn_ctx->a_task->type == ALARM_IO_DEVICE)
 		alarm_task_io_init(avb_tsn_ctx->a_task);
-
-		while (true) {
-			os_msleep(10000);
-			alarm_net_transmit(avb_tsn_ctx->a_task, 0, NULL, 0);
-		}
-	}
 
 exit:
 	return 0;
