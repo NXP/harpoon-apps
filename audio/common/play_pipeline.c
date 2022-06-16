@@ -241,8 +241,6 @@ void *play_pipeline_init(void *parameters)
 	if (!ctx->pipeline)
 		goto err_init;
 
-	audio_pipeline_dump(ctx->pipeline);
-
 	ctx->sample_rate = rate;
 	ctx->chan_numbers = DEMO_AUDIO_DATA_CHANNEL;
 	ctx->bit_width = DEMO_AUDIO_BIT_WIDTH;
