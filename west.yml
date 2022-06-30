@@ -22,7 +22,7 @@ manifest:
       revision: 0fc0f1c854a1a7ad3199a053f607107f2b2a511f
       path: gen_avb_sdk
     - name: FreeRTOS-Kernel
-      revision: 51e25b23a8738b8326cd751ef3063e7ec2544633
+      revision: 14dba01da5623497f76748bca6ccc7fb58ee6d36
   self:
     path: harpoon-apps
 
