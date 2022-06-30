@@ -19,7 +19,7 @@ manifest:
       revision: 46d44c68e6cb7f97a68e6a1f75aaf4337dba90b5
     - name: GenAVB_TSN
       remote: nxp
-      revision: 32c2550d163ceb76e21941fb7297f12a18dbe319
+      revision: 0fc0f1c854a1a7ad3199a053f607107f2b2a511f
       path: gen_avb_sdk
     - name: FreeRTOS-Kernel
       revision: 51e25b23a8738b8326cd751ef3063e7ec2544633
