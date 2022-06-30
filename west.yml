@@ -13,7 +13,7 @@ manifest:
   # Please add items below in reverse alphabetical order
   projects:
     - name: zephyr
-      revision: feature/aarch64_support
+      revision: aeb61cd2bd6d837d0161dc6174bde7279a9862f2
       import: true
     - name: mcux-sdk
       revision: 46d44c68e6cb7f97a68e6a1f75aaf4337dba90b5
