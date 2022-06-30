@@ -16,7 +16,7 @@ manifest:
       revision: aeb61cd2bd6d837d0161dc6174bde7279a9862f2
       import: true
     - name: mcux-sdk
-      revision: 46d44c68e6cb7f97a68e6a1f75aaf4337dba90b5
+      revision: 0565630dc22c464feb346cac5b0d787e8a25229a
     - name: GenAVB_TSN
       remote: nxp
       revision: 0fc0f1c854a1a7ad3199a053f607107f2b2a511f
