@@ -14,13 +14,17 @@ manifest:
   projects:
     - name: zephyr
       revision: aeb61cd2bd6d837d0161dc6174bde7279a9862f2
-      import: true
     - name: mcux-sdk
       revision: 0565630dc22c464feb346cac5b0d787e8a25229a
     - name: GenAVB_TSN
       remote: nxp
       revision: 0fc0f1c854a1a7ad3199a053f607107f2b2a511f
       path: gen_avb_sdk
+    - name: hal_nxp
+      revision: 1026ce5f52b3248b44586e1e2be1abe73a459ff9
+      path: modules/hal/nxp
+      groups:
+        - hal
     - name: FreeRTOS-Kernel
       revision: 14dba01da5623497f76748bca6ccc7fb58ee6d36
   self:
