@@ -694,8 +694,7 @@ int tsn_task_register(struct tsn_task **task, struct tsn_task_params *params,
                       int id, void (*main_loop)(void *), void *ctx,
                       void (*timer_callback)(void *, int))
 {
-    char task_name[16];
-    char timer_name[16];
+    char task_name[20] = {0, };
 
     *task = pvPortMalloc(sizeof(struct tsn_task));
     if (!(*task))
@@ -707,8 +706,8 @@ int tsn_task_register(struct tsn_task **task, struct tsn_task_params *params,
     (*task)->params = params;
     (*task)->ctx = ctx;
 
-    sprintf(task_name, "tsn task%1d", (*task)->id);
-    sprintf(timer_name, "task%1d timer", (*task)->id);
+    snprintf(task_name, 19, "tsn task%1d", (*task)->id);
+    task_name[19] = '\0';
 
     if (tsn_task_net_init(*task) < 0) {
         ERR("tsn_task_net_init error\n");
