@@ -1,4 +1,9 @@
 #!/bin/bash -e
+# For now the script assumes:
+#  - a single jailhouse cell is running/will run
+#  - the cell runs one of the Harpoon images
+
+
 
 function usage ()
 {
@@ -26,10 +31,10 @@ function start ()
 function stop ()
 {
     echo 'Shutdown inmate cell'
-    jailhouse cell shutdown "${INMATE_NAME}"
+    jailhouse cell shutdown 1
 
     echo 'Destroy inmate cell'
-    jailhouse cell destroy "${INMATE_NAME}"
+    jailhouse cell destroy 1
 
     echo 'Disabling Jailhouse root cell'
     jailhouse disable
