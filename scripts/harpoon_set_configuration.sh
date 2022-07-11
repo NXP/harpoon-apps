@@ -11,7 +11,7 @@ function detect_machine ()
 		SOC=imx8mm
 		ENTRY=0x93c00000
 	elif grep -q 'i.MX8MN' /sys/devices/soc0/soc_id; then
-		SOC=imx8mm
+		SOC=imx8mn
 		ENTRY=0x93c00000
 	elif grep -q 'i.MX8MP' /sys/devices/soc0/soc_id; then
 		SOC=imx8mp
