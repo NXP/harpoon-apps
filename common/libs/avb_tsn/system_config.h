@@ -48,6 +48,7 @@ struct system_config {
     struct net_config net[BOARD_NUM_PORTS];
 };
 
+int system_config_set_net(unsigned int port_id, uint8_t *hw_addr);
 struct net_config *system_config_get_net(int port_id);
 struct app_config *system_config_get_app(void);
 struct avb_app_config *system_config_get_avb_app(void);

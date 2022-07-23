@@ -10,6 +10,21 @@
 
 extern struct system_config system_cfg;
 
+int system_config_set_net(unsigned int port_id, uint8_t *hw_addr)
+{
+	int ret = -1;
+
+	if (port_id >= BOARD_NUM_PORTS)
+		goto exit;
+
+	memcpy(system_cfg.net[port_id].hw_addr, hw_addr,
+		sizeof(system_cfg.net[port_id].hw_addr));
+
+	ret = 0;
+exit:
+	return ret;
+}
+
 struct net_config *system_config_get_net(int port_id)
 {
     char port[10];

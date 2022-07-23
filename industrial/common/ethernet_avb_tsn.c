@@ -60,8 +60,6 @@ struct ethernet_avb_tsn_ctx {
 
 static char *app_mode_names[] = {"MOTOR_NETWORK", "MOTOR_LOCAL", "NETWORK_ONLY", "SERIAL"};
 
-/* from industrial/avb_tsn/tsn_app/configs.c: */
-int system_config_set_net(unsigned int port_id, uint8_t *hw_addr);
 extern struct system_config system_cfg;
 
 static struct tsn_app_config *system_config_get_tsn_app(struct ethernet_ctx *ctx)
@@ -351,7 +349,9 @@ void *ethernet_avb_tsn_init(void *parameters)
 
 	log_info("%s\n", __func__);
 
-	system_config_set_net(0, ctx->mac_addr);
+	if (system_config_set_net(0, ctx->mac_addr)) {
+		log_warn("system_config_set_net() failed\n");
+	}
 
 	hardware_ethernet_init();
 
