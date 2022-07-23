@@ -14,7 +14,7 @@ struct ethernet_ctx {
 	void (*event_send)(void *, uint8_t);
 	void *event_data;
 
-	uint8_t hw_addr[6];
+	uint8_t mac_addr[6];
 	uint32_t role;
 };
 

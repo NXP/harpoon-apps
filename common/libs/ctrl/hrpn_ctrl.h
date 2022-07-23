@@ -40,7 +40,6 @@ enum {
 	HRPN_CMD_TYPE_CAN_STOP,
 	HRPN_CMD_TYPE_ETHERNET_RUN = 0x600,
 	HRPN_CMD_TYPE_ETHERNET_STOP,
-	HRPN_CMD_TYPE_ETHERNET_SET_MAC_ADDR,
 	HRPN_RESP_TYPE_INDUSTRIAL = 0x6ff,
 };
 
@@ -85,6 +84,7 @@ struct hrpn_cmd_industrial_run {
 	uint32_t type;
 	uint32_t mode;
 	uint32_t role;
+	uint8_t addr[6];
 };
 
 struct hrpn_cmd_industrial_stop {

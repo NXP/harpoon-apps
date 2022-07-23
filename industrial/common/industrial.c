@@ -74,6 +74,16 @@ static void response(struct mailbox *mb, uint32_t status)
 	mailbox_resp_send(mb, &resp, sizeof(resp));
 }
 
+static void industrial_set_hw_addr(struct industrial_config *cfg, uint8_t *hw_addr)
+{
+	uint8_t *addr = cfg->address;
+
+	memcpy(addr, hw_addr, sizeof(cfg->address));
+
+	log_info("%02x:%02x:%02x:%02x:%02x:%02x\n",
+		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+}
+
 static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run *on)
 {
 	int rc = HRPN_RESP_STATUS_ERROR;
@@ -90,6 +100,8 @@ static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run 
 	cfg.event_send = data_send_event;
 	cfg.event_data = &data->mqueue;
 	cfg.role = on->role;
+
+	industrial_set_hw_addr(&cfg, on->addr);
 
 	data->priv = uc->ops[on->mode].init(&cfg);
 	if (!data->priv)
@@ -180,14 +192,6 @@ static void industrial_command_handler(struct industrial_ctx *ctx)
 		response(mb, rc);
 
 		break;
-
-#ifndef CONFIG_IND_DISABLE_ENET
-	case HRPN_CMD_TYPE_ETHERNET_SET_MAC_ADDR:
-		data = industrial_get_data_ctx(ctx, INDUSTRIAL_USE_CASE_ETHERNET);
-		ethernet_ctrl(&cmd.u.ethernet, len, mb, data);
-
-		break;
-#endif
 
 	default:
 		response(mb, HRPN_RESP_STATUS_ERROR);

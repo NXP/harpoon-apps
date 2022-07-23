@@ -68,7 +68,7 @@ static void enet_build_broadcast_frame(struct ethernet_ctx *ctx)
     uint32_t length = ENET_DATA_LENGTH - 14;
 
     memset(&tx_frame[0], 0xff, 6);
-    memcpy(&tx_frame[6], &ctx->hw_addr[0], 6U);
+    memcpy(&tx_frame[6], ctx->mac_addr, 6U);
     tx_frame[12] = (length >> 8) & 0xFFU;
     tx_frame[13] = length & 0xFFU;
 
@@ -202,7 +202,7 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
     /* Change the MII speed and duplex for actual link status. */
     config.miiSpeed  = (enet_mii_speed_t)speed;
     config.miiDuplex = (enet_mii_duplex_t)duplex;
-    ENET_Init(ENET, &enet_handle, &config, &buffer_config, &ctx->hw_addr[0],  enet_ipg_freq);
+    ENET_Init(ENET, &enet_handle, &config, &buffer_config, ctx->mac_addr,  enet_ipg_freq);
     ENET_ActiveRead(ENET);
 
     enet_build_broadcast_frame(ctx);
@@ -258,6 +258,8 @@ void *ethernet_sdk_enet_init(void *parameters)
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
+
+	memcpy(ctx->mac_addr, cfg->address, sizeof(ctx->mac_addr));
 
 	log_info("%s\n", __func__);
 

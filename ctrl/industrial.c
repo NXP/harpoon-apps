@@ -13,6 +13,8 @@
 #include "hrpn_ctrl.h"
 #include "common.h"
 
+#define MAC_ADDRESS_DEFAULT	{0x00, 0xBB, 0xCC, 0xDD, 0xEE, 0x14}
+
 void can_usage(void)
 {
 	printf(
@@ -43,15 +45,18 @@ void ethernet_usage(void)
 	);
 }
 
-static int default_run(struct mailbox *m, uint32_t type, uint32_t mode, uint32_t role)
+static int default_run(struct mailbox *m, uint32_t type, uint32_t mode, uint32_t role, uint8_t *hw_addr)
 {
-	struct hrpn_cmd_industrial_run run;
+	struct hrpn_cmd_industrial_run run = {0,};
 	struct hrpn_response resp;
 	unsigned int len;
 
 	run.type = type;
 	run.mode = mode;
 	run.role = role;
+
+	if (hw_addr)
+		memcpy(run.addr, hw_addr, sizeof(run.addr));
 
 	len = sizeof(resp);
 
@@ -73,7 +78,7 @@ static int default_stop(struct mailbox *m, uint32_t type)
 
 static int can_run(struct mailbox *m, uint32_t mode, uint32_t role)
 {
-	return default_run(m, HRPN_CMD_TYPE_CAN_RUN, mode, role);
+	return default_run(m, HRPN_CMD_TYPE_CAN_RUN, mode, role, NULL);
 }
 
 static int can_stop(struct mailbox *m)
@@ -81,27 +86,14 @@ static int can_stop(struct mailbox *m)
 	return default_stop(m, HRPN_CMD_TYPE_CAN_STOP);
 }
 
-static int ethernet_run(struct mailbox *m, uint32_t mode, uint32_t role)
+static int ethernet_run(struct mailbox *m, uint32_t mode, uint32_t role, uint8_t *mac_addr)
 {
-	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, mode, role);
+	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, mode, role, mac_addr);
 }
 
 static int ethernet_stop(struct mailbox *m)
 {
 	return default_stop(m, HRPN_CMD_TYPE_ETHERNET_STOP);
-}
-
-static int ethernet_set_mac_address(struct mailbox *m, uint8_t mac_addr[6])
-{
-	struct hrpn_cmd_ethernet_set_mac_addr set_mac_addr;
-	struct hrpn_resp_industrial resp;
-	unsigned int len;
-
-	set_mac_addr.type = HRPN_CMD_TYPE_ETHERNET_SET_MAC_ADDR;
-	memcpy(set_mac_addr.mac.address, mac_addr, sizeof(set_mac_addr.mac.address));
-	len = sizeof(resp);
-
-	return command(m, &set_mac_addr, sizeof(set_mac_addr), HRPN_RESP_TYPE_INDUSTRIAL, &resp, &len, COMMAND_TIMEOUT);
 }
 
 static int read_mac_address(char *buf, uint8_t *mac)
@@ -172,7 +164,7 @@ int ethernet_main(int argc, char *argv[], struct mailbox *m)
 {
 	unsigned int mode;
 	unsigned int role = 0;
-	uint8_t mac_addr[6];
+	uint8_t mac_addr[6] = MAC_ADDRESS_DEFAULT;
 	int option;
 	int rc = 0;
 	bool is_run_cmd = false;
@@ -185,7 +177,6 @@ int ethernet_main(int argc, char *argv[], struct mailbox *m)
 				rc = -1;
 				goto out;
 			}
-			ethernet_set_mac_address(m, mac_addr);
 			break;
 		case 'r':
 			if (strtoul_check(optarg, NULL, 0, &mode) < 0) {
@@ -205,9 +196,9 @@ int ethernet_main(int argc, char *argv[], struct mailbox *m)
 			break;
 		}
 	}
-	/* Run the case after we get all parameters */
+	/* Run the use case after we get all parameters */
 	if (is_run_cmd)
-		rc = ethernet_run(m, mode, role);
+		rc = ethernet_run(m, mode, role, mac_addr);
 out:
 	return rc;
 }
