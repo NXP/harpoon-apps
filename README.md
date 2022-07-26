@@ -1,10 +1,25 @@
-# Harpoon Reference Applications
+# Harpoon: Reference Applications
 
 Harpoon is a Base Enablement SW platform, providing an RTOS and application specific drivers running in Linux and Jailhouse hypervisor environment, on the Cortex-A cores of NXP MPU’s (i.MX 8M Mini, i.MX 8M Nano, i.MX 8M Plus, ...).
 
 Harpoon offers customers an environment for developing real-time demanding applications leveraging the higher performance of the Cortex-A cores (ARMv8-A) compared to the Cortex-M cores (ARMv7-M) traditionally used for RTOS based applications.
 
 The reference applications embedded in this repository may run on several jailhouse guest RTOS (e.g.: Zephyr, FreeRTOS) leveraging the existing NXP RTOS development environment – MCUXpresso.
+
+To ease the integration of Zephyr, mcux-sdk drivers and so on, we leveraged the [Zephyr west tool](https://docs.zephyrproject.org/latest/guides/west/index.html) which helps do multi-repository management and allow users to manage their own ```west.yml``` to select their projects.
+
+# Overview
+
+This project provides the fundamental support for RTOS applications running in an hypervisor environment:
+* HW resource partitioning using Jailhouse hypervisor, providing an inter-ecll IPC communication
+* Arm® CMSIS-CORE startup core drivers and device header files for 64-bit Cortex-A53 core
+* RTOS kernel integration (FreeRTOS, Zephyr)
+* Open-source peripheral drivers leveraging the MCUXpresso SDK ( [mcux-sdk project](https://github.com/NXPmicro/mcux-sdk) )
+* Integration in Linux Yocto BSP as well as Real-time Edge SW Yocto through the [meta-nxp-harpoon](https://github.com/NXPmicro/meta-nxp-harpoon) layer (integration with systemd)
+
+This project is the main repository to build the RTOS application for ARMv8-A cores, it contains the [west.yml](https://github.com/NXPmicro/harpoon-apps/blob/main/west.yml) which keeps the description and revision for other projects in the overall Harpoon delivery. Currently available software components are shown in below figure.
+
+![sdk_graph](docs/sdk_graph.png)
 
 # Getting Started
 
@@ -16,6 +31,7 @@ tar -C /opt/ -xvf gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz     # (sud
 ```
 
 # Cloning this repository
+
 You need to have both Git and West installed, then execute below commands to replicate the whole Harpoon delivery at revision ```${revision}``` and place it in a west worspace named ```hww```.
 ```txt
 west init -m https://github.com/NXPmicro/harpoon-apps --mr ${revision} hww
