@@ -1,5 +1,9 @@
 # Harpoon: Reference Applications
 
+![NXP_logo](docs/nxp_logo_small.png)
+[![Version](https://img.shields.io/github/v/release/NXPMicro/harpoon-apps)](https://github.com/NXPmicro/harpoon-apps/releases/latest)
+[![Contributors](https://img.shields.io/github/contributors/NXPMicro/harpoon-apps)](https://github.com/NXPmicro/harpoon-apps/graphs/contributors)
+
 Harpoon is a Base Enablement SW platform, providing an RTOS and application specific drivers running in Linux and Jailhouse hypervisor environment, on the Cortex-A cores of NXP MPU’s (i.MX 8M Mini, i.MX 8M Nano, i.MX 8M Plus, ...).
 
 Harpoon offers customers an environment for developing real-time demanding applications leveraging the higher performance of the Cortex-A cores (ARMv8-A) compared to the Cortex-M cores (ARMv7-M) traditionally used for RTOS based applications.
