@@ -10,6 +10,7 @@
 
 #include "fsl_enet.h"
 #include "fsl_enet_mdio.h"
+#include "fsl_gpt.h"
 #include "fsl_phyar8031.h"
 
 /*******************************************************************************
@@ -62,5 +63,9 @@
 
 #define BOARD_GPT_1_CLK_EXT_FREQ    24000000U
 #define BOARD_GPT_1_CLK_SOURCE_TYPE kGPT_ClockSource_Periph
+
+unsigned int BOARD_GPT_clk_src(void *base);
+unsigned int BOARD_GPT_clk_freq(void *base);
+int BOARD_NetPort_Get_MAC(unsigned int port, uint8_t *mac);
 
 #endif /* _APP_BOARD_H_ */

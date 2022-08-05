@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 NXP
+ * Copyright 2019,2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -12,12 +12,6 @@
 #define _SYSTEM_CONFIG_H_
 
 #include "board.h"
-#include "fsl_gpt.h"
-
-struct board_config {
-    unsigned int board_gpt_1_input_freq;
-    gpt_clock_source_t board_gpt_1_clock_source;
-};
 
 struct net_config {
     uint8_t hw_addr[6];
@@ -50,12 +44,10 @@ struct app_config {
 };
 
 struct system_config {
-    const struct board_config board;
     struct app_config app;
     struct net_config net[BOARD_NUM_PORTS];
 };
 
-struct board_config *system_config_get_board(void);
 struct net_config *system_config_get_net(int port_id);
 struct app_config *system_config_get_app(void);
 struct avb_app_config *system_config_get_avb_app(void);

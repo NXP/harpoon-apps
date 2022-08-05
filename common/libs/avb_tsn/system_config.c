@@ -10,11 +10,6 @@
 
 extern struct system_config system_cfg;
 
-struct board_config *system_config_get_board(void)
-{
-    return (struct board_config *)&system_cfg.board;
-}
-
 struct net_config *system_config_get_net(int port_id)
 {
     char port[10];

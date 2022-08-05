@@ -10,10 +10,6 @@
 #define CONTROLLER_NUM_IO_DEVICES 1
 
 struct system_config system_cfg = {
-    .board = {
-        .board_gpt_1_input_freq = BOARD_GPT_1_CLK_EXT_FREQ,
-        .board_gpt_1_clock_source = BOARD_GPT_1_CLK_SOURCE_TYPE,
-    },
     .net = {
         [0] = {
             .hw_addr = {0x00, 0xBB, 0xCC, 0xDD, 0xEE, 0x12},
