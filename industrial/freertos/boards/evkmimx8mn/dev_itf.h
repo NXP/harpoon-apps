@@ -36,17 +36,17 @@ static inline uint32_t dev_get_enet_1588_freq(void *base)
 static inline uint32_t dev_get_gpt_ipg_freq(void *base)
 {
     if (base == GPT1)
-        return CLOCK_GetRootClockFreq(kCLOCK_RootGpt1);
+        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt1);
     else if (base == GPT2)
-        return CLOCK_GetRootClockFreq(kCLOCK_RootGpt2);
+        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt2);
     else if (base == GPT3)
-        return CLOCK_GetRootClockFreq(kCLOCK_RootGpt3);
+        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt3);
     else if (base == GPT4)
-        return CLOCK_GetRootClockFreq(kCLOCK_RootGpt4);
+        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt4);
     else if (base == GPT5)
-        return CLOCK_GetRootClockFreq(kCLOCK_RootGpt5);
+        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt5);
     else if (base == GPT6)
-        return CLOCK_GetRootClockFreq(kCLOCK_RootGpt6);
+        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt6);
     else
         return 0;
 }
