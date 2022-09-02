@@ -162,22 +162,6 @@ int sai_write(struct sai_device *dev, uint8_t *addr, size_t len)
 	return (ret == kStatus_Success) ? 0 : -1;
 }
 
-void sai_fifo_read(struct sai_device *dev, uint8_t *addr, size_t len)
-{
-	sai_handle_t *handle = &dev->sai_rx_handle;
-
-	SAI_ReadNonBlocking(dev->sai_base, handle->channel, handle->channelMask,
-			handle->endChannel, handle->bitWidth, addr, len);
-}
-
-void sai_fifo_write(struct sai_device *dev, uint8_t *addr, size_t len)
-{
-	sai_handle_t *handle = &dev->sai_tx_handle;
-
-	SAI_WriteNonBlocking(dev->sai_base, handle->channel, handle->channelMask,
-			handle->endChannel, handle->bitWidth, addr, len);
-}
-
 void sai_enable_irq(struct sai_device *dev, bool rx_irq, bool tx_irq)
 {
 	__sai_enable_irq(dev->sai_base, rx_irq, tx_irq);

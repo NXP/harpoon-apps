@@ -63,10 +63,6 @@ int sai_read(struct sai_device *dev, uint8_t *addr, size_t len);
 
 int sai_write(struct sai_device *dev, uint8_t *addr, size_t len);
 
-void sai_fifo_read(struct sai_device *dev, uint8_t *addr, size_t len);
-
-void sai_fifo_write(struct sai_device *dev, uint8_t *addr, size_t len);
-
 void sai_enable_rx(struct sai_device *dev, bool enable_irq);
 
 void sai_enable_tx(struct sai_device *dev, bool enable_irq);
