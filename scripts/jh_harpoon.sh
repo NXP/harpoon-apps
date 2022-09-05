@@ -66,6 +66,12 @@ if [ -z "$ROOT_CELL" ] || [ -z "$INMATE_CELL" ] || \
    exit 3
 fi
 
+if [ ! -e "$ROOT_CELL" ] || [ ! -e "$INMATE_CELL" ] || \
+   [ ! -e "$INMATE_BIN" ]; then
+    >&2 echo "Missing cell binary/file."
+    exit 4
+fi
+
 if [ $1 == "start" ]; then
     start
 elif [ $1 == "stop" ]; then
