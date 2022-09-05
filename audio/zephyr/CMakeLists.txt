@@ -27,6 +27,7 @@ zephyr_include_directories(
 	${CommonPath}/libs/hlog
 	${CommonPath}/libs/jailhouse
 	${CommonPath}/libs/mailbox
+	${CommonPath}/libs
 	${CommonPath}/libs/stats
 	${CommonPath}/zephyr/boards
 	${ProjDirPath}
@@ -44,6 +45,7 @@ set(CMAKE_MODULE_PATH
 
 zephyr_compile_definitions(OS_ZEPHYR)
 zephyr_compile_definitions(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
+zephyr_compile_definitions(CONFIG_AUD_DISABLE_ENET)
 # HifiBerry Codec
 zephyr_compile_definitions(CODEC_MULTI_ADAPTERS=1)
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_PCM512X CODEC_PCM512X_ENABLE=1)

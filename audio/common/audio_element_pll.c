@@ -11,7 +11,7 @@
 #include "hlog.h"
 #include "hrpn_ctrl.h"
 #include "mailbox.h"
-#include "stats.h"
+#include "libs/stats/stats.h"
 
 #include "sai_drv.h"
 
