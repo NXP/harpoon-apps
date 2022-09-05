@@ -18,7 +18,7 @@
 #include "os/unistd.h"
 
 #define ENET_PHY_ADDRESS                BOARD_PHY0_ADDRESS
-#define ENET_PHY_MIIMODE                BOARD_ENET0_MII_MODE
+#define ENET_PHY_MIIMODE                BOARD_NET_PORT0_MII_MODE
 /* MDIO operations. */
 #define ENET_MDIO_OPS                   BOARD_PHY0_MDIO_OPS
 /* PHY operations. */

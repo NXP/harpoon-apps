@@ -35,21 +35,21 @@
 #define BOARD_NUM_PORTS                1
 #define BOARD_NUM_ENET_QOS_PORTS       1
 
-#define BOARD_ENET0_MII_MODE    kENET_QOS_RgmiiMode
-#define BOARD_ENET0_DRV_TYPE    ENET_QOS_t
-#define BOARD_ENET0_DRV_BASE    ENET_QOS_BASE
-#define BOARD_ENET0_DRV_INDEX	(0)
-#define BOARD_ENET0_DRV_IRQ0     ENET_QOS_IRQn
-#define BOARD_ENET0_DRV_IRQ0_HND ENET_QOS_DriverIRQHandler
+#define BOARD_NET_PORT0_MII_MODE    kENET_QOS_RgmiiMode
+#define BOARD_NET_PORT0_DRV_TYPE    ENET_QOS_t
+#define BOARD_NET_PORT0_DRV_BASE    ENET_QOS_BASE
+#define BOARD_NET_PORT0_DRV_INDEX	(0)
+#define BOARD_NET_PORT0_DRV_IRQ0     ENET_QOS_IRQn
+#define BOARD_NET_PORT0_DRV_IRQ0_HND ENET_QOS_DriverIRQHandler
 
-#define BOARD_ENET0_1588_TIMER_CHANNEL_0      kENET_QOS_PtpPpsIstance0
-#define BOARD_ENET0_1588_TIMER_CHANNEL_1      kENET_QOS_PtpPpsIstance2
-#define BOARD_ENET0_1588_TIMER_CHANNEL_2      kENET_QOS_PtpPpsIstance3
-#define BOARD_ENET0_1588_TIMER_EVENT_CHANNEL  kENET_QOS_PtpPpsIstance1
+#define BOARD_NET_PORT0_1588_TIMER_CHANNEL_0      kENET_QOS_PtpPpsIstance0
+#define BOARD_NET_PORT0_1588_TIMER_CHANNEL_1      kENET_QOS_PtpPpsIstance2
+#define BOARD_NET_PORT0_1588_TIMER_CHANNEL_2      kENET_QOS_PtpPpsIstance3
+#define BOARD_NET_PORT0_1588_TIMER_EVENT_CHANNEL  kENET_QOS_PtpPpsIstance1
 
-#define BOARD_ENET0_1588_TIMER_PPS            kENET_QOS_PtpPpsIstance3 /* FIXME - Need to identify timer channel with PPS output */
+#define BOARD_NET_PORT0_1588_TIMER_PPS            kENET_QOS_PtpPpsIstance3 /* FIXME - Need to identify timer channel with PPS output */
 
-#define BOARD_ENET0_PHY_INDEX   (0)
+#define BOARD_NET_PORT0_PHY_INDEX   (0)
 
 #define BOARD_GPT_0_BASE        GPT2
 #define BOARD_GPT_0_IRQ         GPT2_IRQn
