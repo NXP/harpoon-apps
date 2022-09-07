@@ -78,6 +78,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}/avb_tsn/tsn_app
     ${AppPath}/common
     ${AppPath}/common/boards/${BoardName}
+    ${AppPath}/common/boards/include
     ${AppPath}/freertos
     ${AppPath}/freertos/boards/${BoardName}
     ${CommonPath}
