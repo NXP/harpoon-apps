@@ -41,7 +41,7 @@ SET(FREERTOS_SDK ${SdkDirPath})
 SET(FREERTOS_DIR ${RtosPath})
 SET(FREERTOS_APPS "${ProjDirPath}/../../../../..")
 SET(TARGET "freertos_imx8mm_ca53")
-SET(CONFIG "endpoint_tsn")
+SET(CONFIG "endpoint_avb")
 ADD_SUBDIRECTORY(${GenAVBPath} "${GenAVBBuildPath}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
