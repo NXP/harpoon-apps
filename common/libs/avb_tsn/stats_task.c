@@ -6,7 +6,6 @@
  */
 
 #include "board.h"
-#include "clock_config.h"
 #include "log.h"
 #include "stats.h"
 
