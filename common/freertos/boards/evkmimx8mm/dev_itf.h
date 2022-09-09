@@ -10,6 +10,40 @@
 #ifndef _DEV_ITF_H_
 #define _DEV_ITF_H_
 
+#include "fsl_clock.h"
+
+/*
+ * 24MHz XTAL oscillator
+ * Primary clock source for all PLLs
+ */
+static inline uint32_t dev_get_pll_ref_freq(void)
+{
+	return CLOCK_GetFreq(kCLOCK_Osc24MClk);
+}
+
+/*
+ * Audio Pll tuning
+ */
+static inline void dev_write_audio_pll_num(uint32_t num)
+{
+    /* TODO */
+}
+
+static inline uint32_t dev_read_audio_pll_num(void)
+{
+    /* TODO */ return 0;
+}
+
+static inline uint32_t dev_read_audio_pll_denom(void)
+{
+    /* TODO */ return 0;
+}
+
+static inline uint32_t dev_read_audio_pll_post_div(void)
+{
+    /* TODO */ return 0;
+}
+
 /*
  * Enet module frequency (ipg_clk)
  */
