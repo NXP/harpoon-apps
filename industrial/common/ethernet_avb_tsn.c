@@ -264,8 +264,10 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 	else if (avb_tsn_ctx->a_task->type == ALARM_IO_DEVICE)
 		alarm_task_io_init(avb_tsn_ctx->a_task);
 
-exit:
 	return 0;
+
+exit:
+	return -1;
 }
 
 void ethernet_avb_tsn_exit(void *priv)
