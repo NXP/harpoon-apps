@@ -8,7 +8,6 @@
 #include "sai_clock_config.h"
 
 #if (CONFIG_GENAVB_ENABLE == 1)
-#include "fsl_enet_qos.h"
 
 static void enet_qos_clock_config(void)
 {

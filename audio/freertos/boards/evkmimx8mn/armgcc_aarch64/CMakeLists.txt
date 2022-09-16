@@ -63,6 +63,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/sai_drv.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
+    "${AppPath}/common/boards/${BoardName}/avb_hardware.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/boards/${BoardName}/sai_config.c"
@@ -78,6 +79,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/audio_element_sai_source.c"
     "${AppPath}/common/audio_element_sine.c"
     "${AppPath}/common/audio_pipeline.c"
+    "${AppPath}/common/avb_config.c"
     "${AppPath}/common/pipeline_config.c"
     "${AppPath}/common/play_pipeline.c"
 )
@@ -97,6 +99,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${GenAVBPath}/include/genavb
     ${GenAVBPath}/include/freertos
     ${SdkDirPath}/devices/MIMX8MN6
+    ${SdkDirPath}/drivers/enet
 )
 
 set(CMAKE_MODULE_PATH
@@ -152,6 +155,8 @@ include(driver_cache_armv8a)
 include(driver_clock)
 include(driver_codec)
 include(driver_common)
+include(driver_enet)
+include(driver_gpt)
 include(driver_iuart)
 include(driver_igpio)
 include(driver_mdio-common)

@@ -60,6 +60,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/sai_drv.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
+    "${AppPath}/common/boards/${BoardName}/avb_hardware.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/boards/${BoardName}/sai_config.c"
@@ -76,6 +77,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/audio_element_sai_source.c"
     "${AppPath}/common/audio_element_sine.c"
     "${AppPath}/common/audio_pipeline.c"
+    "${AppPath}/common/avb_config.c"
     "${AppPath}/common/pipeline_config.c"
     "${AppPath}/common/play_pipeline.c"
 )

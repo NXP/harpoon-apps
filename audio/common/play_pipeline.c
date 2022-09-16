@@ -18,6 +18,31 @@
 #include "sai_drv.h"
 #include "sai_config.h"
 
+#if (CONFIG_GENAVB_ENABLE == 1)
+#include "avb_hardware.h"
+#include "avb_tsn/genavb.h"
+#include "avb_tsn/stats_task.h"
+#include "os/irq.h"
+
+extern void BOARD_NET_PORT0_DRV_IRQ0_HND(void);
+
+#ifdef BOARD_NET_PORT0_DRV_IRQ1_HND
+extern void BOARD_NET_PORT0_DRV_IRQ1_HND(void);
+#endif
+#ifdef BOARD_NET_PORT0_DRV_IRQ2_HND
+extern void BOARD_NET_PORT0_DRV_IRQ2_HND(void);
+#endif
+#ifdef BOARD_NET_PORT0_DRV_IRQ3_HND
+extern void BOARD_NET_PORT0_DRV_IRQ3_HND(void);
+#endif
+
+extern void BOARD_GPT_0_IRQ_HANDLER(void);
+extern void BOARD_GPT_1_IRQ_HANDLER(void);
+
+#define STATS_PERIOD_MS 2000
+
+#endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
+
 #define DEFAULT_PERIOD		8
 #define DEFAULT_SAMPLE_RATE	48000
 #define USE_TX_IRQ		1
@@ -206,6 +231,65 @@ static void sai_close(struct pipeline_ctx *ctx)
 	}
 }
 
+#if (CONFIG_GENAVB_ENABLE == 1)
+static void avb_setup(struct pipeline_ctx *ctx)
+{
+	avb_hardware_init();
+
+	os_irq_register(BOARD_NET_PORT0_DRV_IRQ0, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ0_HND, NULL, 0);
+
+#ifdef BOARD_NET_PORT0_DRV_IRQ1_HND
+	os_irq_register(BOARD_NET_PORT0_DRV_IRQ1, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ1_HND, NULL, 0);
+#endif
+#ifdef BOARD_NET_PORT0_DRV_IRQ2_HND
+	os_irq_register(BOARD_NET_PORT0_DRV_IRQ2, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ2_HND, NULL, 0);
+#endif
+#ifdef BOARD_NET_PORT0_DRV_IRQ3_HND
+	os_irq_register(BOARD_NET_PORT0_DRV_IRQ3, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ3_HND, NULL, 0);
+#endif
+
+	os_irq_register(BOARD_GPT_0_IRQ, (void (*)(void(*)))BOARD_GPT_0_IRQ_HANDLER, NULL, 0);
+	os_irq_register(BOARD_GPT_1_IRQ, (void (*)(void(*)))BOARD_GPT_1_IRQ_HANDLER, NULL, 0);
+
+	if (gavb_stack_init()) {
+		log_err("gavb_stack_init() failed\n");
+		goto exit;
+	}
+
+	if (STATS_TaskInit(NULL, NULL, STATS_PERIOD_MS) < 0)
+		log_err("STATS_TaskInit() failed\n");
+
+exit:
+	return;
+}
+
+static void avb_close(struct pipeline_ctx *ctx)
+{
+	gavb_port_stats_exit(0);
+
+	if (gavb_stack_exit()) {
+		log_err("gavb_stack_exit() failed\n");
+	}
+
+	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ0);
+
+#ifdef BOARD_NET_PORT0_DRV_IRQ1_HND
+	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ1);
+#endif
+#ifdef BOARD_NET_PORT0_DRV_IRQ2_HND
+	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ2);
+#endif
+#ifdef BOARD_NET_PORT0_DRV_IRQ3_HND
+	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ3);
+#endif
+
+	os_irq_unregister(BOARD_GPT_0_IRQ);
+	os_irq_unregister(BOARD_GPT_1_IRQ);
+
+	avb_hardware_exit();
+}
+#endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
+
 void *play_pipeline_init(void *parameters)
 {
 	struct audio_config *cfg = parameters;
@@ -250,6 +334,10 @@ void *play_pipeline_init(void *parameters)
 
 	sai_setup(ctx);
 
+#if (CONFIG_GENAVB_ENABLE == 1)
+	avb_setup(ctx);
+#endif
+
 	log_info("Starting %s (Sample Rate: %d Hz, Period: %u frames)\n",
 			pipeline_cfg->name, rate, (uint32_t)period);
 
@@ -268,6 +356,10 @@ void play_pipeline_exit(void *handle)
 	int i;
 
 	audio_pipeline_exit(ctx->pipeline);
+
+#if (CONFIG_GENAVB_ENABLE == 1)
+	avb_close(ctx);
+#endif
 
 	sai_close(ctx);
 
