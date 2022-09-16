@@ -49,6 +49,7 @@ add_compile_options(-DCODEC_PCM186X_ENABLE=1)
 add_compile_options(-DCODEC_PCM512X_ENABLE=1)
 add_compile_options(-DCODEC_WM8960)
 add_compile_options(-DCODEC_WM8960_ENABLE=1)
+add_compile_options(-DCONFIG_GENAVB_ENABLE=1)
 
 project(audio)
 
@@ -70,6 +71,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/audio.c"
     "${AppPath}/common/audio_buffer.c"
     "${AppPath}/common/audio_element.c"
+    "${AppPath}/common/audio_element_avtp_source.c"
     "${AppPath}/common/audio_element_dtmf.c"
     "${AppPath}/common/audio_element_pll.c"
     "${AppPath}/common/audio_element_routing.c"
