@@ -5,7 +5,6 @@
  */
 
 #include "os/stdlib.h"
-#include "os/string.h"
 
 #include "audio_pipeline.h"
 #include "hrpn_ctrl.h"

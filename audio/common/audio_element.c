@@ -109,6 +109,12 @@ int audio_element_check_config(struct audio_element_config *config)
 		rc = sine_element_check_config(config);
 		break;
 
+#if (CONFIG_GENAVB_ENABLE == 1)
+	case AUDIO_ELEMENT_AVTP_SOURCE:
+		rc = avtp_source_element_check_config(config);
+		break;
+#endif
+
 	default:
 		rc = -1;
 		break;
@@ -145,6 +151,12 @@ unsigned int audio_element_data_size(struct audio_element_config *config)
 	case AUDIO_ELEMENT_SINE_SOURCE:
 		size = sine_element_size(config);
 		break;
+
+#if (CONFIG_GENAVB_ENABLE == 1)
+	case AUDIO_ELEMENT_AVTP_SOURCE:
+		size = avtp_source_element_size(config);
+		break;
+#endif
 
 	default:
 		size = 0;
@@ -188,6 +200,12 @@ int audio_element_init(struct audio_element *element, struct audio_element_confi
 	case AUDIO_ELEMENT_SINE_SOURCE:
 		rc = sine_element_init(element, config, buffer);
 		break;
+
+#if (CONFIG_GENAVB_ENABLE == 1)
+	case AUDIO_ELEMENT_AVTP_SOURCE:
+		rc = avtp_source_element_init(element, config, buffer);
+		break;
+#endif
 
 	default:
 		rc = -1;

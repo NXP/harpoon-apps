@@ -7,6 +7,9 @@
 #ifndef _AUDIO_ELEMENT_H_
 #define _AUDIO_ELEMENT_H_
 
+#if (CONFIG_GENAVB_ENABLE == 1)
+#include "audio_element_avtp_source.h"
+#endif
 #include "audio_element_dtmf.h"
 #include "audio_element_pll.h"
 #include "audio_element_routing.h"
@@ -26,6 +29,9 @@ enum {
 	AUDIO_ELEMENT_SAI_SOURCE,
 	AUDIO_ELEMENT_SINE_SOURCE,
 	AUDIO_ELEMENT_PLL,
+#if (CONFIG_GENAVB_ENABLE == 1)
+	AUDIO_ELEMENT_AVTP_SOURCE, /* AVB audio stream listener */
+#endif
 };
 
 /* Configuration */
@@ -48,6 +54,9 @@ struct audio_element_config {
 		struct sai_sink_element_config sai_sink;
 		struct sai_source_element_config sai_source;
 		struct sine_element_config sine;
+#if (CONFIG_GENAVB_ENABLE == 1)
+		struct avtp_source_element_config avtp_source;
+#endif
 	} u;
 };
 
