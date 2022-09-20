@@ -10,9 +10,8 @@
 #include "os/stdio.h"
 
 #ifdef OS_ZEPHYR /* TODO: Implement cache invalidation with OS-independant code */
-#include <zephyr.h>
-#include <kernel.h>
-#include <cache.h>
+#include <zephyr/kernel.h>
+#include <zephyr/cache.h>
 #endif
 
 static inline void os_invd_dcache_all()

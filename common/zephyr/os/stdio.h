@@ -6,7 +6,7 @@
 #ifndef _ZEPHYR_STDIO_H_
 #define _ZEPHYR_STDIO_H_
 
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
 static inline int os_printf(const char *fmt_s, ...)
 {

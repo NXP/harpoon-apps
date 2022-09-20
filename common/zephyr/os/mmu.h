@@ -6,9 +6,9 @@
 #ifndef _ZEPHYR_MMU_H_
 #define _ZEPHYR_MMU_H_
 
-#include <kernel.h>
-#include <arch/arm64/arm_mmu.h>
-#include <sys/mem_manage.h>
+#include <zephyr/kernel.h>
+#include <zephyr/arch/arm64/arm_mmu.h>
+#include <zephyr/sys/mem_manage.h>
 
 /* Memory attribute definitions */
 /*

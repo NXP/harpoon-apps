@@ -6,7 +6,7 @@
 #ifndef _ZEPHYR_ASSERT_H_
 #define _ZEPHYR_ASSERT_H_
 
-#include <sys/__assert.h>
+#include <zephyr/sys/__assert.h>
 
 #define os_assert(cond, msg, ...)				\
 	do {							\

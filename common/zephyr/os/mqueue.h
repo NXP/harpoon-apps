@@ -9,7 +9,7 @@
 
 #include "os/assert.h"
 
-#include <kernel.h>
+#include <zephyr/kernel.h>
 
 typedef struct k_msgq os_mqd_t;
 

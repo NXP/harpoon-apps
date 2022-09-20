@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <device.h>
-#include <kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/kernel.h>
 #include <string.h>
-#include <zephyr.h>
 
 #include "os/assert.h"
 
@@ -16,7 +15,7 @@
 #include "mailbox.h"
 #include "rt_latency.h"
 
-#define STACK_SIZE (640 + CONFIG_TEST_EXTRA_STACKSIZE)
+#define STACK_SIZE 4096
 
 K_THREAD_STACK_DEFINE(gpt_stack, STACK_SIZE);
 
@@ -27,17 +26,6 @@ K_THREAD_STACK_DEFINE(cache_inval_stack, STACK_SIZE);
 #ifndef SILENT_TESTING
 K_THREAD_STACK_DEFINE(print_stack, STACK_SIZE);
 #endif
-
-#define INST_DT_COMPAT_LABEL(n, compat) DT_LABEL(DT_INST(n, compat)),
-/* Generate a list of LABELs for all instances of the "compat" */
-#define LABELS_FOR_DT_COMPAT(compat) \
-	COND_CODE_1(DT_HAS_COMPAT_STATUS_OKAY(compat), \
-		   (UTIL_LISTIFY(DT_NUM_INST_STATUS_OKAY(compat), \
-				 INST_DT_COMPAT_LABEL, compat)), ())
-
-static const char * const devices[] = {
-	LABELS_FOR_DT_COMPAT(nxp_imx_gpt)
-};
 
 #define MAX_TC_THREADS	8
 
@@ -137,14 +125,14 @@ int start_test_case(void *context, int test_case_id)
 	k_busy_wait(USEC_PER_MSEC * 300);
 
 	/* Create GPT threads with Highest Priority*/
-	gpt_dev = device_get_binding(devices[0]);
+	gpt_dev = DEVICE_DT_GET(DT_NODELABEL(gpt1));
 	if(!gpt_dev) {
 		log_err("Unable to get counter device\n");
 		goto err;
 	}
 
 	/* Use the second GPT Counter to create irq load with lower priority */
-	irq_load_dev = device_get_binding(devices[1]);
+	irq_load_dev = DEVICE_DT_GET(DT_NODELABEL(gpt2));
 	if(!irq_load_dev) {
 		log_err("Unable to get counter device\n");
 		goto err;

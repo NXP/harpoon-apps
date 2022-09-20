@@ -6,7 +6,7 @@
 #ifndef _ZEPHYR_UNISTD_H_
 #define _ZEPHYR_UNISTD_H_
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 
 static inline int os_msleep(int32_t msec)
 {

@@ -7,7 +7,7 @@
 #ifndef _ZEPHYR_IRQ_H_
 #define _ZEPHYR_IRQ_H_
 
-#include <kernel.h>
+#include <zephyr/kernel.h>
 
 static inline int os_irq_register(unsigned int irq, void (*func)(void *data),
 		void *data, unsigned int prio)

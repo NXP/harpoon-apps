@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <device.h>
-#include <kernel.h>
-#include <zephyr.h>
+#include <zephyr/device.h>
+#include <zephyr/kernel.h>
 
 #include "app_board.h"
 #include "hlog.h"
@@ -17,7 +16,7 @@
 
 #include "audio_entry.h"
 
-#define STACK_SIZE (640 + CONFIG_TEST_EXTRA_STACKSIZE)
+#define STACK_SIZE 4096
 
 K_THREAD_STACK_DEFINE(data_stack, STACK_SIZE);
 K_THREAD_STACK_DEFINE(ctrl_stack, STACK_SIZE);

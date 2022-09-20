@@ -6,7 +6,7 @@
 #ifndef _ZEPHYR_SEMAPHORE_H_
 #define _ZEPHYR_SEMAPHORE_H_
 
-#include <kernel.h>
+#include <zephyr/kernel.h>
 
 typedef struct k_sem os_sem_t;
 
