@@ -9,7 +9,13 @@
 
 #include "audio_buffer.h"
 
+#define AVTP_RX_STREAM_N		2
+#define AVTP_RX_CHANNEL_N		2
+
 struct avtp_source_element_config {
+	struct avtp_source_stream_config {
+		/* avtp config unused for now */
+	} stream [AVTP_RX_STREAM_N];
 };
 
 struct audio_element_config;

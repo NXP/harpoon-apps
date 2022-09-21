@@ -41,6 +41,7 @@ extern const struct audio_pipeline_config pipeline_dtmf_config;
 extern const struct audio_pipeline_config pipeline_sine_config;
 extern const struct audio_pipeline_config pipeline_loopback_config;
 extern const struct audio_pipeline_config pipeline_full_config;
+extern const struct audio_pipeline_config pipeline_full_avb_config;
 
 /* assign_nonzero_valid_val(): Validate and assign nonzero value.
  * "value" == 0: "var" use default vale, return 0;

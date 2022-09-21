@@ -9,7 +9,6 @@
 #include "os/mqueue.h"
 #include "os/semaphore.h"
 #include "os/stdlib.h"
-#include "os/string.h"
 #include "os/unistd.h"
 #include "os/cpu_load.h"
 
@@ -57,6 +56,12 @@ static struct play_pipeline_config play_pipeline_full_config = {
 	.cfg = &pipeline_full_config,
 };
 
+#if (CONFIG_GENAVB_ENABLE == 1)
+static struct play_pipeline_config play_pipeline_full_avb_config = {
+	.cfg = &pipeline_full_avb_config,
+};
+#endif
+
 const static struct mode_handler handler[] =
 {
 	[0] = {
@@ -86,7 +91,16 @@ const static struct mode_handler handler[] =
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
 		.data = &play_pipeline_full_config,
+	},
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[4] = {
+		.init = play_pipeline_init,
+		.exit = play_pipeline_exit,
+		.run = play_pipeline_run,
+		.stats = play_pipeline_stats,
+		.data = &play_pipeline_full_avb_config,
 	}
+#endif
 };
 
 static void data_send_event(void *userData, uint8_t status)

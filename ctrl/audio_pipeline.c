@@ -26,8 +26,8 @@ void audio_element_routing_usage(void)
 	printf(
 		"\nRouting audio element options:\n"
 		"\t-a <pipeline_id>  audio pipeline id (default 0)\n"
-		"\t-c                connect routing output\n"
-		"\t-d                disconnect routing output\n"
+		"\t-c                connect routing input/output\n"
+		"\t-d                disconnect routing input/output\n"
 		"\t-e <element_id>   routing element id (default 0)\n"
 		"\t-i <input_id>     routing element input  (default 0)\n"
 		"\t-o <output_id>    routing element output (default 0)\n"
@@ -47,6 +47,7 @@ void audio_element_usage(void)
 		"\t                  2 - sai sink\n"
 		"\t                  3 - sai source\n"
 		"\t                  4 - sine source\n"
+		"\t                  5 - avtp source\n"
 	);
 }
 

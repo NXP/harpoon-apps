@@ -11,9 +11,13 @@
 
 /*
  * AVTP source: AVB audio stream listener
+ *
+ * Read from AVTP_RX_STREAM_N streams, with AVTP_RX_CHANNEL_N channels.
  */
 
 struct avtp_source_element {
+	unsigned int stream_n;
+	unsigned int out_n;
 	struct audio_buffer *out;
 	bool started;
 };
@@ -65,7 +69,7 @@ int avtp_source_element_check_config(struct audio_element_config *config)
 		goto err;
 	}
 
-	if (config->outputs != 1) {
+	if (config->outputs != AVTP_RX_STREAM_N * AVTP_RX_CHANNEL_N) {
 		log_err("avtp source: invalid outputs: %u\n", config->outputs);
 		goto err;
 	}
@@ -91,7 +95,10 @@ int avtp_source_element_init(struct audio_element *element, struct audio_element
 	element->dump = avtp_source_element_dump;
 
 	avtp->started = false;
-	avtp->out = &buffer[config->output[0]];
+
+	avtp->stream_n = AVTP_RX_STREAM_N;
+	avtp->out_n = config->outputs;
+	avtp->out = &buffer[config->output[0]]; /* FIXME ?? */
 
 	avtp_source_element_dump(element);
 

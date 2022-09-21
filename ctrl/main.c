@@ -53,6 +53,7 @@ static void audio_usage(void)
 		"\t               1 - sine wave playback\n"
 		"\t               2 - playback & recording (loopback)\n"
 		"\t               3 - audio pipeline\n"
+		"\t               4 - AVB audio pipeline\n"
 		"\t-s             stop running audio mode\n"
 	);
 }
