@@ -22,6 +22,7 @@
 #include "avb_hardware.h"
 #include "avb_tsn/genavb.h"
 #include "avb_tsn/stats_task.h"
+#include "genavb/genavb.h"
 #include "os/irq.h"
 
 extern void BOARD_NET_PORT0_DRV_IRQ0_HND(void);
@@ -40,6 +41,10 @@ extern void BOARD_GPT_0_IRQ_HANDLER(void);
 extern void BOARD_GPT_1_IRQ_HANDLER(void);
 
 #define STATS_PERIOD_MS 2000
+
+struct avtp_avb_ctx {
+	struct genavb_control_handle *ctrl_h;
+};
 
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
 
@@ -66,6 +71,10 @@ struct pipeline_ctx {
 		uint64_t run;
 		uint64_t err;
 	} stats;
+
+#if (CONFIG_GENAVB_ENABLE == 1)
+	struct avtp_avb_ctx avb;
+#endif
 };
 
 void play_pipeline_stats(void *handle)
@@ -150,6 +159,8 @@ static void sai_setup(struct pipeline_ctx *ctx)
 	bool pll_disable = true;
 	int i;
 
+	log_info("enter\n");
+
 	/* Configure each active SAI */
 	for (i = 0; i < sai_active_list_nelems; i++) {
 		uint32_t sai_clock_root, pll_id;
@@ -232,8 +243,106 @@ static void sai_close(struct pipeline_ctx *ctx)
 }
 
 #if (CONFIG_GENAVB_ENABLE == 1)
+
+static void listener_disconnect(unsigned int stream_index)
+{
+	struct hrpn_cmd_audio_element_avtp_disconnect disconnect;
+
+	/* need to disconnect streams in AVTP audio element */
+	disconnect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_DISCONNECT;
+	disconnect.pipeline.id = 0;
+	disconnect.element.type = AUDIO_ELEMENT_AVTP_SOURCE;
+	disconnect.element.id = 0;
+	disconnect.stream_index = stream_index;
+
+	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&disconnect, sizeof(disconnect), NULL);
+}
+
+static void listener_connect(struct genavb_msg_media_stack_connect *media_stack_connect)
+{
+	struct hrpn_cmd_audio_element_avtp_connect connect;
+
+	/* need to connect streams in AVTP audio element */
+	connect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_CONNECT;
+	connect.pipeline.id = 0;
+	connect.element.type = AUDIO_ELEMENT_AVTP_SOURCE;
+	connect.element.id = 0;
+	connect.stream_index = media_stack_connect->stream_index;
+	connect.stream_params = media_stack_connect->stream_params;
+
+	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&connect, sizeof(connect), NULL);
+}
+
+static void handle_avdecc_event(struct pipeline_ctx *ctx, struct genavb_control_handle *ctrl_h)
+{
+	struct genavb_msg_media_stack_connect *media_stack_connect;
+	struct genavb_msg_media_stack_disconnect *media_stack_disconnect;
+	union genavb_media_stack_msg msg;
+	genavb_msg_type_t msg_type;
+	unsigned int msg_len;
+	int rc;
+
+	msg_len = sizeof(union genavb_media_stack_msg);
+
+	rc = genavb_control_receive(ctrl_h, &msg_type, &msg, &msg_len);
+	if (rc != GENAVB_SUCCESS) {
+		/* no event message*/
+
+		goto exit;
+	}
+
+	switch (msg_type) {
+	case GENAVB_MSG_MEDIA_STACK_CONNECT:
+
+		media_stack_connect = &msg.media_stack_connect;
+
+		log_info("GENAVB_MSG_MEDIA_STACK_CONNECT stream index: %u\n",
+				media_stack_connect->stream_index);
+
+		if (media_stack_connect->stream_params.direction == AVTP_DIRECTION_LISTENER)
+			listener_connect(media_stack_connect);
+		else
+			log_warn("talker not supported\n");
+
+		break;
+
+	case GENAVB_MSG_MEDIA_STACK_DISCONNECT:
+
+		media_stack_disconnect = &msg.media_stack_disconnect;
+
+		log_info("GENAVB_MSG_MEDIA_STACK_DISCONNECT stream index: %u\n",
+			media_stack_disconnect->stream_index);
+
+		if (media_stack_disconnect->direction == AVTP_DIRECTION_LISTENER)
+			listener_disconnect(media_stack_disconnect->stream_index);
+		else
+			log_warn("talker not supported\n");
+
+		break;
+
+	default:
+		log_err("Error, unknown message type: %d\n", msg_type);
+		rc = -1;
+		break;
+	}
+
+exit:
+	return;
+}
+
+void play_pipeline_ctrl(void *handle)
+{
+	struct pipeline_ctx *ctx = handle;
+
+	handle_avdecc_event(ctx, ctx->avb.ctrl_h);
+}
+
 static void avb_setup(struct pipeline_ctx *ctx)
 {
+	int genavb_result;
+
+	log_info("enter\n");
+
 	avb_hardware_init();
 
 	os_irq_register(BOARD_NET_PORT0_DRV_IRQ0, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ0_HND, NULL, 0);
@@ -256,6 +365,13 @@ static void avb_setup(struct pipeline_ctx *ctx)
 		goto exit;
 	}
 
+	/* open avdecc control channel */
+	genavb_result = genavb_control_open(get_genavb_handle(), &ctx->avb.ctrl_h, GENAVB_CTRL_AVDECC_MEDIA_STACK);
+	if (genavb_result != GENAVB_SUCCESS) {
+		log_err("genavb_control_open() failed: %s\n", genavb_strerror(genavb_result));
+		goto exit;
+	}
+
 	if (STATS_TaskInit(NULL, NULL, STATS_PERIOD_MS) < 0)
 		log_err("STATS_TaskInit() failed\n");
 
@@ -265,6 +381,8 @@ exit:
 
 static void avb_close(struct pipeline_ctx *ctx)
 {
+	genavb_control_close(ctx->avb.ctrl_h);
+
 	gavb_port_stats_exit(0);
 
 	if (gavb_stack_exit()) {

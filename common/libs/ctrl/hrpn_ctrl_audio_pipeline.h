@@ -6,6 +6,10 @@
 #ifndef _HRPN_CTRL_AUDIO_PIPELINE_H_
 #define _HRPN_CTRL_AUDIO_PIPELINE_H_
 
+#if (CONFIG_GENAVB_ENABLE == 1)
+#include "genavb/genavb.h"
+#endif
+
 #include <stdint.h>
 
 /* Audio pipeline commands */
@@ -65,6 +69,31 @@ struct hrpn_cmd_audio_element_dump {
 	struct hrpn_cmd_audio_element_id element;
 };
 
+struct hrpn_cmd_audio_element_avtp_disconnect {
+	uint32_t type;		/* command type */
+	struct hrpn_cmd_audio_pipeline_id pipeline;
+	struct hrpn_cmd_audio_element_id element;
+	uint32_t stream_index;
+};
+
+struct hrpn_cmd_audio_element_avtp_connect {
+	uint32_t type;		/* command type */
+	struct hrpn_cmd_audio_pipeline_id pipeline;
+	struct hrpn_cmd_audio_element_id element;
+	uint32_t stream_index;
+#if (CONFIG_GENAVB_ENABLE == 1)
+	struct genavb_stream_params stream_params;
+#endif
+};
+
+struct hrpn_cmd_audio_element_avtp {
+	union {
+		struct hrpn_cmd_audio_element_common common;
+		struct hrpn_cmd_audio_element_avtp_connect connect;
+		struct hrpn_cmd_audio_element_avtp_disconnect disconnect;
+	} u;
+};
+
 struct hrpn_resp_audio_element {
 	uint32_t type;		/* command type */
 	uint32_t status;
@@ -76,6 +105,7 @@ struct hrpn_cmd_audio_element {
 		struct hrpn_cmd_audio_element_routing routing;
 		struct hrpn_cmd_audio_element_pll pll;
 		struct hrpn_cmd_audio_element_dump dump;
+		struct hrpn_cmd_audio_element_avtp avtp;
 	} u;
 };
 

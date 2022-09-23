@@ -50,6 +50,13 @@ int audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_elem
 		rc = pll_element_ctrl(element, &cmd->u.pll, len, m);
 		break;
 
+#if (CONFIG_GENAVB_ENABLE == 1)
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_CONNECT:
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_DISCONNECT:
+		rc = avtp_source_element_ctrl(element, &cmd->u.avtp, len, m);
+		break;
+#endif
+
 	default:
 		goto err;
 		break;

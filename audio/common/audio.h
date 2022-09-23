@@ -35,6 +35,7 @@ enum {
 void *play_pipeline_init(void *parameters);
 int play_pipeline_run(void *handle, struct event *e);
 void play_pipeline_stats(void *handle);
+void play_pipeline_ctrl(void *handle);
 void play_pipeline_exit(void *handle);
 
 extern const struct audio_pipeline_config pipeline_dtmf_config;

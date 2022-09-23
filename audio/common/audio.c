@@ -25,6 +25,7 @@ struct mode_handler {
 	void *(*init)(void *);
 	void (*exit)(void *);
 	void (*stats)(void *);
+	void (*ctrl)(void *);
 	int (*run)(void *, struct event *e);
 	void *data;
 };
@@ -98,6 +99,7 @@ const static struct mode_handler handler[] =
 		.exit = play_pipeline_exit,
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
+		.ctrl = play_pipeline_ctrl,
 		.data = &play_pipeline_full_avb_config,
 	}
 #endif
@@ -249,6 +251,13 @@ static void audio_command_handler(struct data_ctx *ctx)
 	}
 }
 
+static void audio_control_handler(struct data_ctx *ctx)
+{
+	if (ctx->handler && ctx->handler->ctrl)
+		ctx->handler->ctrl(ctx->handle);
+}
+
+
 #define CONTROL_POLL_PERIOD	100
 #define STATS_POLL_PERIOD	10000
 #define STATS_COUNT		(STATS_POLL_PERIOD / CONTROL_POLL_PERIOD)
@@ -260,7 +269,11 @@ void audio_control_loop(void *context)
 
 	count = STATS_COUNT;
 	do {
+		/* handle commands from Linux ctrl application */
 		audio_command_handler(ctx);
+
+		/* handle events from control channel(s) */
+		audio_control_handler(ctx);
 
 		count--;
 		if (!count) {

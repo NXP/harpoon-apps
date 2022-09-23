@@ -10,6 +10,10 @@
 #include "audio_element.h"
 #include "audio_buffer.h"
 
+#if (CONFIG_GENAVB_ENABLE == 1)
+#include "genavb/genavb.h"
+#endif
+
 #define AUDIO_PIPELINE_MAX_STAGES	4
 #define AUDIO_PIPELINE_MAX_ELEMENTS	16
 #define AUDIO_PIPELINE_MAX_BUFFERS	256

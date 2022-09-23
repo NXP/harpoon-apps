@@ -94,4 +94,5 @@ static inline void audio_element_reset(struct audio_element *element)
 {
 	element->reset(element);
 }
+
 #endif /* _AUDIO_ELEMENT_H_ */
