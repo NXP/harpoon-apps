@@ -81,6 +81,7 @@ include(component_lists)
 include(component_serial_manager)
 include(component_serial_manager_uart)
 
+include(driver_cache_armv8a)
 include(driver_clock)
 include(driver_common)
 include(driver_gpt)

@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "cpu.h"
-
 #include "os/assert.h"
 #include "os/counter.h"
+#include "os/cache.h"
 #include "os/semaphore.h"
 #include "os/unistd.h"
 
@@ -182,8 +181,8 @@ void cpu_load(struct rt_latency_ctx *ctx)
 
 void cache_inval(void)
 {
-	os_invd_dcache_all();
-	os_invd_icache_all();
+	os_dcache_invd_all();
+	os_icache_invd_all();
 
 	os_msleep(CACHE_INVAL_PERIOD_MS);
 }
