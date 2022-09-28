@@ -27,6 +27,14 @@ manifest:
         - hal
     - name: FreeRTOS-Kernel
       revision: 14dba01da5623497f76748bca6ccc7fb58ee6d36
+    - name: mcux-sdk-middleware-multicore
+      remote: nxpmicro
+      revision: feature/heterogeneous_multicore
+      path: middleware/multicore
+    - name: rpmsg-lite
+      remote: nxpmicro
+      revision: feature/heterogeneous_multicore
+      path: middleware/multicore/rpmsg_lite
   self:
     path: harpoon-apps
 
