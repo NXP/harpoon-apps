@@ -65,4 +65,9 @@ if(CONFIG_BOARD_MIMX8MP_EVK_A53)
 	       ${AppPath}/common/can.c
 	       ${AppPath}/common/ethernet_sdk_enet_qos.c
 	      )
+else()
+  target_sources(app PRIVATE
+	       ${AppPath}/common/boards/${BoardName}/stub.c
+	       ${AppPath}/common/ethernet_sdk_enet.c
+	      )
 endif()

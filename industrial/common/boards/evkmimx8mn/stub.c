@@ -25,3 +25,5 @@ void *can_init_pingpong(void *parameters)
 }
 
 STUB_INDUSTRIAL_USE_CASE(can);
+
+STUB_INDUSTRIAL_USE_CASE(ethernet_sdk_enet_loopback);
