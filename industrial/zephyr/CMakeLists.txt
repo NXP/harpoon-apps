@@ -54,15 +54,15 @@ target_sources(app PRIVATE
 	       main.c
 	       ${AppPath}/common/boards/${BoardName}/clock_config.c
 	       ${AppPath}/common/boards/${BoardName}/hardware_ethernet.c
-	       ${AppPath}/common/boards/${BoardName}/hardware_flexcan.c
 	       ${AppPath}/common/boards/${BoardName}/pin_mux.c
-	       ${AppPath}/common/can.c
 	       ${AppPath}/common/ethernet.c
 	       ${AppPath}/common/industrial.c
 	       )
 
 if(CONFIG_BOARD_MIMX8MP_EVK_A53)
   target_sources(app PRIVATE
+	       ${AppPath}/common/boards/${BoardName}/hardware_flexcan.c
+	       ${AppPath}/common/can.c
 	       ${AppPath}/common/ethernet_sdk_enet_qos.c
 	      )
 endif()
