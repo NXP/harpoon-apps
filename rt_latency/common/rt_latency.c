@@ -254,7 +254,7 @@ int rt_latency_init(const void *dev,
 	ctx->irq_load_dev = irq_load_dev;
 
 	stats_init(&ctx->irq_delay, 31, "irq delay (ns)", NULL);
-	hist_init(&ctx->irq_delay_hist, 20, 200);
+	hist_init(&ctx->irq_delay_hist, 20, 1000);
 
 	stats_init(&ctx->irq_to_sched, 31, "irq to sched (ns)", NULL);
 	hist_init(&ctx->irq_to_sched_hist, 20, 1000);
