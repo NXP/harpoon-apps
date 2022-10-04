@@ -75,6 +75,7 @@ target_sources(app PRIVATE
 	       ${AppPath}/common/audio_element_sai_source.c
 	       ${AppPath}/common/audio_element_sine.c
 	       ${AppPath}/common/audio_pipeline.c
+	       ${AppPath}/common/boards/${BoardName}/clock_config.c
 	       ${AppPath}/common/boards/${BoardName}/codec_config.c
 	       ${AppPath}/common/boards/${BoardName}/pin_mux.c
 	       ${AppPath}/common/boards/${BoardName}/sai_clock_config.c

@@ -60,6 +60,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/sai_drv.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
+    "${AppPath}/common/boards/${BoardName}/clock_config.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/boards/${BoardName}/sai_config.c"
     "${AppPath}/common/boards/${BoardName}/sai_clock_config.c"

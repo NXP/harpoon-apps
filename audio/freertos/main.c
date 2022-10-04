@@ -8,11 +8,11 @@
 #include "task.h"
 
 #include "board.h"
+#include "clock_config.h"
 #include "hlog.h"
 #include "os/assert.h"
 
 #include "pin_mux.h"
-#include "sai_clock_config.h"
 
 #include "audio_entry.h"
 
@@ -29,7 +29,7 @@ static void hardware_setup(void)
 
 	BOARD_InitPins();
 
-	sai_clock_setup();
+	BOARD_InitClocks();
 }
 
 static void data_task(void *pvParameters)

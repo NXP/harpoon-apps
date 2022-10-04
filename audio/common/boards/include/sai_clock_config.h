@@ -6,6 +6,8 @@
 #ifndef _SAI_CLOCK_CONFIG_H_
 #define _SAI_CLOCK_CONFIG_H_
 
+#include <stdint.h>
+
 void sai_clock_setup(void);
 uint32_t get_sai_clock_root(uint32_t id);
 uint32_t sai_select_audio_pll_mux(int sai_id, int srate);
