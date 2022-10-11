@@ -57,6 +57,8 @@ static inline int os_mmu_map(const char *name, uint8_t **virt, uintptr_t phys, s
 
 	switch (attrs & OS_MEM_CACHE_MASK) {
 	case OS_MEM_CACHE_NONE:
+		flags |= MT_NORMAL_NC;
+		break;
 	case OS_MEM_DEVICE_nGnRnE:
 		flags |= MT_DEVICE_nGnRnE;
 		break;
