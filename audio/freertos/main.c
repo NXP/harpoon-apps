@@ -65,7 +65,7 @@ int main(void)
 	hardware_setup();
 
 	xResult = xTaskCreate(main_task, "main_task",
-			configMINIMAL_STACK_SIZE + 200, NULL,
+			configMINIMAL_STACK_SIZE + 800, NULL,
 			main_task_PRIORITY, NULL);
 	os_assert(xResult == pdPASS, "main task creation failed");
 
