@@ -33,28 +33,51 @@ struct mode_handler {
 struct data_ctx {
 	struct ivshmem mem;
 	struct mailbox mb;
+	uint8_t thread_count;
+	uint8_t pipeline_count;
 
-	os_sem_t semaphore;
-	os_mqd_t mqueue;
+	/* The first thead is used for master pipeline, others for slave pipeline */
+	struct thread_data_ctx_t {
+		os_sem_t semaphore;
+		os_mqd_t mqueue;
+		/* pipeline_ctx handle for current thread */
+		void *handle;
+		/* slave pipeline ctx handles to be used by master pipeline */
+		void *slave_handle[MAX_AUDIO_DATA_THREADS - 1];
+	} thread_data_ctx[MAX_AUDIO_DATA_THREADS];
 
 	const struct mode_handler *handler;
-	void *handle;
 };
 
 static struct play_pipeline_config play_pipeline_dtmf_config = {
-	.cfg = &pipeline_dtmf_config,
+	.cfg = {
+		&pipeline_dtmf_config,
+	}
 };
 
 static struct play_pipeline_config play_pipeline_loopback_config = {
-	.cfg = &pipeline_loopback_config,
+	.cfg = {
+		&pipeline_loopback_config,
+	}
 };
 
 static struct play_pipeline_config play_pipeline_sine_config = {
-	.cfg = &pipeline_sine_config,
+	.cfg = {
+		&pipeline_sine_config,
+	}
 };
 
 static struct play_pipeline_config play_pipeline_full_config = {
-	.cfg = &pipeline_full_config,
+	.cfg = {
+		&pipeline_full_config,
+	}
+};
+
+static struct play_pipeline_config play_pipeline_smp_config = {
+	.cfg = {
+		&pipeline_full_thread_0_config,
+		&pipeline_full_thread_1_config,
+	}
 };
 
 #if (CONFIG_GENAVB_ENABLE == 1)
@@ -103,6 +126,14 @@ const static struct mode_handler handler[] =
 		.data = &play_pipeline_full_avb_config,
 	}
 #endif
+	[5] = {
+		.init = play_pipeline_init,
+		.exit = play_pipeline_exit,
+		.run = play_pipeline_run,
+		.stats = play_pipeline_stats,
+		.data = &play_pipeline_smp_config,
+	}
+
 };
 
 static void data_send_event(void *userData, uint8_t status)
@@ -116,26 +147,30 @@ static void data_send_event(void *userData, uint8_t status)
 	os_mq_send(mqueue, &e, OS_MQUEUE_FLAGS_ISR_CONTEXT, 0);
 }
 
-void audio_process_data(void *context)
+void audio_process_data(void *context, int thread_id)
 {
 	struct data_ctx *ctx = context;
 	struct event e;
 
-	if (!os_mq_receive(&ctx->mqueue, &e, 0, OS_QUEUE_EVENT_TIMEOUT_MAX)) {
+	if (!os_mq_receive(&ctx->thread_data_ctx[thread_id].mqueue, &e, 0, OS_QUEUE_EVENT_TIMEOUT_MAX)) {
 
-		os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		os_sem_take(&ctx->thread_data_ctx[thread_id].semaphore, 0, OS_SEM_TIMEOUT_MAX);
 
 		if (ctx->handler)
-			ctx->handler->run(ctx->handle, &e);
+			ctx->handler->run(ctx->thread_data_ctx[thread_id].handle, &e);
 
-		os_sem_give(&ctx->semaphore, 0);
+		os_sem_give(&ctx->thread_data_ctx[thread_id].semaphore, 0);
 	}
 }
 
 static void audio_stats(struct data_ctx *ctx)
 {
-	if (ctx->handler)
-		ctx->handler->stats(ctx->handle);
+	int i;
+
+	if (ctx->handler) {
+		for (i = 0; i < ctx->pipeline_count; i++)
+			ctx->handler->stats(ctx->thread_data_ctx[i].handle);
+	}
 }
 
 static void response(struct mailbox *m, uint32_t status)
@@ -151,7 +186,10 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 {
 	int rc = HRPN_RESP_STATUS_ERROR;
 	struct audio_config cfg;
+	struct play_pipeline_config *play_cfg;
 	struct event e;
+	uint8_t pipeline_count = 0;
+	int i;
 
 	if (ctx->handler)
 		goto exit;
@@ -159,23 +197,48 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	if (run->id >= ARRAY_SIZE(handler) || !handler[run->id].init)
 		goto exit;
 
+	play_cfg = handler[run->id].data;
+	/* Check the count of pipleline */
+	for (i = 0; i < ctx->thread_count; i++) {
+		if (play_cfg->cfg[i] == NULL)
+			break;
+		else
+			pipeline_count++;
+	}
+	os_assert(pipeline_count > 0, "At lease one pipleline should be provided.");
+
 	cfg.event_send = data_send_event;
-	cfg.event_data = &ctx->mqueue;
 	cfg.rate = run->frequency;
 	cfg.period = run->period;
-	cfg.data = handler[run->id].data;
 
-	ctx->handle = handler[run->id].init(&cfg);
-	if (!ctx->handle)
-		goto exit;
+	for (i = 0; i < pipeline_count; i++) {
+		cfg.event_data = &ctx->thread_data_ctx[i].mqueue;
+		cfg.data = (void *)play_cfg->cfg[i];
+		cfg.pipeline_id = i;
+		ctx->thread_data_ctx[i].handle = handler[run->id].init(&cfg);
+		if (!ctx->thread_data_ctx[i].handle)
+			goto exit;
+	}
+	/* Save slave pipeline handle in master pipleline's context */
+	for (i = 0; i < pipeline_count - 1; i++) {
+		ctx->thread_data_ctx[0].slave_handle[i] = ctx->thread_data_ctx[1 + i].handle;
+		update_master_pipeline(ctx->thread_data_ctx[0].handle, ctx->thread_data_ctx[1 + i].handle);
+	}
 
-	os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	for (i = 0; i < pipeline_count; i++) {
+		os_sem_take(&ctx->thread_data_ctx[i].semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	}
 	ctx->handler = &handler[run->id];
-	os_sem_give(&ctx->semaphore, 0);
+	ctx->pipeline_count = pipeline_count;
+	for (i = 0; i < pipeline_count; i++) {
+		os_sem_give(&ctx->thread_data_ctx[i].semaphore, 0);
+	}
 
 	/* Send an event to trigger data thread processing */
 	e.type = EVENT_TYPE_START;
-	os_mq_send(&ctx->mqueue, &e, 0, 0);
+	for (i = 0; i < pipeline_count; i++) {
+		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, 0, 0);
+	}
 
 	rc = HRPN_RESP_STATUS_SUCCESS;
 
@@ -186,16 +249,23 @@ exit:
 static int audio_stop(struct data_ctx *ctx)
 {
 	const struct mode_handler *handler;
+	int i;
 
 	if (!ctx->handler)
 		goto exit;
 
-	os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	for (i = 0; i < ctx->pipeline_count; i++) {
+		os_sem_take(&ctx->thread_data_ctx[i].semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	}
 	handler = ctx->handler;
 	ctx->handler = NULL;
-	os_sem_give(&ctx->semaphore, 0);
+	for (i = 0; i < ctx->pipeline_count; i++) {
+		os_sem_give(&ctx->thread_data_ctx[i].semaphore, 0);
+	}
 
-	handler->exit(ctx->handle);
+	for (i = 0; i < ctx->pipeline_count; i++) {
+		handler->exit(ctx->thread_data_ctx[i].handle);
+	}
 
 exit:
 	return HRPN_RESP_STATUS_SUCCESS;
@@ -206,7 +276,7 @@ static void audio_command_handler(struct data_ctx *ctx)
 	struct hrpn_command cmd;
 	struct mailbox *m = &ctx->mb;;
 	unsigned int len;
-	int rc;
+	int rc = 0;
 
 	len = sizeof(cmd);
 	if (mailbox_cmd_recv(m, &cmd, &len) < 0)
@@ -287,15 +357,17 @@ void audio_control_loop(void *context)
 	} while(1);
 }
 
-void *audio_control_init(void)
+void *audio_control_init(uint8_t thread_count)
 {
-	int err;
+	int err, i;
 	struct data_ctx *audio_ctx;
 	struct ivshmem *mem;
 
 	audio_ctx = os_malloc(sizeof(*audio_ctx));
 	os_assert(audio_ctx, "Audio context failed with memory allocation error");
 	memset(audio_ctx, 0, sizeof(*audio_ctx));
+
+	audio_ctx->thread_count = thread_count;
 
 	mem = &audio_ctx->mem;
 	err = ivshmem_init(0, mem);
@@ -305,11 +377,13 @@ void *audio_control_init(void)
 	mailbox_init(&audio_ctx->mb, mem->out[0], mem->out[mem->id], false);
 	os_assert(!err, "mailbox initialization failed!");
 
-	err = os_sem_init(&audio_ctx->semaphore, 1);
-	os_assert(!err, "semaphore initialization failed!");
+	for (i = 0; i < thread_count; i++) {
+		err = os_sem_init(&audio_ctx->thread_data_ctx[i].semaphore, 1);
+		os_assert(!err, "semaphore initialization failed!");
 
-	err = os_mq_open(&audio_ctx->mqueue, "audio_mqueue", 10, sizeof(struct event));
-	os_assert(!err, "message queue initialization failed!");
+		err = os_mq_open(&audio_ctx->thread_data_ctx[i].mqueue, "audio_mqueue", 10, sizeof(struct event));
+		os_assert(!err, "message queue initialization failed!");
+	}
 
 	return audio_ctx;
 }

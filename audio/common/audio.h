@@ -8,8 +8,10 @@
 #ifndef _AUDIO_H_
 #define _AUDIO_H_
 
+#define MAX_AUDIO_DATA_THREADS 2
+
 struct play_pipeline_config {
-	const struct audio_pipeline_config *cfg;
+	const struct audio_pipeline_config *cfg[MAX_AUDIO_DATA_THREADS];
 };
 
 struct audio_config {
@@ -20,6 +22,8 @@ struct audio_config {
 	void *event_data;
 
 	void *data;
+
+	uint8_t pipeline_id;
 };
 
 struct event {
@@ -37,12 +41,15 @@ int play_pipeline_run(void *handle, struct event *e);
 void play_pipeline_stats(void *handle);
 void play_pipeline_ctrl(void *handle);
 void play_pipeline_exit(void *handle);
+void update_master_pipeline(void *master_handle, void *slave_handle);
 
 extern const struct audio_pipeline_config pipeline_dtmf_config;
 extern const struct audio_pipeline_config pipeline_sine_config;
 extern const struct audio_pipeline_config pipeline_loopback_config;
 extern const struct audio_pipeline_config pipeline_full_config;
 extern const struct audio_pipeline_config pipeline_full_avb_config;
+extern const struct audio_pipeline_config pipeline_full_thread_0_config;
+extern const struct audio_pipeline_config pipeline_full_thread_1_config;
 
 /* assign_nonzero_valid_val(): Validate and assign nonzero value.
  * "value" == 0: "var" use default vale, return 0;

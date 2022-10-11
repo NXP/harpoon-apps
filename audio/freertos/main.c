@@ -19,6 +19,8 @@
 #define main_task_PRIORITY   (configMAX_PRIORITIES - 3)
 #define data_task_PRIORITY   (configMAX_PRIORITIES - 2)
 
+#define DATA_THREADS 1
+
 static void hardware_setup(void)
 {
 	BOARD_InitMemory();
@@ -35,7 +37,7 @@ static void hardware_setup(void)
 static void data_task(void *pvParameters)
 {
 	do {
-		audio_process_data(pvParameters);
+		audio_process_data(pvParameters, 0);
 	} while (1);
 }
 
@@ -46,7 +48,7 @@ void main_task(void *pvParameters)
 
 	log_info("Audio application started!\n");
 
-	context = audio_control_init();
+	context = audio_control_init(DATA_THREADS);
 	os_assert(context, "control initialization failed!");
 
 	xResult = xTaskCreate(data_task, "data_task",

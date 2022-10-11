@@ -75,6 +75,13 @@ struct pipeline_ctx {
 #if (CONFIG_GENAVB_ENABLE == 1)
 	struct avtp_avb_ctx avb;
 #endif
+
+	/* pipeline index, '0' for master pipeline */
+	uint8_t id;
+	/* Slave pipeline count, only valid for master pipeline */
+	uint8_t slave_count;
+	/* Slave pipeline ctx, only valid for master pipeline */
+	void *slave_ctx[MAX_AUDIO_DATA_THREADS - 1];
 };
 
 void play_pipeline_stats(void *handle)
@@ -90,6 +97,8 @@ void play_pipeline_stats(void *handle)
 static void rx_callback(uint8_t status, void *user_data)
 {
 	struct pipeline_ctx *ctx = (struct pipeline_ctx*)user_data;
+	struct pipeline_ctx *slave_ctx;
+	int i;
 
 #if USE_TX_IRQ
 	sai_disable_irq(&ctx->dev[0], false, true);
@@ -100,6 +109,14 @@ static void rx_callback(uint8_t status, void *user_data)
 	ctx->stats.callback++;
 
 	ctx->event_send(ctx->event_data, status);
+
+	/* Master slave need to notify slave pipelines */
+	if (ctx->id == 0) {
+		for (i = 0; i < ctx->slave_count; i++) {
+			slave_ctx = ctx->slave_ctx[i];
+			ctx->event_send(slave_ctx->event_data, status);
+		}
+	}
 }
 
 int play_pipeline_run(void *handle, struct event *e)
@@ -117,11 +134,13 @@ int play_pipeline_run(void *handle, struct event *e)
 		os_assert(!err, "pipeline couldn't restart");
 	}
 
+	if (ctx->id == 0) {
 #if USE_TX_IRQ
-	sai_enable_irq(&ctx->dev[0], false, true);
+		sai_enable_irq(&ctx->dev[0], false, true);
 #else
-	sai_enable_irq(&ctx->dev[0], true, false);
+		sai_enable_irq(&ctx->dev[0], true, false);
 #endif
+	}
 
 	return err;
 }
@@ -411,7 +430,6 @@ static void avb_close(struct pipeline_ctx *ctx)
 void *play_pipeline_init(void *parameters)
 {
 	struct audio_config *cfg = parameters;
-	struct play_pipeline_config *play_cfg = cfg->data;
 	struct audio_pipeline_config *pipeline_cfg;
 	struct pipeline_ctx *ctx;
 	size_t period = DEFAULT_PERIOD;
@@ -433,12 +451,13 @@ void *play_pipeline_init(void *parameters)
 
 	pipeline_cfg = (struct audio_pipeline_config *)(ctx + 1);
 
-	memcpy(pipeline_cfg, play_cfg->cfg, sizeof(struct audio_pipeline_config));
+	memcpy(pipeline_cfg, cfg->data, sizeof(struct audio_pipeline_config));
 
 	/* override pipeline configuration */
 	pipeline_cfg->sample_rate = rate;
 	pipeline_cfg->period = period;
 
+	ctx->id = cfg->pipeline_id;
 	ctx->pipeline = audio_pipeline_init(pipeline_cfg);
 	if (!ctx->pipeline)
 		goto err_init;
@@ -450,7 +469,9 @@ void *play_pipeline_init(void *parameters)
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
 
-	sai_setup(ctx);
+	/* Only the first pipeline need to setup SAI hardware */
+	if (!cfg->pipeline_id)
+		sai_setup(ctx);
 
 #if (CONFIG_GENAVB_ENABLE == 1)
 	avb_setup(ctx);
@@ -468,6 +489,14 @@ err:
 	return NULL;
 }
 
+void update_master_pipeline(void *master_handle, void *slave_handle)
+{
+	struct pipeline_ctx *master_ctx = master_handle;
+	uint8_t slave_index = master_ctx->slave_count;
+
+	master_ctx->slave_ctx[slave_index++] = slave_handle;
+}
+
 void play_pipeline_exit(void *handle)
 {
 	struct pipeline_ctx *ctx = handle;
@@ -479,10 +508,13 @@ void play_pipeline_exit(void *handle)
 	avb_close(ctx);
 #endif
 
-	sai_close(ctx);
+	/* Only the first pipeline need to close hardware */
+	if (!ctx->id) {
+		sai_close(ctx);
 
-	for (i = 0; i < sai_active_list_nelems; i++)
-		codec_close(sai_active_list[i].cid);
+		for (i = 0; i < sai_active_list_nelems; i++)
+			codec_close(sai_active_list[i].cid);
+	}
 
 	os_free(ctx);
 
