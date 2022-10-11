@@ -8,6 +8,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef MBOX_TRANSPORT_RPMSG
+#include "rpmsg.h"
+#endif
+
 #include "mailbox.h"
 
 
@@ -44,11 +48,16 @@ int mailbox_cmd_send(struct mailbox *mbox, void *data, unsigned int len)
 	c->len = len;
 	memcpy(c->data, data, len);
 
+#ifndef MBOX_TRANSPORT_RPMSG
 	mbox->last_cmd += 1;
 
 	__DSB();
 
 	c->seq = mbox->last_cmd;
+#else
+	if (rpmsg_send(mbox->transport, c, sizeof(*c)))
+		return -3;
+#endif
 
 	return 0;
 }
@@ -61,6 +70,10 @@ int mailbox_resp_recv(struct mailbox *mbox, void *data, unsigned int *len)
 	if (!mbox->dir)
 		return -1;
 
+#ifdef MBOX_TRANSPORT_RPMSG
+	if (rpmsg_recv(mbox->transport, r, sizeof(*r)))
+		return -3;
+#else
 	/* check if new response */
 	if (r->seq == mbox->last_resp)
 		return -1;
@@ -72,6 +85,7 @@ int mailbox_resp_recv(struct mailbox *mbox, void *data, unsigned int *len)
 	/* check if it matches command */
 	if (r->seq != mbox->last_cmd)
 		return -2;
+#endif
 
 	resp_len = r->len;
 
@@ -92,6 +106,10 @@ int mailbox_cmd_recv(struct mailbox *mbox, void *data, unsigned int *len)
 	if (mbox->dir)
 		return -1;
 
+#ifdef MBOX_TRANSPORT_RPMSG
+	if (rpmsg_recv(mbox->transport, c, sizeof(*c)))
+		return -3;
+#else
 	/* check if new command */
 	if (c->seq == mbox->last_cmd)
 		return -1;
@@ -99,6 +117,7 @@ int mailbox_cmd_recv(struct mailbox *mbox, void *data, unsigned int *len)
 	mbox->last_cmd = c->seq;
 
 	__DSB();
+#endif
 
 	cmd_len = c->len;
 
@@ -124,9 +143,14 @@ int mailbox_resp_send(struct mailbox *mbox, void *data, unsigned int len)
 	r->len = len;
 	memcpy(r->data, data, len);
 
+#ifndef MBOX_TRANSPORT_RPMSG
 	__DSB();
 
 	r->seq = mbox->last_cmd;
+#else
+	if (rpmsg_send(mbox->transport, r, sizeof(*r)))
+		return -3;
+#endif
 
 	return 0;
 }
