@@ -233,7 +233,7 @@ int dtmf_element_check_config(struct audio_element_config *config)
 		goto err;
 	}
 
-	if ((config->u.sine.amplitude <= 0.0) || (config->u.sine.amplitude > 1.0)) {
+	if ((config->u.dtmf.amplitude <= 0.0) || (config->u.dtmf.amplitude > 1.0)) {
 		log_err("dtmf: invalid amplitude: %f\n", config->u.dtmf.amplitude);
 		goto err;
 	}
