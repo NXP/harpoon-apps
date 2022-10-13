@@ -32,7 +32,7 @@ struct resp {
 /* Command Sender */
 int mailbox_cmd_send(struct mailbox *mbox, void *data, unsigned int len)
 {
-	struct cmd *cmd = mbox->cmd;
+	struct cmd *c = mbox->cmd;
 
 	if (!mbox->dir)
 		return -1;
@@ -41,14 +41,14 @@ int mailbox_cmd_send(struct mailbox *mbox, void *data, unsigned int len)
 		return -1;
 
 	/* write new command */
-	cmd->len = len;
-	memcpy(cmd->data, data, len);
+	c->len = len;
+	memcpy(c->data, data, len);
 
 	mbox->last_cmd += 1;
 
 	__DSB();
 
-	cmd->seq = mbox->last_cmd;
+	c->seq = mbox->last_cmd;
 
 	return 0;
 }
