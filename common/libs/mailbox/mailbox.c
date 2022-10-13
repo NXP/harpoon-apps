@@ -13,10 +13,9 @@
 
 #define MAX_PAYLOAD	255
 
-static inline void __DSB(void)
-{
-	__asm volatile ("dsb sy");
-}
+#ifndef __DSB
+#define __DSB()	__asm volatile ("dsb sy")
+#endif
 
 struct cmd {
 	volatile uint32_t seq;
