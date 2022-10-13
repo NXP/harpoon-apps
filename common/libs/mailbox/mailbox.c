@@ -131,11 +131,12 @@ int mailbox_resp_send(struct mailbox *mbox, void *data, unsigned int len)
 	return 0;
 }
 
-int mailbox_init(struct mailbox *mbox, void *cmd, void *resp, bool dir)
+int mailbox_init(struct mailbox *mbox, void *cmd, void *resp, bool dir, void *tp)
 {
 	struct resp *r;
 	struct cmd *c;
 
+	mbox->transport = tp;
 	mbox->dir = dir;
 	mbox->cmd = cmd;
 	mbox->resp = resp;

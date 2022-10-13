@@ -223,6 +223,7 @@ int main(int argc, char *argv[])
 	unsigned int uio_id = 0;
 	int i;
 	int rc = 0;
+	void *tp = NULL;
 
 	if (argc < 2) {
 		usage();
@@ -232,7 +233,7 @@ int main(int argc, char *argv[])
 	if (ivshmem_init(&mem, uio_id) < 0)
 		goto err_ivshmem;
 
-	if (mailbox_init(&m, mem.out, mem.in + 2 * 4096, true) < 0)
+	if (mailbox_init(&m, mem.out, mem.in + 2 * 4096, true, tp) < 0)
 		goto err_mailbox;
 
 	for (i = 0; i < sizeof(command_handler) / sizeof(struct cmd_handler); i++)

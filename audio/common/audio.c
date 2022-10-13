@@ -417,6 +417,7 @@ void *audio_control_init(uint8_t thread_count)
 	int err, i;
 	struct data_ctx *audio_ctx;
 	struct ivshmem *mem;
+	void *tp = NULL;
 
 	audio_ctx = os_malloc(sizeof(*audio_ctx));
 	os_assert(audio_ctx, "Audio context failed with memory allocation error");
@@ -429,7 +430,7 @@ void *audio_control_init(uint8_t thread_count)
 	os_assert(!err, "ivshmem initialization failed, cannot proceed\n");
 	os_assert(mem->out_size, "ivshmem mis-configuration, cannot proceed\n");
 
-	mailbox_init(&audio_ctx->mb, mem->out[0], mem->out[mem->id], false);
+	mailbox_init(&audio_ctx->mb, mem->out[0], mem->out[mem->id], false, tp);
 	os_assert(!err, "mailbox initialization failed!");
 
 	for (i = 0; i < thread_count; i++) {

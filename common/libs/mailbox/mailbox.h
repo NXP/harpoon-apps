@@ -15,6 +15,7 @@ struct mailbox {
 	unsigned int last_resp;
 	void *cmd;
 	void *resp;
+	void *transport;
 };
 
 int mailbox_cmd_send(struct mailbox *mbox, void *data, unsigned int len);
@@ -22,6 +23,6 @@ int mailbox_cmd_recv(struct mailbox *mbox, void *data, unsigned int *len);
 int mailbox_resp_send(struct mailbox *mbox, void *data, unsigned int len);
 int mailbox_resp_recv(struct mailbox *mbox, void *data, unsigned int *len);
 
-int mailbox_init(struct mailbox *mbox, void *cmd, void *resp, bool dir);
+int mailbox_init(struct mailbox *mbox, void *cmd, void *resp, bool dir, void *tp);
 
 #endif /* _MAILBOX_H_ */
