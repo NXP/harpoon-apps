@@ -21,6 +21,12 @@
 
 #include "audio_pipeline.h"
 
+#ifdef MBOX_TRANSPORT_RPMSG
+#include "rpmsg.h"
+
+#define EPT_ADDR (30)
+#endif
+
 struct mode_handler {
 	void *(*init)(void *);
 	void (*exit)(void *);
@@ -412,12 +418,57 @@ void audio_control_loop(void *context)
 	} while(1);
 }
 
+#ifdef MBOX_TRANSPORT_RPMSG
+static int rpmsg_transport_init(int link_id, int ept_addr, const char *sn,
+				void **tp, void **cmd, void **resp)
+{
+	struct rpmsg_instance *ri;
+	struct rpmsg_ept *ept;
+
+	ri = rpmsg_init(link_id);
+	os_assert(ri, "rpmsg initialization failed, cannot proceed\n");
+	ept = rpmsg_create_ept(ri, ept_addr, sn);
+	os_assert(ept, "rpmsg ept creation failed, cannot proceed\n");
+	*tp = ept;
+	*cmd = os_malloc(1024);
+	os_assert(*cmd, "malloc mailbox memory faild, cannot proceed\n");
+	*resp = *cmd + 512;
+	memset(*cmd, 0, 1024);
+
+	return 0;
+}
+
+#else
+
+static int ivshmem_transport_init(unsigned int bdf, struct ivshmem *mem,
+				  void **tp, void **cmd, void **resp)
+{
+	int rc;
+
+	if (!mem) {
+		mem = os_malloc(sizeof(*mem));
+		os_assert(mem, "malloc for ivshmem struct faild, cannot proceed\n");
+	}
+
+	rc = ivshmem_init(bdf, mem);
+	os_assert(!rc, "ivshmem initialization failed, can not proceed\n");
+
+	os_assert(mem->out_size, "ivshmem mis-configuration, can not proceed\n");
+
+	*cmd = mem->out[0];
+	*resp = mem->out[mem->id];
+	*tp = NULL;
+
+	return 0;
+}
+#endif
+
 void *audio_control_init(uint8_t thread_count)
 {
 	int err, i;
 	struct data_ctx *audio_ctx;
-	struct ivshmem *mem;
 	void *tp = NULL;
+	void *cmd, *resp;
 
 	audio_ctx = os_malloc(sizeof(*audio_ctx));
 	os_assert(audio_ctx, "Audio context failed with memory allocation error");
@@ -425,12 +476,16 @@ void *audio_control_init(uint8_t thread_count)
 
 	audio_ctx->thread_count = thread_count;
 
-	mem = &audio_ctx->mem;
-	err = ivshmem_init(0, mem);
-	os_assert(!err, "ivshmem initialization failed, cannot proceed\n");
-	os_assert(mem->out_size, "ivshmem mis-configuration, cannot proceed\n");
+#ifdef MBOX_TRANSPORT_RPMSG
+	err = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw",
+				   &tp, &cmd, &resp);
+	os_assert(!err, "rpmsg transport initialization failed, cannot proceed\n");
+#else /* IVSHMEM */
+	err = ivshmem_transport_init(0, &audio_ctx->mem, &tp, &cmd, &resp);
+	os_assert(!err, "ivshmem transport initialization failed, cannot proceed\n");
+#endif
 
-	err = mailbox_init(&audio_ctx->mb, mem->out[0], mem->out[mem->id], false, tp);
+	err = mailbox_init(&audio_ctx->mb, cmd, resp, false, tp);
 	os_assert(!err, "mailbox initialization failed!");
 
 	for (i = 0; i < thread_count; i++) {
