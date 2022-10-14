@@ -19,6 +19,12 @@
 
 #include "industrial.h"
 
+#ifdef MBOX_TRANSPORT_RPMSG
+#include "rpmsg.h"
+
+#define EPT_ADDR (30)
+#endif
+
 extern const struct industrial_use_case use_cases[];
 
 void *industrial_get_data_ctx(struct industrial_ctx *ctx, int use_case_id)
@@ -231,18 +237,66 @@ static int data_ctx_init(struct data_ctx *data)
 	return err;
 }
 
+#ifdef MBOX_TRANSPORT_RPMSG
+static int rpmsg_transport_init(int link_id, int ept_addr, const char *sn,
+				void **tp, void **cmd, void **resp)
+{
+	struct rpmsg_instance *ri;
+	struct rpmsg_ept *ept;
+
+	ri = rpmsg_init(link_id);
+	os_assert(ri, "rpmsg initialization failed, cannot proceed\n");
+	ept = rpmsg_create_ept(ri, ept_addr, sn);
+	os_assert(ept, "rpmsg ept creation failed, cannot proceed\n");
+	*tp = ept;
+	*cmd = os_malloc(1024);
+	os_assert(*cmd, "malloc mailbox memory faild, cannot proceed\n");
+	*resp = *cmd + 512;
+	memset(*cmd, 0, 1024);
+
+	return 0;
+}
+
+#else
+
+static int ivshmem_transport_init(unsigned int bdf, struct ivshmem *mem,
+				  void **tp, void **cmd, void **resp)
+{
+	int rc;
+
+	if (!mem) {
+		mem = os_malloc(sizeof(*mem));
+		os_assert(mem, "malloc for ivshmem struct faild, cannot proceed\n");
+	}
+
+	rc = ivshmem_init(bdf, mem);
+	os_assert(!rc, "ivshmem initialization failed, can not proceed\n");
+
+	os_assert(mem->out_size, "ivshmem mis-configuration, can not proceed\n");
+
+	*cmd = mem->out[0];
+	*resp = mem->out[mem->id];
+	*tp = NULL;
+
+	return 0;
+}
+#endif
+
 static int ctrl_ctx_init(struct ctrl_ctx *ctrl)
 {
 	int err;
-	struct ivshmem *mem;
 	void *tp = NULL;
+	void *cmd, *resp;
 
-	mem = &ctrl->mem;
-	err = ivshmem_init(0, mem);
-	os_assert(!err, "ivshmem initialization failed, cannot proceed\n");
-	os_assert(mem->out_size, "ivshmem mis-configuration, cannot proceed\n");
-
-	err = mailbox_init(&ctrl->mb, mem->out[0], mem->out[mem->id], false, tp);
+#ifdef MBOX_TRANSPORT_RPMSG
+	err = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw",
+				   &tp, &cmd, &resp);
+	os_assert(!err, "rpmsg transport initialization failed, cannot proceed\n");
+#else /* IVSHMEM */
+	err = ivshmem_transport_init(0, &ctrl->mem, &tp, &cmd, &resp);
+	os_assert(!err, "ivshmem transport initialization failed, cannot proceed\n");
+#endif
+	err = mailbox_init(&ctrl->mb, cmd, resp, false, tp);
 	os_assert(!err, "mailbox initialization failed!");
 
 	return err;
