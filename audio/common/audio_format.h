@@ -6,6 +6,8 @@
 #ifndef _AUDIO_FORMAT_H_
 #define _AUDIO_FORMAT_H_
 
+#include "cmsis_compiler.h"
+
 /* Audio samples in double floating point format, and [-1.0, 1.0] range.
  * If the format is changed, most of the functions below need to be adjusted.
  * Using a format with less than 32bit (default hardware fifo width) would
@@ -35,7 +37,8 @@ static inline audio_sample_t audio_double_to_sample(double v)
 
 static inline void audio_invert_int32(int32_t *val)
 {
-	/* FIXME */
+	/* 0x12345678 -> 0x78563412 */
+	*val = __REV(*val);
 }
 
 /*
