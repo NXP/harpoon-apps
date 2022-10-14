@@ -9,6 +9,15 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.1.1)
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
+# Select RPMSG as mailbox transport layer
+if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
+    add_compile_definitions(MBOX_TRANSPORT_RPMSG)
+    # config to select component, the format is CONFIG_USE_${component}
+    set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
+    set(CONFIG_USE_middleware_freertos-kernel_MIMX8MM6 true)
+
+endif()
+
 # ENABLE DRIVER CACHE CONTROL
 ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
 
@@ -34,6 +43,9 @@ SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX8MM6")
+if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
+    SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
+endif()
 
 SET(GenAVBPath "${ProjDirPath}/../../../../../../gen_avb_sdk")
 SET(GenAVBBuildPath "${CMAKE_CURRENT_BINARY_DIR}/gen_avb_build")
@@ -53,7 +65,13 @@ add_compile_options(-DBUILD_MOTOR=0)
 
 project(industrial)
 
-set(MCUX_SDK_PROJECT_NAME industrial.elf)
+if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
+    set(BIN_NAME industrial_rpmsg)
+else()
+    set(BIN_NAME industrial)
+endif()
+
+set(MCUX_SDK_PROJECT_NAME ${BIN_NAME}.elf)
 
 include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
@@ -104,6 +122,8 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/stats
+    ${CommonPath}/libs/rpmsg
+    ${MulticorePath}
     ${RtosPath}
     ${SdkDirPath}
 )
@@ -155,6 +175,13 @@ include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
 include(middleware_freertos-kernel_ca53)
 
+if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
+    include(lib_rpmsg)
+    include(middleware_multicore_rpmsg_lite_imx8mm_ca53_freertos)
+    include(middleware_multicore_rpmsg_lite_MIMX8MM6)
+    include(middleware_multicore_rpmsg_lite_freertos)
+endif()
+
 include(utility_assert)
 include(utility_debug_console)
 include(utilities_misc_utilities)
@@ -178,4 +205,4 @@ target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE nosys)
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)
 
 ADD_CUSTOM_COMMAND(TARGET ${MCUX_SDK_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY}
--Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/industrial.bin)
+-Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/${BIN_NAME}.bin)
