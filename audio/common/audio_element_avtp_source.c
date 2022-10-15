@@ -40,6 +40,9 @@ struct avtp_stream {
 	unsigned int overflow;
 	unsigned int received;
 
+	unsigned int count;		/* small logic that avoid reading */
+	unsigned int until;		/* data when stream in underflow. */
+
 	bool convert;
 	bool invert;			/* format conversion */
 	unsigned int shift;		/* format conversion */
@@ -136,6 +139,9 @@ static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int s
 	}
 	log_info("  batch size: %u\n", cur_batch_size);
 
+	stream->count = 0;
+	stream->until = 1;
+
 	os_sem_take(&avtp->semaphore, 0, OS_SEM_TIMEOUT_MAX);
 	stream->connected = 1;
 	os_sem_give(&avtp->semaphore, 0);
@@ -231,23 +237,38 @@ err:
 	return -1;
 }
 
-static void listener_receive(struct avtp_source_element *avtp, unsigned int stream_index, unsigned int period)
+static int listener_receive(struct avtp_source_element *avtp, unsigned int stream_index, unsigned int period)
 {
 	struct avtp_stream *stream = &avtp->stream[stream_index];
 	int i, j, k;
 	int read_bytes = 0;
 #define PERIOD_MAX	32 /* TODO - use genavbstream_listener_receive() directly */
 	uint32_t data[AVTP_RX_CHANNEL_N * PERIOD_MAX];
+	int ret = -1;
+
+	if (stream->count < stream->until) {
+		/* tempo to accumulate enough data on the AVB network */
+		stream->count++;
+
+		goto exit;
+	}
 
 	read_bytes = genavb_stream_receive(stream->handle, &data, stream->cur_batch_size, NULL, NULL);
 
 	if (read_bytes < 0) {
 		stream->err++;
+		stream->count = 0;
+
+		goto exit;
+
 	} else if (read_bytes < stream->cur_batch_size) {
 		stream->underflow++;
-	} else {
-		stream->received++;
+		stream->count = 0;
+
+		goto exit;
 	}
+
+	stream->received++;
 
 	k = 0;
 	for (j = 0; j < period; j++) {
@@ -262,6 +283,11 @@ static void listener_receive(struct avtp_source_element *avtp, unsigned int stre
 		for (i = 0; i < avtp_source_channel_n(); i++)
 			audio_convert_from(audio_buf_write_addr(stream->channel_buf[i], 0), period, stream->invert, stream->mask, stream->shift);
 	}
+
+	ret = 0;
+
+exit:
+	return ret;
 }
 
 static int avtp_source_element_run(struct audio_element *element)
