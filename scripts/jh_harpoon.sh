@@ -12,6 +12,9 @@ function usage ()
 
 function start ()
 {
+    echo 'modprobe -r virtio_rpmsg_bus'
+    modprobe -r virtio_rpmsg_bus
+
     echo 'modprobe jailhouse'
     modprobe jailhouse
 
@@ -26,6 +29,9 @@ function start ()
 
     echo 'Starting inmate cell'
     jailhouse cell start "${INMATE_NAME}"
+
+    echo 'modprobe virtio_rpmsg_bus'
+    modprobe virtio_rpmsg_bus
 }
 
 function stop ()
