@@ -113,18 +113,10 @@
 #define BOARD_NET_TX_CACHEABLE
 #define BOARD_NET_RX_CACHEABLE
 
+#define BOARD_NUM_GPT                            1
+
 #define BOARD_GPT_0_BASE                         GPT2
 #define BOARD_GPT_0_IRQ                          GPT2_IRQn
-
-#define BOARD_GPT_1_BASE                         GPT1
-#define BOARD_GPT_1_IRQ                          GPT1_IRQn
-
-#define BOARD_GPT_1_CHANNEL                      kGPT_InputCapture_Channel2
-#define BOARD_GPT_1_INTERRUPT_MASK               kGPT_InputCapture2InterruptEnable
-#define BOARD_GPT_1_STATUS_FLAG_MASK             kGPT_InputCapture2Flag
-
-#define BOARD_GPT_1_CLK_EXT_FREQ                 24000000U
-#define BOARD_GPT_1_CLK_SOURCE_TYPE              kGPT_ClockSource_Periph
 
 unsigned int BOARD_GPT_clk_src(void *base);
 unsigned int BOARD_GPT_clk_freq(void *base);

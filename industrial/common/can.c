@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "app_board.h"
 #include "hardware_flexcan.h"
 #include "hlog.h"
 #include "industrial.h"
 #include "fsl_flexcan.h"
-#include "app_board.h"
 
 #include "os/irq.h"
 #include "os/stdlib.h"
