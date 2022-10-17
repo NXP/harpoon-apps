@@ -2,7 +2,8 @@
 
 function usage ()
 {
-	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | audio_smp | avb | industrial | latency>"
+	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | audio_smp | avb | industrial | latency> [rpmsg]"
+	echo "rpmsg: this option is only available for freertos on evkimx8mm"
 }
 
 function detect_machine ()
@@ -21,7 +22,14 @@ function detect_machine ()
 
 CONF_FILE=/etc/harpoon/harpoon.conf
 
-if [ ! $# -eq 2 ]; then
+RPMSG=""
+if [ $# -eq 3 ]; then
+	RPMSG="_$3"
+	if [[ "${RPMSG}" != "_rpmsg" ]]; then
+		usage
+		exit 5
+	fi
+elif [ ! $# -eq 2 ]; then
 	usage
 	exit 1
 fi
@@ -39,11 +47,18 @@ if [ -z $SOC ]; then
 	exit 3
 fi
 
+if [[ "$RPMSG" == "_rpmsg" ]]; then
+	if [[ "$SOC" != "imx8mm" || "$RTOS" != "freertos"  ]]; then
+		usage
+		exit 7
+	fi
+fi
+
 if [ "$2" == "audio" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
 	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-audio.cell
-	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio.bin
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio${RPMSG}.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
 	EOF
@@ -75,7 +90,7 @@ elif [ "$2" == "industrial" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
 	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-industrial.cell
-	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/industrial.bin
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/industrial${RPMSG}.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
 	EOF
@@ -83,7 +98,7 @@ elif [ "$2" == "latency" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
 	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}.cell
-	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/rt_latency.bin
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/rt_latency${RPMSG}.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
 	EOF
