@@ -200,7 +200,6 @@ int routing_element_init(struct audio_element *element, struct audio_element_con
 {
 	struct routing_element *routing = element->data;
 	audio_sample_t *silence_storage;
-	audio_sample_t val;
 	int i;
 
 	if (os_sem_init(&routing->semaphore, 1))
@@ -232,9 +231,7 @@ int routing_element_init(struct audio_element *element, struct audio_element_con
 
 	audio_buf_init(&routing->silence, silence_storage, element->period);
 
-	val = AUDIO_SAMPLE_SILENCE;
-	for (i = 0; i < element->period; i++)
-		audio_buf_write(&routing->silence, &val, 1);
+	audio_buf_write_silence(&routing->silence, element->period);
 
 	routing_element_dump(element);
 

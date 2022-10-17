@@ -95,6 +95,17 @@ void audio_buf_write_head(struct audio_buffer *buf, audio_sample_t *samples, uns
 	}
 }
 
+void audio_buf_write_silence(struct audio_buffer *buf, unsigned int len)
+{
+	audio_sample_t silence = AUDIO_SAMPLE_SILENCE;
+	int i;
+
+	for (i = 0; i < len; i++)
+		__audio_buf_write(buf, i, &silence, 1);
+
+	audio_buf_write_update(buf, len);
+}
+
 void audio_buf_read(struct audio_buffer *buf, audio_sample_t *samples, unsigned int len)
 {
 	int i;

@@ -39,6 +39,7 @@ bool audio_buf_full(struct audio_buffer *buf);
 bool audio_buf_empty(struct audio_buffer *buf);
 void audio_buf_write(struct audio_buffer *buf, audio_sample_t *samples, unsigned int len);
 void audio_buf_write_head(struct audio_buffer *buf, audio_sample_t *samples, unsigned int len);
+void audio_buf_write_silence(struct audio_buffer *buf, unsigned int len);
 void audio_buf_read(struct audio_buffer *buf, audio_sample_t *samples, unsigned int len);
 void audio_buf_dump(struct audio_buffer *buf);
 

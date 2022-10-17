@@ -143,15 +143,9 @@ static int sai_source_element_run(struct audio_element *element)
 		}
 
 	} else {
-		audio_sample_t val = AUDIO_SAMPLE_SILENCE;
-
 		/* Fill output buffer with silence */
-		for (i = 0; i < sai->out_n; i++) {
-			for (j = 0; j < element->period; j++)
-				__audio_buf_write(sai->out[i].buf, j, &val, 1);
-
-			audio_buf_write_update(sai->out[i].buf, element->period);
-		}
+		for (i = 0; i < sai->out_n; i++)
+			audio_buf_write_silence(sai->out[i].buf, element->period);
 
 		for (i = 0; i < sai->sai_n; i++)
 			__sai_enable_rx(sai->base[i], false);

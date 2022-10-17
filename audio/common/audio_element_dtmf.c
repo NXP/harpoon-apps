@@ -62,13 +62,7 @@ static void dtmf_generate_sinewave(struct dtmf_element *dtmf, unsigned int sampl
 
 static void dtmf_generate_silence(struct dtmf_element *dtmf, unsigned int samples)
 {
-	int i;
-	audio_sample_t silence = AUDIO_SAMPLE_SILENCE;
-
-	for (i = 0; i < samples; i++)
-		__audio_buf_write(dtmf->out, i, &silence, 1);
-
-	audio_buf_write_update(dtmf->out, samples);
+	audio_buf_write_silence(dtmf->out, samples);
 
 	dtmf->phase += samples;
 }
