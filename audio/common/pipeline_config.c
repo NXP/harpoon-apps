@@ -705,6 +705,12 @@ const struct audio_pipeline_config pipeline_full_thread_0_config = {
 
 	.buffers = 12,
 
+	.buffer = {
+		[8] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 0},
+		[9] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 1},
+		[10] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 2},
+		[11] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 3},
+	},
 	.buffer_storage = 12,
 };
 
@@ -761,5 +767,12 @@ const struct audio_pipeline_config pipeline_full_thread_1_config = {
 
 	.buffers = 4,
 
-	.buffer_storage = 4,
+	.buffer = {
+		[0] = { .flags = AUDIO_BUFFER_FLAG_SHARED_USER, .shared_id = 0},
+		[1] = { .flags = AUDIO_BUFFER_FLAG_SHARED_USER, .shared_id = 1},
+		[2] = { .flags = AUDIO_BUFFER_FLAG_SHARED_USER, .shared_id = 2},
+		[3] = { .flags = AUDIO_BUFFER_FLAG_SHARED_USER, .shared_id = 3},
+	},
+
+	.buffer_storage = 0,
 };

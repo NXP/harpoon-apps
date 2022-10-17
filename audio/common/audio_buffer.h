@@ -13,12 +13,14 @@
 
 #include "audio_format.h"
 
-#define	AUDIO_BUFFER_FLAG_SILENCE	(1 << 0)
+#define AUDIO_BUFFER_FLAG_SHARED	(1 << 0)
+#define AUDIO_BUFFER_FLAG_SHARED_USER	(1 << 1)
 
 /* Configuration */
 struct audio_buffer_config {
 	unsigned int storage;	/* storage array index */
 	unsigned int flags;
+	unsigned int shared_id;
 };
 
 struct audio_buffer_storage_config {
@@ -34,9 +36,12 @@ struct audio_buffer {
 	unsigned int size;	/* in units of samples */
 	unsigned int size_mask;
 	unsigned int silence;	/* in units of samples */
+	unsigned int flags;
+	unsigned int shared_id;
 };
 
-void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size, unsigned int silence);
+void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size,
+		unsigned int silence, unsigned int flags, unsigned int shared_id);
 unsigned int audio_buf_avail(struct audio_buffer *buf);
 unsigned int audio_buf_free(struct audio_buffer *buf);
 bool audio_buf_full(struct audio_buffer *buf);

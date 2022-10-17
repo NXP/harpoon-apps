@@ -75,6 +75,26 @@ static struct audio_element *audio_pipeline_element_find(struct audio_pipeline *
 	return NULL;
 }
 
+static struct audio_buffer *audio_pipeline_shared_buffer_find(unsigned shared_id)
+{
+	struct audio_pipeline *pipeline;
+	struct audio_buffer *buffer;
+	int i, j;
+
+	for (i = 0; i < MAX_PIPELINES; i++) {
+		pipeline  = audio_pipeline_table_find(i);
+		if (pipeline == NULL)
+			break;
+		for ( j = 0; j < pipeline->buffers; j++) {
+			buffer = &pipeline->buffer[j];
+			if ((buffer->flags & AUDIO_BUFFER_FLAG_SHARED) && (buffer->shared_id == shared_id))
+				return buffer;
+		}
+	}
+
+	return NULL;
+}
+
 static void audio_pipeline_response(struct mailbox *m, uint32_t status)
 {
 	struct hrpn_resp_audio_pipeline resp;
@@ -221,7 +241,7 @@ static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 
 	/* Check all buffers reference valid storage */
 	for (i = 0; i < config->buffers; i++) {
-		if (config->buffer[i].storage >= config->buffer_storage) {
+		if (config->buffer[i].storage >= config->buffer_storage && !(config->buffer[i].flags & AUDIO_BUFFER_FLAG_SHARED_USER)) {
 				log_err("buffer(%u) references invalid storage(%u)\n", i, config->buffer[i].storage);
 				goto err;
 		}
@@ -448,6 +468,7 @@ static void audio_pipeline_free(struct audio_pipeline *pipeline)
 static void audio_pipeline_buffer_init(struct audio_pipeline *pipeline, struct audio_pipeline_config *config)
 {
 	uint8_t *stage_base, *element_base, *element_data_base, *buffer_base, *buffer_storage_base;
+	struct audio_buffer *buffer;
 	unsigned int storage_id;
 	audio_sample_t *base;
 	unsigned int size;
@@ -461,17 +482,28 @@ static void audio_pipeline_buffer_init(struct audio_pipeline *pipeline, struct a
 	buffer_storage_base = ((uint8_t *)buffer_base + audio_buffer_size(config));
 
 	pipeline->buffer = (struct audio_buffer *)buffer_base;
+	pipeline->buffers = config->buffers;
 
 	for (i = 0; i < config->buffers; i++) {
-		storage_id = config->buffer[i].storage;
+		if (config->buffer[i].flags & AUDIO_BUFFER_FLAG_SHARED_USER) {
+			buffer = audio_pipeline_shared_buffer_find(config->buffer[i].shared_id);
+			if (buffer == NULL)
+				log_err("Can't find shared buffer");
+			else
+				audio_buf_init(&pipeline->buffer[i], buffer->base, buffer->size, 0,
+						config->buffer[i].flags, config->buffer[i].shared_id);
+		} else {
+			storage_id = config->buffer[i].storage;
 
-		base = (audio_sample_t *)buffer_storage_base + audio_buffer_storage_off(config, storage_id);
-		size = config->storage[storage_id].periods * config->period;
+			base = (audio_sample_t *)buffer_storage_base + audio_buffer_storage_off(config, storage_id);
+			size = config->storage[storage_id].periods * config->period;
 
-		if (config->buffer[i].flags & AUDIO_BUFFER_FLAG_SILENCE)
-			audio_buf_init(&pipeline->buffer[i], base, size, config->period);
-		else
-			audio_buf_init(&pipeline->buffer[i], base, size, 0);
+			if (config->buffer[i].flags & AUDIO_BUFFER_FLAG_SHARED)
+				audio_buf_init(&pipeline->buffer[i], base, size, config->period,
+						config->buffer[i].flags, config->buffer[i].shared_id);
+			else
+				audio_buf_init(&pipeline->buffer[i], base, size, 0, 0, 0);
+		}
 	}
 }
 
@@ -579,10 +611,16 @@ static void audio_pipeline_set_config(struct audio_pipeline_config *config)
 		}
 	}
 
-	/* Use 0, for default storage id (same as buffer id) */
-	for (i = 0; i < config->buffers; i++)
-		if (!config->buffer[i].storage)
-			config->buffer[i].storage = i;
+	/* Use 0, for default storage id (same as next free storage id) */
+	j = 0;
+	for (i = 0; i < config->buffers; i++) {
+		if (!config->buffer[i].storage) {
+			if ((config->buffer[i].flags & AUDIO_BUFFER_FLAG_SHARED_USER))
+				config->buffer[i].storage = config->buffer[i].shared_id;
+			else
+				config->buffer[i].storage = j++;
+		}
+	}
 
 	/* Use 0, for default storage size */
 	for (i = 0; i < config->buffer_storage; i++)

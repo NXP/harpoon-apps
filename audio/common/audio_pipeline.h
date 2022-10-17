@@ -26,6 +26,7 @@ struct audio_pipeline_stage_config {
 
 struct audio_pipeline_config {
 	char *name;
+	uint8_t id;
 
 	unsigned int period;
 
@@ -68,6 +69,7 @@ struct audio_pipeline_stage {
 
 struct audio_pipeline {
 	unsigned int stages;
+	unsigned int buffers;
 
 	struct audio_pipeline_stage *stage;
 

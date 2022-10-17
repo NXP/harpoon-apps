@@ -29,17 +29,21 @@
 */
 void audio_buf_dump(struct audio_buffer *buf)
 {
-	log_info("buf(%p): base %p, size %x/%x, read %x, write %x\n",
-		  buf, buf->base, buf->size, buf->size_mask, buf->read, buf->write);
+	log_info("buf(%p): base %p, size %x/%x, read %x, write %x, flags %d, shared_id %d\n",
+		  buf, buf->base, buf->size, buf->size_mask, buf->read, buf->write,
+		  buf->flags, buf->shared_id);
 }
 
-void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size, unsigned int silence)
+void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size,
+		unsigned int silence, unsigned int flags, unsigned int shared_id)
 {
 	buf->base = base;
 	buf->size = size;
 	buf->read = 0;
 	buf->write = 0;
 	buf->silence = silence;
+	buf->flags = flags;
+	buf->shared_id = shared_id;
 
 	buf->size_mask = 0;
 	while ((size >>= 1))

@@ -36,14 +36,12 @@ struct data_ctx {
 	uint8_t thread_count;
 	uint8_t pipeline_count;
 
-	/* The first thead is used for master pipeline, others for slave pipeline */
+	/* The first thead is used for parent pipeline, others for child pipeline */
 	struct thread_data_ctx_t {
 		os_sem_t semaphore;
 		os_mqd_t mqueue;
 		/* pipeline_ctx handle for current thread */
 		void *handle;
-		/* slave pipeline ctx handles to be used by master pipeline */
-		void *slave_handle[MAX_AUDIO_DATA_THREADS - 1];
 	} thread_data_ctx[MAX_AUDIO_DATA_THREADS];
 
 	const struct mode_handler *handler;
@@ -138,13 +136,15 @@ const static struct mode_handler handler[] =
 
 static void data_send_event(void *userData, uint8_t status)
 {
-	os_mqd_t *mqueue = userData;
+	struct data_ctx *ctx = userData;
 	struct event e;
+	int i;
 
 	e.type = EVENT_TYPE_TX_RX;
 	e.data = status;
 
-	os_mq_send(mqueue, &e, OS_MQUEUE_FLAGS_ISR_CONTEXT, 0);
+	for (i = 0; i < ctx->pipeline_count; i++)
+		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, OS_MQUEUE_FLAGS_ISR_CONTEXT, 0);
 }
 
 void audio_process_data(void *context, int thread_id)
@@ -212,17 +212,12 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	cfg.period = run->period;
 
 	for (i = 0; i < pipeline_count; i++) {
-		cfg.event_data = &ctx->thread_data_ctx[i].mqueue;
+		cfg.event_data = ctx;
 		cfg.data = (void *)play_cfg->cfg[i];
 		cfg.pipeline_id = i;
 		ctx->thread_data_ctx[i].handle = handler[run->id].init(&cfg);
 		if (!ctx->thread_data_ctx[i].handle)
 			goto exit;
-	}
-	/* Save slave pipeline handle in master pipleline's context */
-	for (i = 0; i < pipeline_count - 1; i++) {
-		ctx->thread_data_ctx[0].slave_handle[i] = ctx->thread_data_ctx[1 + i].handle;
-		update_master_pipeline(ctx->thread_data_ctx[0].handle, ctx->thread_data_ctx[1 + i].handle);
 	}
 
 	for (i = 0; i < pipeline_count; i++) {

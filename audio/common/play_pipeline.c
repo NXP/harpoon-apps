@@ -78,18 +78,14 @@ struct pipeline_ctx {
 
 	/* pipeline index, '0' for master pipeline */
 	uint8_t id;
-	/* Slave pipeline count, only valid for master pipeline */
-	uint8_t slave_count;
-	/* Slave pipeline ctx, only valid for master pipeline */
-	void *slave_ctx[MAX_AUDIO_DATA_THREADS - 1];
 };
 
 void play_pipeline_stats(void *handle)
 {
 	struct pipeline_ctx *ctx = handle;
 
-	log_info("callback: %llu, run: %llu, err: %llu\n", ctx->stats.callback, ctx->stats.run,
-		ctx->stats.err);
+	log_info("pipeline%d  callback: %llu, run: %llu, err: %llu\n", ctx->id,
+			ctx->stats.callback, ctx->stats.run, ctx->stats.err);
 
 	audio_pipeline_stats(ctx->pipeline);
 }
@@ -97,8 +93,6 @@ void play_pipeline_stats(void *handle)
 static void rx_callback(uint8_t status, void *user_data)
 {
 	struct pipeline_ctx *ctx = (struct pipeline_ctx*)user_data;
-	struct pipeline_ctx *slave_ctx;
-	int i;
 
 #if USE_TX_IRQ
 	sai_disable_irq(&ctx->dev[0], false, true);
@@ -109,14 +103,6 @@ static void rx_callback(uint8_t status, void *user_data)
 	ctx->stats.callback++;
 
 	ctx->event_send(ctx->event_data, status);
-
-	/* Master slave need to notify slave pipelines */
-	if (ctx->id == 0) {
-		for (i = 0; i < ctx->slave_count; i++) {
-			slave_ctx = ctx->slave_ctx[i];
-			ctx->event_send(slave_ctx->event_data, status);
-		}
-	}
 }
 
 int play_pipeline_run(void *handle, struct event *e)
@@ -456,6 +442,7 @@ void *play_pipeline_init(void *parameters)
 	/* override pipeline configuration */
 	pipeline_cfg->sample_rate = rate;
 	pipeline_cfg->period = period;
+	pipeline_cfg->id = cfg->pipeline_id;
 
 	ctx->id = cfg->pipeline_id;
 	ctx->pipeline = audio_pipeline_init(pipeline_cfg);
@@ -487,14 +474,6 @@ err_init:
 
 err:
 	return NULL;
-}
-
-void update_master_pipeline(void *master_handle, void *slave_handle)
-{
-	struct pipeline_ctx *master_ctx = master_handle;
-	uint8_t slave_index = master_ctx->slave_count;
-
-	master_ctx->slave_ctx[slave_index++] = slave_handle;
 }
 
 void play_pipeline_exit(void *handle)
