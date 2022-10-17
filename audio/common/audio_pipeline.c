@@ -469,7 +469,10 @@ static void audio_pipeline_buffer_init(struct audio_pipeline *pipeline, struct a
 		base = (audio_sample_t *)buffer_storage_base + audio_buffer_storage_off(config, storage_id);
 		size = config->storage[storage_id].periods * config->period;
 
-		audio_buf_init(&pipeline->buffer[i], base, size);
+		if (config->buffer[i].flags & AUDIO_BUFFER_FLAG_SILENCE)
+			audio_buf_init(&pipeline->buffer[i], base, size, config->period);
+		else
+			audio_buf_init(&pipeline->buffer[i], base, size, 0);
 	}
 }
 

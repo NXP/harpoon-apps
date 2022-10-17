@@ -229,9 +229,7 @@ int routing_element_init(struct audio_element *element, struct audio_element_con
 		routing->out[i].buf = &buffer[config->output[i]];
 	}
 
-	audio_buf_init(&routing->silence, silence_storage, element->period);
-
-	audio_buf_write_silence(&routing->silence, element->period);
+	audio_buf_init(&routing->silence, silence_storage, element->period, element->period);
 
 	routing_element_dump(element);
 

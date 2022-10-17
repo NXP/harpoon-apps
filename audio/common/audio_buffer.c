@@ -33,18 +33,21 @@ void audio_buf_dump(struct audio_buffer *buf)
 		  buf, buf->base, buf->size, buf->size_mask, buf->read, buf->write);
 }
 
-void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size)
+void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size, unsigned int silence)
 {
 	buf->base = base;
 	buf->size = size;
 	buf->read = 0;
 	buf->write = 0;
+	buf->silence = silence;
 
 	buf->size_mask = 0;
 	while ((size >>= 1))
 		buf->size_mask++;
 
 	buf->size_mask = (1U << buf->size_mask) - 1;
+
+	audio_buf_write_silence(buf, buf->silence);
 }
 
 unsigned int audio_buf_avail(struct audio_buffer *buf)

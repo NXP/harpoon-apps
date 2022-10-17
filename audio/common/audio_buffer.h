@@ -13,9 +13,12 @@
 
 #include "audio_format.h"
 
+#define	AUDIO_BUFFER_FLAG_SILENCE	(1 << 0)
+
 /* Configuration */
 struct audio_buffer_config {
 	unsigned int storage;	/* storage array index */
+	unsigned int flags;
 };
 
 struct audio_buffer_storage_config {
@@ -30,9 +33,10 @@ struct audio_buffer {
 	unsigned int write;	/* in units of samples */
 	unsigned int size;	/* in units of samples */
 	unsigned int size_mask;
+	unsigned int silence;	/* in units of samples */
 };
 
-void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size);
+void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size, unsigned int silence);
 unsigned int audio_buf_avail(struct audio_buffer *buf);
 unsigned int audio_buf_free(struct audio_buffer *buf);
 bool audio_buf_full(struct audio_buffer *buf);
@@ -140,6 +144,8 @@ static inline void audio_buf_reset(struct audio_buffer *buf)
 {
 	buf->read = 0;
 	buf->write = 0;
+
+	audio_buf_write_silence(buf, buf->silence);
 }
 
 #endif /* _AUDIO_BUFFER_H_ */
