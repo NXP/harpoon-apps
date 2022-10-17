@@ -23,6 +23,7 @@ struct audio_config {
 	void *event_data;
 
 	void *data;
+	void *async_sem;
 };
 
 struct event {
@@ -31,8 +32,9 @@ struct event {
 };
 
 enum {
-	EVENT_TYPE_TX_RX,
-	EVENT_TYPE_START
+	EVENT_TYPE_DATA,
+	EVENT_TYPE_RESET,
+	EVENT_TYPE_RESET_ASYNC
 };
 
 void *play_pipeline_init(void *parameters);

@@ -5,6 +5,7 @@
  */
 
 #include "os/assert.h"
+#include "os/semaphore.h"
 #include "os/stdlib.h"
 
 #include "app_board.h"
@@ -58,6 +59,7 @@ static const uint32_t supported_rate[] = {44100, 48000, 88200, 96000, 176400, 19
 struct pipeline_ctx {
 	void (*event_send)(void *, uint8_t);
 	void *event_data;
+	os_sem_t *async_sem;
 
 	struct sai_device dev[SAI_TX_MAX_INSTANCE];
 	struct audio_pipeline *pipeline;
@@ -108,24 +110,38 @@ static void rx_callback(uint8_t status, void *user_data)
 int play_pipeline_run(void *handle, struct event *e)
 {
 	struct pipeline_ctx *ctx = handle;
-	int err;
+	int err = 0;
 
-	ctx->stats.run++;
+	switch (e->type) {
+	case EVENT_TYPE_DATA:
+		ctx->stats.run++;
 
-	err = audio_pipeline_run(ctx->pipeline);
-	if (err) {
-		ctx->stats.err++;
-		audio_pipeline_reset(ctx->pipeline);
 		err = audio_pipeline_run(ctx->pipeline);
-		os_assert(!err, "pipeline couldn't restart");
-	}
+		if (err) {
+			ctx->stats.err++;
+			break;
+		}
 
-	if (ctx->id == 0) {
+		if (ctx->id == 0) {
 #if USE_TX_IRQ
-		sai_enable_irq(&ctx->dev[0], false, true);
+			sai_enable_irq(&ctx->dev[0], false, true);
 #else
-		sai_enable_irq(&ctx->dev[0], true, false);
+			sai_enable_irq(&ctx->dev[0], true, false);
 #endif
+		}
+		break;
+
+	case EVENT_TYPE_RESET:
+		audio_pipeline_reset(ctx->pipeline);
+		break;
+
+	case EVENT_TYPE_RESET_ASYNC:
+		audio_pipeline_reset(ctx->pipeline);
+		os_sem_give(ctx->async_sem, 0);
+		break;
+
+	default:
+		break;
 	}
 
 	return err;
@@ -455,6 +471,7 @@ void *play_pipeline_init(void *parameters)
 	ctx->period = period;
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
+	ctx->async_sem = cfg->async_sem;
 
 	/* Only the first pipeline need to setup SAI hardware */
 	if (!cfg->pipeline_id)

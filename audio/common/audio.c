@@ -39,6 +39,7 @@ struct data_ctx {
 	/* The first thead is used for parent pipeline, others for child pipeline */
 	struct thread_data_ctx_t {
 		os_sem_t semaphore;
+		os_sem_t async_sem;
 		os_mqd_t mqueue;
 		/* pipeline_ctx handle for current thread */
 		void *handle;
@@ -140,11 +141,50 @@ static void data_send_event(void *userData, uint8_t status)
 	struct event e;
 	int i;
 
-	e.type = EVENT_TYPE_TX_RX;
+	e.type = EVENT_TYPE_DATA;
 	e.data = status;
 
 	for (i = 0; i < ctx->pipeline_count; i++)
 		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, OS_MQUEUE_FLAGS_ISR_CONTEXT, 0);
+}
+
+static void audio_reset(struct data_ctx *ctx, unsigned int id)
+{
+	struct event e;
+	int i;
+
+	e.type = EVENT_TYPE_RESET;
+	ctx->handler->run(ctx->thread_data_ctx[id].handle, &e);
+
+	/* reset all other handlers */
+	e.type = EVENT_TYPE_RESET_ASYNC;
+
+	for (i = 0; i < ctx->pipeline_count; i++) {
+		if (i == id)
+			continue;
+
+		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, 0, 0);
+	}
+
+	/* wait for asynchronous reset execution */
+	for (i = 0; i < ctx->pipeline_count; i++) {
+		if (i == id)
+			continue;
+
+		os_sem_take(&ctx->thread_data_ctx[i].async_sem, 0, OS_SEM_TIMEOUT_MAX);
+	}
+
+	e.type = EVENT_TYPE_DATA;
+	if (ctx->handler->run(ctx->thread_data_ctx[id].handle, &e) < 0)
+		os_assert(false, "handler couldn't restart");
+
+	/* restart other handlers */
+	for (i = 0; i < ctx->pipeline_count; i++) {
+		if (i == id)
+			continue;
+
+		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, 0, 0);
+	}
 }
 
 void audio_process_data(void *context, int thread_id)
@@ -157,7 +197,8 @@ void audio_process_data(void *context, int thread_id)
 		os_sem_take(&ctx->thread_data_ctx[thread_id].semaphore, 0, OS_SEM_TIMEOUT_MAX);
 
 		if (ctx->handler)
-			ctx->handler->run(ctx->thread_data_ctx[thread_id].handle, &e);
+			if (ctx->handler->run(ctx->thread_data_ctx[thread_id].handle, &e) != 0)
+				audio_reset(ctx, 0);
 
 		os_sem_give(&ctx->thread_data_ctx[thread_id].semaphore, 0);
 	}
@@ -215,6 +256,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 		cfg.event_data = ctx;
 		cfg.data = (void *)play_cfg->cfg[i];
 		cfg.pipeline_id = i;
+		cfg.async_sem = &ctx->thread_data_ctx[i].async_sem;
 		ctx->thread_data_ctx[i].handle = handler[run->id].init(&cfg);
 		if (!ctx->thread_data_ctx[i].handle)
 			goto exit;
@@ -230,7 +272,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	}
 
 	/* Send an event to trigger data thread processing */
-	e.type = EVENT_TYPE_START;
+	e.type = EVENT_TYPE_DATA;
 	for (i = 0; i < pipeline_count; i++) {
 		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, 0, 0);
 	}
@@ -375,6 +417,9 @@ void *audio_control_init(uint8_t thread_count)
 	for (i = 0; i < thread_count; i++) {
 		err = os_sem_init(&audio_ctx->thread_data_ctx[i].semaphore, 1);
 		os_assert(!err, "semaphore initialization failed!");
+
+		err = os_sem_init(&audio_ctx->thread_data_ctx[i].async_sem, 1);
+		os_assert(!err, "async semaphone initialization failed!");
 
 		err = os_mq_open(&audio_ctx->thread_data_ctx[i].mqueue, "audio_mqueue", 10, sizeof(struct event));
 		os_assert(!err, "message queue initialization failed!");
