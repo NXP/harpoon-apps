@@ -67,6 +67,7 @@ void main(void)
 		k_thread_create(&data_thread[i], data_stack[i], STACK_SIZE,
 				data_task, context, &i, NULL,
 				K_HIGHEST_THREAD_PRIO, 0, K_NO_WAIT);
+		k_thread_cpu_pin(&data_thread[i], i);
 	}
 
 	k_thread_create(&ctrl_thread, ctrl_stack, STACK_SIZE,
