@@ -46,6 +46,7 @@ struct data_ctx {
 	} thread_data_ctx[MAX_AUDIO_DATA_THREADS];
 
 	const struct mode_handler *handler;
+	os_sem_t reset_sem;
 };
 
 static struct play_pipeline_config play_pipeline_dtmf_config = {
@@ -151,7 +152,15 @@ static void data_send_event(void *userData, uint8_t status)
 static void audio_reset(struct data_ctx *ctx, unsigned int id)
 {
 	struct event e;
-	int i;
+	int i, ret;
+
+	/*
+	 *  If reset process has already been raised by another pipeline, return immediately
+	 *  because reset process will cover all pipeline.
+	 */
+	ret = os_sem_take(&ctx->reset_sem, 0, 0);
+	if (ret)
+		return;
 
 	e.type = EVENT_TYPE_RESET;
 	ctx->handler->run(ctx->thread_data_ctx[id].handle, &e);
@@ -185,6 +194,7 @@ static void audio_reset(struct data_ctx *ctx, unsigned int id)
 
 		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, 0, 0);
 	}
+	os_sem_give(&ctx->reset_sem, 0);
 }
 
 void audio_process_data(void *context, uint8_t thread_id)
@@ -198,7 +208,7 @@ void audio_process_data(void *context, uint8_t thread_id)
 
 		if (ctx->handler)
 			if (ctx->handler->run(ctx->thread_data_ctx[thread_id].handle, &e) != 0)
-				audio_reset(ctx, 0);
+				audio_reset(ctx, thread_id);
 
 		os_sem_give(&ctx->thread_data_ctx[thread_id].semaphore, 0);
 	}
@@ -418,8 +428,11 @@ void *audio_control_init(uint8_t thread_count)
 		err = os_sem_init(&audio_ctx->thread_data_ctx[i].semaphore, 1);
 		os_assert(!err, "semaphore initialization failed!");
 
-		err = os_sem_init(&audio_ctx->thread_data_ctx[i].async_sem, 1);
-		os_assert(!err, "async semaphone initialization failed!");
+		err = os_sem_init(&audio_ctx->thread_data_ctx[i].async_sem, 0);
+		os_assert(!err, "asynchronous semaphone initialization failed!");
+
+		err = os_sem_init(&audio_ctx->reset_sem, 1);
+		os_assert(!err, "reset semaphore initialization failed!");
 
 		err = os_mq_open(&audio_ctx->thread_data_ctx[i].mqueue, "audio_mqueue", 10, sizeof(struct event));
 		os_assert(!err, "message queue initialization failed!");
