@@ -36,7 +36,7 @@ struct data_ctx {
 	uint8_t thread_count;
 	uint8_t pipeline_count;
 
-	/* The first thead is used for parent pipeline, others for child pipeline */
+	/* The first thread is used for parent pipeline, others are for child pipeline */
 	struct thread_data_ctx_t {
 		os_sem_t semaphore;
 		os_sem_t async_sem;
@@ -187,7 +187,7 @@ static void audio_reset(struct data_ctx *ctx, unsigned int id)
 	}
 }
 
-void audio_process_data(void *context, int thread_id)
+void audio_process_data(void *context, uint8_t thread_id)
 {
 	struct data_ctx *ctx = context;
 	struct event e;

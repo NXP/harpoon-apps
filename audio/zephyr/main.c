@@ -37,7 +37,7 @@ static void hardware_setup(void)
 
 static void data_task(void *context, void *thread_id, void *p3)
 {
-	int id = *(int *)thread_id;
+	uint8_t id = *(uint8_t *)thread_id;
 
 	do {
 		audio_process_data(context, id);
