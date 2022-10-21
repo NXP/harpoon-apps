@@ -241,9 +241,11 @@ static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 
 	/* Check all buffers reference valid storage */
 	for (i = 0; i < config->buffers; i++) {
-		if (config->buffer[i].storage >= config->buffer_storage && !(config->buffer[i].flags & AUDIO_BUFFER_FLAG_SHARED_USER)) {
+		if (config->buffer[i].storage >= config->buffer_storage) {
+			if (!(config->buffer[i].flags & AUDIO_BUFFER_FLAG_SHARED_USER)) {
 				log_err("buffer(%u) references invalid storage(%u)\n", i, config->buffer[i].storage);
 				goto err;
+			}
 		}
 
 		/* Check all buffers are referenced by a single input and single output */
@@ -259,12 +261,19 @@ static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 			goto err;
 		}
 
-		/* Check all buffers are referenced by one input and one output */
-		if (!input)
-			log_warn("buffer(%u) not referenced by any input\n", i);
+		if (config->buffer[i].flags & AUDIO_BUFFER_FLAG_SHARED_USER
+				|| config->buffer[i].flags & AUDIO_BUFFER_FLAG_SHARED) {
+			  if (!input && !output)
+				  log_warn("shared_buffer(%u, %u) not referenced by any input/output\n",
+						  i, config->buffer[i].shared_id);
+		} else {
+			/* Check all buffers are referenced by one input and one output */
+			if (!input)
+				log_warn("buffer(%u) not referenced by any input\n", i);
 
-		if (!output)
-			log_warn("buffer(%u) not referenced by any output\n", i);
+			if (!output)
+				log_warn("buffer(%u) not referenced by any output\n", i);
+		}
 	}
 
 	/* Check that no element input is connected to an ouput of a later stage */

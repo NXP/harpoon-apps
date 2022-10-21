@@ -597,6 +597,7 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 };
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
 
+#ifdef CONFIG_SMP
 const struct audio_pipeline_config pipeline_full_thread_0_config = {
 
 	.name = "Full audio pipeline for thread 0",
@@ -712,6 +713,13 @@ const struct audio_pipeline_config pipeline_full_thread_0_config = {
 		[11] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 3},
 	},
 	.buffer_storage = 12,
+
+	.storage = {
+		[8] = {.periods = 3},
+		[9] = {.periods = 3},
+		[10] = {.periods = 3},
+		[11] = {.periods = 3},
+	},
 };
 
 const struct audio_pipeline_config pipeline_full_thread_1_config = {
@@ -776,3 +784,4 @@ const struct audio_pipeline_config pipeline_full_thread_1_config = {
 
 	.buffer_storage = 0,
 };
+#endif
