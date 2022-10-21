@@ -2,7 +2,7 @@
 
 function usage ()
 {
-	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | avb | industrial | latency>"
+	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | audio_smp | avb | industrial | latency>"
 }
 
 function detect_machine ()
@@ -47,6 +47,18 @@ if [ "$2" == "audio" ]; then
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
 	EOF
+elif [ "$2" == "audio_smp" ]; then
+	if [[ "$RTOS" != "zephyr" ]]; then
+		echo "Unsupported RTOS"
+		exit 4
+	fi
+	cat <<-EOF > "$CONF_FILE"
+	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-audio.cell
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio_smp.bin
+	INMATE_ENTRY_ADDRESS=$ENTRY
+	INMATE_NAME=${RTOS}
+	EOF
 elif [ "$2" == "avb" ]; then
 	if [[ "$RTOS" != "freertos" ]]; then
 		echo "Unsupported RTOS"
@@ -77,5 +89,5 @@ elif [ "$2" == "latency" ]; then
 	EOF
 else
 	usage
-	exit 5
+	exit 6
 fi
