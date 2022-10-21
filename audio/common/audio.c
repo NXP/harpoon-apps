@@ -84,7 +84,9 @@ static struct play_pipeline_config play_pipeline_smp_config = {
 
 #if (CONFIG_GENAVB_ENABLE == 1)
 static struct play_pipeline_config play_pipeline_full_avb_config = {
-	.cfg = &pipeline_full_avb_config,
+	.cfg = {
+		&pipeline_full_avb_config,
+	}
 };
 #endif
 
@@ -371,12 +373,13 @@ static void audio_command_handler(struct data_ctx *ctx)
 	}
 }
 
+#if (CONFIG_GENAVB_ENABLE == 1)
 static void audio_control_handler(struct data_ctx *ctx)
 {
 	if (ctx->handler && ctx->handler->ctrl)
-		ctx->handler->ctrl(ctx->handle);
+		ctx->handler->ctrl(ctx->thread_data_ctx[0].handle);
 }
-
+#endif
 
 #define CONTROL_POLL_PERIOD	100
 #define STATS_POLL_PERIOD	10000
@@ -392,8 +395,10 @@ void audio_control_loop(void *context)
 		/* handle commands from Linux ctrl application */
 		audio_command_handler(ctx);
 
+#if (CONFIG_GENAVB_ENABLE == 1)
 		/* handle events from control channel(s) */
 		audio_control_handler(ctx);
+#endif
 
 		count--;
 		if (!count) {
