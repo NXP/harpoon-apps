@@ -242,7 +242,7 @@ static int ctrl_ctx_init(struct ctrl_ctx *ctrl)
 	os_assert(!err, "ivshmem initialization failed, cannot proceed\n");
 	os_assert(mem->out_size, "ivshmem mis-configuration, cannot proceed\n");
 
-	mailbox_init(&ctrl->mb, mem->out[0], mem->out[mem->id], false, tp);
+	err = mailbox_init(&ctrl->mb, mem->out[0], mem->out[mem->id], false, tp);
 	os_assert(!err, "mailbox initialization failed!");
 
 	return err;
