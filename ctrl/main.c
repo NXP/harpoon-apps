@@ -54,6 +54,7 @@ static void audio_usage(void)
 		"\t               2 - playback & recording (loopback)\n"
 		"\t               3 - audio pipeline\n"
 		"\t               4 - AVB audio pipeline\n"
+		"\t               5 - SMP audio pipeline\n"
 		"\t-s             stop running audio mode\n"
 	);
 }
