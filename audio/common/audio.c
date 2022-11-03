@@ -90,7 +90,7 @@ static struct play_pipeline_config play_pipeline_full_avb_config = {
 };
 #endif
 
-const static struct mode_handler handler[] =
+const static struct mode_handler g_handler[] =
 {
 	[0] = {
 		.init = play_pipeline_init,
@@ -122,11 +122,11 @@ const static struct mode_handler handler[] =
 	},
 #if (CONFIG_GENAVB_ENABLE == 1)
 	[4] = {
-		.init = play_pipeline_init,
-		.exit = play_pipeline_exit,
+		.init = play_pipeline_init_avb,
+		.exit = play_pipeline_exit_avb,
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
-		.ctrl = play_pipeline_ctrl,
+		.ctrl = play_pipeline_ctrl_avb,
 		.data = &play_pipeline_full_avb_config,
 	}
 #endif
@@ -250,10 +250,10 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	if (ctx->handler)
 		goto exit;
 
-	if (run->id >= ARRAY_SIZE(handler) || !handler[run->id].init)
+	if (run->id >= ARRAY_SIZE(g_handler) || !g_handler[run->id].init)
 		goto exit;
 
-	play_cfg = handler[run->id].data;
+	play_cfg = g_handler[run->id].data;
 	/* Check the count of pipleline */
 	for (i = 0; i < ctx->thread_count; i++) {
 		if (play_cfg->cfg[i] == NULL)
@@ -272,7 +272,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 		cfg.data = (void *)play_cfg->cfg[i];
 		cfg.pipeline_id = i;
 		cfg.async_sem = &ctx->thread_data_ctx[i].async_sem;
-		ctx->thread_data_ctx[i].handle = handler[run->id].init(&cfg);
+		ctx->thread_data_ctx[i].handle = g_handler[run->id].init(&cfg);
 		if (!ctx->thread_data_ctx[i].handle)
 			goto exit;
 	}
@@ -280,7 +280,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	for (i = 0; i < pipeline_count; i++) {
 		os_sem_take(&ctx->thread_data_ctx[i].semaphore, 0, OS_SEM_TIMEOUT_MAX);
 	}
-	ctx->handler = &handler[run->id];
+	ctx->handler = &g_handler[run->id];
 	ctx->pipeline_count = pipeline_count;
 	for (i = 0; i < pipeline_count; i++) {
 		os_sem_give(&ctx->thread_data_ctx[i].semaphore, 0);

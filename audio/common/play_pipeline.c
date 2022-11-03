@@ -351,16 +351,17 @@ exit:
 	return;
 }
 
-void play_pipeline_ctrl(void *handle)
+void play_pipeline_ctrl_avb(void *handle)
 {
 	struct pipeline_ctx *ctx = handle;
 
 	handle_avdecc_event(ctx, ctx->avb.ctrl_h);
 }
 
-static void avb_setup(struct pipeline_ctx *ctx)
+static int avb_setup(struct pipeline_ctx *ctx)
 {
 	int genavb_result;
+	int rc;
 
 	log_info("enter\n");
 
@@ -381,7 +382,8 @@ static void avb_setup(struct pipeline_ctx *ctx)
 	os_irq_register(BOARD_GPT_0_IRQ, (void (*)(void(*)))BOARD_GPT_0_IRQ_HANDLER, NULL, 0);
 	os_irq_register(BOARD_GPT_1_IRQ, (void (*)(void(*)))BOARD_GPT_1_IRQ_HANDLER, NULL, 0);
 
-	if (gavb_stack_init()) {
+	rc = gavb_stack_init();
+	if (rc) {
 		log_err("gavb_stack_init() failed\n");
 		goto exit;
 	}
@@ -390,6 +392,8 @@ static void avb_setup(struct pipeline_ctx *ctx)
 	genavb_result = genavb_control_open(get_genavb_handle(), &ctx->avb.ctrl_h, GENAVB_CTRL_AVDECC_MEDIA_STACK);
 	if (genavb_result != GENAVB_SUCCESS) {
 		log_err("genavb_control_open() failed: %s\n", genavb_strerror(genavb_result));
+		rc = -1;
+
 		goto exit;
 	}
 
@@ -397,7 +401,7 @@ static void avb_setup(struct pipeline_ctx *ctx)
 		log_err("STATS_TaskInit() failed\n");
 
 exit:
-	return;
+	return rc;
 }
 
 static void avb_close(struct pipeline_ctx *ctx)
@@ -426,6 +430,33 @@ static void avb_close(struct pipeline_ctx *ctx)
 	os_irq_unregister(BOARD_GPT_1_IRQ);
 
 	avb_hardware_exit();
+}
+
+void *play_pipeline_init_avb(void *parameters)
+{
+	struct pipeline_ctx *ctx;
+	int rc;
+
+	ctx = play_pipeline_init(parameters);
+
+	if (ctx) {
+		rc = avb_setup(ctx);
+		if (rc) {
+			play_pipeline_exit(ctx);
+			ctx = NULL;
+		}
+	}
+
+	return ctx;
+}
+
+void play_pipeline_exit_avb(void *handle)
+{
+	struct pipeline_ctx *ctx = handle;
+
+	avb_close(ctx);
+
+	play_pipeline_exit(handle);
 }
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
 
@@ -477,10 +508,6 @@ void *play_pipeline_init(void *parameters)
 	if (!cfg->pipeline_id)
 		sai_setup(ctx);
 
-#if (CONFIG_GENAVB_ENABLE == 1)
-	avb_setup(ctx);
-#endif
-
 	log_info("Starting %s (Sample Rate: %d Hz, Period: %u frames)\n",
 			pipeline_cfg->name, rate, (uint32_t)period);
 
@@ -499,10 +526,6 @@ void play_pipeline_exit(void *handle)
 	int i;
 
 	audio_pipeline_exit(ctx->pipeline);
-
-#if (CONFIG_GENAVB_ENABLE == 1)
-	avb_close(ctx);
-#endif
 
 	/* Only the first pipeline need to close hardware */
 	if (!ctx->id) {

@@ -37,11 +37,16 @@ enum {
 	EVENT_TYPE_RESET_ASYNC
 };
 
+/* generic audio callbacks */
 void *play_pipeline_init(void *parameters);
 int play_pipeline_run(void *handle, struct event *e);
 void play_pipeline_stats(void *handle);
-void play_pipeline_ctrl(void *handle);
 void play_pipeline_exit(void *handle);
+
+/* AVB-specific callbacks */
+void *play_pipeline_init_avb(void *parameters);
+void play_pipeline_ctrl_avb(void *handle);
+void play_pipeline_exit_avb(void *handle);
 
 extern const struct audio_pipeline_config pipeline_dtmf_config;
 extern const struct audio_pipeline_config pipeline_sine_config;
