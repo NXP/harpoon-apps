@@ -29,27 +29,49 @@ This project is the main repository to build the RTOS application for ARMv8-A co
 
 A cross compiler is required to build Cortex-A applications ; this project is compatible with the ARM GCC toolchain that you may download and install:
 
-```
+```bash
 wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
 tar -C /opt/ -xvf gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz     # (sudo permissions might be required)
 ```
 
+You need to have the follow tools to clone and build Harpoon applications:
+```bash
+# Update environment
+sudo apt update
+
+# git
+sudo apt install git
+
+# python3
+sudo apt install python3-pip
+
+# west
+pip3 install west
+
+# Common tools for compilation
+sudo apt install cmake # minimum required version "3.20.0"
+
+# Zephyr Compilation
+sudo apt install ninja-build
+sudo apt install python3-pyelftools
+```
+
 # Cloning this repository
 
-You need to have both Git and West installed, then execute below commands to replicate the whole Harpoon delivery at revision ```${revision}``` and place it in a west worspace named ```hww```.
-```txt
+Execute below commands to replicate the whole Harpoon delivery at revision ```${revision}``` and place it in a west worspace named ```hww```.
+```bash
 west init -m https://github.com/NXPmicro/harpoon-apps --mr ${revision} hww
 cd hww
 west update
 ```
-Replace ```${revision}``` with any Harpoon release you wish to use (e.g.: ```harpoon_2.0.1```). This can also be ```main``` if you want the latest state, or any commit SHA.
+Replace ```${revision}``` with any Harpoon release you wish to use (e.g.: ```harpoon_2.2.0```). This can also be ```main``` if you want the latest state, or any commit SHA.
 
 # Repository structure
 
 The aim of this repository is to provide a comprehensive set of reference applications.
 It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as well as the MCUXpresso SDK (including drivers and libraries):
 
-```txt
+```bash
 .
 .
 ├── harpoon-apps
@@ -121,6 +143,9 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   │   └── i2c_test.h
 │   │   └── src
 │   │       └── i2c_test.c                  <-- hardware/os-independent source code for the application
+|   ├── audio                <-- RTOS audio application
+│   ├── rt_latency           <-- RTOS rt latency measurement application
+│   ├── industrial           <-- RTOS industrial application
 │   ├── README.md
 │   └── west.yml
 ├── FreeRTOS-Kernel                         <-- RTOS Kernel Git tree
@@ -146,16 +171,15 @@ The first application that you may attempt to build and execute is the `rt_laten
 ## Compile
 
 ### FreeRTOS
-
 If starting from a fresh console, the cross-compiler variable needs to be set:
 
-```
+```bash
 export ARMGCC_DIR=/opt/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf
 ```
 
 Then move to the right path, depending on the board and the RTOS that you are looking for. The example below builds the application within FreeRTOS and for the i.MX 8M Plus EVK board:
 
-```
+```bash
 cd harpoon-apps/rt_latency/freertos/boards/evkmimx8mp/armgcc_aarch64/
 ./build_ddr_release.sh
 ```
@@ -163,19 +187,27 @@ cd harpoon-apps/rt_latency/freertos/boards/evkmimx8mp/armgcc_aarch64/
 The resulting binary is located under the `ddr_release/` directory and is called `rt_latency.bin`. This is the binary blob that _jailhouse_ loads into the inmate cell before starting it.
 
 ### Zephyr
+If starting from a fresh console, the cross-compiler and zephyr variables need to be set:
 
-Since Zephyr is installed using `west`, it is recommended to export Zephyr before building an application:
+```bash
+export ARMGCC_DIR=/opt/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf
+export Zephyr_DIR=/path/to/hww/zephyr
+```
 
+Then move to the right path, depending on the board and the RTOS that you are looking for. The example below builds the Zephyr `rt_latency` application for the i.MX 8M Plus EVK board:
+
+```bash
+cd harpoon-apps/rt_latency/zephyr/boards/evkmimx8mp/armgcc_aarch64/
+./clean.sh
+./build_singlecore.sh
 ```
-west zephyr-export
-west build -p auto -b mimx8mp_evk_a53_1core harpoon-apps/rt_latency/zephyr
-```
+Please refer to https://docs.zephyrproject.org/latest/develop/west/install.html for more details.
 
 ## Running the reference applications
 
 Jailhouse, running in the Linux root cell, provides the necessary tools to create, load and execute the reference applications built within this repository ; this example gives the commands for a inmate cell for i.MX 8MP EVK, replace "xxx" with "freertos" for FreeRTOS or "zephyr" for Zephyr:
 
-```
+```bash
 modprobe jailhouse
 jailhouse enable /usr/share/jailhouse/cells/imx8mp.cell
 jailhouse cell create /usr/share/jailhouse/cells/imx8mp-xxx.cell
@@ -193,16 +225,16 @@ modprobe -r jailhouse
 Alternatively, a systemd unit file is provided to start the reference applications. This unit file runs a scripts that uses configuration file `/etc/harpoon/harpoon.conf` to figure out the different jailhouse parameters (application name, cell names, load address, ...).
 Preconfigured configurations can be generated with script `harpoon_set_configuration.sh`.
 
-Example to run the `rt_latency` application:
+Example to run the FreeRTOS `rt_latency` application:
 
-```
-harpoon_set_configuration.sh latency # this needs to be run only once
+```bash
+harpoon_set_configuration.sh freertos latency # this may be run only once; replace freertos by zephyr for Zephyr applications
 systemctl start harpoon
 ```
 
 To be able to visualize the guest OS console, the UART4 tty shall be opened ; e.g.:
 
-```
+```bash
 screen /dev/ttyUSB3 115200
 ```
 
