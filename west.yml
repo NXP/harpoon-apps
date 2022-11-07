@@ -18,7 +18,7 @@ manifest:
       revision: cb3b07a151bb27d3477f58bc5d1df3e259e4018a
     - name: GenAVB_TSN
       remote: nxp
-      revision: 0fc0f1c854a1a7ad3199a053f607107f2b2a511f
+      revision: b5f3515d6a6baf3d9b1763002890582d587588a3
       path: gen_avb_sdk
     - name: hal_nxp
       revision: 1026ce5f52b3248b44586e1e2be1abe73a459ff9
