@@ -104,7 +104,7 @@ void ethernet_avb_tsn_stats(void *priv)
 	struct ethernet_ctx *ctx = priv;
 
 	(void)ctx;
-	log_info("not implemented\n");
+	log_debug("not implemented\n");
 }
 
 int ethernet_avb_tsn_run(void *priv, struct event *e)

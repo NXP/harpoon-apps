@@ -849,7 +849,7 @@ void can_stats(void *priv)
 	struct can_ctx *ctx = priv;
 
 	(void)ctx;
-	log_info("not implemented\n");
+	log_debug("not implemented\n");
 }
 
 int can_run(void *priv, struct event *e)
