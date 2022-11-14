@@ -101,7 +101,7 @@ int32_t codec_set_format(enum codec_id cid, uint32_t mclk, uint32_t sample_rate,
 	else if (cid == CODEC_ID_WM8960) {
 		err = CODEC_SetFormat(&wm8960_codec_handle, mclk, sample_rate, bitwidth);
 		if (err != kStatus_Success) {
-			log_err("WM8960 set format failed (err %d)\n", err);
+			log_warn("WM8960 set format failed: sample rate %d not supported (err %d)\n",sample_rate, err);
 			goto end;
 		}
 	}
