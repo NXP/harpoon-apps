@@ -8,6 +8,7 @@
 #include "audio_element.h"
 #include "audio_format.h"
 #include "hlog.h"
+#include "stats.h"
 
 #include "sai_drv.h"
 
@@ -53,6 +54,8 @@ struct sai_line {
 	unsigned int max;
 	unsigned int underflow;
 	unsigned int overflow;
+	struct stats latency;
+	struct hist latency_hist;
 };
 
 struct sai_source_element {
@@ -111,7 +114,10 @@ static int sai_source_element_run(struct audio_element *element)
 
 			level = __sai_rx_level(line->base, line->id);
 
-			if (level <= line->min) {
+			stats_update(&line->latency, level - line->min);
+			hist_update(&line->latency_hist, level - line->min);
+
+			if (level < line->min) {
 				/* rx underflow */
 				line->underflow++;
 				goto err;
@@ -199,14 +205,25 @@ static void sai_source_element_dump(struct audio_element *element)
 static void sai_source_element_stats(struct audio_element *element)
 {
 	struct sai_source_element *sai = element->data;
+	struct sai_line *line;
 	int i;
 
 	for (i = 0; i < sai->line_n; i++) {
+		line = &sai->line[i];
+
 		log_info("rx line: %u, sai(%u, %u)\n",
-			 i, sai->line[i].sai_id, sai->line[i].id);
+			 i, line->sai_id, line->id);
 
 		log_info("  underflow: %u, overflow: %u\n",
-			sai->line[i].underflow, sai->line[i].overflow);
+			line->underflow, line->overflow);
+
+		stats_compute(&line->latency);
+		stats_print(&line->latency);
+
+		hist_print(&line->latency_hist);
+
+		stats_reset(&line->latency);
+		hist_reset(&line->latency_hist);
 	}
 }
 
@@ -362,8 +379,12 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 			line->id = line_config->id;
 			line->sai_id = sai_config->id;
 
-			line->min = line_config->channel_n * element->period - 1;
+			line->min = line_config->channel_n * element->period;
 			line->max = 2 * line_config->channel_n * element->period;
+
+			stats_init(&line->latency, 31, "rx latency (samples)", NULL);
+			hist_init(&line->latency_hist, 16, 1);
+
 			line++;
 
 			for (k = 0; k < line_config->channel_n; k++) {
