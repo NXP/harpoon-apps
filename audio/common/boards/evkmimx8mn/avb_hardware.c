@@ -83,10 +83,7 @@ static void pin_mux_enet(void)
 
 static void enet_clock_config(void)
 {
-	const clock_ip_name_t enet_clock[] = ENET_CLOCKS;
-	uint32_t instance = ENET_GetInstance(ENET);
-
-	CLOCK_DisableClock(enet_clock[instance]);
+	CLOCK_DisableClock(kCLOCK_Enet1);
 
 	CLOCK_SetRootDivider(kCLOCK_RootEnetAxi, 1U, 1U);
 	CLOCK_SetRootMux(kCLOCK_RootEnetAxi, kCLOCK_EnetAxiRootmuxSysPll1Div3);
@@ -94,7 +91,7 @@ static void enet_clock_config(void)
 	CLOCK_SetRootMux(kCLOCK_RootEnetTimer, kCLOCK_EnetTimerRootmuxSysPll2Div10);
 	CLOCK_SetRootDivider(kCLOCK_RootEnetTimer, 1U, 1U);
 
-	CLOCK_EnableClock(enet_clock[instance]);
+	CLOCK_EnableClock(kCLOCK_Enet1);
 }
 
 static void gpt_clock_config(void)
