@@ -107,7 +107,6 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${BoardPath}
     ${AppBoardPath}
     ${GenAVBPath}/include
-    ${GenAVBPath}/include/genavb
     ${GenAVBPath}/include/freertos
     ${SdkDirPath}/devices/MIMX8MM6
     ${SdkDirPath}/drivers/enet
