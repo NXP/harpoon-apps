@@ -48,7 +48,7 @@ static void audio_usage(void)
 		"\nAudio options:\n"
 		"\t-f <frequency> audio clock frequency (in Hz)\n"
 		"\t               Supporting 44100, 48000, 88200, 176400, 96000, 192000 Hz\n"
-		"\t               Will use default frequency 44100Hz if not specified\n"
+		"\t               Will use default frequency 48000Hz if not specified\n"
 		"\t-p <frames>    audio processing period (in frames)\n"
 		"\t               Supporting 2, 4, 8, 16, 32 frames\n"
 		"\t               Will use default period 8 frames if not specified\n"
