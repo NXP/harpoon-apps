@@ -70,25 +70,10 @@
 #define SAI3_RX_SYNC_MODE		(WM8960_SAI_RX_SYNC_MODE)
 #define SAI3_CODEC_ID                   (CODEC_ID_WM8960)
 
-
-/* Use Hifiberry codec by default for legacy functions */
-#define DEMO_SAI			(HIFIBERRY_SAI)
-#define DEMO_CODEC_ID			(CODEC_ID_HIFIBERRY)
-#define DEMO_SAI_MASTER_SLAVE		(HIFIBERRY_SAI_MASTER_SLAVE)
-#define DEMO_AUDIO_MASTER_CLOCK		(HIFIBERRY_SAI_CLK_FREQ)
-#define DEMO_SAI_TX_SYNC_MODE		(HIFIBERRY_SAI_TX_SYNC_MODE)
-#define DEMO_SAI_RX_SYNC_MODE		(HIFIBERRY_SAI_RX_SYNC_MODE)
-
 #define DEMO_SAI_CHANNEL		(0)
-
-/*set Bclk source to Mclk clock*/
-#define DEMO_SAI_CLOCK_SOURCE		(1U)
-
-#define DEMO_SAI_MCLK_OUTPUT		true
 
 #define DEMO_AUDIO_DATA_CHANNEL		(2U)
 #define DEMO_AUDIO_BIT_WIDTH		kSAI_WordWidth32bits
-#define DEMO_AUDIO_SAMPLE_RATE		(kSAI_SampleRate44100Hz)
 
 /* Network Port configuration */
 #ifndef CONFIG_AUD_DISABLE_ENET
