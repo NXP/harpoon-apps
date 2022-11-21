@@ -12,8 +12,10 @@ function usage ()
 
 function start ()
 {
-    echo 'modprobe -r virtio_rpmsg_bus'
-    modprobe -r virtio_rpmsg_bus
+    if [[ "${INMATE_BIN}" =~ .*"_rpmsg.bin" ]]; then
+        echo 'modprobe -r virtio_rpmsg_bus'
+        modprobe -r virtio_rpmsg_bus
+    fi
 
     echo 'modprobe jailhouse'
     modprobe jailhouse
@@ -30,8 +32,10 @@ function start ()
     echo 'Starting inmate cell'
     jailhouse cell start "${INMATE_NAME}"
 
-    echo 'modprobe virtio_rpmsg_bus'
-    modprobe virtio_rpmsg_bus
+    if [[ "${INMATE_BIN}" =~ .*"_rpmsg.bin" ]]; then
+        echo 'modprobe virtio_rpmsg_bus'
+        modprobe virtio_rpmsg_bus
+    fi
 }
 
 function stop ()
