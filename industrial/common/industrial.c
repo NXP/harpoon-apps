@@ -134,6 +134,9 @@ static int industrial_stop(struct data_ctx *data)
 	if (!data->ops)
 		goto exit;
 
+	if (data->ops->pre_exit)
+		data->ops->pre_exit(data->priv);
+
 	os_sem_take(&data->semaphore, 0, OS_SEM_TIMEOUT_MAX);
 	ops = data->ops;
 	data->ops = NULL;

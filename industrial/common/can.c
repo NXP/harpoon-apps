@@ -86,6 +86,8 @@ struct can_ctx {
 	uint8_t node_type;
 	uint8_t test_type;
 
+	bool rxStop;
+
 	volatile status_t rxStatus;
 	volatile uint32_t rxQueueNum;
 };
@@ -670,6 +672,8 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             /* Waiting for Message receive finish. */
             while (!ctx->rxComplete)
             {
+                if (ctx->rxStop)
+                    goto exit;
             }
 
             log_info("Received message from MB%d\n", RX_MESSAGE_BUFFER_NUM);
@@ -705,6 +709,8 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             log_info("Transmission began\n");
             while (!ctx->txComplete)
             {
+                if (ctx->rxStop)
+                    goto exit;
             };
             ctx->txComplete = false;
 
@@ -722,6 +728,8 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             /* Wait until Rx MB full. */
             while (!ctx->rxComplete)
             {
+                if (ctx->rxStop)
+                    goto exit;
             };
             ctx->rxComplete = false;
 
@@ -781,6 +789,8 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             /* Wait until Rx receive full. */
             while (!ctx->rxComplete)
             {
+                if (ctx->rxStop)
+                    goto exit;
             };
             ctx->rxComplete = false;
 
@@ -800,6 +810,8 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
 
             while (!ctx->txComplete)
             {
+                if (ctx->rxStop)
+                    goto exit;
             };
             ctx->txComplete = false;
 
@@ -810,6 +822,8 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
                 /* Wait until Rx queue 1 full. */
                 while (ctx->rxQueueNum != 1U)
                 {
+                    if (ctx->rxStop)
+                        goto exit;
                 };
                 ctx->rxQueueNum = 0;
                 log_info("Read Rx MB from Queue 1.\n");
@@ -821,6 +835,8 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
                 /* Wait until Rx queue 2 full. */
                 while (ctx->rxQueueNum != 2U)
                 {
+                    if (ctx->rxStop)
+                        goto exit;
                 };
                 ctx->rxQueueNum = 0;
                 log_info("Read Rx MB from Queue 2.\n");
@@ -839,6 +855,8 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             log_info("==FlexCAN PingPong functional example -- Finish.==\n");
         }
     }
+
+exit:
     os_irq_unregister(EXAMPLE_FLEXCAN_IRQn);
 
     log_info("end\n");
@@ -855,13 +873,29 @@ void can_stats(void *priv)
 int can_run(void *priv, struct event *e)
 {
 	struct can_ctx *ctx = priv;
+	int err = -1;
 
 	log_info("FLEXCAN running: type %d node %c\n",
-		       ctx->test_type, ctx->node_type ? 'B' : 'A');
+			ctx->test_type, ctx->node_type ? 'B' : 'A');
+	switch (e->type)
+	{
+		case EVENT_TYPE_START:
+			test_flexcan_transmit(ctx);
+			err = 0;
+			break;
+		default:
+			log_err("Invalid event: %d\n", e->type);
+			break;
+	}
 
-	test_flexcan_transmit(ctx);
+	return err;
+}
 
-	return 0;
+void can_pre_exit(void *priv)
+{
+	struct can_ctx *ctx = priv;
+
+	ctx->rxStop = true;
 }
 
 static void *can_init(void *parameters, uint32_t test_type)
@@ -890,6 +924,7 @@ static void *can_init(void *parameters, uint32_t test_type)
 	ctx->event_data = cfg->event_data;
 	ctx->node_type = node_type;
 	ctx->test_type = test_type;
+	ctx->rxStop = false;
 
 	log_debug("node %c\n", ctx->node_type ? 'B' : 'A');
 	log_debug("test type %d\n", test_type);

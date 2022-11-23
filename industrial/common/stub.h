@@ -21,6 +21,11 @@ void x##_exit(void *priv) \
 	(void)priv; \
 	log_err("not supported\n"); \
 } \
+void x##_pre_exit(void *priv) \
+{ \
+	(void)priv; \
+	log_err("not supported\n"); \
+} \
 \
 void x##_stats(void *priv) \
 { \

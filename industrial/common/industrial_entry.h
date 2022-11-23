@@ -30,6 +30,7 @@ struct event {
 struct mode_operations {
 	void *(*init)(void *);
 	void (*exit)(void *);
+	void (*pre_exit)(void *);
 	void (*stats)(void *);
 	int (*run)(void *, struct event *e);
 };
@@ -75,6 +76,7 @@ void *can_init_pingpong(void *parameters);
 int can_run(void *priv, struct event *e);
 void can_stats(void *priv);
 void can_exit(void *priv);
+void can_pre_exit(void *priv);
 
 void *ethernet_avb_tsn_init(void *parameters);
 int ethernet_avb_tsn_run(void *priv, struct event *e);
