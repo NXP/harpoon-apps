@@ -15,7 +15,7 @@ manifest:
     - name: zephyr
       revision: 33caa926d0e053897b2f4060cf1d51553fb4d8c2
     - name: mcux-sdk
-      revision: 0565630dc22c464feb346cac5b0d787e8a25229a
+      revision: cb3b07a151bb27d3477f58bc5d1df3e259e4018a
     - name: GenAVB_TSN
       remote: nxp
       revision: 0fc0f1c854a1a7ad3199a053f607107f2b2a511f
