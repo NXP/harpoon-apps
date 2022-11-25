@@ -2,9 +2,11 @@
 
 manifest:
   defaults:
-    remote: nxpmicro
+    remote: nxp
 
   remotes:
+    - name: nxpzephyr
+      url-base: https://github.com/nxp-zephyr
     - name: nxpmicro
       url-base: https://github.com/NXPmicro
     - name: nxp
@@ -13,19 +15,22 @@ manifest:
   # Please add items below in reverse alphabetical order
   projects:
     - name: zephyr
+      remote: nxpzephyr
       revision: 33caa926d0e053897b2f4060cf1d51553fb4d8c2
     - name: mcux-sdk
+      remote: nxpmicro
       revision: cb3b07a151bb27d3477f58bc5d1df3e259e4018a
     - name: GenAVB_TSN
-      remote: nxp
       revision: b5f3515d6a6baf3d9b1763002890582d587588a3
       path: gen_avb_sdk
     - name: hal_nxp
+      remote: nxpzephyr
       revision: 1026ce5f52b3248b44586e1e2be1abe73a459ff9
       path: modules/hal/nxp
       groups:
         - hal
     - name: FreeRTOS-Kernel
+      remote: nxpmicro
       revision: 8df2481c594a05d69f15e9052471586184fa88cc
     - name: mcux-sdk-middleware-multicore
       remote: nxpmicro
