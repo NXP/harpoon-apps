@@ -1,8 +1,8 @@
 # Harpoon: Reference Applications
 
 ![NXP_logo](docs/nxp_logo_small.png)
-[![Version](https://img.shields.io/github/v/release/NXPMicro/harpoon-apps)](https://github.com/NXPmicro/harpoon-apps/releases/latest)
-[![Contributors](https://img.shields.io/github/contributors/NXPMicro/harpoon-apps)](https://github.com/NXPmicro/harpoon-apps/graphs/contributors)
+[![Version](https://img.shields.io/github/v/release/NXP/harpoon-apps)](https://github.com/NXP/harpoon-apps/releases/latest)
+[![Contributors](https://img.shields.io/github/contributors/NXP/harpoon-apps)](https://github.com/NXP/harpoon-apps/graphs/contributors)
 
 Harpoon is a Base Enablement SW platform, providing an RTOS and application specific drivers running in Linux and Jailhouse hypervisor environment, on the Cortex-A cores of NXP MPU’s (i.MX 8M Mini, i.MX 8M Nano, i.MX 8M Plus, ...).
 
@@ -19,9 +19,9 @@ This project provides the fundamental support for RTOS applications running in a
 * Arm® CMSIS-CORE startup core drivers and device header files for 64-bit Cortex-A53 core
 * RTOS kernel integration (FreeRTOS, Zephyr)
 * Open-source peripheral drivers leveraging the MCUXpresso SDK ( [mcux-sdk project](https://github.com/NXPmicro/mcux-sdk) )
-* Integration in Linux Yocto BSP as well as Real-time Edge SW Yocto through the [meta-nxp-harpoon](https://github.com/NXPmicro/meta-nxp-harpoon) layer (integration with systemd)
+* Integration in Linux Yocto BSP as well as Real-time Edge SW Yocto through the [meta-nxp-harpoon](https://github.com/NXP/meta-nxp-harpoon) layer (integration with systemd)
 
-This project is the main repository to build the RTOS application for ARMv8-A cores, it contains the [west.yml](https://github.com/NXPmicro/harpoon-apps/blob/main/west.yml) which keeps the description and revision for other projects in the overall Harpoon delivery. Currently available software components are shown in below figure.
+This project is the main repository to build the RTOS application for ARMv8-A cores, it contains the [west.yml](https://github.com/NXP/harpoon-apps/blob/main/west.yml) which keeps the description and revision for other projects in the overall Harpoon delivery. Currently available software components are shown in below figure.
 
 ![sdk_graph](docs/sdk_graph.png)
 
@@ -60,7 +60,7 @@ sudo apt install python3-pyelftools
 
 Execute below commands to replicate the whole Harpoon delivery at revision ```${revision}``` and place it in a west worspace named ```hww```.
 ```bash
-west init -m https://github.com/NXPmicro/harpoon-apps --mr ${revision} hww
+west init -m https://github.com/NXP/harpoon-apps --mr ${revision} hww
 cd hww
 west update
 ```
