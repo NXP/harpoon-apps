@@ -13,7 +13,7 @@ Description and comments:    Harpoon application examples
                              SDK-based examples to show how to use peripheral
                              drivers, integrate middleware and execute application
                              inside jailhouse cells on a ARM Cortex-A53 core.
-Release Location:            https://github.com/NXPmicro/harpoon-apps (tag harpoon_2.2.0)
+Release Location:            https://github.com/NXP/harpoon-apps (tag harpoon_2.2.0)
 Origin:                      NXP (BSD-3-Clause)
 --------------------------------------------
 Package:                     MCUXpresso_SDK
@@ -58,7 +58,7 @@ Outgoing License:            Apache-2.0
 License File:                zephyr/LICENSE
 Type of Content:             source code
 Description and comments:    Open source scalable real-time operating system
-Release Location:            https://github.com/NXPmicro/zephyr.git (tag harpoon_2.2.0)
+Release Location:            https://github.com/nxp-zephyr/zephyr.git (tag harpoon_2.2.0)
 Origin:                      https://github.com/zephyrproject-rtos/zephyr.git
 --------------------------------------------
 Package:                     hal_nxp
@@ -66,8 +66,8 @@ Outgoing License:            LA_OPT_NXP_Software_License - Additional distributi
 License File:                modules/hal/mcux/mcux-sdk/LA_OPT_NXP_Software_License.txt
 Type of Content:             source code
 Description and comments:    SDK files for Zephyr
-Release Location:            https://github.com/NXPmicro/hal_nxp.git (tag harpoon_2.2.0)
-Origin:                      https://github.com/NXPmicro/hal_nxp.git
+Release Location:            https://github.com/nxp-zephyr/hal_nxp.git (tag harpoon_2.2.0)
+Origin:                      https://github.com/zephyrproject-rtos/hal_nxp.git
 --------------------------------------------
 Package:                     genavb-sdk
 Outgoing License:            LA_OPT_NXP_Software_License - Additional distribution license granted - Section 2.3 applies
