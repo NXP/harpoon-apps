@@ -26,7 +26,7 @@ manifest:
       groups:
         - hal
     - name: FreeRTOS-Kernel
-      revision: 14dba01da5623497f76748bca6ccc7fb58ee6d36
+      revision: 8df2481c594a05d69f15e9052471586184fa88cc
     - name: mcux-sdk-middleware-multicore
       remote: nxpmicro
       revision: feature/heterogeneous_multicore
