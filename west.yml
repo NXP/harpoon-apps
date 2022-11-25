@@ -13,7 +13,7 @@ manifest:
   # Please add items below in reverse alphabetical order
   projects:
     - name: zephyr
-      revision: aeb61cd2bd6d837d0161dc6174bde7279a9862f2
+      revision: 33caa926d0e053897b2f4060cf1d51553fb4d8c2
     - name: mcux-sdk
       revision: 0565630dc22c464feb346cac5b0d787e8a25229a
     - name: GenAVB_TSN
