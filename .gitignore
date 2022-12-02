@@ -98,6 +98,11 @@ CMakeCache.txt
 Makefile
 *.obj
 *.map
+build_singlecore
+build_smp
+gen_avb_build
+ddr_debug
 
 # Linux application binaries
 ctrl/harpoon_ctrl
+ctrl/harpoon_ctrl_rpmsg
