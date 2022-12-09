@@ -13,6 +13,7 @@
 #include "os/irq.h"
 #include "os/stdlib.h"
 #include "os/string.h"
+#include "os/unistd.h"
 
 /*******************************************************************************
  * Definitions
@@ -740,7 +741,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
 
             log_info("==FlexCAN interrupt functional example -- Finish.==\n");
         } else if (test_type == 3) {
-            uint32_t times = 50;
+            uint32_t times = 40;
 
             for (i = 0; i < times; i++)
             {
@@ -751,7 +752,7 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
 #endif
                 /* Wait for 200ms after every 2 RX_QUEUE_BUFFER_SIZE transmissions. */
                 if ((TxCount % (RX_QUEUE_BUFFER_SIZE * 2U)) == 0U)
-                    SDK_DelayAtLeastUs(200000U, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+                    os_msleep(200);
 
                 ctx->frame.dataByte0++;
                 TxCount++;
