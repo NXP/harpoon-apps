@@ -155,7 +155,7 @@ static void counter_init(const void *dev)
 	gptConfig.divider = 1;
 	GPT_Init((GPT_Type *)(dev), &gptConfig);
 
-	ret = os_irq_register(irqn, gpt_irq_handler, (void *)dev, 0);
+	ret = os_irq_register(irqn, gpt_irq_handler, (void *)dev, OS_IRQ_PRIO_DEFAULT);
 	os_assert(!ret, "Failed to register counter's IRQ! (%d)", ret);
 	os_irq_enable(irqn);
 

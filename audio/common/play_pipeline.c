@@ -367,20 +367,20 @@ static int avb_setup(struct pipeline_ctx *ctx)
 
 	avb_hardware_init();
 
-	os_irq_register(BOARD_NET_PORT0_DRV_IRQ0, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ0_HND, NULL, 0);
+	os_irq_register(BOARD_NET_PORT0_DRV_IRQ0, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ0_HND, NULL, OS_IRQ_PRIO_DEFAULT);
 
 #ifdef BOARD_NET_PORT0_DRV_IRQ1_HND
-	os_irq_register(BOARD_NET_PORT0_DRV_IRQ1, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ1_HND, NULL, 0);
+	os_irq_register(BOARD_NET_PORT0_DRV_IRQ1, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ1_HND, NULL, OS_IRQ_PRIO_DEFAULT);
 #endif
 #ifdef BOARD_NET_PORT0_DRV_IRQ2_HND
-	os_irq_register(BOARD_NET_PORT0_DRV_IRQ2, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ2_HND, NULL, 0);
+	os_irq_register(BOARD_NET_PORT0_DRV_IRQ2, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ2_HND, NULL, OS_IRQ_PRIO_DEFAULT);
 #endif
 #ifdef BOARD_NET_PORT0_DRV_IRQ3_HND
-	os_irq_register(BOARD_NET_PORT0_DRV_IRQ3, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ3_HND, NULL, 0);
+	os_irq_register(BOARD_NET_PORT0_DRV_IRQ3, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ3_HND, NULL, OS_IRQ_PRIO_DEFAULT);
 #endif
 
-	os_irq_register(BOARD_GPT_0_IRQ, (void (*)(void(*)))BOARD_GPT_0_IRQ_HANDLER, NULL, 0);
-	os_irq_register(BOARD_GPT_1_IRQ, (void (*)(void(*)))BOARD_GPT_1_IRQ_HANDLER, NULL, 0);
+	os_irq_register(BOARD_GPT_0_IRQ, (void (*)(void(*)))BOARD_GPT_0_IRQ_HANDLER, NULL, OS_IRQ_PRIO_DEFAULT);
+	os_irq_register(BOARD_GPT_1_IRQ, (void (*)(void(*)))BOARD_GPT_1_IRQ_HANDLER, NULL, OS_IRQ_PRIO_DEFAULT);
 
 	rc = gavb_stack_init();
 	if (rc) {

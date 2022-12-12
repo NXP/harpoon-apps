@@ -352,12 +352,12 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 
 	switch (sai_config->working_mode) {
 		case SAI_RX_IRQ_MODE:
-			ret = os_irq_register(sai_irq_n, sai_irq_handler_continuous, dev, 0);
+			ret = os_irq_register(sai_irq_n, sai_irq_handler_continuous, dev, OS_IRQ_PRIO_DEFAULT);
 			os_assert(!ret, "Failed to register SAI IRQ! (%d)", ret);
 			os_irq_enable(sai_irq_n);
 			break;
 		case SAI_CALLBACK_MODE:
-			ret = os_irq_register(sai_irq_n, sai_irq_handler, dev, 0);
+			ret = os_irq_register(sai_irq_n, sai_irq_handler, dev, OS_IRQ_PRIO_DEFAULT);
 			os_assert(!ret, "Failed to register SAI IRQ! (%d)", ret);
 			os_irq_enable(sai_irq_n);
 			break;

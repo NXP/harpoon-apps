@@ -44,7 +44,7 @@ static void uart_irq_init(void)
 {
 	BaseType_t xResult;
 
-	irq_register(BOARD_UART_IRQ, uart_irq_handler, NULL, 0);
+	irq_register(BOARD_UART_IRQ, uart_irq_handler, NULL, portLOWEST_USABLE_INTERRUPT_PRIORITY - 1);
 
 	GIC_SetRedistPriority(BOARD_UART_IRQ, (portLOWEST_USABLE_INTERRUPT_PRIORITY - 1) << portPRIORITY_SHIFT);
 

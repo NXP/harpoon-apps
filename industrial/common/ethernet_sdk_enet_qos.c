@@ -532,7 +532,7 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
     g_rxSuccessFlag = false;
 
     /* Register ENET_QOS interrupts */
-    os_irq_register(EXAMPLE_ENET_QOS_IRQ, enet_qos_test_irq_handler, NULL, 0);
+    os_irq_register(EXAMPLE_ENET_QOS_IRQ, enet_qos_test_irq_handler, NULL, OS_IRQ_PRIO_DEFAULT);
 
     hardware_ethernet_init();
 

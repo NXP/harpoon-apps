@@ -490,7 +490,7 @@ void test_flexcan_setup(void)
 
         GIC_SetInterfacePriorityMask(0xf0);
         /* Enable Rx Message Buffer interrupt. */
-        os_irq_register(EXAMPLE_FLEXCAN_IRQn, EXAMPLE_FLEXCAN_IRQHandler, NULL, 0xe1);
+        os_irq_register(EXAMPLE_FLEXCAN_IRQn, EXAMPLE_FLEXCAN_IRQHandler, NULL, OS_IRQ_PRIO_DEFAULT + 1);
 
         /* Enable receive interrupt for Rx queue 1 & 2 end Message Buffer. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
@@ -506,7 +506,7 @@ void test_flexcan_setup(void)
         /* Create FlexCAN handle structure and set call back function. */
         FLEXCAN_TransferCreateHandle(EXAMPLE_CAN, &flexcanHandle, flexcan_callback, NULL);
 
-        os_irq_register(EXAMPLE_FLEXCAN_IRQn, test_flexcan_irq_handler, NULL, 0xe1);
+        os_irq_register(EXAMPLE_FLEXCAN_IRQn, test_flexcan_irq_handler, NULL, OS_IRQ_PRIO_DEFAULT + 1);
         os_irq_enable(EXAMPLE_FLEXCAN_IRQn);
 
         /* Set Rx Masking mechanism. */
@@ -557,7 +557,7 @@ void test_flexcan_setup(void)
                                                   (uint32_t)kFLEXCAN_ErrorInterruptEnable |
                                                   (uint32_t)kFLEXCAN_RxWarningInterruptEnable);
             /* Register interrupt. */
-            os_irq_register(EXAMPLE_FLEXCAN_IRQn, test_flexcan_irq_handler, NULL, 0xe1);
+            os_irq_register(EXAMPLE_FLEXCAN_IRQn, test_flexcan_irq_handler, NULL, OS_IRQ_PRIO_DEFAULT + 1);
             /* Setup Rx Message Buffer. */
             mbConfig.format = kFLEXCAN_FrameFormatStandard;
             mbConfig.type   = kFLEXCAN_FrameTypeData;
