@@ -31,4 +31,6 @@ static inline void os_irq_disable(unsigned int irq)
 	DisableIRQ(irq);
 }
 
+#include "os/irq.h" /* include os priority abstractions from common/os/irq.h */
+
 #endif /* #ifndef _FREERTOS_IRQ_H_ */

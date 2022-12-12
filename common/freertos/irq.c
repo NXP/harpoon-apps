@@ -1,10 +1,11 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2023 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "os/irq.h"
 #include "os/stddef.h"
 #include "os/stdint.h"
 
@@ -30,6 +31,9 @@ int irq_register(int nr, void (*func)(void *data), void *data, unsigned int prio
 	if (nr >= NR_IRQS)
 		goto exit;
 
+	if (prio < OS_IRQ_PRIO_MAX || prio > OS_IRQ_PRIO_MIN)
+		goto exit;
+
 	portDISABLE_INTERRUPTS();
 
 	hdlr = &handler[nr];
@@ -37,8 +41,7 @@ int irq_register(int nr, void (*func)(void *data), void *data, unsigned int prio
 	hdlr->func = func;
 	hdlr->data = data;
 
-	if (prio)
-		GIC_SetPriority(nr, prio);
+	GIC_SetPriority(nr, prio << portPRIORITY_SHIFT);
 
 	ret = 0;
 

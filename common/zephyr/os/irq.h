@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,11 +9,17 @@
 
 #include <zephyr/kernel.h>
 
+#define PRIORITY_SHIFT 4
+
 static inline int os_irq_register(unsigned int irq, void (*func)(void *data),
 		void *data, unsigned int prio)
 {
-	irq_connect_dynamic(irq, prio, (void (*)(const void *data))func,
+	if (prio < OS_IRQ_PRIO_MAX || prio > OS_IRQ_PRIO_MIN)
+		return -1;
+
+	irq_connect_dynamic(irq, prio << PRIORITY_SHIFT, (void (*)(const void *data))func,
 			(const void *)data, 0);
+
 	return 0;
 }
 
