@@ -9,7 +9,7 @@
 
 #define VERSION_MAJOR 2 /* eg API breaking */
 #define VERSION_MDIUM 2 /* Feature  update */
-#define VERSION_MINOR 0 /* Bufix /  Hotfix */
+#define VERSION_MINOR 1 /* Bufix /  Hotfix */
 
 
 #define _STRINGIFY(x) #x
