@@ -64,7 +64,7 @@ west init -m https://github.com/NXP/harpoon-apps --mr ${revision} hww
 cd hww
 west update
 ```
-Replace ```${revision}``` with any Harpoon release you wish to use (e.g.: ```harpoon_2.2.0```). This can also be ```main``` if you want the latest state, or any commit SHA.
+Replace ```${revision}``` with any Harpoon release you wish to use (e.g.: ```harpoon_2.2.1```). This can also be ```main``` if you want the latest state, or any commit SHA.
 
 # Repository structure
 
