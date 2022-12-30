@@ -46,10 +46,6 @@ static void uart_irq_init(void)
 
 	irq_register(BOARD_UART_IRQ, uart_irq_handler, NULL, portLOWEST_USABLE_INTERRUPT_PRIORITY - 1);
 
-	GIC_SetRedistPriority(BOARD_UART_IRQ, (portLOWEST_USABLE_INTERRUPT_PRIORITY - 1) << portPRIORITY_SHIFT);
-
-	GIC_SetPriority(BOARD_UART_IRQ, (portLOWEST_USABLE_INTERRUPT_PRIORITY - 1) << portPRIORITY_SHIFT);
-
 	xResult = xTaskCreate(uart_task, "uart_task",
 			configMINIMAL_STACK_SIZE + 200, NULL,
 			uart_task_PRIORITY, &uart_task_h);
