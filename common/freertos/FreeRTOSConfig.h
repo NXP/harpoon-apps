@@ -65,12 +65,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * FreeRTOS functions that can be called from an interrupt are those that end in
  * "FromISR".  FreeRTOS maintains a separate interrupt safe API to enable
  * interrupt entry to be shorter, faster, simpler and smaller.
- *
- * For the purpose of setting configMAX_API_CALL_INTERRUPT_PRIORITY 255
- * represents the lowest priority.
  */
-/* If the interrupt controller implements 16 unique priority levels then valid values are 1 to 14. */
-#define configMAX_API_CALL_INTERRUPT_PRIORITY   10
+/* If the interrupt controller implements 16 unique priority levels then valid values are 1 to 14.
+ * However, in case security extensions are implemented, configMAX_API_CALL_INTERRUPT_PRIORITY must be strictly
+ * greater than configUNIQUE_INTERRUPT_PRIORITIES / 2 (see portable/GCC/ARM_CA53_64_BIT_SRE/port.c) ; hence,
+ * valid values become 9 to 14
+ */
+#define configMAX_API_CALL_INTERRUPT_PRIORITY   9
 
 /* The following constant describe the hardware GIC */
 #define configUNIQUE_INTERRUPT_PRIORITIES       16
