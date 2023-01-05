@@ -25,8 +25,8 @@ static inline int os_irq_register(unsigned int irq, void (*func)(void *data),
 
 static inline int os_irq_unregister(unsigned int irq)
 {
-	/* To be safe in case of not calling os_irq_disable() following this api */
 	irq_disable(irq);
+	irq_connect_dynamic(irq, OS_IRQ_PRIO_DEFAULT << PRIORITY_SHIFT, NULL, NULL, 0);
 
 	return 0;
 }

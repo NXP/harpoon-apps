@@ -65,6 +65,8 @@ int irq_unregister(int nr)
 	hdlr->func = NULL;
 	hdlr->data = NULL;
 
+	GIC_SetPriority(nr, OS_IRQ_PRIO_DEFAULT << portPRIORITY_SHIFT);
+
 	ret = 0;
 
 	portENABLE_INTERRUPTS();
