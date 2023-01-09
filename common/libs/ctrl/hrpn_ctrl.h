@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2023 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -52,6 +52,11 @@ enum {
 	HRPN_RESP_STATUS_ERROR = 1,
 };
 
+enum {
+	HRPN_PROTOCOL_CAN = 0,
+	HRPN_PROTOCOL_CAN_FD = 1,
+};
+
 struct hrpn_cmd_latency_run {
 	uint32_t type;
 	uint32_t id;
@@ -88,6 +93,7 @@ struct hrpn_cmd_industrial_run {
 	uint32_t type;
 	uint32_t mode;
 	uint32_t role;
+	uint32_t protocol;
 	uint8_t addr[6];
 };
 

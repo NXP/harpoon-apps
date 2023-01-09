@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -32,8 +32,6 @@
 #define RX_MESSAGE_BUFFER_NUM (9)
 #define TX_MESSAGE_BUFFER_NUM (8)
 
-/* Define USE_CANFD to no-zero value to evaluate CANFD mode, define to 0 to use classical CAN mode*/
-#define USE_CANFD (1)
 /*
  *    DWORD_IN_MB    DLC    BYTES_IN_MB             Maximum MBs
  *    2              8      kFLEXCAN_8BperMB        64
@@ -73,21 +71,22 @@ struct can_ctx {
 
 	flexcan_mb_transfer_t txXfer, rxXfer;
 
-#if (defined(USE_CANFD) && USE_CANFD)
-	flexcan_fd_frame_t frame;
-	flexcan_fd_frame_t rxFrame[RX_QUEUE_BUFFER_SIZE * 2];
-#else
-	flexcan_frame_t frame;
-	flexcan_frame_t rxFrame[RX_QUEUE_BUFFER_SIZE * 2];
-#endif
+	union {
+		flexcan_fd_frame_t canfd_frame;
+		flexcan_fd_frame_t canfd_rxFrame[RX_QUEUE_BUFFER_SIZE * 2];
+
+		flexcan_frame_t frame;
+		flexcan_frame_t rxFrame[RX_QUEUE_BUFFER_SIZE * 2];
+	} u;
 
 	uint32_t txIdentifier;
 	uint32_t rxIdentifier;
 
 	uint8_t node_type;
 	uint8_t test_type;
+	bool use_canfd;
 
-	bool rxStop;
+	bool sys_exit;
 
 	volatile status_t rxStatus;
 	volatile uint32_t rxQueueNum;
@@ -96,15 +95,10 @@ struct can_ctx {
 /*******************************************************************************
  * Code
  ******************************************************************************/
-
 /*!
  * @brief User read message buffer function
  */
-#if (defined(USE_CANFD) && USE_CANFD)
-static status_t User_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *pRxFrame)
-#else
 static status_t User_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFrame)
-#endif
 {
     /* Assertion. */
     assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
@@ -114,7 +108,73 @@ static status_t User_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pR
     uint32_t cs_temp;
     uint8_t rx_code;
     uint32_t can_id = 0;
-#if (defined(USE_CANFD) && USE_CANFD)
+    /* Read CS field of Rx Message Buffer to lock Message Buffer. */
+    cs_temp = base->MB[mbIdx].CS;
+    can_id  = base->MB[mbIdx].ID;
+
+    /* Get Rx Message Buffer Code field. */
+    rx_code = (uint8_t)((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT);
+
+    /* Check to see if Rx Message Buffer is full or overrun. */
+    if ((0x2 == rx_code) || (0x6 == rx_code))
+    {
+        /* Store Message ID. */
+        pRxFrame->id = can_id & (CAN_ID_EXT_MASK | CAN_ID_STD_MASK);
+
+        /* Get the message ID and format. */
+        pRxFrame->format = (cs_temp & CAN_CS_IDE_MASK) != 0U ? (uint8_t)kFLEXCAN_FrameFormatExtend :
+                                                               (uint8_t)kFLEXCAN_FrameFormatStandard;
+
+        /* Get the message type. */
+        pRxFrame->type =
+            (cs_temp & CAN_CS_RTR_MASK) != 0U ? (uint8_t)kFLEXCAN_FrameTypeRemote : (uint8_t)kFLEXCAN_FrameTypeData;
+
+        /* Get the message length. */
+        pRxFrame->length = (uint8_t)((cs_temp & CAN_CS_DLC_MASK) >> CAN_CS_DLC_SHIFT);
+
+        /* Get the time stamp. */
+        pRxFrame->timestamp = (uint16_t)((cs_temp & CAN_CS_TIME_STAMP_MASK) >> CAN_CS_TIME_STAMP_SHIFT);
+
+        /* Store Message Payload. */
+        pRxFrame->dataWord0 = base->MB[mbIdx].WORD0;
+        pRxFrame->dataWord1 = base->MB[mbIdx].WORD1;
+
+        /* Restore original Rx value*/
+        base->MB[mbIdx].ID = FLEXCAN_ID_STD(RX_MB_ID_AFTER_MASK);
+
+        /* Read free-running timer to unlock Rx Message Buffer. */
+        (void)base->TIMER;
+
+        if (0x2 == rx_code)
+        {
+            status = kStatus_Success;
+        }
+        else
+        {
+            status = kStatus_FLEXCAN_RxOverflow;
+        }
+    }
+    else
+    {
+        /* Read free-running timer to unlock Rx Message Buffer. */
+        (void)base->TIMER;
+
+        status = kStatus_Fail;
+    }
+
+    return status;
+}
+
+static status_t User_FDReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *pRxFrame)
+{
+    /* Assertion. */
+    assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
+    assert(NULL != pRxFrame);
+
+    status_t status;
+    uint32_t cs_temp;
+    uint8_t rx_code;
+    uint32_t can_id = 0;
     uint8_t cnt = 0;
     uint32_t dataSize;
     dataSize                  = (base->FDCTRL & CAN_FDCTRL_MBDSR0_MASK) >> CAN_FDCTRL_MBDSR0_SHIFT;
@@ -147,11 +207,7 @@ static status_t User_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pR
     /* Read CS field of Rx Message Buffer to lock Message Buffer. */
     cs_temp = mbAddr[offset];
     can_id  = mbAddr[offset + 1U];
-#else
-    /* Read CS field of Rx Message Buffer to lock Message Buffer. */
-    cs_temp = base->MB[mbIdx].CS;
-    can_id  = base->MB[mbIdx].ID;
-#endif
+
     /* Get Rx Message Buffer Code field. */
     rx_code = (uint8_t)((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT);
 
@@ -175,7 +231,6 @@ static status_t User_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pR
         /* Get the time stamp. */
         pRxFrame->timestamp = (uint16_t)((cs_temp & CAN_CS_TIME_STAMP_MASK) >> CAN_CS_TIME_STAMP_SHIFT);
 
-#if (defined(USE_CANFD) && USE_CANFD)
         /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64
            Bytes payload. */
         for (cnt = 0; cnt < (dataSize + 1U); cnt++)
@@ -191,13 +246,10 @@ static status_t User_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pR
 
         /* Restore original Rx ID value*/
         mbAddr[offset + 1U] = FLEXCAN_ID_STD(RX_MB_ID_AFTER_MASK);
-#else
-        /* Store Message Payload. */
-        pRxFrame->dataWord0 = base->MB[mbIdx].WORD0;
-        pRxFrame->dataWord1 = base->MB[mbIdx].WORD1;
+
         /* Restore original Rx value*/
         base->MB[mbIdx].ID = FLEXCAN_ID_STD(RX_MB_ID_AFTER_MASK);
-#endif
+
         /* Read free-running timer to unlock Rx Message Buffer. */
         (void)base->TIMER;
 
@@ -269,7 +321,11 @@ static void User_TransferHandleIRQ(CAN_Type *base, struct can_ctx *ctx)
                      */
                     FLEXCAN_SetRxIndividualMask(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i,
                                                 FLEXCAN_RX_MB_STD_MASK(RX_MB_ID_MASK | TX_MB_ID, 0, 0));
-                    (void)User_ReadRxMb(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i, &ctx->rxFrame[i]);
+                    if (ctx->use_canfd)
+                        (void)User_FDReadRxMb(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i, &ctx->u.canfd_rxFrame[i]);
+                    else
+                        (void)User_ReadRxMb(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i, &ctx->u.rxFrame[i]);
+
                     /* Clear queue 1 Message Buffer receive status. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
                     FLEXCAN_ClearMbStatusFlags(base, (uint64_t)1U << (RX_QUEUE_BUFFER_BASE + i));
@@ -292,7 +348,10 @@ static void User_TransferHandleIRQ(CAN_Type *base, struct can_ctx *ctx)
                                                 FLEXCAN_RX_MB_STD_MASK(RX_MB_ID_MASK, 0, 0));
                 for (; i < (RX_QUEUE_BUFFER_SIZE * 2U); i++)
                 {
-                    status = User_ReadRxMb(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i, &ctx->rxFrame[i]);
+                    if (ctx->use_canfd)
+                        status = User_FDReadRxMb(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i, &ctx->u.canfd_rxFrame[i]);
+                    else
+                        status = User_ReadRxMb(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i, &ctx->u.rxFrame[i]);
 
                     /* Clear queue 2 Message Buffer receive status. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
@@ -374,11 +433,11 @@ static void EXAMPLE_FLEXCAN_IRQHandler(void *data)
     if (0U != FLEXCAN_GetMbStatusFlags(EXAMPLE_CAN, flag << RX_MESSAGE_BUFFER_NUM))
     {
         FLEXCAN_ClearMbStatusFlags(EXAMPLE_CAN, flag << RX_MESSAGE_BUFFER_NUM);
-#if (defined(USE_CANFD) && USE_CANFD)
-        (void)FLEXCAN_ReadFDRxMb(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &ctx->frame);
-#else
-        (void)FLEXCAN_ReadRxMb(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &ctx->frame);
-#endif
+        if (ctx->use_canfd)
+            (void)FLEXCAN_ReadFDRxMb(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &ctx->u.canfd_frame);
+        else
+            (void)FLEXCAN_ReadRxMb(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &ctx->u.frame);
+
         ctx->rxComplete = true;
     }
 }
@@ -468,37 +527,25 @@ static void test_flexcan_setup(struct can_ctx *ctx)
 #if (defined(USE_IMPROVED_TIMING_CONFIG) && USE_IMPROVED_TIMING_CONFIG)
     flexcan_timing_config_t timing_config;
     memset(&timing_config, 0, sizeof(flexcan_timing_config_t));
-#if (defined(USE_CANFD) && USE_CANFD)
-    if (FLEXCAN_FDCalculateImprovedTimingValues(EXAMPLE_CAN, flexcanConfig.baudRate, flexcanConfig.baudRateFD,
-                                                EXAMPLE_CAN_CLK_FREQ, &timing_config))
-    {
+    if (ctx->use_canfd && FLEXCAN_FDCalculateImprovedTimingValues(EXAMPLE_CAN, flexcanConfig.baudRate, flexcanConfig.baudRateFD,
+                                                EXAMPLE_CAN_CLK_FREQ, &timing_config)) {
         /* Update the improved timing configuration*/
         memcpy(&(flexcanConfig.timingConfig), &timing_config, sizeof(flexcan_timing_config_t));
-    }
-    else
-    {
-        log_info("No found Improved Timing Configuration. Just used default configuration\n\n");
-    }
-#else
-    if (FLEXCAN_CalculateImprovedTimingValues(EXAMPLE_CAN, flexcanConfig.baudRate, EXAMPLE_CAN_CLK_FREQ,
-                                              &timing_config))
-    {
+    } else if (!ctx->use_canfd && FLEXCAN_CalculateImprovedTimingValues(EXAMPLE_CAN, flexcanConfig.baudRate, EXAMPLE_CAN_CLK_FREQ,
+                                                &timing_config)) {
         /* Update the improved timing configuration*/
         memcpy(&(flexcanConfig.timingConfig), &timing_config, sizeof(flexcan_timing_config_t));
-    }
-    else
-    {
+    } else {
         log_info("No found Improved Timing Configuration. Just used default configuration\n\n");
     }
-#endif
 #endif
 
     log_info("init CAN with clock freq %lu Hz\n", EXAMPLE_CAN_CLK_FREQ);
-#if (defined(USE_CANFD) && USE_CANFD)
-    FLEXCAN_FDInit(EXAMPLE_CAN, &flexcanConfig, EXAMPLE_CAN_CLK_FREQ, BYTES_IN_MB, true);
-#else
-    FLEXCAN_Init(EXAMPLE_CAN, &flexcanConfig, EXAMPLE_CAN_CLK_FREQ);
-#endif
+
+    if (ctx->use_canfd)
+        FLEXCAN_FDInit(EXAMPLE_CAN, &flexcanConfig, EXAMPLE_CAN_CLK_FREQ, BYTES_IN_MB, true);
+    else
+        FLEXCAN_Init(EXAMPLE_CAN, &flexcanConfig, EXAMPLE_CAN_CLK_FREQ);
 
     if (test_type == 1)
     {
@@ -506,18 +553,14 @@ static void test_flexcan_setup(struct can_ctx *ctx)
         mbConfig.format = kFLEXCAN_FrameFormatStandard;
         mbConfig.type   = kFLEXCAN_FrameTypeData;
         mbConfig.id     = FLEXCAN_ID_STD(ctx->txIdentifier);
-#if (defined(USE_CANFD) && USE_CANFD)
-        FLEXCAN_SetFDRxMbConfig(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &mbConfig, true);
-#else
-        FLEXCAN_SetRxMbConfig(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &mbConfig, true);
-#endif
 
-        /* Setup Tx Message Buffer. */
-#if (defined(USE_CANFD) && USE_CANFD)
-        FLEXCAN_SetFDTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
-#else
-        FLEXCAN_SetTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
-#endif
+        if (ctx->use_canfd) {
+            FLEXCAN_SetFDRxMbConfig(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &mbConfig, true);
+            FLEXCAN_SetFDTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
+        } else {
+            FLEXCAN_SetRxMbConfig(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &mbConfig, true);
+            FLEXCAN_SetTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
+        }
 
         /* Enable Rx Message Buffer interrupt. */
         os_irq_register(EXAMPLE_FLEXCAN_IRQn, EXAMPLE_FLEXCAN_IRQHandler, ctx, OS_IRQ_PRIO_DEFAULT + 1);
@@ -546,22 +589,22 @@ static void test_flexcan_setup(struct can_ctx *ctx)
         mbConfig.format = kFLEXCAN_FrameFormatStandard;
         mbConfig.type   = kFLEXCAN_FrameTypeData;
         mbConfig.id     = FLEXCAN_ID_STD(ctx->rxIdentifier);
-#if (defined(USE_CANFD) && USE_CANFD)
-        FLEXCAN_SetFDRxMbConfig(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &mbConfig, true);
-#else
-        FLEXCAN_SetRxMbConfig(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &mbConfig, true);
-#endif
+
+        if (ctx->use_canfd)
+            FLEXCAN_SetFDRxMbConfig(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &mbConfig, true);
+        else
+            FLEXCAN_SetRxMbConfig(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &mbConfig, true);
 
         /* Setup Tx Message Buffer. */
-#if (defined(USE_CANFD) && USE_CANFD)
-        FLEXCAN_SetFDTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
-#else
-        FLEXCAN_SetTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
-#endif
+        if (ctx->use_canfd)
+            FLEXCAN_SetFDTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
+        else
+            FLEXCAN_SetTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
+
         if (node_type == CAN_NODE_A)
         {
             log_info("Press any key to trigger one-shot transmission\n\n");
-            ctx->frame.dataByte0 = 0;
+            ctx->u.frame.dataByte0 = 0;
         }
         else
         {
@@ -573,13 +616,13 @@ static void test_flexcan_setup(struct can_ctx *ctx)
         if (node_type == CAN_NODE_A)
         {
             /* Setup Tx Message Buffer. */
-#if (defined(USE_CANFD) && USE_CANFD)
-            FLEXCAN_SetFDTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
-#else
-            FLEXCAN_SetTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
-#endif
-            ctx->frame.dataByte0 = 0;
-            ctx->frame.dataByte1 = 0x55;
+            if (ctx->use_canfd)
+                FLEXCAN_SetFDTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
+            else
+                FLEXCAN_SetTxMbConfig(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, true);
+
+            ctx->u.frame.dataByte0 = 0;
+            ctx->u.frame.dataByte1 = 0x55;
         }
         else
         {
@@ -598,12 +641,12 @@ static void test_flexcan_setup(struct can_ctx *ctx)
                 /* Setup Rx individual ID mask. */
                 FLEXCAN_SetRxIndividualMask(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i,
                                         FLEXCAN_RX_MB_STD_MASK(RX_MB_ID_MASK, 0, 0));
-#if (defined(USE_CANFD) && USE_CANFD)
-                FLEXCAN_SetFDRxMbConfig(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i, &mbConfig, true);
-#else
-                FLEXCAN_SetRxMbConfig(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i, &mbConfig, true);
-#endif
+                if (ctx->use_canfd)
+                    FLEXCAN_SetFDRxMbConfig(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i, &mbConfig, true);
+                else
+                    FLEXCAN_SetRxMbConfig(EXAMPLE_CAN, RX_QUEUE_BUFFER_BASE + i, &mbConfig, true);
             }
+
             /* Enable receive interrupt for Rx queue 1 & 2 end Message Buffer. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
             FLEXCAN_EnableMbInterrupts(EXAMPLE_CAN, (uint64_t)1U << RX_QUEUE_BUFFER_END_1);
@@ -629,64 +672,65 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
 
     log_debug("enter\n");
 
+    if (ctx->sys_exit)
+        goto exit;
+
     if ((node_type == CAN_NODE_A) || (test_type == 1))
     {
-        ctx->frame.id     = FLEXCAN_ID_STD(ctx->txIdentifier);
-        ctx->frame.format = (uint8_t)kFLEXCAN_FrameFormatStandard;
-        ctx->frame.type   = (uint8_t)kFLEXCAN_FrameTypeData;
-        ctx->frame.length = (uint8_t)DLC;
-#if (defined(USE_CANFD) && USE_CANFD)
-        ctx->frame.brs = (uint8_t)1U;
-#endif
+        ctx->u.frame.id     = FLEXCAN_ID_STD(ctx->txIdentifier);
+        ctx->u.frame.format = (uint8_t)kFLEXCAN_FrameFormatStandard;
+        ctx->u.frame.type   = (uint8_t)kFLEXCAN_FrameTypeData;
+        ctx->u.frame.length = (uint8_t)DLC;
+        if (ctx->use_canfd)
+            ctx->u.canfd_frame.brs = (uint8_t)1U;
+
         if (test_type == 1)
         {
-#if (defined(USE_CANFD) && USE_CANFD)
-            for (i = 0; i < DWORD_IN_MB; i++)
-            {
-               ctx->frame.dataWord[i] = i;
+            if (ctx->use_canfd) {
+                for (i = 0; i < DWORD_IN_MB; i++)
+                {
+                    ctx->u.canfd_frame.dataWord[i] = i;
+                }
+            } else {
+                ctx->u.frame.dataWord0 = CAN_WORD0_DATA_BYTE_0(0x11) | CAN_WORD0_DATA_BYTE_1(0x22) | CAN_WORD0_DATA_BYTE_2(0x33) |
+                                CAN_WORD0_DATA_BYTE_3(0x44);
+                ctx->u.frame.dataWord1 = CAN_WORD1_DATA_BYTE_4(0x55) | CAN_WORD1_DATA_BYTE_5(0x66) | CAN_WORD1_DATA_BYTE_6(0x77) |
+                                CAN_WORD1_DATA_BYTE_7(0x88);
             }
-#else
-            ctx->frame.dataWord0 = CAN_WORD0_DATA_BYTE_0(0x11) | CAN_WORD0_DATA_BYTE_1(0x22) | CAN_WORD0_DATA_BYTE_2(0x33) |
-                              CAN_WORD0_DATA_BYTE_3(0x44);
-            ctx->frame.dataWord1 = CAN_WORD1_DATA_BYTE_4(0x55) | CAN_WORD1_DATA_BYTE_5(0x66) | CAN_WORD1_DATA_BYTE_6(0x77) |
-                              CAN_WORD1_DATA_BYTE_7(0x88);
-#endif
 
             log_info("Send message from MB%d to MB%d\n", TX_MESSAGE_BUFFER_NUM, RX_MESSAGE_BUFFER_NUM);
-#if (defined(USE_CANFD) && USE_CANFD)
-            for (i = 0; i < DWORD_IN_MB; i++)
-            {
-                log_info("tx word%d = 0x%x\n", i, ctx->frame.dataWord[i]);
+            if (ctx->use_canfd) {
+                for (i = 0; i < DWORD_IN_MB; i++)
+                {
+                    log_info("tx word%d = 0x%x\n", i, ctx->u.canfd_frame.dataWord[i]);
+                }
+            } else {
+                log_info("tx word0 = 0x%x\n", ctx->u.frame.dataWord0);
+                log_info("tx word1 = 0x%x\n", ctx->u.frame.dataWord1);
             }
-#else
-            log_info("tx word0 = 0x%x\n", ctx->frame.dataWord0);
-            log_info("tx word1 = 0x%x\n", ctx->frame.dataWord1);
-#endif
 
             /* Send data through Tx Message Buffer using polling function. */
-#if (defined(USE_CANFD) && USE_CANFD)
-            (void)FLEXCAN_TransferFDSendBlocking(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, &ctx->frame);
-#else
-            (void)FLEXCAN_TransferSendBlocking(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, &ctx->frame);
-#endif
+            if (ctx->use_canfd)
+                (void)FLEXCAN_TransferFDSendBlocking(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, &ctx->u.canfd_frame);
+            else
+                (void)FLEXCAN_TransferSendBlocking(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, &ctx->u.frame);
 
             /* Waiting for Message receive finish. */
             while (!ctx->rxComplete)
             {
-                if (ctx->rxStop)
+                if (ctx->sys_exit)
                     goto exit;
             }
 
             log_info("Received message from MB%d\n", RX_MESSAGE_BUFFER_NUM);
-#if (defined(USE_CANFD) && USE_CANFD)
-            for (i = 0; i < DWORD_IN_MB; i++)
-            {
-                log_info("rx word%d = 0x%x\n", i, ctx->frame.dataWord[i]);
+            if (ctx->use_canfd) {
+                for (i = 0; i < DWORD_IN_MB; i++)
+                {
+                    log_info("rx word%d = 0x%x\n", i, ctx->u.canfd_frame.dataWord[i]);
+                }
             }
-#else
-            log_info("rx word0 = 0x%x\n", ctx->frame.dataWord0);
-            log_info("rx word1 = 0x%x\n", ctx->frame.dataWord1);
-#endif
+            log_info("rx word0 = 0x%x\n", ctx->u.frame.dataWord0);
+            log_info("rx word1 = 0x%x\n", ctx->u.frame.dataWord1);
 
             /* Stop FlexCAN Send & Receive. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
@@ -699,18 +743,18 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
 
         } else if (test_type == 2) {
             ctx->txXfer.mbIdx = (uint8_t)TX_MESSAGE_BUFFER_NUM;
-#if (defined(USE_CANFD) && USE_CANFD)
-            ctx->txXfer.framefd = &ctx->frame;
-            (void)FLEXCAN_TransferFDSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
-#else
-            ctx->txXfer.frame = &ctx->frame;
-            (void)FLEXCAN_TransferSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
-#endif
+            if (ctx->use_canfd) {
+                ctx->txXfer.framefd = &ctx->u.canfd_frame;
+                (void)FLEXCAN_TransferFDSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
+            } else {
+                ctx->txXfer.frame = &ctx->u.frame;
+                (void)FLEXCAN_TransferSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
+            }
 
             log_info("Transmission began\n");
             while (!ctx->txComplete)
             {
-                if (ctx->rxStop)
+                if (ctx->sys_exit)
                     goto exit;
             };
             ctx->txComplete = false;
@@ -718,26 +762,26 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
             log_info("Transmission sent\n");
             /* Start receive data through Rx Message Buffer. */
             ctx->rxXfer.mbIdx = (uint8_t)RX_MESSAGE_BUFFER_NUM;
-#if (defined(USE_CANFD) && USE_CANFD)
-            ctx->rxXfer.framefd = &ctx->frame;
-            (void)FLEXCAN_TransferFDReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
-#else
-            ctx->rxXfer.frame = &ctx->frame;
-            (void)FLEXCAN_TransferReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
-#endif
+            if (ctx->use_canfd) {
+                ctx->rxXfer.framefd = &ctx->u.canfd_frame;
+                (void)FLEXCAN_TransferFDReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
+            } else {
+                ctx->rxXfer.frame = &ctx->u.frame;
+                (void)FLEXCAN_TransferReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
+            }
 
             /* Wait until Rx MB full. */
             while (!ctx->rxComplete)
             {
-                if (ctx->rxStop)
+                if (ctx->sys_exit)
                     goto exit;
             };
             ctx->rxComplete = false;
 
-            log_info("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\n", ctx->frame.id >> CAN_ID_STD_SHIFT,
-                     ctx->frame.dataByte0, ctx->frame.timestamp);
-            ctx->frame.dataByte0++;
-            ctx->frame.dataByte1 = 0x55;
+            log_info("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\n", ctx->u.frame.id >> CAN_ID_STD_SHIFT,
+                     ctx->u.frame.dataByte0, ctx->u.frame.timestamp);
+            ctx->u.frame.dataByte0++;
+            ctx->u.frame.dataByte1 = 0x55;
 
             log_info("==FlexCAN interrupt functional example -- Finish.==\n");
         } else if (test_type == 3) {
@@ -745,26 +789,23 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
 
             for (i = 0; i < times; i++)
             {
-#if (defined(USE_CANFD) && USE_CANFD)
-                (void)FLEXCAN_TransferFDSendBlocking(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, &ctx->frame);
-#else
-                (void)FLEXCAN_TransferSendBlocking(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, &ctx->frame);
-#endif
+                if (ctx->use_canfd)
+                    (void)FLEXCAN_TransferFDSendBlocking(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, &ctx->u.canfd_frame);
+                else
+                    (void)FLEXCAN_TransferSendBlocking(EXAMPLE_CAN, TX_MESSAGE_BUFFER_NUM, &ctx->u.frame);
+
                 /* Wait for 200ms after every 2 RX_QUEUE_BUFFER_SIZE transmissions. */
                 if ((TxCount % (RX_QUEUE_BUFFER_SIZE * 2U)) == 0U)
                     os_msleep(200);
 
-                ctx->frame.dataByte0++;
+                ctx->u.frame.dataByte0++;
                 TxCount++;
             }
             log_info("Transmission done.\n\n");
             log_info("==FlexCAN PingPong functional example -- Finish.==\n");
         }
-    }
-    else
-    {
-        if (test_type == 2)
-        {
+    } else {
+        if (test_type == 2) {
             /* Before this , should first make node B enter STOP mode after FlexCAN
              * initialized with enableSelfWakeup=true and Rx MB configured, then A
              * sends ctx->frame N which wakes up node B. A will continue to send ctx->frame N
@@ -772,46 +813,45 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
              * application it seems that B received the ctx->frame that woke it up which
              * is not expected as stated in the reference manual, but actually the
              * output in the terminal B received is the same second ctx->frame N). */
-            if (ctx->wakenUp)
-            {
+            if (ctx->wakenUp) {
                 log_info("B has been waken up!\n\n");
             }
 
             /* Start receive data through Rx Message Buffer. */
             ctx->rxXfer.mbIdx = (uint8_t)RX_MESSAGE_BUFFER_NUM;
-#if (defined(USE_CANFD) && USE_CANFD)
-            ctx->rxXfer.framefd = &ctx->frame;
-            (void)FLEXCAN_TransferFDReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
-#else
-            ctx->rxXfer.frame = &ctx->frame;
-            (void)FLEXCAN_TransferReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
-#endif
+            if (ctx->use_canfd) {
+                ctx->rxXfer.framefd = &ctx->u.canfd_frame;
+                (void)FLEXCAN_TransferFDReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
+            } else {
+                ctx->rxXfer.frame = &ctx->u.frame;
+                (void)FLEXCAN_TransferReceiveNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->rxXfer);
+            }
 
             /* Wait until Rx receive full. */
             while (!ctx->rxComplete)
             {
-                if (ctx->rxStop)
+                if (ctx->sys_exit)
                     goto exit;
             };
             ctx->rxComplete = false;
 
-            log_info("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\n", ctx->frame.id >> CAN_ID_STD_SHIFT,
-                 ctx->frame.dataByte0, ctx->frame.timestamp);
+            log_info("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\n", ctx->u.frame.id >> CAN_ID_STD_SHIFT,
+                 ctx->u.frame.dataByte0, ctx->u.frame.timestamp);
 
-            ctx->frame.id     = FLEXCAN_ID_STD(ctx->txIdentifier);
+            ctx->u.frame.id     = FLEXCAN_ID_STD(ctx->txIdentifier);
             ctx->txXfer.mbIdx = (uint8_t)TX_MESSAGE_BUFFER_NUM;
-#if (defined(USE_CANFD) && USE_CANFD)
-            ctx->frame.brs      = 1;
-            ctx->txXfer.framefd = &ctx->frame;
-            (void)FLEXCAN_TransferFDSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
-#else
-            ctx->txXfer.frame = &ctx->frame;
-            (void)FLEXCAN_TransferSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
-#endif
+            if (ctx->use_canfd) {
+                ctx->u.canfd_frame.brs = 1;
+                ctx->txXfer.framefd = &ctx->u.canfd_frame;
+                (void)FLEXCAN_TransferFDSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
+            } else {
+                ctx->txXfer.frame = &ctx->u.frame;
+                (void)FLEXCAN_TransferSendNonBlocking(EXAMPLE_CAN, &ctx->flexcanHandle, &ctx->txXfer);
+            }
 
             while (!ctx->txComplete)
             {
-                if (ctx->rxStop)
+                if (ctx->sys_exit)
                     goto exit;
             };
             ctx->txComplete = false;
@@ -823,31 +863,30 @@ static void test_flexcan_transmit(struct can_ctx *ctx)
                 /* Wait until Rx queue 1 full. */
                 while (ctx->rxQueueNum != 1U)
                 {
-                    if (ctx->rxStop)
+                    if (ctx->sys_exit)
                         goto exit;
                 };
                 ctx->rxQueueNum = 0;
                 log_info("Read Rx MB from Queue 1.\n");
                 for (i = 0; i < RX_QUEUE_BUFFER_SIZE; i++)
                 {
-                    log_info("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\n", ctx->rxFrame[i].id >> CAN_ID_STD_SHIFT,
-                             ctx->rxFrame[i].dataByte0, ctx->rxFrame[i].timestamp);
+                    log_info("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\n", ctx->u.rxFrame[i].id >> CAN_ID_STD_SHIFT,
+                             ctx->u.rxFrame[i].dataByte0, ctx->u.rxFrame[i].timestamp);
                 }
                 /* Wait until Rx queue 2 full. */
                 while (ctx->rxQueueNum != 2U)
                 {
-                    if (ctx->rxStop)
+                    if (ctx->sys_exit)
                         goto exit;
                 };
                 ctx->rxQueueNum = 0;
                 log_info("Read Rx MB from Queue 2.\n");
                 for (; i < (RX_QUEUE_BUFFER_SIZE * 2U); i++)
                 {
-                    log_info("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\n", ctx->rxFrame[i].id >> CAN_ID_STD_SHIFT,
-                             ctx->rxFrame[i].dataByte0, ctx->rxFrame[i].timestamp);
+                    log_info("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\n", ctx->u.rxFrame[i].id >> CAN_ID_STD_SHIFT,
+                             ctx->u.rxFrame[i].dataByte0, ctx->u.rxFrame[i].timestamp);
                 }
-                if (ctx->rxStatus == kStatus_FLEXCAN_RxOverflow)
-                {
+                if (ctx->rxStatus == kStatus_FLEXCAN_RxOverflow) {
                     ctx->rxStatus = 0;
                     log_info("The data in the last MB %d in the queue 2 is overwritten\n", RX_QUEUE_BUFFER_END_2);
                 }
@@ -896,7 +935,7 @@ void can_pre_exit(void *priv)
 {
 	struct can_ctx *ctx = priv;
 
-	ctx->rxStop = true;
+	ctx->sys_exit = true;
 }
 
 static void *can_init(void *parameters, uint32_t test_type)
@@ -923,12 +962,14 @@ static void *can_init(void *parameters, uint32_t test_type)
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
+	ctx->use_canfd = cfg->protocol;
 	ctx->node_type = node_type;
 	ctx->test_type = test_type;
-	ctx->rxStop = false;
+	ctx->sys_exit = false;
 
 	log_debug("node %c\n", ctx->node_type ? 'B' : 'A');
 	log_debug("test type %d\n", test_type);
+	log_debug("used protocol %s\n", ctx->use_canfd ? "CAN-FD" : "CAN");
 
 	hardware_flexcan_init();
 

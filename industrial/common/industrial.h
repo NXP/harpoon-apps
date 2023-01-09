@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -14,6 +14,7 @@
 
 struct industrial_config {
 	unsigned int role; /* node_type for CAN, controller/endpoint for ethernet */
+	unsigned int protocol;
 	uint8_t address[6];
 
 	void (*event_send)(void *, uint8_t);

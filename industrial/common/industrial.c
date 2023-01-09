@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -106,6 +106,7 @@ static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run 
 	cfg.event_send = data_send_event;
 	cfg.event_data = &data->mqueue;
 	cfg.role = on->role;
+	cfg.protocol = on->protocol;
 
 	industrial_set_hw_addr(&cfg, on->addr);
 

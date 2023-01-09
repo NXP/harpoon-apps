@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -26,6 +26,9 @@ void can_usage(void)
 		"\t-n <node_type> acting as node 'A' or 'B' (default 'A')\n"
 		"\t               0 - node 'A'\n"
 		"\t               1 - node 'B'\n"
+		"\t-o <protocol>  use CAN or CAN FD (default '0')\n"
+		"\t               0 - use CAN\n"
+		"\t               1 - use CAN FD\n"
 		"\t-s             stop CAN\n"
 	);
 }
@@ -46,7 +49,7 @@ void ethernet_usage(void)
 	);
 }
 
-static int default_run(struct mailbox *m, uint32_t type, uint32_t mode, uint32_t role, uint8_t *hw_addr)
+static int default_run(struct mailbox *m, uint32_t type, uint32_t mode, uint32_t role, uint32_t protocol, uint8_t *hw_addr)
 {
 	struct hrpn_cmd_industrial_run run = {0,};
 	struct hrpn_response resp;
@@ -55,6 +58,7 @@ static int default_run(struct mailbox *m, uint32_t type, uint32_t mode, uint32_t
 	run.type = type;
 	run.mode = mode;
 	run.role = role;
+	run.protocol = protocol;
 
 	if (hw_addr)
 		memcpy(run.addr, hw_addr, sizeof(run.addr));
@@ -77,9 +81,9 @@ static int default_stop(struct mailbox *m, uint32_t type)
 	return command(m, &stop, sizeof(stop), HRPN_RESP_TYPE_INDUSTRIAL, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int can_run(struct mailbox *m, uint32_t mode, uint32_t role)
+static int can_run(struct mailbox *m, uint32_t mode, uint32_t role, uint32_t protocol)
 {
-	return default_run(m, HRPN_CMD_TYPE_CAN_RUN, mode, role, NULL);
+	return default_run(m, HRPN_CMD_TYPE_CAN_RUN, mode, role, protocol, NULL);
 }
 
 static int can_stop(struct mailbox *m)
@@ -89,7 +93,7 @@ static int can_stop(struct mailbox *m)
 
 static int ethernet_run(struct mailbox *m, uint32_t mode, uint32_t role, uint8_t *mac_addr)
 {
-	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, mode, role, mac_addr);
+	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, mode, role, 0, mac_addr);
 }
 
 static int ethernet_stop(struct mailbox *m)
@@ -131,11 +135,12 @@ int can_main(int argc, char *argv[], struct mailbox *m)
 {
 	unsigned int mode;
 	unsigned int role = 0;
+	unsigned int protocol = HRPN_PROTOCOL_CAN;
 	int option;
 	int rc = 0;
 	bool is_run_cmd = false;
 
-	while ((option = getopt(argc, argv, "r:sn:v")) != -1) {
+	while ((option = getopt(argc, argv, "r:sn:o:v")) != -1) {
 		switch (option) {
 		case 'r':
 			if (strtoul_check(optarg, NULL, 0, &mode) < 0) {
@@ -143,6 +148,13 @@ int can_main(int argc, char *argv[], struct mailbox *m)
 			}
 			is_run_cmd = true;
 			break;
+
+		case 'o':
+			if (strtoul_check(optarg, NULL, 16, &protocol) < 0) {
+				printf("Invalid protocol\n");
+			}
+			break;
+
 		case 'n':
 			if (strtoul_check(optarg, NULL, 16, &role) < 0) {
 				printf("Invalid role\n");
@@ -156,7 +168,7 @@ int can_main(int argc, char *argv[], struct mailbox *m)
 	}
 	/* Run the case after we get all parameters */
 	if (is_run_cmd)
-		rc = can_run(m, mode, role);
+		rc = can_run(m, mode, role, protocol);
 out:
 	return rc;
 }
