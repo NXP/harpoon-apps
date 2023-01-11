@@ -58,7 +58,7 @@ extern const struct audio_pipeline_config pipeline_full_thread_0_config;
 extern const struct audio_pipeline_config pipeline_full_thread_1_config;
 
 /* assign_nonzero_valid_val(): Validate and assign nonzero value.
- * "value" == 0: "var" use default vale, return 0;
+ * "value" == 0: "var" use default value, return 0;
  * "value" != 0: if "value" is in array "supported_list", "var" = "value",
  * 		 then return 0, otherwise return -1;
  */

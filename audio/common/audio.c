@@ -274,14 +274,14 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 		goto exit;
 
 	play_cfg = g_handler[run->id].data;
-	/* Check the count of pipleline */
+	/* Check the count of pipeline */
 	for (i = 0; i < ctx->thread_count; i++) {
 		if (play_cfg->cfg[i] == NULL)
 			break;
 		else
 			pipeline_count++;
 	}
-	os_assert(pipeline_count > 0, "At lease one pipleline should be provided.");
+	os_assert(pipeline_count > 0, "At lease one pipeline should be provided.");
 
 	cfg.event_send = data_send_event;
 	cfg.rate = run->frequency;
