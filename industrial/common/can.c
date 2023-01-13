@@ -542,10 +542,17 @@ static void test_flexcan_setup(struct can_ctx *ctx)
 
     log_info("init CAN with clock freq %lu Hz\n", EXAMPLE_CAN_CLK_FREQ);
 
-    if (ctx->use_canfd)
+    if (ctx->use_canfd) {
         FLEXCAN_FDInit(EXAMPLE_CAN, &flexcanConfig, EXAMPLE_CAN_CLK_FREQ, BYTES_IN_MB, true);
-    else
+        CAN_Type *base = EXAMPLE_CAN;
+        if (!(base->MCR & CAN_MCR_FDEN_MASK)) {
+            ctx->sys_exit = true;
+            log_err("CAN FD not supported\n");
+            return;
+        }
+    } else {
         FLEXCAN_Init(EXAMPLE_CAN, &flexcanConfig, EXAMPLE_CAN_CLK_FREQ);
+    }
 
     if (test_type == 1)
     {
