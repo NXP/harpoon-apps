@@ -171,7 +171,7 @@ include(driver_wm8960)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
-include(middleware_freertos-kernel_ca53)
+include(middleware_freertos-kernel_aarch64)
 
 include(utility_assert)
 include(utility_debug_console)
