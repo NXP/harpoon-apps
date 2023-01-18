@@ -2,7 +2,7 @@
 
 function usage ()
 {
-	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | audio_smp | avb | industrial | latency> [rpmsg]"
+	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | audio_smp | avb | hello | industrial | latency> [rpmsg]"
 	echo "rpmsg: this option is only available for freertos on evkimx8mm"
 }
 
@@ -83,6 +83,14 @@ elif [ "$2" == "avb" ]; then
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
 	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-avb.cell
 	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio.bin
+	INMATE_ENTRY_ADDRESS=$ENTRY
+	INMATE_NAME=${RTOS}
+	EOF
+elif [ "$2" == "hello" ]; then
+	cat <<-EOF > "$CONF_FILE"
+	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}.cell
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/hello_world.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
 	EOF
