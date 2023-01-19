@@ -55,6 +55,10 @@ int audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_elem
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_DISCONNECT:
 		rc = avtp_source_element_ctrl(element, &cmd->u.avtp, len, m);
 		break;
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_CONNECT:
+	case HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_DISCONNECT:
+		rc = avtp_sink_element_ctrl(element, &cmd->u.avtp, len, m);
+		break;
 #endif
 
 	default:
@@ -120,6 +124,9 @@ int audio_element_check_config(struct audio_element_config *config)
 	case AUDIO_ELEMENT_AVTP_SOURCE:
 		rc = avtp_source_element_check_config(config);
 		break;
+	case AUDIO_ELEMENT_AVTP_SINK:
+		rc = avtp_sink_element_check_config(config);
+		break;
 #endif
 
 	default:
@@ -161,6 +168,9 @@ unsigned int audio_element_data_size(struct audio_element_config *config)
 
 #if (CONFIG_GENAVB_ENABLE == 1)
 	case AUDIO_ELEMENT_AVTP_SOURCE:
+		size = avtp_source_element_size(config);
+		break;
+	case AUDIO_ELEMENT_AVTP_SINK:
 		size = avtp_source_element_size(config);
 		break;
 #endif
@@ -211,6 +221,9 @@ int audio_element_init(struct audio_element *element, struct audio_element_confi
 #if (CONFIG_GENAVB_ENABLE == 1)
 	case AUDIO_ELEMENT_AVTP_SOURCE:
 		rc = avtp_source_element_init(element, config, buffer);
+		break;
+	case AUDIO_ELEMENT_AVTP_SINK:
+		rc = avtp_sink_element_init(element, config, buffer);
 		break;
 #endif
 

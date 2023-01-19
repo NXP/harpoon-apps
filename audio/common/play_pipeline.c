@@ -135,6 +135,35 @@ static void listener_connect(struct genavb_msg_media_stack_connect *media_stack_
 	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&connect, sizeof(connect), NULL);
 }
 
+static void talker_disconnect(unsigned int stream_index)
+{
+	struct hrpn_cmd_audio_element_avtp_disconnect disconnect;
+
+	/* need to disconnect streams in AVTP audio element */
+	disconnect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_DISCONNECT;
+	disconnect.pipeline.id = 0;
+	disconnect.element.type = AUDIO_ELEMENT_AVTP_SOURCE;
+	disconnect.element.id = 0;
+	disconnect.stream_index = stream_index;
+
+	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&disconnect, sizeof(disconnect), NULL);
+}
+
+static void talker_connect(struct genavb_msg_media_stack_connect *media_stack_connect)
+{
+	struct hrpn_cmd_audio_element_avtp_connect connect;
+
+	/* need to connect streams in AVTP audio element */
+	connect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_CONNECT;
+	connect.pipeline.id = 0;
+	connect.element.type = AUDIO_ELEMENT_AVTP_SINK;
+	connect.element.id = 0;
+	connect.stream_index = media_stack_connect->stream_index;
+	connect.stream_params = media_stack_connect->stream_params;
+
+	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&connect, sizeof(connect), NULL);
+}
+
 static void handle_avdecc_event(struct pipeline_ctx *ctx, struct genavb_control_handle *ctrl_h)
 {
 	struct genavb_msg_media_stack_connect *media_stack_connect;
@@ -164,7 +193,7 @@ static void handle_avdecc_event(struct pipeline_ctx *ctx, struct genavb_control_
 		if (media_stack_connect->stream_params.direction == AVTP_DIRECTION_LISTENER)
 			listener_connect(media_stack_connect);
 		else
-			log_warn("talker not supported\n");
+			talker_connect(media_stack_connect);
 
 		break;
 
@@ -178,7 +207,7 @@ static void handle_avdecc_event(struct pipeline_ctx *ctx, struct genavb_control_
 		if (media_stack_disconnect->direction == AVTP_DIRECTION_LISTENER)
 			listener_disconnect(media_stack_disconnect->stream_index);
 		else
-			log_warn("talker not supported\n");
+			talker_disconnect(media_stack_disconnect->stream_index);
 
 		break;
 

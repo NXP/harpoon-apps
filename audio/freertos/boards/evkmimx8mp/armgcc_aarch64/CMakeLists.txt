@@ -71,6 +71,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/audio.c"
     "${AppPath}/common/audio_buffer.c"
     "${AppPath}/common/audio_element.c"
+    "${AppPath}/common/audio_element_avtp_sink.c"
     "${AppPath}/common/audio_element_avtp_source.c"
     "${AppPath}/common/audio_element_dtmf.c"
     "${AppPath}/common/audio_element_pll.c"
