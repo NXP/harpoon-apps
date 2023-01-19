@@ -542,14 +542,14 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 			.inputs = 9,
 			.input = {0, }, 	/* 0 - 8 */
 
-			.outputs = 4,
+			.outputs = 8,
 			.output = {9, },	/* 9 - 12 */
 		},
 	},
 
 	.stage[2] = {
 
-		.elements = 2,
+		.elements = 3,
 
 		.element[0] = {
 			.type = AUDIO_ELEMENT_SAI_SINK,
@@ -582,6 +582,16 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 		},
 
 		.element[1] = {
+			.type = AUDIO_ELEMENT_AVTP_SINK,
+			.u.avtp_sink = {
+				.stream_n = 2,
+			},
+
+			.inputs = 4,
+			.input = {13, },	/* 13 - 16 */
+		},
+
+    .element[2] = {
 			.type = AUDIO_ELEMENT_PLL,
 			.u.pll = {
 				.src_sai_id = 5,
@@ -591,9 +601,9 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 		},
 	},
 
-	.buffers = 13,
+	.buffers = 17,
 
-	.buffer_storage = 13,
+	.buffer_storage = 17,
 };
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
 
