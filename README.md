@@ -10,12 +10,12 @@ Harpoon offers customers an environment for developing real-time demanding appli
 
 The reference applications embedded in this repository may run on several jailhouse guest RTOS (e.g.: Zephyr, FreeRTOS) leveraging the existing NXP RTOS development environment – MCUXpresso.
 
-To ease the integration of Zephyr, mcux-sdk drivers and so on, we leveraged the [Zephyr west tool](https://docs.zephyrproject.org/latest/guides/west/index.html) which helps do multi-repository management and allow users to manage their own ```west.yml``` to select their projects.
+To ease the integration of Zephyr, mcux-sdk and other repositories, we leverage the [Zephyr west tool](https://docs.zephyrproject.org/latest/guides/west/index.html) which helps managing multiple repositories and allows the users to maintain their own ```west.yml``` for their project.
 
 # Overview
 
 This project provides the fundamental support for RTOS applications running in an hypervisor environment:
-* HW resource partitioning using Jailhouse hypervisor, providing an inter-ecll IPC communication
+* HW resource partitioning using Jailhouse hypervisor, providing an inter-cell IPC communication
 * Arm® CMSIS-CORE startup core drivers and device header files for 64-bit Cortex-A53 core
 * RTOS kernel integration (FreeRTOS, Zephyr)
 * Open-source peripheral drivers leveraging the MCUXpresso SDK ( [mcux-sdk project](https://github.com/NXPmicro/mcux-sdk) )
@@ -58,7 +58,7 @@ sudo apt install python3-pyelftools
 
 # Cloning this repository
 
-Execute below commands to replicate the whole Harpoon delivery at revision ```${revision}``` and place it in a west worspace named ```hww```.
+Execute below commands to replicate the whole Harpoon delivery at revision ```${revision}``` and place it in a west workspace named ```hww```.
 ```bash
 west init -m https://github.com/NXP/harpoon-apps --mr ${revision} hww
 cd hww
