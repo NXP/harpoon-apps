@@ -77,6 +77,7 @@ struct hrpn_cmd_audio_run {
 	uint32_t id;
 	uint32_t frequency;
 	uint32_t period;
+	uint8_t addr[6];
 };
 
 struct hrpn_cmd_audio_stop {

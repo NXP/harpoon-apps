@@ -17,6 +17,7 @@ struct play_pipeline_config {
 struct audio_config {
 	uint32_t rate;
 	uint32_t period;
+	uint8_t address[6];
 	uint8_t pipeline_id;
 
 	void (*event_send)(void *, uint8_t);

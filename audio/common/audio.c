@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,6 +20,10 @@
 #include "audio_entry.h"
 
 #include "audio_pipeline.h"
+
+#if (CONFIG_GENAVB_ENABLE == 1)
+#include "system_config.h"
+#endif
 
 #ifdef MBOX_TRANSPORT_RPMSG
 #include "rpmsg.h"
@@ -147,6 +151,16 @@ const static struct mode_handler g_handler[] =
 #endif
 };
 
+static void audio_set_hw_addr(struct audio_config *cfg, uint8_t *hw_addr)
+{
+	uint8_t *addr = cfg->address;
+
+	memcpy(addr, hw_addr, sizeof(cfg->address));
+
+	log_info("%02x:%02x:%02x:%02x:%02x:%02x\n",
+		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+}
+
 static void data_send_event(void *userData, uint8_t status)
 {
 	struct data_ctx *ctx = userData;
@@ -272,6 +286,13 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	cfg.event_send = data_send_event;
 	cfg.rate = run->frequency;
 	cfg.period = run->period;
+	audio_set_hw_addr(&cfg, run->addr);
+
+#if (CONFIG_GENAVB_ENABLE == 1)
+	if (system_config_set_net(0, cfg.address)) {
+		log_warn("system_config_set_net() failed\n");
+	}
+#endif
 
 	for (i = 0; i < pipeline_count; i++) {
 		cfg.event_data = ctx;

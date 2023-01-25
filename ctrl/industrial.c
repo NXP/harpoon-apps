@@ -13,8 +13,6 @@
 #include "hrpn_ctrl.h"
 #include "common.h"
 
-#define MAC_ADDRESS_DEFAULT	{0x00, 0xBB, 0xCC, 0xDD, 0xEE, 0x14}
-
 void can_usage(void)
 {
 	printf(
@@ -37,7 +35,7 @@ void ethernet_usage(void)
 {
 	printf(
 		"\nIndustrial ethernet options:\n"
-		"\t-a <mac_addr>  set hardware MAC address (default 91:e0:f0:00:fe:70)\n"
+		"\t-a <mac_addr>  set hardware MAC address (default 00:bb:cc:dd:ee:14)\n"
 		"\t-r <id>        run ethernet mode id:\n"
 		"\t               0 - genAVB/TSN stack (FreeRTOS only)\n"
 		"\t               1 - mcux-sdk API (imx8m{m,n} ENET, imx8mp ENET_QoS on Zephyr)\n"
@@ -99,18 +97,6 @@ static int ethernet_run(struct mailbox *m, uint32_t mode, uint32_t role, uint8_t
 static int ethernet_stop(struct mailbox *m)
 {
 	return default_stop(m, HRPN_CMD_TYPE_ETHERNET_STOP);
-}
-
-static int read_mac_address(char *buf, uint8_t *mac)
-{
-#define NB_OCTETS	6
-    int canary = 3 * NB_OCTETS - 1; /* octets + ":" separators */
-    int rc;
-
-    buf[canary] = '\0';
-    rc = sscanf(buf, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
-
-    return (rc == NB_OCTETS) ? 0 : -1;
 }
 
 static int industrial_main(int option, char *optarg, struct mailbox *m,

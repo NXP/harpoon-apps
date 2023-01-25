@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -52,6 +52,7 @@ static void audio_usage(void)
 		"\t-p <frames>    audio processing period (in frames)\n"
 		"\t               Supporting 2, 4, 8, 16, 32 frames\n"
 		"\t               Will use default period 8 frames if not specified\n"
+		"\t-a <mac_addr>  set hardware MAC address (default 00:bb:cc:dd:ee:14)\n"
 		"\t-r <id>        run audio mode id:\n"
 		"\t               0 - dtmf playback\n"
 		"\t               1 - sine wave playback\n"
@@ -63,9 +64,9 @@ static void audio_usage(void)
 	);
 }
 
-static int audio_run(struct mailbox *m, unsigned int id, unsigned int frequency, unsigned int period)
+static int audio_run(struct mailbox *m, unsigned int id, unsigned int frequency, unsigned int period, uint8_t *hw_addr)
 {
-	struct hrpn_cmd_audio_run run;
+	struct hrpn_cmd_audio_run run = {0,};
 	struct hrpn_response resp;
 	unsigned int len;
 
@@ -73,6 +74,8 @@ static int audio_run(struct mailbox *m, unsigned int id, unsigned int frequency,
 	run.id = id;
 	run.frequency = frequency;
 	run.period = period;
+
+	memcpy(run.addr, hw_addr, sizeof(run.addr));
 
 	len = sizeof(resp);
 
@@ -99,9 +102,10 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 	int rc = 0;
 	unsigned int frequency = 0;
 	unsigned int period = 0;
+	uint8_t mac_addr[6] = MAC_ADDRESS_DEFAULT;
 	bool is_run_cmd = false;
 
-	while ((option = getopt(argc, argv, "f:p:r:sv")) != -1) {
+	while ((option = getopt(argc, argv, "f:p:r:a:sv")) != -1) {
 		switch (option) {
 		case 'f':
 			if (strtoul_check(optarg, NULL, 0, &frequency) < 0) {
@@ -115,6 +119,15 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 		case 'p':
 			if (strtoul_check(optarg, NULL, 0, &period) < 0) {
 				printf("Invalid period\n");
+				rc = -1;
+				goto out;
+			}
+
+			break;
+
+		case 'a':
+			if (read_mac_address(optarg, mac_addr) < 0) {
+				printf("Invalid MAC address\n");
 				rc = -1;
 				goto out;
 			}
@@ -142,7 +155,7 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 	}
 	/* Run the case after we get all parameters */
 	if (is_run_cmd)
-		rc = audio_run(m, id, frequency, period);
+		rc = audio_run(m, id, frequency, period, mac_addr);
 
 out:
 	return rc;
