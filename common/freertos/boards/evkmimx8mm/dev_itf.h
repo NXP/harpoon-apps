@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -70,17 +70,17 @@ static inline uint32_t dev_get_enet_1588_freq(void *base)
 static inline uint32_t dev_get_gpt_ipg_freq(void *base)
 {
     if (base == GPT1)
-        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt1);
+        return CLOCK_GetClockRootFreq(kCLOCK_Gpt1ClkRoot);
     else if (base == GPT2)
-        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt2);
+        return CLOCK_GetClockRootFreq(kCLOCK_Gpt2ClkRoot);
     else if (base == GPT3)
-        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt3);
+        return CLOCK_GetClockRootFreq(kCLOCK_Gpt3ClkRoot);
     else if (base == GPT4)
-        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt4);
+        return CLOCK_GetClockRootFreq(kCLOCK_Gpt4ClkRoot);
     else if (base == GPT5)
-        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt5);
+        return CLOCK_GetClockRootFreq(kCLOCK_Gpt5ClkRoot);
     else if (base == GPT6)
-        return CLOCK_GetClockRootFreq(kCLOCK_RootGpt6);
+        return CLOCK_GetClockRootFreq(kCLOCK_Gpt6ClkRoot);
     else
         return 0;
 }
