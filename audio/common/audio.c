@@ -19,6 +19,12 @@
 #include "audio.h"
 #include "audio_entry.h"
 
+#include "app_board.h"
+#include "codec_config.h"
+#include "sai_clock_config.h"
+#include "sai_drv.h"
+#include "sai_config.h"
+
 #include "audio_pipeline.h"
 
 #if (CONFIG_GENAVB_ENABLE == 1)
@@ -40,11 +46,27 @@ struct mode_handler {
 	void *data;
 };
 
+#define DEFAULT_PERIOD		8
+#define DEFAULT_SAMPLE_RATE	48000
+#define USE_TX_IRQ		1
+
+static const int supported_period[] = {2, 4, 8, 16, 32};
+static const uint32_t supported_rate[] = {44100, 48000, 88200, 96000, 176400, 192000};
+
 struct data_ctx {
 	struct ivshmem mem;
 	struct mailbox mb;
 	uint8_t thread_count;
 	uint8_t pipeline_count;
+
+	/* SAI data for hardware setup */
+	struct sai_device dev[SAI_TX_MAX_INSTANCE];
+	sai_word_width_t bit_width;
+	sai_sample_rate_t sample_rate;
+	uint32_t chan_numbers;
+	uint8_t period;
+
+	uint64_t callback;
 
 	/* The first thread is used for parent pipeline, others are for child pipeline */
 	struct thread_data_ctx_t {
@@ -161,9 +183,8 @@ static void audio_set_hw_addr(struct audio_config *cfg, uint8_t *hw_addr)
 		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
 }
 
-static void data_send_event(void *userData, uint8_t status)
+static void data_send_event(struct data_ctx *ctx, uint8_t status)
 {
-	struct data_ctx *ctx = userData;
 	struct event e;
 	int i;
 
@@ -172,6 +193,143 @@ static void data_send_event(void *userData, uint8_t status)
 
 	for (i = 0; i < ctx->pipeline_count; i++)
 		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, OS_MQUEUE_FLAGS_ISR_CONTEXT, 0);
+}
+
+static void rx_callback(uint8_t status, void *user_data)
+{
+	struct data_ctx *ctx = (struct data_ctx *)user_data;
+
+#if USE_TX_IRQ
+	sai_disable_irq(&ctx->dev[0], false, true);
+#else
+	sai_disable_irq(&ctx->dev[0], true, false);
+#endif
+
+	ctx->callback++;
+
+	data_send_event(ctx, status);
+}
+
+static void pll_adjust_disable(struct data_ctx *ctx)
+{
+	struct hrpn_cmd_audio_element_pll cmd;
+	int i;
+
+	/* need to disable PLL audio element */
+	cmd.u.common.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_DISABLE;
+	cmd.u.common.element.type = AUDIO_ELEMENT_PLL;
+	cmd.u.common.element.id = 0;
+
+	for (i = 0; i < MAX_PIPELINES; i++) {
+		cmd.u.common.pipeline.id = i;
+		audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&cmd, sizeof(cmd), NULL);
+	}
+}
+
+static void pll_adjust_set_pll_id(struct data_ctx *ctx, uint32_t pll_id)
+{
+	struct hrpn_cmd_audio_element_pll cmd;
+	int i;
+
+	/* PLL element needs to know the sampling rate to determine the input PLL */
+	cmd.u.common.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ID;
+	cmd.u.common.element.type = AUDIO_ELEMENT_PLL;
+	cmd.u.common.element.id = 0;
+	cmd.pll_id = pll_id;
+
+	for (i = 0; i < MAX_PIPELINES; i++) {
+		cmd.u.common.pipeline.id = i;
+		audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&cmd, sizeof(cmd), NULL);
+	}
+}
+
+static void sai_setup(struct data_ctx *ctx)
+{
+	struct sai_cfg sai_config;
+	bool pll_disable = true;
+	int i;
+
+	log_info("enter\n");
+
+	/* Configure each active SAI */
+	for (i = 0; i < sai_active_list_nelems; i++) {
+		uint32_t sai_clock_root, pll_id;
+		int sai_id;
+		enum codec_id cid;
+		int32_t ret;
+
+		sai_config.sai_base = sai_active_list[i].sai_base;
+		sai_config.bit_width = ctx->bit_width;
+		sai_config.sample_rate = ctx->sample_rate;
+		sai_config.chan_numbers = ctx->chan_numbers;
+
+		sai_id = get_sai_id(sai_active_list[i].sai_base);
+		os_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
+
+		sai_clock_root = get_sai_clock_root(sai_id - 1);
+		sai_config.source_clock_hz = CLOCK_GetPllFreq(sai_active_list[i].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
+
+		sai_config.tx_sync_mode = sai_active_list[i].tx_sync_mode;
+		sai_config.rx_sync_mode = sai_active_list[i].rx_sync_mode;
+		sai_config.msel = sai_active_list[i].msel;
+
+		if (i == 0) {
+			/* First SAI instance used as IRQ source */
+			sai_config.rx_callback = rx_callback;
+			sai_config.rx_user_data = ctx;
+			sai_config.working_mode = SAI_RX_IRQ_MODE;
+		} else {
+			sai_config.rx_callback = NULL;
+			sai_config.rx_user_data = NULL;
+			sai_config.working_mode = SAI_POLLING_MODE;
+		}
+
+		/* Configure attached codec */
+		cid = sai_active_list[i].cid;
+		ret = codec_setup(cid);
+		if (ret != kStatus_Success) {
+			if ((i == 0) && (sai_active_list[i].masterSlave == kSAI_Slave)) {
+				/* First SAI in the list manages interrupts: it cannot be
+				 * slave if no codec is connected
+				 */
+				log_info("No codec found on SAI%d, forcing master mode\n",
+						get_sai_id(sai_active_list[i].sai_base));
+				sai_active_list[i].masterSlave = kSAI_Master;
+			}
+		} else {
+			codec_set_format(cid, sai_config.source_clock_hz, sai_config.sample_rate, ctx->bit_width);
+		}
+
+		sai_config.masterSlave = sai_active_list[i].masterSlave;
+
+		if (sai_config.masterSlave == kSAI_Slave)
+			pll_disable = false;
+
+		/* Set FIFO water mark to be period size of all channels*/
+#if USE_TX_IRQ
+		sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers - 1;
+#else
+		sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
+#endif
+
+		sai_drv_setup(&ctx->dev[i], &sai_config);
+
+		pll_id = sai_select_audio_pll_mux(sai_id, sai_config.sample_rate);
+		pll_adjust_set_pll_id(ctx, pll_id);
+	}
+
+	if (pll_disable)
+		pll_adjust_disable(ctx);
+}
+
+static void sai_close(struct data_ctx *ctx)
+{
+	int i;
+
+	/* Close each active SAI */
+	for (i = 0; i < sai_active_list_nelems; i++) {
+		sai_drv_exit(&ctx->dev[i]);
+	}
 }
 
 static void audio_reset(struct data_ctx *ctx, unsigned int id)
@@ -212,6 +370,14 @@ static void audio_reset(struct data_ctx *ctx, unsigned int id)
 	if (ctx->handler->run(ctx->thread_data_ctx[id].handle, &e) < 0)
 		os_assert(false, "handler couldn't restart");
 
+	if (id == 0) {
+#if USE_TX_IRQ
+		sai_enable_irq(&ctx->dev[0], false, true);
+#else
+		sai_enable_irq(&ctx->dev[0], true, false);
+#endif
+	}
+
 	/* restart other handlers */
 	for (i = 0; i < ctx->pipeline_count; i++) {
 		if (i == id)
@@ -231,10 +397,20 @@ void audio_process_data(void *context, uint8_t thread_id)
 
 		os_sem_take(&ctx->thread_data_ctx[thread_id].semaphore, 0, OS_SEM_TIMEOUT_MAX);
 
-		if (ctx->handler)
-			if (ctx->handler->run(ctx->thread_data_ctx[thread_id].handle, &e) != 0)
+		if (ctx->handler) {
+			if (ctx->handler->run(ctx->thread_data_ctx[thread_id].handle, &e) != 0) {
 				audio_reset(ctx, thread_id);
+			} else {
+				if (thread_id == 0 && e.type == EVENT_TYPE_DATA) {
+#if USE_TX_IRQ
+					sai_enable_irq(&ctx->dev[0], false, true);
+#else
+					sai_enable_irq(&ctx->dev[0], true, false);
+#endif
+				}
+			}
 
+		}
 		os_sem_give(&ctx->thread_data_ctx[thread_id].semaphore, 0);
 	}
 }
@@ -246,6 +422,8 @@ static void audio_stats(struct data_ctx *ctx)
 	if (ctx->handler) {
 		for (i = 0; i < ctx->pipeline_count; i++)
 			ctx->handler->stats(ctx->thread_data_ctx[i].handle);
+
+		log_info("callback: %llu\n", ctx->callback);
 	}
 }
 
@@ -265,6 +443,8 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	struct play_pipeline_config *play_cfg;
 	struct event e;
 	uint8_t pipeline_count = 0;
+	size_t period = DEFAULT_PERIOD;
+	uint32_t rate = DEFAULT_SAMPLE_RATE;
 	int i;
 
 	if (ctx->handler)
@@ -283,9 +463,6 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	}
 	os_assert(pipeline_count > 0, "At lease one pipeline should be provided.");
 
-	cfg.event_send = data_send_event;
-	cfg.rate = run->frequency;
-	cfg.period = run->period;
 	audio_set_hw_addr(&cfg, run->addr);
 
 #if (CONFIG_GENAVB_ENABLE == 1)
@@ -294,8 +471,25 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	}
 #endif
 
+	if (assign_nonzero_valid_val(period, run->period, supported_period) != 0) {
+		log_err("Period %d frames is not supported\n", run->period);
+		goto exit;
+	}
+
+	if (assign_nonzero_valid_val(rate, run->frequency, supported_rate) != 0) {
+		log_err("Rate %d Hz is not supported\n", run->frequency);
+		goto exit;
+	}
+
+	ctx->callback = 0;
+	ctx->sample_rate = rate;
+	ctx->chan_numbers = DEMO_AUDIO_DATA_CHANNEL;
+	ctx->bit_width = DEMO_AUDIO_BIT_WIDTH;
+	ctx->period = period;
+	cfg.rate = rate;
+	cfg.period = period;
+
 	for (i = 0; i < pipeline_count; i++) {
-		cfg.event_data = ctx;
 		cfg.data = (void *)play_cfg->cfg[i];
 		cfg.pipeline_id = i;
 		cfg.async_sem = &ctx->thread_data_ctx[i].async_sem;
@@ -303,6 +497,8 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 		if (!ctx->thread_data_ctx[i].handle)
 			goto exit;
 	}
+
+	sai_setup(ctx);
 
 	for (i = 0; i < pipeline_count; i++) {
 		os_sem_take(&ctx->thread_data_ctx[i].semaphore, 0, OS_SEM_TIMEOUT_MAX);
@@ -345,6 +541,11 @@ static int audio_stop(struct data_ctx *ctx)
 	for (i = 0; i < ctx->pipeline_count; i++) {
 		handler->exit(ctx->thread_data_ctx[i].handle);
 	}
+
+	sai_close(ctx);
+
+	for (i = 0; i < sai_active_list_nelems; i++)
+		codec_close(sai_active_list[i].cid);
 
 exit:
 	return HRPN_RESP_STATUS_SUCCESS;
