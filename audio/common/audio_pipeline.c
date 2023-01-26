@@ -11,7 +11,6 @@
 #include "hlog.h"
 #include "mailbox.h"
 
-#define MAX_PIPELINES	4
 #define STORAGE_DEFAULT_PERIODS 2
 
 static struct audio_pipeline *pipeline_table[MAX_PIPELINES];

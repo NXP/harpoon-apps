@@ -17,6 +17,7 @@
 #define AUDIO_PIPELINE_MAX_STAGES	4
 #define AUDIO_PIPELINE_MAX_ELEMENTS	16
 #define AUDIO_PIPELINE_MAX_BUFFERS	256
+#define MAX_PIPELINES	4
 
 /* Configuration */
 struct audio_pipeline_stage_config {

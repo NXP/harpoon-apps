@@ -150,28 +150,34 @@ int play_pipeline_run(void *handle, struct event *e)
 static void pll_adjust_disable(struct pipeline_ctx *ctx)
 {
 	struct hrpn_cmd_audio_element_pll cmd;
+	int i;
 
 	/* need to disable PLL audio element */
 	cmd.u.common.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_DISABLE;
-	cmd.u.common.pipeline.id = 0;
 	cmd.u.common.element.type = AUDIO_ELEMENT_PLL;
 	cmd.u.common.element.id = 0;
 
-	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&cmd, sizeof(cmd), NULL);
+	for (i = 0; i < MAX_PIPELINES; i++) {
+		cmd.u.common.pipeline.id = i;
+		audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&cmd, sizeof(cmd), NULL);
+	}
 }
 
 static void pll_adjust_set_pll_id(struct pipeline_ctx *ctx, uint32_t pll_id)
 {
 	struct hrpn_cmd_audio_element_pll cmd;
+	int i;
 
 	/* PLL element needs to know the sampling rate to determine the input PLL */
 	cmd.u.common.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ID;
-	cmd.u.common.pipeline.id = 0;
 	cmd.u.common.element.type = AUDIO_ELEMENT_PLL;
 	cmd.u.common.element.id = 0;
 	cmd.pll_id = pll_id;
 
-	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&cmd, sizeof(cmd), NULL);
+	for (i = 0; i < MAX_PIPELINES; i++) {
+		cmd.u.common.pipeline.id = i;
+		audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&cmd, sizeof(cmd), NULL);
+	}
 }
 
 static void sai_setup(struct pipeline_ctx *ctx)
@@ -504,9 +510,7 @@ void *play_pipeline_init(void *parameters)
 	ctx->event_data = cfg->event_data;
 	ctx->async_sem = cfg->async_sem;
 
-	/* Only the first pipeline need to setup SAI hardware */
-	if (!cfg->pipeline_id)
-		sai_setup(ctx);
+	sai_setup(ctx);
 
 	log_info("Starting %s (Sample Rate: %d Hz, Period: %u frames)\n",
 			pipeline_cfg->name, rate, (uint32_t)period);
