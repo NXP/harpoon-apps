@@ -13,6 +13,9 @@
 #include "fsl_device_registers.h"
 #include "fsl_debug_console.h"
 #include "board.h"
+#if __has_include("clock_config.h")
+#include "clock_config.h"
+#endif
 
 /*******************************************************************************
  * Definitions
@@ -32,6 +35,8 @@ extern void hello_world_doNothing(void);
 /*******************************************************************************
  * Code
  ******************************************************************************/
+__WEAK void BOARD_InitClocks(void) {}
+
 /*!
  * @brief Application entry point.
  */
@@ -41,6 +46,7 @@ int main(void)
 
     /* Init board cpu and hardware. */
     BOARD_InitMemory();
+    BOARD_InitClocks();
     BOARD_InitDebugConsole();
 
     xResult = xTaskCreate(hello_task, "Hello_task", configMINIMAL_STACK_SIZE + 100, NULL, hello_task_PRIORITY, NULL);
