@@ -32,6 +32,9 @@ manifest:
     - name: FreeRTOS-Kernel
       remote: nxpmicro
       revision: 8df2481c594a05d69f15e9052471586184fa88cc
+    - name: heterogeneous-multicore
+      remote: nxpmicro
+      revision: master
     - name: mcux-sdk-middleware-multicore
       remote: nxpmicro
       revision: feature/heterogeneous_multicore
