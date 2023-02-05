@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -13,7 +13,7 @@
 
 struct rpmsg_instance {
 	struct rpmsg_lite_instance *volatile rl_inst;
-	void *sgimbox_va;
+	void *mbox_va;
 	void *rpmsg_shmem_va;
 	void *rpmsg_buf_va;
 };

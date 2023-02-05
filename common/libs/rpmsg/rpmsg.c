@@ -1,6 +1,5 @@
 /*
- * Copyright 2022 NXP
- * All rights reserved.
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,6 +8,7 @@
 #include "os/mmu.h"
 #include "os/stdlib.h"
 #include "os/stdio.h"
+#include "os/irq.h"
 
 #include "rpmsg.h"
 #include "board.h"
@@ -109,6 +109,13 @@ int rpmsg_destroy_ept(struct rpmsg_ept *ept)
 	return ret;
 }
 
+static void rpmsg_mailbox_init(void)
+{
+	os_irq_register(RL_GEN_SW_MBOX_IRQ, gen_sw_mbox_handler,
+			(void *)RL_GEN_SW_MBOX_BASE, OS_IRQ_PRIO_DEFAULT);
+	os_irq_enable(RL_GEN_SW_MBOX_IRQ);
+}
+
 struct rpmsg_instance *rpmsg_init(int link_id)
 {
 	struct rpmsg_instance *ri;
@@ -118,8 +125,8 @@ struct rpmsg_instance *rpmsg_init(int link_id)
 	if (!ri)
 		return ri;
 
-	ret = os_mmu_map("SGI MBOX", (uint8_t **)&ri->sgimbox_va,
-			(uintptr_t)RL_SGIMBOX_BASE, KB(4),
+	ret = os_mmu_map("MBOX", (uint8_t **)&ri->mbox_va,
+			(uintptr_t)RL_GEN_SW_MBOX_BASE, KB(4),
 			OS_MEM_DEVICE_nGnRE | OS_MEM_PERM_RW);
 	os_assert(ret == 0, "os_mmu_map() failed\n");
 	ret = os_mmu_map("RPMSG", (uint8_t **)&ri->rpmsg_shmem_va,
@@ -130,6 +137,8 @@ struct rpmsg_instance *rpmsg_init(int link_id)
 			(uintptr_t)RPMSG_BUF_BASE, MB(1),
 			OS_MEM_CACHE_NONE | OS_MEM_PERM_RW);
 	os_assert(ret == 0, "os_mmu_map() failed\n");
+
+	rpmsg_mailbox_init();
 
 	os_printf("\r\nRPMSG init ...\r\n");
 	ri->rl_inst = rpmsg_lite_remote_init((void *)RPMSG_LITE_SHMEM_BASE, link_id, RL_NO_FLAGS);
@@ -150,6 +159,6 @@ void rpmsg_deinit(struct rpmsg_instance *ri)
 	rpmsg_lite_deinit(ri->rl_inst);
 	os_mmu_unmap((uintptr_t)ri->rpmsg_buf_va, MB(1));
 	os_mmu_unmap((uintptr_t)ri->rpmsg_shmem_va, KB(64));
-	os_mmu_unmap((uintptr_t)ri->sgimbox_va, KB(4));
+	os_mmu_unmap((uintptr_t)ri->mbox_va, KB(4));
 	os_free(ri);
 }
