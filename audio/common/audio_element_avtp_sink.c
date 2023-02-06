@@ -308,6 +308,7 @@ static void avtp_sink_element_reset(struct audio_element *element)
 	int i, rc;
 
 	event.event_mask = AVTP_FLUSH;
+	event.index = 0;
 	for (i = 0; i < avtp->stream_n; i++) {
 		stream = &avtp->stream[i];
 		if (stream->handle){
