@@ -2,8 +2,9 @@
 
 function usage ()
 {
-	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | audio_smp | avb | hello | industrial | latency> [rpmsg]"
+	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | audio_smp | avb | hello | industrial | latency | virtio_net> [rpmsg]"
 	echo "rpmsg: this option is only available for freertos on evkimx8mm"
+	echo "virtio_net: this application is only available for FreeRTOS on evkimx8mm"
 }
 
 function detect_machine ()
@@ -50,7 +51,7 @@ if [ -z $SOC ]; then
 	exit 3
 fi
 
-if [[ "$RPMSG" == "_rpmsg" ]]; then
+if [[ "$RPMSG" == "_rpmsg" || "$2" == "virtio_net" ]]; then
 	if [[ "$SOC" != "imx8mm" || "$RTOS" != "freertos"  ]]; then
 		usage
 		exit 7
@@ -110,6 +111,14 @@ elif [ "$2" == "latency" ]; then
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
 	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}.cell
 	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/rt_latency${RPMSG}.bin
+	INMATE_ENTRY_ADDRESS=$ENTRY
+	INMATE_NAME=${RTOS}
+	EOF
+elif [ "$2" == "virtio_net" ]; then
+	cat <<-EOF > "$CONF_FILE"
+	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-industrial.cell
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/virtio_net.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
 	EOF

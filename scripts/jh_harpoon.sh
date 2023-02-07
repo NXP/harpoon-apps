@@ -36,10 +36,24 @@ function start ()
         echo 'modprobe virtio_rpmsg_bus'
         modprobe virtio_rpmsg_bus
     fi
+
+    if [[ "${INMATE_BIN}" == "virtio_net.bin" ]]; then
+        echo 'modprobe virtio_mmio'
+        modprobe virtio_mmio
+        echo 'modprobe virtio_net'
+        modprobe virtio_net
+    fi
 }
 
 function stop ()
 {
+    if [[ "${INMATE_BIN}" == "virtio_net.bin" ]]; then
+        echo 'modprobe -r virtio_net'
+        modprobe -r virtio_net
+        echo 'modprobe -r virtio_mmio'
+        modprobe -r virtio_mmio
+    fi
+
     echo 'Shutdown inmate cell'
     jailhouse cell shutdown 1
 
