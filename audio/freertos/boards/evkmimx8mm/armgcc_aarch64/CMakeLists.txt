@@ -21,6 +21,7 @@ if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
     # config to select component, the format is CONFIG_USE_${component}
     set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
     set(CONFIG_USE_middleware_freertos-kernel_MIMX8MM6 true)
+    ADD_DEFINITIONS(-DAARCH64=1)
 endif()
 
 # ENABLE ASM
@@ -196,7 +197,7 @@ include(middleware_freertos-kernel_aarch64)
 
 if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
     include(lib_rpmsg)
-    include(middleware_multicore_rpmsg_lite_imx8mm_ca53_freertos)
+    include(middleware_multicore_rpmsg_lite_aarch64_freertos)
     include(middleware_multicore_rpmsg_lite_MIMX8MM6)
     include(middleware_multicore_rpmsg_lite_freertos)
 endif()
