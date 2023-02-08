@@ -16,7 +16,7 @@
 
 #include "audio_entry.h"
 
-#define main_task_PRIORITY   (configMAX_PRIORITIES - 3)
+#define main_task_PRIORITY   (configMAX_PRIORITIES - 10)
 #define data_task_PRIORITY   (configMAX_PRIORITIES - 2)
 
 #define DATA_THREADS 1
