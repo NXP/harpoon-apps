@@ -72,7 +72,7 @@ static unsigned int avtp_source_out_n(void)
 	return AVTP_RX_STREAM_N * AVTP_RX_CHANNEL_N;
 }
 
-static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int stream_index, struct genavb_stream_params *params, unsigned int period)
+static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int stream_index, struct genavb_stream_params *params, struct audio_element *element)
 {
 	struct avtp_stream *stream = &avtp->stream[stream_index];
 	struct genavb_handle *handle;
@@ -119,15 +119,21 @@ static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int s
 		goto exit;
 	}
 
+	if (avdecc_fmt_sample_rate(&params->format) != element->sample_rate) {
+		log_err("unsupported sample rate: %u != %u\n", avdecc_fmt_sample_rate(&params->format), element->sample_rate);
+
+		goto exit;
+	}
+
 	stream->convert = true;
 	stream->invert = invert;
 	stream->shift = shift;
 	stream->mask = mask;
 
-	cur_batch_size = period * avdecc_fmt_sample_size(&params->format);
+	cur_batch_size = element->period * avdecc_fmt_sample_size(&params->format);
 	stream->cur_batch_size = cur_batch_size;
 
-	if (period < avdecc_fmt_samples_per_packet(&params->format, params->stream_class))
+	if (element->period < avdecc_fmt_samples_per_packet(&params->format, params->stream_class))
 		cur_batch_size = avdecc_fmt_samples_per_packet(&params->format, params->stream_class) * avdecc_fmt_sample_size(&params->format);
 	else
 		cur_batch_size = stream->cur_batch_size;
@@ -211,7 +217,7 @@ int avtp_source_element_ctrl(struct audio_element *element, struct hrpn_cmd_audi
 		if (cmd->u.connect.stream_index >= avtp->stream_n)
 			goto err;
 
-		avtp_source_connect(avtp, cmd->u.connect.stream_index, &cmd->u.connect.stream_params, element->period);
+		avtp_source_connect(avtp, cmd->u.connect.stream_index, &cmd->u.connect.stream_params, element);
 
 		break;
 

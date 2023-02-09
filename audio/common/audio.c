@@ -174,6 +174,22 @@ const static struct mode_handler g_handler[] =
 #endif
 };
 
+static void audio_check_params(struct audio_config *cfg, int run_id)
+{
+	log_debug("enter\n");
+
+	if (cfg->period == 2) {
+		switch (cfg->rate) {
+		case 176400:
+		case 192000:
+			log_warn("Unsupported rate(%d Hz)/period(%d) combination\n", cfg->rate, cfg->period);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 static void audio_set_hw_addr(struct audio_config *cfg, uint8_t *hw_addr)
 {
 	uint8_t *addr = cfg->address;
@@ -487,6 +503,8 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	ctx->period = period;
 	cfg.rate = rate;
 	cfg.period = period;
+
+	audio_check_params(&cfg, run->id);
 
 	for (i = 0; i < pipeline_count; i++) {
 		cfg.data = (void *)play_cfg->cfg[i];
