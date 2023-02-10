@@ -28,6 +28,7 @@
 
 #define APP_PERIOD_DEFAULT              100000
 #define APP_PERIOD_MIN                  100000
+#define APP_PERIOD_MAX                  1000000000
 #define NET_DELAY_OFFSET_DEFAULT        (APP_PERIOD_DEFAULT / 2)
 
 #define APP_PERIOD_SERIAL_DEFAULT       2000000

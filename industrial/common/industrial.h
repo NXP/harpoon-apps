@@ -15,6 +15,7 @@
 struct industrial_config {
 	unsigned int role; /* node_type for CAN, controller/endpoint for ethernet */
 	unsigned int protocol;
+	uint32_t period;
 	uint8_t address[6];
 
 	void (*event_send)(void *, uint8_t, uint8_t);

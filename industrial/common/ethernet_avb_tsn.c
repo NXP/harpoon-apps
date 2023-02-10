@@ -12,6 +12,7 @@
 #include "alarm_task.h"
 #include "avb_tsn/genavb.h"
 #include "avb_tsn/stats_task.h"
+#include "avb_tsn/types.h"
 #include "cyclic_task.h"
 #include "ethernet.h"
 #include "hardware_ethernet.h"
@@ -86,6 +87,8 @@ static struct tsn_app_config *system_config_get_tsn_app(struct ethernet_ctx *ctx
 #else
 	config->role = ctx->role;
 
+	config->period_ns = ctx->period;
+
 #endif /* (ENABLE_STORAGE == 1) */
 
 	return config;
@@ -143,11 +146,6 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 	log_info("motor_offset     : %f\n", config->motor_offset);
 	log_info("control_strategy : %u\n", config->control_strategy);
 	log_info("app period       : %u\n", config->period_ns);
-
-	if (config->period_ns < APP_PERIOD_MIN) {
-		log_err("invalid application period, minimum is %u ns\n", APP_PERIOD_MIN);
-		goto exit;
-	}
 
 #if BUILD_MOTOR == 1
 	if ((config->mode == MOTOR_LOCAL || config->mode == MOTOR_NETWORK) &&
@@ -330,6 +328,12 @@ void *ethernet_avb_tsn_init(void *parameters)
 		goto exit;
 	}
 
+	/* validate user defined task period: check range and if it is an integer that can divide 1 second */
+	if (cfg->period < APP_PERIOD_MIN || cfg->period > APP_PERIOD_MAX || ((NSECS_PER_SEC / cfg->period) * cfg->period != NSECS_PER_SEC)) {
+		log_err("Period %d frames is not supported\n", cfg->period);
+		goto exit;
+	}
+
 	ctx = os_malloc(sizeof(*ctx) + sizeof(*avb_tsn_ctx));
 	if (!ctx) {
 		log_err("Memory allocation error\n");
@@ -342,6 +346,7 @@ void *ethernet_avb_tsn_init(void *parameters)
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
+	ctx->period = cfg->period;
 	ctx->role = role;
 	memcpy(ctx->mac_addr, cfg->address, sizeof(ctx->mac_addr));
 

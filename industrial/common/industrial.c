@@ -101,6 +101,7 @@ static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run 
 	cfg.event_send = data_send_event;
 	cfg.event_data = &data->mqueue;
 	cfg.role = on->role;
+	cfg.period = on->period;
 	cfg.protocol = on->protocol;
 
 	industrial_set_hw_addr(&cfg, on->addr);
