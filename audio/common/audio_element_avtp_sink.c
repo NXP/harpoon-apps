@@ -351,7 +351,7 @@ static void avtp_sink_element_stats(struct audio_element *element)
 	int i;
 
 	for (i = 0; i < avtp->stream_n; i++) {
-		log_info("rx stream: %u, avtp(%p, %u)\n", i, avtp->stream[i].handle, avtp->stream[i].id);
+		log_info("tx stream: %u, avtp(%p, %u)\n", i, avtp->stream[i].handle, avtp->stream[i].id);
 
 		log_info("  connected: %u\n", avtp->stream[i].connected);
 		log_info("  batch size: %u\n", avtp->stream[i].cur_batch_size);
