@@ -19,11 +19,9 @@
 #include "os/assert.h"
 #include "os/counter.h"
 #include "os/semaphore.h"
-#include "os/stdlib.h"
 
 #include "stats.h"
 #include "ivshmem.h"
-#include "hrpn_ctrl.h"
 #include "hlog.h"
 #include "mailbox.h"
 #include "version.h"

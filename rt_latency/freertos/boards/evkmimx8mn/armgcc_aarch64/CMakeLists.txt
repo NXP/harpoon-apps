@@ -3,11 +3,19 @@ SET(MCUX_DEVICE "MIMX8MN6_ca53")
 
 # CROSS COMPILER SETTING
 SET(CMAKE_SYSTEM_NAME Generic)
-CMAKE_MINIMUM_REQUIRED (VERSION 3.1.1)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.12.0)
 
 # THE VERSION NUMBER
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
+
+# Select RPMSG as mailbox transport layer
+add_compile_definitions(MBOX_TRANSPORT_RPMSG)
+
+# config to select component, the format is CONFIG_USE_${component}
+set(CONFIG_USE_middleware_freertos-kernel_MIMX8MN6 true)
+set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
+ADD_DEFINITIONS(-DAARCH64=1)
 
 # ENABLE ASM
 ENABLE_LANGUAGE(ASM)
@@ -25,13 +33,15 @@ SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/evkmimx8mn")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/evkmimx8mn")
+SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
 project(rt_latency)
+set(BIN_NAME rt_latency)
 
-set(MCUX_SDK_PROJECT_NAME rt_latency.elf)
+set(MCUX_SDK_PROJECT_NAME ${BIN_NAME}.elf)
 
 include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
@@ -61,6 +71,8 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/hlog
     ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/ctrl
+    ${CommonPath}/libs/rpmsg
+    ${MulticorePath}
     ${RtosPath}
     ${SdkDirPath}
 )
@@ -92,10 +104,14 @@ include(lib_jailhouse)
 include(lib_hlog)
 include(lib_mailbox)
 include(lib_ctrl)
+include(lib_rpmsg)
 
+include(middleware_freertos-kernel_aarch64)
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
-include(middleware_freertos-kernel_aarch64)
+include(middleware_multicore_rpmsg_lite_aarch64_freertos)
+include(middleware_multicore_rpmsg_lite_freertos)
+include(middleware_multicore_rpmsg_lite_MIMX8MN6)
 
 include(utility_assert)
 include(utility_debug_console)
@@ -114,4 +130,4 @@ target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE nosys)
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)
 
 ADD_CUSTOM_COMMAND(TARGET ${MCUX_SDK_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY}
--Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/rt_latency.bin)
+	-Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/${BIN_NAME}.bin)

@@ -10,13 +10,12 @@ SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
 # Select RPMSG as mailbox transport layer
-if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
-    add_compile_definitions(MBOX_TRANSPORT_RPMSG)
-    # config to select component, the format is CONFIG_USE_${component}
-    set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
-    set(CONFIG_USE_middleware_freertos-kernel_MIMX8MM6 true)
-    ADD_DEFINITIONS(-DAARCH64=1)
-endif()
+add_compile_definitions(MBOX_TRANSPORT_RPMSG)
+
+# config to select component, the format is CONFIG_USE_${component}
+set(CONFIG_USE_middleware_freertos-kernel_MIMX8MM6 true)
+set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
+ADD_DEFINITIONS(-DAARCH64=1)
 
 # ENABLE ASM
 ENABLE_LANGUAGE(ASM)
@@ -34,21 +33,13 @@ SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/evkmimx8mm")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/evkmimx8mm")
-
-if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
-    SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
-endif()
+SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
 project(rt_latency)
-
-if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
-    set(BIN_NAME rt_latency_rpmsg)
-else()
-    set(BIN_NAME rt_latency)
-endif()
+set(BIN_NAME rt_latency)
 
 set(MCUX_SDK_PROJECT_NAME ${BIN_NAME}.elf)
 
@@ -113,17 +104,14 @@ include(lib_jailhouse)
 include(lib_hlog)
 include(lib_mailbox)
 include(lib_ctrl)
+include(lib_rpmsg)
 
+include(middleware_freertos-kernel_aarch64)
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
-include(middleware_freertos-kernel_aarch64)
-
-if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
-    include(lib_rpmsg)
-    include(middleware_multicore_rpmsg_lite_aarch64_freertos)
-    include(middleware_multicore_rpmsg_lite_MIMX8MM6)
-    include(middleware_multicore_rpmsg_lite_freertos)
-endif()
+include(middleware_multicore_rpmsg_lite_aarch64_freertos)
+include(middleware_multicore_rpmsg_lite_freertos)
+include(middleware_multicore_rpmsg_lite_MIMX8MM6)
 
 include(utility_assert)
 include(utility_debug_console)
