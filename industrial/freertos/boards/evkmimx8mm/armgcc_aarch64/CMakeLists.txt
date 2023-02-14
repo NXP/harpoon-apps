@@ -10,13 +10,12 @@ SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
 # Select RPMSG as mailbox transport layer
-if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
-    add_compile_definitions(MBOX_TRANSPORT_RPMSG)
-    # config to select component, the format is CONFIG_USE_${component}
-    set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
-    set(CONFIG_USE_middleware_freertos-kernel_MIMX8MM6 true)
-    ADD_DEFINITIONS(-DAARCH64=1)
-endif()
+add_compile_definitions(MBOX_TRANSPORT_RPMSG)
+
+# config to select component, the format is CONFIG_USE_${component}
+set(CONFIG_USE_middleware_freertos-kernel_MIMX8MM6 true)
+set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
+ADD_DEFINITIONS(-DAARCH64=1)
 
 # ENABLE DRIVER CACHE CONTROL
 ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
@@ -43,9 +42,7 @@ SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX8MM6")
-if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
-    SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
-endif()
+SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 
 SET(GenAVBPath "${ProjDirPath}/../../../../../../gen_avb_sdk")
 SET(GenAVBBuildPath "${CMAKE_CURRENT_BINARY_DIR}/gen_avb_build")
@@ -64,12 +61,7 @@ add_compile_options(-DSERIAL_MODE=0)
 add_compile_options(-DBUILD_MOTOR=0)
 
 project(industrial)
-
-if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
-    set(BIN_NAME industrial_rpmsg)
-else()
-    set(BIN_NAME industrial)
-endif()
+set(BIN_NAME industrial)
 
 set(MCUX_SDK_PROJECT_NAME ${BIN_NAME}.elf)
 
@@ -120,8 +112,8 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/hlog
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/mailbox
-    ${CommonPath}/libs/stats
     ${CommonPath}/libs/rpmsg
+    ${CommonPath}/libs/stats
     ${MulticorePath}
     ${RtosPath}
     ${SdkDirPath}
@@ -168,18 +160,15 @@ include(lib_ctrl)
 include(lib_jailhouse)
 include(lib_hlog)
 include(lib_mailbox)
+include(lib_rpmsg)
 include(lib_stats)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
 include(middleware_freertos-kernel_aarch64)
-
-if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
-    include(lib_rpmsg)
-    include(middleware_multicore_rpmsg_lite_aarch64_freertos)
-    include(middleware_multicore_rpmsg_lite_MIMX8MM6)
-    include(middleware_multicore_rpmsg_lite_freertos)
-endif()
+include(middleware_multicore_rpmsg_lite_aarch64_freertos)
+include(middleware_multicore_rpmsg_lite_freertos)
+include(middleware_multicore_rpmsg_lite_MIMX8MM6)
 
 include(utility_assert)
 include(utility_debug_console)
