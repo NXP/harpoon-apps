@@ -2,8 +2,7 @@
 
 function usage ()
 {
-	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | audio_smp | avb | hello | industrial | latency | virtio_net> [rpmsg]"
-	echo "rpmsg: this option is only available for freertos on evkimx8mm"
+	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | audio_smp | avb | hello | industrial | latency | virtio_net>"
 	echo "virtio_net: this application is only available for FreeRTOS on evkimx8mm"
 }
 
@@ -26,14 +25,7 @@ function detect_machine ()
 
 CONF_FILE=/etc/harpoon/harpoon.conf
 
-RPMSG=""
-if [ $# -eq 3 ]; then
-	RPMSG="_$3"
-	if [[ "${RPMSG}" != "_rpmsg" ]]; then
-		usage
-		exit 5
-	fi
-elif [ ! $# -eq 2 ]; then
+if [ ! $# -eq 2 ]; then
 	usage
 	exit 1
 fi
@@ -51,7 +43,7 @@ if [ -z $SOC ]; then
 	exit 3
 fi
 
-if [[ "$RPMSG" == "_rpmsg" || "$2" == "virtio_net" ]]; then
+if [ "$2" == "virtio_net" ]; then
 	if [[ "$SOC" != "imx8mm" || "$RTOS" != "freertos"  ]]; then
 		usage
 		exit 7
@@ -62,7 +54,7 @@ if [ "$2" == "audio" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
 	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-audio.cell
-	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio${RPMSG}.bin
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
 	EOF
@@ -102,7 +94,7 @@ elif [ "$2" == "industrial" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
 	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-industrial.cell
-	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/industrial${RPMSG}.bin
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/industrial.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
 	EOF
@@ -110,7 +102,7 @@ elif [ "$2" == "latency" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
 	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}.cell
-	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/rt_latency${RPMSG}.bin
+	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/rt_latency.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
 	EOF

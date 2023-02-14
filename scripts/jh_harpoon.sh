@@ -4,6 +4,7 @@
 #  - the cell runs one of the Harpoon images
 
 
+HC_RPMSG_SHORT_CUT=/usr/local/bin/harpoon_ctrl
 
 function usage ()
 {
@@ -12,9 +13,15 @@ function usage ()
 
 function start ()
 {
-    if [[ "${INMATE_BIN}" =~ .*"_rpmsg.bin" ]]; then
+    if [[ "${INMATE_NAME}" == "freertos" ]]; then
         echo 'modprobe -r virtio_rpmsg_bus'
         modprobe -r virtio_rpmsg_bus
+
+        echo 'Use RPMSG-based Linux control application'
+        mkdir -p /usr/local/bin
+        ln -sf /usr/bin/harpoon_ctrl_rpmsg "${HC_RPMSG_SHORT_CUT}"
+    else
+        rm -f "${HC_RPMSG_SHORT_CUT}"
     fi
 
     echo 'modprobe jailhouse'
@@ -32,7 +39,7 @@ function start ()
     echo 'Starting inmate cell'
     jailhouse cell start "${INMATE_NAME}"
 
-    if [[ "${INMATE_BIN}" =~ .*"_rpmsg.bin" ]]; then
+    if [[ "${INMATE_NAME}"  == "freertos" ]]; then
         echo 'modprobe virtio_rpmsg_bus'
         modprobe virtio_rpmsg_bus
     fi
@@ -52,6 +59,11 @@ function start ()
 
 function stop ()
 {
+    if [[ "${INMATE_NAME}" == "freertos" ]]; then
+        echo 'Restore default (ivshmem) Linux control application'
+        rm -f "${HC_RPMSG_SHORT_CUT}"
+    fi
+
     if [[ "${INMATE_BIN}" =~ .*"virtio_net.bin" ]]; then
         echo 'modprobe -r virtio_net'
         modprobe -r virtio_net
