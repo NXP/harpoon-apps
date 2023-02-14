@@ -266,8 +266,7 @@ static int talker_send(struct avtp_sink_element *avtp, unsigned int stream_index
 		ret = -1;
 		goto exit;
 	}
-	if (write_total > (int)stream->cur_batch_size) {
-		/* tx overflow */
+	if (write_total < (int)stream->cur_batch_size) {
 		stream->overflow++;
 		ret = -1;
 		goto exit;
