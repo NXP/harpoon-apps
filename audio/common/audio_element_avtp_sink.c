@@ -132,7 +132,6 @@ static void avtp_sink_connect(struct avtp_sink_element *avtp, unsigned int strea
 	if ((avb_result = genavb_stream_create(handle, &stream->handle, params, &cur_batch_size, 0)) != GENAVB_SUCCESS) {
 		log_err("genavb_stream_create() failed: %s\n", genavb_strerror(avb_result));
 		stream->cur_batch_size = 0;
-		os_sem_give(&avtp->semaphore, 0);
 
 		goto exit;
 	}
