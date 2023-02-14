@@ -42,9 +42,6 @@ struct avtp_stream {
 	unsigned int overflow;
 	unsigned int sent;
 
-	unsigned int count; /* small logic that avoid reading */
-	unsigned int until; /* data when stream in underflow. */
-
 	bool convert;
 	bool invert;	    /* format conversion */
 	unsigned int shift; /* format conversion */
@@ -140,9 +137,6 @@ static void avtp_sink_connect(struct avtp_sink_element *avtp, unsigned int strea
 		goto exit;
 	}
 	log_info("  batch size: %u\n", cur_batch_size);
-
-	stream->count = 0;
-	stream->until = 1;
 
 	os_sem_take(&avtp->semaphore, 0, OS_SEM_TIMEOUT_MAX);
 	stream->connected = 1;
