@@ -127,6 +127,11 @@ static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int s
 	cur_batch_size = period * avdecc_fmt_sample_size(&params->format);
 	stream->cur_batch_size = cur_batch_size;
 
+	if (period < avdecc_fmt_samples_per_packet(&params->format, params->stream_class))
+		cur_batch_size = avdecc_fmt_samples_per_packet(&params->format, params->stream_class) * avdecc_fmt_sample_size(&params->format);
+	else
+		cur_batch_size = stream->cur_batch_size;
+
 	params->flags = 0; /* disable media clock recovery */
 
 	/* Create new AVTP stream, update stream_handle */
@@ -136,6 +141,7 @@ static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int s
 
 		goto exit;
 	}
+	log_info("  stream batch size: %u\n", stream->cur_batch_size);
 	log_info("  batch size: %u\n", cur_batch_size);
 
 	stream->count = 0;
