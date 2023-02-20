@@ -44,6 +44,12 @@ void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int
 	buf->silence = silence;
 	buf->flags = flags;
 	buf->shared_id = shared_id;
+	buf->input_type = 0;
+	buf->input_id = 0;
+	buf->input_element_id = 0;
+	buf->output_type = 0;
+	buf->output_id = 0;
+	buf->output_element_id = 0;
 
 	buf->size_mask = 0;
 	while ((size >>= 1))

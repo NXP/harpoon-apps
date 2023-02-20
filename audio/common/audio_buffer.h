@@ -38,6 +38,12 @@ struct audio_buffer {
 	unsigned int silence;	/* in units of samples */
 	unsigned int flags;
 	unsigned int shared_id;
+	uint32_t input_type:4;
+	uint32_t input_id:12;
+	uint32_t input_element_id:12;
+	uint32_t output_type:4;
+	uint32_t output_id:12;
+	uint32_t output_element_id:12;
 };
 
 void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size,
