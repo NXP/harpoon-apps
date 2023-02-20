@@ -440,8 +440,11 @@ int avtp_source_element_init(struct audio_element *element, struct audio_element
 	for (i = 0; i < avtp->stream_n; i++) {
 		avtp->stream[i].connected = 0;
 
-		for (j = 0; j < avtp_source_channel_n()	; j++, k++)
+		for (j = 0; j < avtp_source_channel_n()	; j++, k++) {
 			avtp->stream[i].channel_buf[j] = &buffer[config->output[k]];
+			avtp->stream[i].channel_buf[j]->input_type = element->type;
+			avtp->stream[i].channel_buf[j]->input_id = k;
+		}
 	}
 
 	for (i = 0; i < avtp->out_n; i++)

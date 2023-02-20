@@ -392,6 +392,8 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 
 				map->rx_fifo = __sai_rx_fifo_addr(sai->base[i], line_config->id);
 				map->out = &buffer[config->output[l]];
+				map->out->input_type = element->type;
+				map->out->input_id = l;
 				l++;
 			}
 		}

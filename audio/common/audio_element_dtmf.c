@@ -270,6 +270,8 @@ int dtmf_element_init(struct audio_element *element, struct audio_element_config
 
 	dtmf->amplitude = config->u.dtmf.amplitude;
 	dtmf->out = &buffer[config->output[0]];
+	dtmf->out->input_type = element->type;
+	dtmf->out->input_id = 0;
 
 	dtmf_get_freqs(dtmf->sequence[dtmf->sequence_id], &freq1, &freq2);
 

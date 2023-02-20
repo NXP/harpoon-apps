@@ -383,6 +383,8 @@ int sai_sink_element_init(struct audio_element *element, struct audio_element_co
 
 				map->tx_fifo = __sai_tx_fifo_addr(sai->base[i], line_config->id);
 				map->in = &buffer[config->input[l]];
+				map->in->output_type = element->type;
+				map->in->output_id = l;
 				l++;
 			}
 		}

@@ -105,6 +105,8 @@ int sine_element_init(struct audio_element *element, struct audio_element_config
 	sine->amplitude = config->u.sine.amplitude;
 	sine->phase = 0;
 	sine->out = &buffer[config->output[0]];
+	sine->out->input_type = element->type;
+	sine->out->input_id = 0;
 
 	sine_element_dump(element);
 
