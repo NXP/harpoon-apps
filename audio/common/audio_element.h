@@ -37,6 +37,8 @@ enum {
 	AUDIO_ELEMENT_MAX,
 };
 
+extern const char *element_name[AUDIO_ELEMENT_MAX];
+
 /* Configuration */
 struct audio_element_config {
 	unsigned int type;

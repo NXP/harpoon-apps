@@ -5,6 +5,7 @@
  */
 
 #include "audio_buffer.h"
+#include "audio_element.h"
 #include "hlog.h"
 
 /*
@@ -32,6 +33,13 @@ void audio_buf_dump(struct audio_buffer *buf)
 	log_info("buf(%p): base %p, size %x/%x, read %x, write %x, flags %d, shared_id %d\n",
 		  buf, buf->base, buf->size, buf->size_mask, buf->read, buf->write,
 		  buf->flags, buf->shared_id);
+}
+
+void audio_buf_routing_dump(struct audio_buffer *buf)
+{
+	log_info("buf(%p): %12s(%2d:%2d) -> %12s(%2d:%2d)\n",
+			buf, element_name[buf->input_type], buf->input_element_id, buf->input_id,
+			element_name[buf->output_type], buf->output_element_id, buf->output_id);
 }
 
 void audio_buf_init(struct audio_buffer *buf, audio_sample_t *base, unsigned int size,

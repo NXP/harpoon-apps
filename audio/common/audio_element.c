@@ -10,6 +10,19 @@
 #include "hlog.h"
 #include "mailbox.h"
 
+const char *element_name[AUDIO_ELEMENT_MAX] = {
+	[AUDIO_ELEMENT_DTMF_SOURCE] = "DTMF_SOURCE",
+	[AUDIO_ELEMENT_ROUTING] = "ROUTING",
+	[AUDIO_ELEMENT_SAI_SINK] = "SAI_SINK",
+	[AUDIO_ELEMENT_SAI_SOURCE] = "SAI_SOURCE",
+	[AUDIO_ELEMENT_SINE_SOURCE] = "SINE_SOURCE",
+	[AUDIO_ELEMENT_PLL] = "PLL",
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[AUDIO_ELEMENT_AVTP_SOURCE] = "AVTP_SOURCE",
+	[AUDIO_ELEMENT_AVTP_SINK] = "AVTP_SINK",
+#endif
+};
+
 static void audio_element_response(struct mailbox *m, uint32_t status)
 {
 	struct hrpn_resp_audio_element resp;

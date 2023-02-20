@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -106,6 +106,17 @@ static void audio_pipeline_response(struct mailbox *m, uint32_t status)
 	}
 }
 
+static void audio_routing_dump(struct audio_pipeline *pipeline)
+{
+	struct audio_buffer buf;
+	int i;
+
+	for (i = 0; i < pipeline->buffers; i++) {
+		buf = pipeline->buffer[i];
+		audio_buf_routing_dump(&buf);
+	}
+}
+
 int audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, struct mailbox *m)
 {
 	struct audio_pipeline *pipeline = NULL;
@@ -125,6 +136,7 @@ int audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, s
 			goto err;
 
 		audio_pipeline_dump(pipeline);
+		audio_routing_dump(pipeline);
 
 		audio_pipeline_response(m, HRPN_RESP_STATUS_SUCCESS);
 
