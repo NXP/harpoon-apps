@@ -255,9 +255,18 @@ static void tsn_net_st_config_enable(struct tsn_task *task)
     struct net_address *addr = &task->params->tx_params[0].addr;
     unsigned int cycle_time = task->params->task_period_ns;
     uint8_t iso_traffic_prio = addr->priority;
-    uint8_t tclass = priority_to_traffic_class_map(CFG_TRAFFIC_CLASS_MAX, CFG_SR_CLASS_MAX)[iso_traffic_prio];
+    const uint8_t *map;
+    uint8_t tclass;
     unsigned int iso_tx_time = frame_tx_time_ns(task->params->tx_buf_size, 1000) * ST_TX_TIME_FACTOR;
     int i;
+
+    map = priority_to_traffic_class_map(CFG_TRAFFIC_CLASS_MAX, CFG_SR_CLASS_MAX);
+    if (!map) {
+        ERR("priority_to_traffic_class_map() error\n");
+        return;
+    } else {
+        tclass = map[iso_traffic_prio];
+    }
 
     gate_list[0].gate_states = 1 << tclass;
 
@@ -339,8 +348,17 @@ static void tsn_net_fp_config_enable(struct tsn_task *task)
 {
     struct genavb_fp_config config;
     struct net_address *addr = &task->params->tx_params[0].addr;
-    uint8_t tclass = priority_to_traffic_class_map(CFG_TRAFFIC_CLASS_MAX, CFG_SR_CLASS_MAX)[addr->priority];
+    const uint8_t *map;
+    uint8_t tclass;
     int i;
+
+    map = priority_to_traffic_class_map(CFG_TRAFFIC_CLASS_MAX, CFG_SR_CLASS_MAX);
+    if (!map) {
+        ERR("priority_to_traffic_class_map() error\n");
+        return;
+    } else {
+        tclass = map[addr->priority];
+    }
 
     for (i = 0; i < QOS_PRIORITY_MAX; i++) {
         if (priority_to_traffic_class_map(CFG_TRAFFIC_CLASS_MAX, CFG_SR_CLASS_MAX)[i] >= tclass)
