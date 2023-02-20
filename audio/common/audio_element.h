@@ -70,6 +70,7 @@ struct audio_element {
 	unsigned int type;
 	unsigned int sample_rate;
 	unsigned int period;
+	unsigned int element_id;
 
 	int (*run)(struct audio_element *element);
 	void(*reset)(struct audio_element *element);
