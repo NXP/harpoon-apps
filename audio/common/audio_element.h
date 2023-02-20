@@ -34,6 +34,7 @@ enum {
 	AUDIO_ELEMENT_AVTP_SOURCE, /* AVB audio stream listener */
 	AUDIO_ELEMENT_AVTP_SINK,   /* AVB audio stream talker */
 #endif
+	AUDIO_ELEMENT_MAX,
 };
 
 /* Configuration */

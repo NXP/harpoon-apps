@@ -233,11 +233,13 @@ int routing_element_init(struct audio_element *element, struct audio_element_con
 
 	for (i = 0; i < routing->outputs; i++) {
 		routing->out[i].buf->input_type = element->type;
+		routing->out[i].buf->input_element_id = element->element_id;
 		routing->out[i].buf->input_id = i;
 	}
 
 	for (i = 0; i < routing->inputs; i++) {
 		routing->in[i]->output_type = element->type;
+		routing->in[i]->output_element_id = element->element_id;
 		routing->in[i]->output_id = i;
 	}
 

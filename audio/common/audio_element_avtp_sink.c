@@ -410,6 +410,7 @@ int avtp_sink_element_init(struct audio_element *element, struct audio_element_c
 		for (j = 0; j < avtp_sink_channel_n(); j++, k++) {
 			avtp->stream[i].channel_buf[j] = &buffer[config->input[k]];
 			avtp->stream[i].channel_buf[j]->output_type = element->type;
+			avtp->stream[i].channel_buf[j]->output_element_id = element->element_id;
 			avtp->stream[i].channel_buf[j]->output_id = k;
 		}
 	}

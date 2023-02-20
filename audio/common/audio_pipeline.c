@@ -6,6 +6,7 @@
 
 #include "os/stdlib.h"
 
+#include "audio_element.h"
 #include "audio_pipeline.h"
 #include "hrpn_ctrl.h"
 #include "hlog.h"
@@ -643,6 +644,7 @@ struct audio_pipeline *audio_pipeline_init(struct audio_pipeline_config *config)
 	struct audio_pipeline *pipeline;
 	struct audio_pipeline_stage *stage;
 	struct audio_element *element;
+	unsigned int element_ids[AUDIO_ELEMENT_MAX] = {0};
 	int i, j;
 
 	log_info("enter\n");
@@ -666,9 +668,12 @@ struct audio_pipeline *audio_pipeline_init(struct audio_pipeline_config *config)
 		for (j = 0; j < stage->elements; j++) {
 			element = &stage->element[j];
 			element_config = &stage_config->element[j];
+			element->element_id = element_ids[element_config->type];
 
 			if (audio_element_init(element, element_config, pipeline->buffer) < 0)
 				goto err_init;
+
+			element_ids[element->type]++;
 		}
 	}
 
