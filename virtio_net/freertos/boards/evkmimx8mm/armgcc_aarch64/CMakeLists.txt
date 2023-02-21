@@ -9,6 +9,9 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.1.1)
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
+# ENABLE DRIVER CACHE CONTROL
+ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
+
 # ENABLE ASM
 ENABLE_LANGUAGE(ASM)
 
@@ -90,6 +93,7 @@ include(component_lists)
 include(component_serial_manager)
 include(component_serial_manager_uart)
 
+include(driver_cache_armv8a)
 include(driver_clock)
 include(driver_common)
 include(driver_enet)
