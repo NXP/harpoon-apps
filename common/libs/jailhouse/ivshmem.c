@@ -1,11 +1,12 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "os/assert.h"
 #include "os/mmu.h"
+#include "os/stdlib.h"
 
 #include "ivshmem.h"
 #include "memory.h"
@@ -254,4 +255,26 @@ err:
 	log_err("ivshmem init failed\n");
 
 	return -1;
+}
+
+int ivshmem_transport_init(unsigned int bdf, struct ivshmem *mem,
+				  void **tp, void **cmd, void **resp)
+{
+	int rc;
+
+	if (!mem) {
+		mem = os_malloc(sizeof(*mem));
+		os_assert(mem, "malloc for ivshmem struct faild, cannot proceed\n");
+	}
+
+	rc = ivshmem_init(bdf, mem);
+	os_assert(!rc, "ivshmem initialization failed, can not proceed\n");
+
+	os_assert(mem->out_size, "ivshmem mis-configuration, can not proceed\n");
+
+	*cmd = mem->out[0];
+	*resp = mem->out[mem->id];
+	*tp = NULL;
+
+	return 0;
 }

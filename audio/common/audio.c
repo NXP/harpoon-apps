@@ -657,51 +657,6 @@ void audio_control_loop(void *context)
 	} while(1);
 }
 
-#ifdef MBOX_TRANSPORT_RPMSG
-static int rpmsg_transport_init(int link_id, int ept_addr, const char *sn,
-				void **tp, void **cmd, void **resp)
-{
-	struct rpmsg_instance *ri;
-	struct rpmsg_ept *ept;
-
-	ri = rpmsg_init(link_id);
-	os_assert(ri, "rpmsg initialization failed, cannot proceed\n");
-	ept = rpmsg_create_ept(ri, ept_addr, sn);
-	os_assert(ept, "rpmsg ept creation failed, cannot proceed\n");
-	*tp = ept;
-	*cmd = os_malloc(1024);
-	os_assert(*cmd, "malloc mailbox memory faild, cannot proceed\n");
-	*resp = *cmd + 512;
-	memset(*cmd, 0, 1024);
-
-	return 0;
-}
-
-#else
-
-static int ivshmem_transport_init(unsigned int bdf, struct ivshmem *mem,
-				  void **tp, void **cmd, void **resp)
-{
-	int rc;
-
-	if (!mem) {
-		mem = os_malloc(sizeof(*mem));
-		os_assert(mem, "malloc for ivshmem struct faild, cannot proceed\n");
-	}
-
-	rc = ivshmem_init(bdf, mem);
-	os_assert(!rc, "ivshmem initialization failed, can not proceed\n");
-
-	os_assert(mem->out_size, "ivshmem mis-configuration, can not proceed\n");
-
-	*cmd = mem->out[0];
-	*resp = mem->out[mem->id];
-	*tp = NULL;
-
-	return 0;
-}
-#endif
-
 void *audio_control_init(uint8_t thread_count)
 {
 	int err, i;

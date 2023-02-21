@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,5 +20,7 @@ struct ivshmem {
 };
 
 int ivshmem_init(unsigned int bfd, struct ivshmem *ivshmem);
+int ivshmem_transport_init(unsigned int bdf, struct ivshmem *mem,
+				  void **tp, void **cmd, void **resp);
 
 #endif /* _IVSHMEM_H_ */

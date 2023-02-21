@@ -85,19 +85,19 @@
 //! @def RL_GEN_SW_MBOX_BASE
 //!
 //! Specify the sharing memory base address used for mailbox.
-#define RL_GEN_SW_MBOX_BASE (0xb8500000)
+#define RL_GEN_SW_MBOX_BASE (0xfe000000)
 //@}
 
 //! @def VDEV0_VRING_BASE
 //!
 //! Specify the sharing memory base address used for RPMSG.
-#define VDEV0_VRING_BASE	(0xb8600000U)
+#define VDEV0_VRING_BASE	(0xfe100000U)
 //@}
 
 //! @def RPMSG_BUF_BASE
 //!
 //! Specify the sharing memory base address used for RPMSG buffer.
-#define RPMSG_BUF_BASE		(0xb8700000U)
+#define RPMSG_BUF_BASE		(0xfe200000U)
 //@}
 
 //! @def RL_GEN_SW_MBOX_IRQ

@@ -11,7 +11,6 @@
 #include "os/irq.h"
 
 #include "rpmsg.h"
-#include "board.h"
 
 #define RPMSG_LITE_SHMEM_BASE	(VDEV0_VRING_BASE)
 
@@ -161,4 +160,23 @@ void rpmsg_deinit(struct rpmsg_instance *ri)
 	os_mmu_unmap((uintptr_t)ri->rpmsg_shmem_va, KB(64));
 	os_mmu_unmap((uintptr_t)ri->mbox_va, KB(4));
 	os_free(ri);
+}
+
+int rpmsg_transport_init(int link_id, int ept_addr, const char *sn,
+				void **tp, void **cmd, void **resp)
+{
+	struct rpmsg_instance *ri;
+	struct rpmsg_ept *ept;
+
+	ri = rpmsg_init(link_id);
+	os_assert(ri, "rpmsg initialization failed, cannot proceed\n");
+	ept = rpmsg_create_ept(ri, ept_addr, sn);
+	os_assert(ept, "rpmsg ept creation failed, cannot proceed\n");
+	*tp = ept;
+	*cmd = os_malloc(1024);
+	os_assert(*cmd, "malloc mailbox memory failded, cannot proceed\n");
+	*resp = *cmd + 512;
+	memset(*cmd, 0, 1024);
+
+	return 0;
 }

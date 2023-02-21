@@ -29,10 +29,6 @@
 #define BOARD_UART_IRQ         UART4_IRQn
 #define BOARD_UART_IRQ_HANDLER UART4_IRQHandler
 
-/* Shared memory base for RPMsg communication. */
-#define VDEV0_VRING_BASE	(0xB8600000U)
-#define RPMSG_BUF_BASE		(0xB8700000U)
-
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
