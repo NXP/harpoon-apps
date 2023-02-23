@@ -208,7 +208,7 @@ int avtp_source_element_ctrl(struct audio_element *element, struct hrpn_cmd_audi
 		if ((len != sizeof(struct hrpn_cmd_audio_element_avtp_connect)))
 			goto err;
 
-		if (cmd->u.connect.stream_index >= avtp->out_n)
+		if (cmd->u.connect.stream_index >= avtp->stream_n)
 			goto err;
 
 		avtp_source_connect(avtp, cmd->u.connect.stream_index, &cmd->u.connect.stream_params, element->period);
@@ -220,7 +220,7 @@ int avtp_source_element_ctrl(struct audio_element *element, struct hrpn_cmd_audi
 		if ((len != sizeof(struct hrpn_cmd_audio_element_avtp_disconnect)))
 			goto err;
 
-		if (cmd->u.disconnect.stream_index >= avtp->out_n)
+		if (cmd->u.disconnect.stream_index >= avtp->stream_n)
 			goto err;
 
 		avtp_source_disconnect(avtp, cmd->u.disconnect.stream_index);
