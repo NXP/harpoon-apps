@@ -48,6 +48,7 @@ void audio_element_usage(void)
 		"\t                  3 - sai source\n"
 		"\t                  4 - sine source\n"
 		"\t                  5 - avtp source\n"
+		"\t                  6 - avtp sink\n"
 	);
 }
 
