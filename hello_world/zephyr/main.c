@@ -26,6 +26,9 @@ static void hello_func(void *p1, void *p2, void *p3)
 {
 	struct main_ctx *ctx = p1;
 
+	log_raw(INFO, "\r\n");
+	log_info("Hello world.\n");
+
 	do {
 		k_msleep(500);
 
@@ -49,7 +52,7 @@ static void tictac_func(void *p1, void *p2, void *p3)
 			log_raw(INFO, "tac ");
 
 		if (!(count % 20))
-			log_raw(INFO, "\n");
+			log_raw(INFO, "\r\n");
 
 	} while(1);
 }
@@ -59,8 +62,6 @@ int main(void)
 	struct main_ctx *ctx = &main_ctx;
 	struct k_thread *hello_thread;
 	struct k_thread *tictac_thread;
-
-	log_info("Hello world.\n");
 
 	/* tic tac thread */
 	tictac_thread = &ctx->tc_thread[ctx->threads_running_count++];

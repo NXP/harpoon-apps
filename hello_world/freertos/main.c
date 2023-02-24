@@ -17,6 +17,8 @@
 #include "clock_config.h"
 #endif
 
+#include "hlog.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -28,8 +30,8 @@
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-static void hello_task(void *pvParameters);
-static void tictac_task(void *pvParameters);
+static void hello_func(void *pvParameters);
+static void tictac_func(void *pvParameters);
 extern void hello_world_doNothing(void);
 
 /*******************************************************************************
@@ -49,10 +51,10 @@ int main(void)
     BOARD_InitClocks();
     BOARD_InitDebugConsole();
 
-    xResult = xTaskCreate(hello_task, "Hello_task", configMINIMAL_STACK_SIZE + 100, NULL, hello_task_PRIORITY, NULL);
+    xResult = xTaskCreate(hello_func, "Hello_task", configMINIMAL_STACK_SIZE + 100, NULL, hello_task_PRIORITY, NULL);
     assert(xResult == pdPASS);
 
-    xResult = xTaskCreate(tictac_task, "Tictac_task", configMINIMAL_STACK_SIZE + 100, NULL, tictac_task_PRIORITY, NULL);
+    xResult = xTaskCreate(tictac_func, "Tictac_task", configMINIMAL_STACK_SIZE + 100, NULL, tictac_task_PRIORITY, NULL);
     assert(xResult == pdPASS);
 
     vTaskStartScheduler();
@@ -63,13 +65,14 @@ int main(void)
 }
 
 /*!
- * @brief Task responsible for printing of "Hello world." message.
+ * @brief function responsible for printing of "Hello world." message.
  */
-static void hello_task(void *pvParameters)
+static void hello_func(void *pvParameters)
 {
     for (;;)
     {
-        PRINTF("\r\nHello world.\r\n");
+        log_raw(INFO, "\r\n");
+        log_info("Hello world.\n");
 
         hello_world_doNothing();
 
@@ -78,9 +81,9 @@ static void hello_task(void *pvParameters)
 }
 
 /*!
- * @brief Task responsible for printing of "tic tac" messages.
+ * @brief function responsible for printing of "tic tac" messages.
  */
-static void tictac_task(void *pvParameters)
+static void tictac_func(void *pvParameters)
 {
     unsigned long long count = 0;
 #define TIME_DELAY_SLEEP      (1 * configTICK_RATE_HZ)
@@ -90,11 +93,11 @@ static void tictac_task(void *pvParameters)
         vTaskDelay(TIME_DELAY_SLEEP);
 
         if (++count % 2)
-            PRINTF("tic ");
+            log_raw(INFO, "tic ");
         else
-            PRINTF("tac ");
+            log_raw(INFO, "tac ");
 
         if (!(count % 20))
-            PRINTF("\r\n");
+            log_raw(INFO, "\r\n");
     }
 }
