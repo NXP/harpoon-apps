@@ -37,7 +37,12 @@ function start ()
         modprobe virtio_rpmsg_bus
     fi
 
-    if [[ "${INMATE_BIN}" == "virtio_net.bin" ]]; then
+    if [[ "${INMATE_BIN}" =~ .*"virtio_net.bin" ]]; then
+        echo 'modprobe -r virtio_net'
+        modprobe -r virtio_net
+        echo 'modprobe -r virtio_mmio'
+        modprobe -r virtio_mmio
+        usleep 1000
         echo 'modprobe virtio_mmio'
         modprobe virtio_mmio
         echo 'modprobe virtio_net'
@@ -47,7 +52,7 @@ function start ()
 
 function stop ()
 {
-    if [[ "${INMATE_BIN}" == "virtio_net.bin" ]]; then
+    if [[ "${INMATE_BIN}" =~ .*"virtio_net.bin" ]]; then
         echo 'modprobe -r virtio_net'
         modprobe -r virtio_net
         echo 'modprobe -r virtio_mmio'
