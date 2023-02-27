@@ -4,7 +4,7 @@
 [![Version](https://img.shields.io/github/v/release/NXP/harpoon-apps)](https://github.com/NXP/harpoon-apps/releases/latest)
 [![Contributors](https://img.shields.io/github/contributors/NXP/harpoon-apps)](https://github.com/NXP/harpoon-apps/graphs/contributors)
 
-Harpoon is a Base Enablement SW platform, providing an RTOS and application specific drivers running in Linux and Jailhouse hypervisor environment, on the Cortex-A cores of NXP MPU’s (i.MX 8M Mini, i.MX 8M Nano, i.MX 8M Plus, ...).
+Harpoon is a Base Enablement SW platform, providing an RTOS and application specific drivers running in Linux and Jailhouse hypervisor environment, on the Cortex-A cores of NXP MPU’s (i.MX 8M Mini, i.MX 8M Nano, i.MX 8M Plus, i.MX 93, ...).
 
 Harpoon offers customers an environment for developing real-time demanding applications leveraging the higher performance of the Cortex-A cores (ARMv8-A) compared to the Cortex-M cores (ARMv7-M) traditionally used for RTOS based applications.
 
@@ -18,7 +18,7 @@ This project provides the fundamental support for RTOS applications running in a
 * HW resource partitioning using Jailhouse hypervisor, providing an inter-cell IPC communication
 * Arm® CMSIS-CORE startup core drivers and device header files for 64-bit Cortex-A53 core
 * RTOS kernel integration (FreeRTOS, Zephyr)
-* Open-source peripheral drivers leveraging the MCUXpresso SDK ( [mcux-sdk project](https://github.com/NXPmicro/mcux-sdk) )
+* Open-source peripheral drivers leveraging the MCUXpresso SDK ( [mcux-sdk project](https://github.com/nxp-mcuxpresso/mcux-sdk) )
 * Integration in Linux Yocto BSP as well as Real-time Edge SW Yocto through the [meta-nxp-harpoon](https://github.com/NXP/meta-nxp-harpoon) layer (integration with systemd)
 
 This project is the main repository to build the RTOS application for ARMv8-A cores, it contains the [west.yml](https://github.com/NXP/harpoon-apps/blob/main/west.yml) which keeps the description and revision for other projects in the overall Harpoon delivery. Currently available software components are shown in below figure.
@@ -60,11 +60,12 @@ sudo apt install python3-pyelftools
 
 Execute below commands to replicate the whole Harpoon delivery at revision ```${revision}``` and place it in a west workspace named ```hww```.
 ```bash
+export revision=harpoon_2.3
 west init -m https://github.com/NXP/harpoon-apps --mr ${revision} hww
 cd hww
 west update
 ```
-Replace ```${revision}``` with any Harpoon release you wish to use (e.g.: ```harpoon_2.2.1```). This can also be ```main``` if you want the latest state, or any commit SHA.
+Replace ```${revision}``` with any Harpoon release you wish to use. This can also be ```main``` if you want the latest state, or any commit SHA.
 
 # Repository structure
 
@@ -146,6 +147,7 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 |   ├── audio                <-- RTOS audio application
 │   ├── rt_latency           <-- RTOS rt latency measurement application
 │   ├── industrial           <-- RTOS industrial application
+│   ├── virtio_net           <-- RTOS virtio application
 │   ├── README.md
 │   └── west.yml
 ├── FreeRTOS-Kernel                         <-- RTOS Kernel Git tree
@@ -214,7 +216,7 @@ jailhouse cell create /usr/share/jailhouse/cells/imx8mp-xxx.cell
 jailhouse cell load xxx /usr/share/harpoon/inmates/xxx/rt_latency.bin --address 0xc0000000
 jailhouse cell start xxx
 
-/usr/share/harpoon/harpoon_ctrl latency -r 1   # start rt_latency test case 1
+harpoon_ctrl latency -r 1   # start rt_latency test case 1
 
 jailhouse cell shutdown xxx
 jailhouse cell destroy xxx
