@@ -372,10 +372,14 @@ static int enet_qos_phy_init(phy_handle_t *phyHandle, mdio_handle_t *mdioHandle,
 
     mdioHandle->resource.csrClock_Hz = CLOCK_GetFreq(kCLOCK_EnetIpgClk);
 
+    count = 10;
     if (loopback) {
         phyConfig.autoNeg = false;
         phyConfig.speed = kPHY_Speed1000M;
-        status = PHY_Init(phyHandle, &phyConfig);
+        do
+        {
+            status = PHY_Init(phyHandle, &phyConfig);
+        } while ((status != kStatus_Success) && (--count));
         os_assert(status == kStatus_Success, "PHY initialization failed\r\n");
         /* Enable loopback mode */
         PHY_EnableLoopback(phyHandle, kPHY_LocalLoop, kPHY_Speed1000M, true);
