@@ -35,14 +35,14 @@ manifest:
       revision: 27bb9bb8ab283f2d802e28b485d4ca0531f66ba6
     - name: heterogeneous-multicore
       remote: nxprealtimeedgesw
-      revision: master
+      revision: fe7e5c1a932e38712ae5da167958aab8b43ae883
     - name: mcux-sdk-middleware-multicore
       remote: nxpmcuxpresso
-      revision: feature/heterogeneous_multicore
+      revision: e914909af2bf44fd651e3383ba0cd8cf5f0bda66
       path: middleware/multicore
     - name: rpmsg-lite
       remote: nxpmcuxpresso
-      revision: feature/heterogeneous_multicore
+      revision: 71bc60055fb02194b04ab4101795fa462444be87
       path: middleware/multicore/rpmsg_lite
   self:
     path: harpoon-apps
