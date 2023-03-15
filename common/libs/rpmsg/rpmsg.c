@@ -29,9 +29,11 @@ int rpmsg_recv(struct rpmsg_ept *ept, void *data, uint32_t len)
 	uint32_t size;
 	int32_t ret;
 
-	ret = rpmsg_queue_recv(ept->ri->rl_inst, ept->ept_q, (uint32_t *)&msg_src_addr, (char *)data, len, &size, RL_BLOCK);
+	ret = rpmsg_queue_recv(ept->ri->rl_inst, ept->ept_q, (uint32_t *)&msg_src_addr, (char *)data, len, &size, RL_DONT_BLOCK);
 	if (ret != RL_SUCCESS) {
-		os_printf("rpmsg_queue_recv() failed\n");
+		if (ret != RL_ERR_NO_BUFF)
+			os_printf("rpmsg_queue_recv() failed\n");
+
 		return ret;
 	}
 
