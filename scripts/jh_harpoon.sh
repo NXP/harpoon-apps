@@ -13,7 +13,7 @@ function usage ()
 
 function start ()
 {
-    if [[ "${INMATE_NAME}" == "freertos" ]]; then
+    if [[ "${INMATE_NAME}" == "freertos" ]] && [[ ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         echo 'modprobe -r virtio_rpmsg_bus'
         modprobe -r virtio_rpmsg_bus
 
@@ -39,7 +39,7 @@ function start ()
     echo 'Starting inmate cell'
     jailhouse cell start "${INMATE_NAME}"
 
-    if [[ "${INMATE_NAME}"  == "freertos" ]]; then
+    if [[ "${INMATE_NAME}"  == "freertos" ]] && [[ ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         echo 'modprobe virtio_rpmsg_bus'
         modprobe virtio_rpmsg_bus
     fi
