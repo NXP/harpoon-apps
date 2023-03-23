@@ -49,7 +49,7 @@ function start ()
         modprobe -r virtio_net
         echo 'modprobe -r virtio_mmio'
         modprobe -r virtio_mmio
-        usleep 1000
+        sleep 5
         echo 'modprobe virtio_mmio'
         modprobe virtio_mmio
         echo 'modprobe virtio_net'
