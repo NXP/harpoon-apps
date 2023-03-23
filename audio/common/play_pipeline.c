@@ -276,8 +276,6 @@ static void avb_close(struct pipeline_ctx *ctx)
 {
 	genavb_control_close(ctx->avb.ctrl_h);
 
-	gavb_port_stats_exit(0);
-
 	if (gavb_stack_exit()) {
 		log_err("gavb_stack_exit() failed\n");
 	}
