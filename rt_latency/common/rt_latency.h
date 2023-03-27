@@ -11,13 +11,13 @@
 #include "stats.h"
 
 /* Time period between two statistics logs (seconds) */
-#define STATS_PERIOD_SEC                       (10)
+#define STATS_PERIOD_SEC					   (10)
 
 /* Time for counter alarm timeout (us) */
-#define COUNTER_PERIOD_US_VAL               (20000)
+#define COUNTER_PERIOD_US_VAL			   (20000)
 
 /* Time between two cache invalidation instructions (ms) */
-#define CACHE_INVAL_PERIOD_MS                 (100)
+#define CACHE_INVAL_PERIOD_MS				 (100)
 
 /*
  * Symbol definitions:
@@ -36,55 +36,55 @@
 
 enum rt_latency_test_case_id
 {
-    RT_LATENCY_TEST_CASE_1 = 1,
-    RT_LATENCY_TEST_CASE_2,
-    RT_LATENCY_TEST_CASE_3,
-    RT_LATENCY_TEST_CASE_4,
-    RT_LATENCY_TEST_CASE_5,
-    RT_LATENCY_TEST_CASE_6,
-    RT_LATENCY_TEST_CASE_7,
+	RT_LATENCY_TEST_CASE_1 = 1,
+	RT_LATENCY_TEST_CASE_2,
+	RT_LATENCY_TEST_CASE_3,
+	RT_LATENCY_TEST_CASE_4,
+	RT_LATENCY_TEST_CASE_5,
+	RT_LATENCY_TEST_CASE_6,
+	RT_LATENCY_TEST_CASE_7,
 
-    RT_LATENCY_TEST_CASE_MAX,
+	RT_LATENCY_TEST_CASE_MAX,
 };
 
 static inline int rt_latency_get_tc_load(int test_case_id)
 {
-    int mask = 0;
+	int mask = 0;
 
-    switch (test_case_id) {
-    case RT_LATENCY_TEST_CASE_1:
-        break;
-    case RT_LATENCY_TEST_CASE_2:
-        mask |= RT_LATENCY_WITH_CPU_LOAD;
-        break;
-    case RT_LATENCY_TEST_CASE_3:
-        mask |= RT_LATENCY_WITH_IRQ_LOAD;
-        break;
-    case RT_LATENCY_TEST_CASE_4:
-        mask |= RT_LATENCY_WITH_CPU_LOAD |
-                RT_LATENCY_WITH_CPU_LOAD_SEM;
-        break;
-    case RT_LATENCY_TEST_CASE_5:
-        mask |= RT_LATENCY_WITH_CPU_LOAD |
-                RT_LATENCY_WITH_LINUX_LOAD;
-        break;
-    case RT_LATENCY_TEST_CASE_6:
-        mask |= RT_LATENCY_WITH_CPU_LOAD |
-                RT_LATENCY_WITH_INVD_CACHE;
-        break;
-    case RT_LATENCY_TEST_CASE_7:
-        /*
-         * TODO: Move/duplicate the code in OCRAM to enable before enabling
-         * RT_LATENCY_TEST_CASE_7
-         */
-        mask = -1;
-        break;
-    default:
-        mask = -1;
-        break;
-    }
+	switch (test_case_id) {
+	case RT_LATENCY_TEST_CASE_1:
+		break;
+	case RT_LATENCY_TEST_CASE_2:
+		mask |= RT_LATENCY_WITH_CPU_LOAD;
+		break;
+	case RT_LATENCY_TEST_CASE_3:
+		mask |= RT_LATENCY_WITH_IRQ_LOAD;
+		break;
+	case RT_LATENCY_TEST_CASE_4:
+		mask |= RT_LATENCY_WITH_CPU_LOAD |
+				RT_LATENCY_WITH_CPU_LOAD_SEM;
+		break;
+	case RT_LATENCY_TEST_CASE_5:
+		mask |= RT_LATENCY_WITH_CPU_LOAD |
+				RT_LATENCY_WITH_LINUX_LOAD;
+		break;
+	case RT_LATENCY_TEST_CASE_6:
+		mask |= RT_LATENCY_WITH_CPU_LOAD |
+				RT_LATENCY_WITH_INVD_CACHE;
+		break;
+	case RT_LATENCY_TEST_CASE_7:
+		/*
+		 * TODO: Move/duplicate the code in OCRAM to enable before enabling
+		 * RT_LATENCY_TEST_CASE_7
+		 */
+		mask = -1;
+		break;
+	default:
+		mask = -1;
+		break;
+	}
 
-    return mask;
+	return mask;
 }
 
 struct rt_latency_ctx {

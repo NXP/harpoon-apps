@@ -228,7 +228,7 @@ uint8_t os_counter_get_num_of_channels(const void *dev)
  * When alarm expiration handler is called, channel is considered available and can be set again in that context.
  */
 int os_counter_set_channel_alarm(const void *dev, uint8_t chan_id,
-          const struct os_counter_alarm_cfg *alarm_cfg)
+		const struct os_counter_alarm_cfg *alarm_cfg)
 {
 	int ret = 0;
 	uint32_t current, next;

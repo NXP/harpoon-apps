@@ -123,8 +123,8 @@ struct hrpn_cmd_ethernet_set_mac_addr {
 
 struct hrpn_cmd_ethernet {
 	union {
-    struct hrpn_cmd_ethernet_common common;
-    struct hrpn_cmd_ethernet_set_mac_addr set_mac_addr;
+		struct hrpn_cmd_ethernet_common common;
+		struct hrpn_cmd_ethernet_set_mac_addr set_mac_addr;
 	} u;
 };
 

@@ -20,7 +20,7 @@ void vApplicationIdleHook(void)
 	 * idle starts just before calling WFI below and it ends on entry to the first IRQ
 	 * busy starts on entry to first IRQ and ends here
 	 * IRQ entry is trapped in vApplicationIRQHandler() and a flag (cpu_load_work_begin = 0) is used to determine the first one
-     */
+	 */
 	portDISABLE_INTERRUPTS();
 	cpu_idle += cpu_load_work_begin - cpu_load_work_end;
 	ARM_TIMER_GetCounterCount(ARM_TIMER_VIRTUAL, &cpu_load_work_end);

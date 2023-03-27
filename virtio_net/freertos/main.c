@@ -42,18 +42,18 @@ static void virtio_task(void *pvParameters);
  */
 int main(void)
 {
-    BaseType_t xResult;
+	BaseType_t xResult;
 
-    virtio_board_init();
+	virtio_board_init();
 
-    xResult = xTaskCreate(virtio_task, "Virtio_task", configMINIMAL_STACK_SIZE + 100, NULL, virtio_task_PRIORITY, NULL);
-    assert(xResult == pdPASS);
+	xResult = xTaskCreate(virtio_task, "Virtio_task", configMINIMAL_STACK_SIZE + 100, NULL, virtio_task_PRIORITY, NULL);
+	assert(xResult == pdPASS);
 
-    vTaskStartScheduler();
-    for (;;)
-        ;
+	vTaskStartScheduler();
+	for (;;)
+		;
 
-    return xResult;
+	return xResult;
 }
 
 static void virtio_task(void *pvParameters)

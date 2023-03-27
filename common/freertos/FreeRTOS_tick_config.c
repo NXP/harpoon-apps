@@ -72,29 +72,29 @@ static void VirtualTimer_IRQn_Handler(void *data)
 
 void vConfigureTickInterrupt( void )
 {
-    uint32_t val;
+	uint32_t val;
 
-    /* Initialize the device. */
-    ARM_TIMER_Initialize(ARM_TIMER);
+	/* Initialize the device. */
+	ARM_TIMER_Initialize(ARM_TIMER);
 
-    /* Fetch timer frequency rate. */
-    ARM_TIMER_GetFreq(&val);
+	/* Fetch timer frequency rate. */
+	ARM_TIMER_GetFreq(&val);
 
-    /* Derive values from the tick rate. */
-    FreeRTOS_tick_interval = val / configTICK_RATE_HZ;
+	/* Derive values from the tick rate. */
+	FreeRTOS_tick_interval = val / configTICK_RATE_HZ;
 
-    /* Set the timer tick interval. */
-    ARM_TIMER_SetInterval(ARM_TIMER, FreeRTOS_tick_interval);
+	/* Set the timer tick interval. */
+	ARM_TIMER_SetInterval(ARM_TIMER, FreeRTOS_tick_interval);
 
-    irq_register(VirtualTimer_IRQn, VirtualTimer_IRQn_Handler, NULL, portLOWEST_USABLE_INTERRUPT_PRIORITY);
+	irq_register(VirtualTimer_IRQn, VirtualTimer_IRQn_Handler, NULL, portLOWEST_USABLE_INTERRUPT_PRIORITY);
 
-    /* Enable the interrupt in the GIC. */
-    GIC_EnableInterface();
-    GIC_SetInterfacePriorityMask(portLOWEST_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
-    GIC_EnableIRQ(VirtualTimer_IRQn);
+	/* Enable the interrupt in the GIC. */
+	GIC_EnableInterface();
+	GIC_SetInterfacePriorityMask(portLOWEST_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
+	GIC_EnableIRQ(VirtualTimer_IRQn);
 
-    /* Start the timer with interrupt enabled. */
-    ARM_TIMER_Start(ARM_TIMER, true);
+	/* Start the timer with interrupt enabled. */
+	ARM_TIMER_Start(ARM_TIMER, true);
 }
 /*-----------------------------------------------------------*/
 
@@ -112,6 +112,6 @@ void vConfigureTickInterrupt( void )
  */
 void vClearTickInterrupt( void )
 {
-    /* Set the timer tick interval. */
-    ARM_TIMER_SetInterval(ARM_TIMER, FreeRTOS_tick_interval);
+	/* Set the timer tick interval. */
+	ARM_TIMER_SetInterval(ARM_TIMER, FreeRTOS_tick_interval);
 }

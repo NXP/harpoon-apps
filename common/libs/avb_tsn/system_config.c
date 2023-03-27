@@ -26,33 +26,33 @@ exit:
 
 struct net_config *system_config_get_net(int port_id)
 {
-    char port[10];
+	char port[10];
 
-    if (port_id >= BOARD_NUM_PORTS)
-        return NULL;
+	if (port_id >= BOARD_NUM_PORTS)
+		return NULL;
 
-    snprintf(port, 10, "/port%u", port_id);
-    if (storage_cd(port) == 0) {
-        storage_read_mac_address("hw_addr", system_cfg.net[port_id].hw_addr);
-        storage_read_ipv4_address("ip_addr", system_cfg.net[port_id].ip_addr);
-        storage_read_ipv4_address("net_mask", system_cfg.net[port_id].net_mask);
-        storage_read_ipv4_address("gw_addr", system_cfg.net[port_id].gw_addr);
+	snprintf(port, 10, "/port%u", port_id);
+	if (storage_cd(port) == 0) {
+		storage_read_mac_address("hw_addr", system_cfg.net[port_id].hw_addr);
+		storage_read_ipv4_address("ip_addr", system_cfg.net[port_id].ip_addr);
+		storage_read_ipv4_address("net_mask", system_cfg.net[port_id].net_mask);
+		storage_read_ipv4_address("gw_addr", system_cfg.net[port_id].gw_addr);
 
-        storage_cd("/");
-    }
+		storage_cd("/");
+	}
 
-    return &system_cfg.net[port_id];
+	return &system_cfg.net[port_id];
 }
 
 struct avb_app_config *system_config_get_avb_app(void)
 {
-    struct avb_app_config *config = &system_cfg.app.avb_app_config;
+	struct avb_app_config *config = &system_cfg.app.avb_app_config;
 
-    if (storage_cd("/avb_app") == 0) {
-        storage_read_uint("mclock_role", &config->mclock_role);
+	if (storage_cd("/avb_app") == 0) {
+		storage_read_uint("mclock_role", &config->mclock_role);
 
-        storage_cd("/");
-    }
+		storage_cd("/");
+	}
 
-    return config;
+	return config;
 }

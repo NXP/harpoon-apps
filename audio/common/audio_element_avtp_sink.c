@@ -43,9 +43,9 @@ struct avtp_stream {
 	unsigned int sent;
 
 	bool convert;
-	bool invert;	    /* format conversion */
-	unsigned int shift; /* format conversion */
-	unsigned int mask;  /* format conversion */
+	bool invert;		/* format conversion */
+	unsigned int shift;	/* format conversion */
+	unsigned int mask;	/* format conversion */
 };
 
 struct avtp_sink_element {
@@ -251,8 +251,8 @@ static int talker_send(struct avtp_sink_element *avtp, unsigned int stream_index
 	int i, j, k;
 	int write_total;
 
-  if (stream->convert)
-	  for (i = 0; i < avtp_sink_channel_n(); i++)
+	if (stream->convert)
+		for (i = 0; i < avtp_sink_channel_n(); i++)
 			audio_convert_to(audio_buf_read_addr(stream->channel_buf[i], 0), period, stream->invert, stream->mask, stream->shift);
 
 #define PERIOD_MAX 32
@@ -378,7 +378,7 @@ int avtp_sink_element_check_config(struct audio_element_config *config)
 
 	if (config->u.avtp_sink.stream_n > avtp_sink_stream_n()) {
 		log_err("number of streams not supported: %u != %u\n",
-			       config->u.avtp_sink.stream_n, avtp_sink_stream_n());
+				   config->u.avtp_sink.stream_n, avtp_sink_stream_n());
 		goto err;
 	}
 

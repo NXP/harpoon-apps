@@ -52,8 +52,8 @@ void main_task(void *pvParameters)
 	os_assert(context, "control initialization failed!");
 
 	xResult = xTaskCreate(data_task, "data_task",
-                        configMINIMAL_STACK_SIZE + 200, context,
-                        data_task_PRIORITY, NULL);
+						configMINIMAL_STACK_SIZE + 200, context,
+						data_task_PRIORITY, NULL);
 	os_assert(xResult == pdPASS, "data task creation failed");
 
 	/* forever loop */

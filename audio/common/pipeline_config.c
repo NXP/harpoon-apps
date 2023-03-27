@@ -591,7 +591,7 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 			.input = {13, },	/* 13 - 16 */
 		},
 
-    .element[2] = {
+	.element[2] = {
 			.type = AUDIO_ELEMENT_PLL,
 			.u.pll = {
 				.src_sai_id = 5,

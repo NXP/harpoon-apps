@@ -91,7 +91,7 @@ static int sai_source_element_run(struct audio_element *element)
 		 */
 	case SYNC_PARTIAL:
 		/* scheduling source is synchronous to audio clock, but not frame sync, fifo level, e.g.:
-                   - GPT timer IRQ with audio clock source
+				   - GPT timer IRQ with audio clock source
 		   - SAI IRQ, for a different SAI instance, using same clock, but not hardware sync mode
 		   - SAI IRQ, for a different SAI instance, but fifo was reset after start 
 		   On first iteration, after start, number of samples may vary, need to compensate.
@@ -102,7 +102,7 @@ static int sai_source_element_run(struct audio_element *element)
 	case SYNC_NONE:
 		/* scheduling source asynchronous to audio clock:
 		   - GPT timer IRQ, with system clock source
-                   - Slave SAI with different audio clock
+				   - Slave SAI with different audio clock
 		   in this case samples may be accumulating in the playback fifo, need to check level and compensate (drop samples)
 		*/
 	}

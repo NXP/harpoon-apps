@@ -134,5 +134,5 @@ static const struct ARM_MMU_config MMU_config = {
 
 void MMU_init(void)
 {
-    return ARM_MMU_Initialize(&MMU_config, true);
+	return ARM_MMU_Initialize(&MMU_config, true);
 }

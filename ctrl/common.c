@@ -66,13 +66,13 @@ int strtoul_check(const char *nptr, char **endptr, int base, unsigned int *val)
 int read_mac_address(char *buf, uint8_t *mac)
 {
 #define NB_OCTETS	6
-    int canary = 3 * NB_OCTETS - 1; /* octets + ":" separators */
-    int rc;
+	int canary = 3 * NB_OCTETS - 1; /* octets + ":" separators */
+	int rc;
 
-    buf[canary] = '\0';
-    rc = sscanf(buf, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
+	buf[canary] = '\0';
+	rc = sscanf(buf, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
 
-    return (rc == NB_OCTETS) ? 0 : -1;
+	return (rc == NB_OCTETS) ? 0 : -1;
 }
 
 void usage(void)

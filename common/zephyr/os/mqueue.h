@@ -14,7 +14,7 @@
 typedef struct k_msgq os_mqd_t;
 
 static inline int os_mq_open(os_mqd_t *mq, const char *name,
-                             uint32_t nb_items, size_t item_size)
+							 uint32_t nb_items, size_t item_size)
 {
 	int err;
 
@@ -30,7 +30,7 @@ static inline int os_mq_close(os_mqd_t *mq)
 }
 
 static inline int os_mq_send(os_mqd_t *mq, const void *item,
-                             uint32_t flags, uint32_t timeout_ms)
+							 uint32_t flags, uint32_t timeout_ms)
 {
 	k_timeout_t t;
 
@@ -46,7 +46,7 @@ static inline int os_mq_send(os_mqd_t *mq, const void *item,
 }
 
 static inline int os_mq_receive(os_mqd_t *mq, void *item,
-                                uint32_t flags, uint32_t timeout_ms)
+								uint32_t flags, uint32_t timeout_ms)
 {
 	k_timeout_t t;
 

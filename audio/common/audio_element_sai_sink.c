@@ -61,7 +61,7 @@ static void sai_sink_element_fifo_write(struct audio_element *element)
 
 	for (i = 0; i < sai->in_n; i++) {
 		if (sai->in[i].convert)
-				audio_convert_to(audio_buf_read_addr(sai->in[i].buf, 0), element->period, sai->in[i].invert, sai->in[i].mask, sai->in[i].shift);
+			audio_convert_to(audio_buf_read_addr(sai->in[i].buf, 0), element->period, sai->in[i].invert, sai->in[i].mask, sai->in[i].shift);
 	}
 
 	for (i = 0; i < element->period; i++) {
@@ -95,18 +95,18 @@ static int sai_sink_element_run(struct audio_element *element)
 		 */
 	case SYNC_PARTIAL:
 		/* scheduling source is synchronous to audio clock, but not frame sync, fifo level, e.g.:
-                   - GPT timer IRQ with audio clock source
+				   - GPT timer IRQ with audio clock source
 		   - SAI IRQ, for a different SAI instance, using same clock, but not hardware sync mode
 		   - SAI IRQ, for a different SAI instance, but fifo was reset after start 
 		   On first iteration, after start, number of samples may vary, need to compensate.
 		   Need to take into account software jitter for proper compensation.
-                   In following iterations, fifo level should be guaranteed.
+				   In following iterations, fifo level should be guaranteed.
 		   May increase end to end latency of up to one sample.
 		*/
 	case SYNC_NONE:
 		/* scheduling source asynchronous to audio clock:
 		   - GPT timer IRQ, with system clock source
-                   - Slave SAI with different audio clock
+				   - Slave SAI with different audio clock
 		   in this case samples may be accumulating in the playback fifo, need to check level and compensate (drop samples)
 		*/
 	}

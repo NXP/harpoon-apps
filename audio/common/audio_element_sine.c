@@ -24,7 +24,7 @@ struct sine_element {
 static int sine_element_run(struct audio_element *element)
 {
 	struct sine_element *sine = element->data;
-        double v;
+	double v;
 	audio_sample_t w;
 	int i;
 

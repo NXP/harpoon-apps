@@ -63,32 +63,32 @@ extern struct system_config system_cfg;
 
 static struct tsn_app_config *system_config_get_tsn_app(struct ethernet_ctx *ctx)
 {
-    struct tsn_app_config *config = &system_cfg.app.tsn_app_config;
+	struct tsn_app_config *config = &system_cfg.app.tsn_app_config;
 
 #if (ENABLE_STORAGE == 1)
-    if (storage_cd("/tsn_app") == 0) {
-        storage_read_uint("mode", &config->mode);
-        storage_read_uint("role", &config->role);
-        storage_read_uint("num_io_devices", &config->num_io_devices);
-        storage_read_float("motor_offset", &config->motor_offset);
-        storage_read_uint("control_strategy", &config->control_strategy);
-        storage_read_uint("use_st", &config->use_st);
-        storage_read_uint("use_fp", &config->use_fp);
-        storage_read_uint("cmd_client", &config->cmd_client);
+	if (storage_cd("/tsn_app") == 0) {
+		storage_read_uint("mode", &config->mode);
+		storage_read_uint("role", &config->role);
+		storage_read_uint("num_io_devices", &config->num_io_devices);
+		storage_read_float("motor_offset", &config->motor_offset);
+		storage_read_uint("control_strategy", &config->control_strategy);
+		storage_read_uint("use_st", &config->use_st);
+		storage_read_uint("use_fp", &config->use_fp);
+		storage_read_uint("cmd_client", &config->cmd_client);
 
-        if (config->mode == SERIAL)
-            config->period_ns = APP_PERIOD_SERIAL_DEFAULT;
+		if (config->mode == SERIAL)
+			config->period_ns = APP_PERIOD_SERIAL_DEFAULT;
 
-        storage_read_uint("period_ns", &config->period_ns);
+		storage_read_uint("period_ns", &config->period_ns);
 
-        storage_cd("/");
-    }
+		storage_cd("/");
+	}
 #else
 	config->role = ctx->role;
 
 #endif /* (ENABLE_STORAGE == 1) */
 
-    return config;
+	return config;
 }
 
 static void null_loop(void *data, int timer_status)

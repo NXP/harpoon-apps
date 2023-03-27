@@ -26,22 +26,22 @@ static inline uint32_t dev_get_pll_ref_freq(void)
  */
 static inline void dev_write_audio_pll_num(uint32_t num)
 {
-    /* TODO */
+	/* TODO */
 }
 
 static inline uint32_t dev_read_audio_pll_num(void)
 {
-    /* TODO */ return 0;
+	/* TODO */ return 0;
 }
 
 static inline uint32_t dev_read_audio_pll_denom(void)
 {
-    /* TODO */ return 0;
+	/* TODO */ return 0;
 }
 
 static inline uint32_t dev_read_audio_pll_post_div(void)
 {
-    /* TODO */ return 0;
+	/* TODO */ return 0;
 }
 
 /*
@@ -49,9 +49,9 @@ static inline uint32_t dev_read_audio_pll_post_div(void)
  */
 static inline uint32_t dev_get_enet_core_freq(void *base)
 {
-    return CLOCK_GetPllFreq(kCLOCK_SystemPll1Ctrl) / 3 /
-        CLOCK_GetRootPreDivider(kCLOCK_RootEnetAxi) /
-        CLOCK_GetRootPostDivider(kCLOCK_RootEnetAxi);
+	return CLOCK_GetPllFreq(kCLOCK_SystemPll1Ctrl) / 3 /
+		CLOCK_GetRootPreDivider(kCLOCK_RootEnetAxi) /
+		CLOCK_GetRootPostDivider(kCLOCK_RootEnetAxi);
 }
 
 /*
@@ -59,9 +59,9 @@ static inline uint32_t dev_get_enet_core_freq(void *base)
  */
 static inline uint32_t dev_get_enet_1588_freq(void *base)
 {
-    return CLOCK_GetPllFreq(kCLOCK_SystemPll2Ctrl) / 10 /
-        CLOCK_GetRootPreDivider(kCLOCK_RootEnetTimer) /
-        CLOCK_GetRootPostDivider(kCLOCK_RootEnetTimer);
+	return CLOCK_GetPllFreq(kCLOCK_SystemPll2Ctrl) / 10 /
+		CLOCK_GetRootPreDivider(kCLOCK_RootEnetTimer) /
+		CLOCK_GetRootPostDivider(kCLOCK_RootEnetTimer);
 }
 
 /*
@@ -69,20 +69,20 @@ static inline uint32_t dev_get_enet_1588_freq(void *base)
  */
 static inline uint32_t dev_get_gpt_ipg_freq(void *base)
 {
-    if (base == GPT1)
-        return CLOCK_GetClockRootFreq(kCLOCK_Gpt1ClkRoot);
-    else if (base == GPT2)
-        return CLOCK_GetClockRootFreq(kCLOCK_Gpt2ClkRoot);
-    else if (base == GPT3)
-        return CLOCK_GetClockRootFreq(kCLOCK_Gpt3ClkRoot);
-    else if (base == GPT4)
-        return CLOCK_GetClockRootFreq(kCLOCK_Gpt4ClkRoot);
-    else if (base == GPT5)
-        return CLOCK_GetClockRootFreq(kCLOCK_Gpt5ClkRoot);
-    else if (base == GPT6)
-        return CLOCK_GetClockRootFreq(kCLOCK_Gpt6ClkRoot);
-    else
-        return 0;
+	if (base == GPT1)
+		return CLOCK_GetClockRootFreq(kCLOCK_Gpt1ClkRoot);
+	else if (base == GPT2)
+		return CLOCK_GetClockRootFreq(kCLOCK_Gpt2ClkRoot);
+	else if (base == GPT3)
+		return CLOCK_GetClockRootFreq(kCLOCK_Gpt3ClkRoot);
+	else if (base == GPT4)
+		return CLOCK_GetClockRootFreq(kCLOCK_Gpt4ClkRoot);
+	else if (base == GPT5)
+		return CLOCK_GetClockRootFreq(kCLOCK_Gpt5ClkRoot);
+	else if (base == GPT6)
+		return CLOCK_GetClockRootFreq(kCLOCK_Gpt6ClkRoot);
+	else
+		return 0;
 }
 
 #endif /* _DEV_ITF_H_ */

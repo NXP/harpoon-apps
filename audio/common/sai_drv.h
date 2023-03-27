@@ -113,7 +113,7 @@ static inline void __sai_disable_irq(void *base, bool rx_irq, bool tx_irq)
 {
 	if (rx_irq) {
 		/* Disable Rx interrupt */
- #if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
 		SAI_RxDisableInterrupts(base,
 				I2S_TCSR_FEIE_MASK | I2S_TCSR_FRIE_MASK);
 #else
