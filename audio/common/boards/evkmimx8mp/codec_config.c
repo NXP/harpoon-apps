@@ -149,6 +149,12 @@ int32_t codec_setup(enum codec_id cid)
 			log_err("WM8960 initialisation failed (err %d)\n", err);
 			goto end;
 		}
+		/* Set volume on both channels */
+		err = CODEC_SetVolume(&wm8960_codec_handle, kWM8960_HeadphoneRight, 75);
+		if (err != kStatus_Success) {
+			log_err("WM8960 set volume to maximum failed (err %d)\n", err);
+			goto end;
+		}
 		err = kStatus_Success;
 	}
 	else {
