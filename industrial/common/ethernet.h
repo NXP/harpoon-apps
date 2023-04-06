@@ -11,7 +11,7 @@
 #include "industrial.h"
 
 struct ethernet_ctx {
-	void (*event_send)(void *, uint8_t);
+	void (*event_send)(void *, uint8_t, uint8_t);
 	void *event_data;
 
 	uint8_t mac_addr[6];

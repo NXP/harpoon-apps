@@ -24,6 +24,30 @@ void *can_init_pingpong(void *parameters)
 	return NULL;
 }
 
+void *flexcan_init(void *parameters)
+{
+	log_err("not supported\n");
+	return NULL;
+}
+
+int flexcan_run(void *priv, struct event *e)
+{
+	log_err("not supported\n");
+	return -1;
+}
+
+void flexcan_exit(void *priv)
+{
+	log_err("not supported\n");
+	return;
+}
+
+void flexcan_stats(void *priv)
+{
+	log_err("not supported\n");
+	return;
+}
+
 STUB_INDUSTRIAL_USE_CASE(can);
 
 STUB_INDUSTRIAL_USE_CASE(ethernet_sdk_enet_loopback);

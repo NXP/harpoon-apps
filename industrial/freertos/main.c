@@ -19,6 +19,8 @@
 
 #define main_task_PRIORITY	(configMAX_PRIORITIES - 8)
 
+void *os_counter = (GPT_Type*) GPT1;
+
 const struct industrial_use_case use_cases[] =
 {
 	[INDUSTRIAL_USE_CASE_CAN] = {
@@ -48,6 +50,13 @@ const struct industrial_use_case use_cases[] =
 				.pre_exit = can_pre_exit,
 				.run = can_run,
 				.stats = can_stats,
+			},
+			[3] = {
+				.init = flexcan_init,
+				.exit = flexcan_exit,
+				.pre_exit = can_pre_exit,
+				.run = flexcan_run,
+				.stats = flexcan_stats,
 			},
 		},
 	},

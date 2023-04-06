@@ -32,13 +32,13 @@ void *industrial_get_data_ctx(struct industrial_ctx *ctx, int use_case_id)
 	return &ctx->data[use_case_id];
 }
 
-static void data_send_event(void *userData, uint8_t status)
+static void data_send_event(void *userData, uint8_t type, uint8_t data)
 {
 	os_mqd_t *mqueue = userData;
 	struct event e;
 
-	e.type = EVENT_TYPE_TX_RX;
-	e.data = status;
+	e.type = type;
+	e.data = data;
 
 	os_mq_send(mqueue, &e, OS_MQUEUE_FLAGS_ISR_CONTEXT, 0);
 }
@@ -134,6 +134,8 @@ static int industrial_stop(struct data_ctx *data)
 
 	if (!data->ops)
 		goto exit;
+
+	data->ops->stats(data->priv);
 
 	if (data->ops->pre_exit)
 		data->ops->pre_exit(data->priv);

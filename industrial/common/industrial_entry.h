@@ -67,7 +67,7 @@ struct industrial_use_case {
 	 * Possibility to add more in the future if we decide to have more than
 	 * one software path for a given hardware resource.
 	 */
-	struct mode_operations ops[3];
+	struct mode_operations ops[4];
 };
 
 void *can_init_loopback(void *parameters);
@@ -77,6 +77,10 @@ int can_run(void *priv, struct event *e);
 void can_stats(void *priv);
 void can_exit(void *priv);
 void can_pre_exit(void *priv);
+void *flexcan_init(void *parameters);
+int flexcan_run(void *priv, struct event *e);
+void flexcan_exit(void *priv);
+void flexcan_stats(void *priv);
 
 void *ethernet_avb_tsn_init(void *parameters);
 int ethernet_avb_tsn_run(void *priv, struct event *e);

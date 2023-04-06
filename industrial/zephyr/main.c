@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <zephyr/device.h>
 #include <zephyr/kernel.h>
 
 #include "hlog.h"
@@ -21,6 +22,9 @@
 K_THREAD_STACK_DEFINE(data_stack1, STACK_SIZE);
 K_THREAD_STACK_DEFINE(data_stack2, STACK_SIZE);
 K_THREAD_STACK_DEFINE(ctrl_stack, STACK_SIZE);
+K_THREAD_STACK_DEFINE(gpt_stack, STACK_SIZE);
+
+void *os_counter = DEVICE_DT_GET(DT_NODELABEL(gpt1));
 
 struct z_thread_stack_element *data_stacks[] =
 {
@@ -58,6 +62,13 @@ const struct industrial_use_case use_cases[] =
 				.pre_exit = can_pre_exit,
 				.run = can_run,
 				.stats = can_stats,
+			},
+			[3] = {
+				.init = flexcan_init,
+				.exit = flexcan_exit,
+				.pre_exit = can_pre_exit,
+				.run = flexcan_run,
+				.stats = flexcan_stats,
 			},
 		},
 	},

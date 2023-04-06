@@ -1,0 +1,7 @@
+#define IRQ_HIGHEST_PRIORITY	0
+
+&gpt1 {
+	interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL
+		IRQ_HIGHEST_PRIORITY>;
+	status = "okay";
+};

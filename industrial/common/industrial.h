@@ -17,13 +17,14 @@ struct industrial_config {
 	unsigned int protocol;
 	uint8_t address[6];
 
-	void (*event_send)(void *, uint8_t);
+	void (*event_send)(void *, uint8_t, uint8_t);
 	void *event_data;
 };
 
 enum industrial_event {
-	EVENT_TYPE_TX_RX,
-	EVENT_TYPE_START
+	EVENT_TYPE_START,
+	EVENT_TYPE_IRQ,
+	EVENT_TYPE_TIMER
 };
 
 void ethernet_ctrl(struct hrpn_cmd_ethernet *cmd, unsigned int len,
