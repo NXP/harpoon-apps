@@ -33,6 +33,10 @@ manifest:
     - name: FreeRTOS-Kernel
       remote: nxpmcuxpresso
       revision: 27bb9bb8ab283f2d802e28b485d4ca0531f66ba6
+    - name: CMSIS_5
+      remote: nxpmcuxpresso
+      path: mcux-sdk/CMSIS
+      revision: feature/aarch64_support
     - name: heterogeneous-multicore
       remote: nxprealtimeedgesw
       revision: fe7e5c1a932e38712ae5da167958aab8b43ae883
