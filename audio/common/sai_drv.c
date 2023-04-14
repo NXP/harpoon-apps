@@ -26,16 +26,6 @@ static bool __sai_tx_is_sync(void *base)
 	return ((((I2S_Type *)base)->TCR2 & I2S_TCR2_SYNC_MASK) != 0U);
 }
 
-static bool __sai_rx_is_enabled(void *base)
-{
-	return ((((I2S_Type *)base)->RCSR & I2S_RCSR_RE_MASK) != 0U);
-}
-
-static bool __sai_tx_is_enabled(void *base)
-{
-	return ((((I2S_Type *)base)->TCSR & I2S_TCSR_TE_MASK) != 0U);
-}
-
 static void __sai_rx_enable(void *base)
 {
 	((I2S_Type *)base)->RCSR = ((((I2S_Type *)base)->RCSR & 0xFFE3FFFFU) | I2S_RCSR_RE_MASK);
@@ -46,14 +36,28 @@ static void __sai_tx_enable(void *base)
 	((I2S_Type *)base)->TCSR = ((((I2S_Type *)base)->TCSR & 0xFFE3FFFFU) | I2S_TCSR_TE_MASK);
 }
 
-static void __sai_rx_disable(void *base)
+static void __sai_rx_disable(void *base, uint32_t mask)
 {
-	((I2S_Type *)base)->RCSR = ((((I2S_Type *)base)->RCSR & 0xFFE3FFFFU) & (~I2S_RCSR_RE_MASK));
+	/* Set the software reset and FIFO reset to clear internal state and keep configuration registers */
+	((I2S_Type *)base)->RCSR = I2S_RCSR_SR_MASK | I2S_RCSR_FR_MASK | (((I2S_Type *)base)->RCSR & (0x70001F03U)) | mask;
+	/* Clear software reset bit, this should be done by software */
+	((I2S_Type *)base)->RCSR &= ~I2S_RCSR_SR_MASK;
+
+	/* In some cases, SR is not cleared, we poll the register to ensure it is */
+	while (((I2S_Type *)base)->RCSR & I2S_RCSR_SR_MASK)
+		((I2S_Type *)base)->RCSR &= ~I2S_RCSR_SR_MASK;
 }
 
-static void __sai_tx_disable(void *base)
+static void __sai_tx_disable(void *base, uint32_t mask)
 {
-	((I2S_Type *)base)->TCSR = ((((I2S_Type *)base)->TCSR & 0xFFE3FFFFU) & (~I2S_TCSR_TE_MASK));
+	/* Set the software reset and FIFO reset to clear internal state and keep configuration registers */
+	((I2S_Type *)base)->TCSR = I2S_TCSR_SR_MASK | I2S_TCSR_FR_MASK | (((I2S_Type *)base)->TCSR & (0x70001F03U)) | mask;
+	/* Clear software reset bit, this should be done by software */
+	((I2S_Type *)base)->TCSR &= ~I2S_TCSR_SR_MASK;
+
+	/* In some cases, SR is not cleared, we poll the register to ensure it is */
+	while (((I2S_Type *)base)->TCSR & I2S_TCSR_SR_MASK)
+		((I2S_Type *)base)->TCSR &= ~I2S_TCSR_SR_MASK;
 }
 
 void __sai_enable_rx(void *base, bool enable_irq)
@@ -88,25 +92,10 @@ void __sai_disable_rx(void *base)
 	if (__sai_rx_is_sync(base))
 		return;
 
-	__sai_rx_disable(base);
+	__sai_rx_disable(base, kSAI_FIFOErrorFlag | kSAI_SyncErrorFlag | kSAI_WordStartFlag);
 
-	/* Wait for completion */
-	while (__sai_rx_is_enabled(base))
-		;
-
-	SAI_RxClearStatusFlags(base, I2S_RCSR_FEF_MASK);
-
-	/* Reset FIFO */
-	SAI_RxSoftwareReset(base, kSAI_ResetTypeFIFO);
-
-	if (__sai_tx_is_sync(base)) {
-		__sai_tx_disable(base);
-
-		/* Need to reset Tx fifo after Rx is disabled */
-		SAI_TxClearStatusFlags(base, I2S_TCSR_FEF_MASK);
-
-		SAI_TxSoftwareReset(base, kSAI_ResetTypeFIFO);
-	}
+	if (__sai_tx_is_sync(base))
+		__sai_tx_disable(base, kSAI_FIFOErrorFlag | kSAI_SyncErrorFlag | kSAI_WordStartFlag);
 }
 
 void __sai_disable_tx(void *base)
@@ -115,24 +104,10 @@ void __sai_disable_tx(void *base)
 	if (__sai_tx_is_sync(base))
 		return;
 
-	__sai_tx_disable(base);
+	__sai_tx_disable(base, kSAI_FIFOErrorFlag | kSAI_SyncErrorFlag | kSAI_WordStartFlag);
 
-	/* Wait for completion */
-	while (__sai_tx_is_enabled(base))
-		;
-
-	SAI_TxClearStatusFlags(base, I2S_TCSR_FEF_MASK);
-
-	/* Reset FIFO */
-	SAI_TxSoftwareReset(base, kSAI_ResetTypeFIFO);
-
-	if (__sai_rx_is_sync(base)) {
-		__sai_rx_disable(base);
-
-		/* Need to reset Rx fifo after Tx is disabled */
-		SAI_RxClearStatusFlags(base, I2S_RCSR_FEF_MASK);
-		SAI_RxSoftwareReset(base, kSAI_ResetTypeFIFO);
-	}
+	if (__sai_rx_is_sync(base))
+		__sai_rx_disable(base, kSAI_FIFOErrorFlag | kSAI_SyncErrorFlag | kSAI_WordStartFlag);
 }
 
 int sai_read(struct sai_device *dev, uint8_t *addr, size_t len)
