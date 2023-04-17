@@ -309,8 +309,10 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 	config.masterSlave         = sai_config->masterSlave;
 	config.bitClock.bclkSource = sai_config->msel;
 
+#if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
 	if (sai_config->fifo_water_mark)
 		config.fifo.fifoWatermark = sai_config->fifo_water_mark;
+#endif
 
 	SAI_TransferTxSetConfig(sai, &dev->sai_tx_handle, &config);
 	config.syncMode = sai_config->rx_sync_mode;

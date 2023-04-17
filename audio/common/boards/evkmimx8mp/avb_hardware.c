@@ -5,7 +5,7 @@
 */
 
 #include "avb_hardware.h"
-#include "fsl_enet_qos_mdio.h"
+#include "fsl_enet_qos.h"
 #include "fsl_gpio.h"
 #include "fsl_iomuxc.h"
 #include "pin_mux.h"
@@ -106,6 +106,12 @@ static void gpt_clock_config(void)
 	CLOCK_SetRootMux(kCLOCK_RootGpt2, kCLOCK_GptRootmuxOsc24M);
 	CLOCK_SetRootDivider(kCLOCK_RootGpt2, 1U, 1U);
 	CLOCK_EnableClock(kCLOCK_Gpt2);
+}
+
+void ENET_QOS_EnableClock(bool enable)
+{
+	IOMUXC_GPR->GPR1 = (IOMUXC_GPR->GPR1 & (~IOMUXC_GPR_GPR1_GPR_ENET_QOS_CLK_GEN_EN_MASK)) |
+		IOMUXC_GPR_GPR1_GPR_ENET_QOS_CLK_GEN_EN(enable);
 }
 
 void ENET_QOS_SetSYSControl(enet_qos_mii_mode_t miiMode)

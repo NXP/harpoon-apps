@@ -173,9 +173,6 @@ include(driver_enet_qos)
 include(driver_gpt)
 include(driver_iuart)
 include(driver_igpio)
-include(driver_mdio-common)
-include(driver_mdio-enet)
-include(driver_mdio-enet-qos)
 include(driver_pcm186x)
 include(driver_pcm512x)
 include(driver_phy-common)
@@ -192,7 +189,7 @@ include(middleware_multicore_rpmsg_lite_MIMX8ML8)
 
 include(utility_assert)
 include(utility_debug_console)
-include(utilities_misc_utilities)
+include(utilities_misc_utilities_aarch64)
 
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
 
