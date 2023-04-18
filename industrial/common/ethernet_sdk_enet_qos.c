@@ -360,17 +360,40 @@ static void enet_qos_prepare_configuration(enet_qos_config_t *config, enet_qos_p
     };
 }
 
-static int enet_qos_phy_init(phy_handle_t *phyHandle, mdio_handle_t *mdioHandle, bool loopback)
+static status_t MDIO_Write(uint8_t phyAddr, uint8_t regAddr, uint16_t data)
+{
+	return ENET_QOS_MDIOWrite(EXAMPLE_ENET_QOS_BASE, phyAddr, regAddr, data);
+}
+
+static status_t MDIO_Read(uint8_t phyAddr, uint8_t regAddr, uint16_t *pData)
+{
+	return ENET_QOS_MDIORead(EXAMPLE_ENET_QOS_BASE, phyAddr, regAddr, pData);
+}
+
+static void MDIO_Init(uint32_t enet_ipg_freq)
+{
+	ENET_QOS_SetSMI(EXAMPLE_ENET_QOS_BASE, enet_ipg_freq);
+
+	phy_resource.write = MDIO_Write;
+	phy_resource.read = MDIO_Read;
+}
+
+static int enet_qos_phy_init(phy_handle_t *phyHandle, bool loopback)
 {
     phy_config_t phyConfig = {0};
     status_t status;
     uint32_t count = 0;
     bool link = false;
     bool autonego = false;
+    uint32_t enet_ipg_freq;
 
     phyConfig.phyAddr = EXAMPLE_PHY_ADDR;
+    phyConfig.ops = &EXAMPLE_PHY;
+    phyConfig.resource = &phy_resource;
 
-    mdioHandle->resource.csrClock_Hz = CLOCK_GetFreq(kCLOCK_EnetIpgClk);
+    enet_ipg_freq = CLOCK_GetFreq(kCLOCK_EnetIpgClk);
+
+    MDIO_Init(enet_ipg_freq);
 
     count = 10;
     if (loopback) {
@@ -504,8 +527,7 @@ void ethernet_sdk_enet_stats(void *priv)
 int ethernet_sdk_enet_run(void *priv, struct event *e)
 {
     struct ethernet_ctx *ctx = priv;
-    mdio_handle_t mdioHandle = {.resource = {.base = EXAMPLE_ENET_QOS_BASE}, .ops = &EXAMPLE_ENET_QOS_OPS};
-    phy_handle_t phyHandle   = {.phyAddr = EXAMPLE_PHY_ADDR, .mdioHandle = &mdioHandle, .ops = &EXAMPLE_PHY};
+    phy_handle_t phyHandle;
 
     int ret = -1;
     enet_qos_buffer_config_t buffConfig[ENET_QOS_TXQUEUE_USE];
@@ -551,7 +573,7 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
 
     /* Initialize PHY and wait until auto-negotiation is over. */
     log_info("Wait for PHY init...\r\n");
-    ret = enet_qos_phy_init(&phyHandle, &mdioHandle, ctx->loopback);
+    ret = enet_qos_phy_init(&phyHandle, ctx->loopback);
     if (ret != kStatus_Success)
     {
         log_info("Unable to initialize phy: %d\r\n", ret);

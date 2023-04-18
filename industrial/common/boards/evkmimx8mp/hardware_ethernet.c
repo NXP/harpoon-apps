@@ -1,5 +1,5 @@
 /*
-* Copyright 2022 NXP
+* Copyright 2022-2023 NXP
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -7,9 +7,17 @@
 #include "hardware_ethernet.h"
 #include "fsl_gpio.h"
 
+phy_rtl8211f_resource_t phy_resource;
+
 void ENET_QOS_SetSYSControl(enet_qos_mii_mode_t miiMode)
 {
     IOMUXC_GPR->GPR1 |= IOMUXC_GPR_GPR1_GPR_ENET_QOS_INTF_SEL(miiMode); /* Set this bit to enable ENET_QOS clock generation. */
+}
+
+void ENET_QOS_EnableClock(bool enable)
+{
+	IOMUXC_GPR->GPR1 = (IOMUXC_GPR->GPR1 & (~IOMUXC_GPR_GPR1_GPR_ENET_QOS_CLK_GEN_EN_MASK)) |
+		IOMUXC_GPR_GPR1_GPR_ENET_QOS_CLK_GEN_EN(enable);
 }
 
 void hardware_ethernet_init(void)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,9 +21,7 @@
 
 /* PHY 0 is RTL8211FDI phy */
 #define BOARD_PHY0_ADDRESS      (0x01U)           /* Phy address of enet port 1. */
-#define BOARD_PHY0_MDIO_BASE    ENET_QOS_BASE     /* MDIO MAC controller base address. */
-#define BOARD_PHY0_MDIO_OPS     &enet_qos_ops     /* MDIO MAC controller operations. */
-#define BOARD_PHY0_OPS          &phyrtl8211f_ops  /* PHY operations. */
+#define BOARD_PHY0_OPS          phyrtl8211f_ops  /* PHY operations. */
 
 #define BOARD_PHY0_TX_LATENCY_100M (650) /* FIXME - Needs calibration, comes from RT1170 which has same phy */
 #define BOARD_PHY0_RX_LATENCY_100M (650) /* FIXME - Needs calibration, comes from RT1170 which has same phy */
@@ -33,6 +31,11 @@
 /* Network Port configuration */
 #define BOARD_NUM_PORTS                1
 #define BOARD_NUM_ENET_QOS_PORTS       1
+
+#define BOARD_NUM_MDIO                 1
+#define BOARD_PHY0_MDIO_ID             0
+#define BOARD_MDIO0_DRV_TYPE           ENET_QOS_t
+#define BOARD_MDIO0_DRV_INDEX          (0)
 
 #define BOARD_NET_PORT0_MII_MODE    kENET_QOS_RgmiiMode
 #define BOARD_NET_PORT0_DRV_TYPE    ENET_QOS_t

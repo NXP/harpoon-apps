@@ -1,11 +1,12 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "ethernet.h"
 #include "app_board.h"
+#include "hardware_ethernet.h"
 #include "hlog.h"
 #include "hrpn_ctrl.h"
 #include "industrial.h"
@@ -17,8 +18,6 @@
 
 #define ENET_PHY_ADDRESS                BOARD_PHY0_ADDRESS
 #define ENET_PHY_MIIMODE                BOARD_NET_PORT0_MII_MODE
-/* MDIO operations. */
-#define ENET_MDIO_OPS                   BOARD_PHY0_MDIO_OPS
 /* PHY operations. */
 #define ENET_PHY_OPS                    BOARD_PHY0_OPS
 
@@ -55,9 +54,26 @@ static enet_handle_t enet_handle;
 static uint8_t tx_frame[ENET_DATA_LENGTH + 14];
 static uint8_t rx_frame[ENET_DATA_LENGTH + 14];
 
-/* Enet PHY and MDIO interface handler */
-static mdio_handle_t mdio_handle = {.ops = ENET_MDIO_OPS};
-static phy_handle_t phy_handle = {.phyAddr = ENET_PHY_ADDRESS, .mdioHandle = &mdio_handle, .ops = ENET_PHY_OPS};
+/* Enet PHY interface handler */
+static phy_handle_t phy_handle;
+
+static status_t MDIO_Write(uint8_t phyAddr, uint8_t regAddr, uint16_t data)
+{
+	return ENET_MDIOWrite(ENET, phyAddr, regAddr, data);
+}
+
+static status_t MDIO_Read(uint8_t phyAddr, uint8_t regAddr, uint16_t *pData)
+{
+	return ENET_MDIORead(ENET, phyAddr, regAddr, pData);
+}
+
+static void MDIO_Init(uint32_t enet_ipg_freq)
+{
+	ENET_SetSMI(ENET, enet_ipg_freq, false);
+
+	phy_resource.write = MDIO_Write;
+	phy_resource.read = MDIO_Read;
+}
 
 /* Build Frame for transmit. */
 static void enet_build_broadcast_frame(struct ethernet_ctx *ctx)
@@ -141,6 +157,10 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
 
 	os_printf("\r\nENET test start.\r\n");
 
+	enet_ipg_freq = CLOCK_GetFreq(kCLOCK_EnetIpgClk);
+
+	MDIO_Init(enet_ipg_freq);
+
 	/* Prepare the buffer configuration. */
 	buffer_config.rxBdNumber = ENET_RXBD_NUM;
 	buffer_config.txBdNumber = ENET_TXBD_NUM;
@@ -154,7 +174,6 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
 	buffer_config.txMaintainEnable = true;
 	buffer_config.txFrameInfo = NULL;
 
-	enet_ipg_freq = CLOCK_GetFreq(kCLOCK_EnetIpgClk);
 
 	ENET_GetDefaultConfig(&config);
 
@@ -165,8 +184,8 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
 
 	phy_config.phyAddr = ENET_PHY_ADDRESS;
 	phy_config.autoNeg = true;
-	mdio_handle.resource.base = ENET;
-	mdio_handle.resource.csrClock_Hz = enet_ipg_freq;
+	phy_config.ops = &ENET_PHY_OPS;
+	phy_config.resource = &phy_resource;
 
 	/* Initialize PHY */
 	status = PHY_Init(&phy_handle, &phy_config);

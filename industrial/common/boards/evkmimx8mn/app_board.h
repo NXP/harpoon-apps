@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,9 +8,7 @@
 #define _APP_BOARD_H_
 
 #include "fsl_enet.h"
-#include "fsl_enet_mdio.h"
 #include "fsl_gpt.h"
-#include "fsl_phyar8031.h"
 
 /*******************************************************************************
  * Definitions
@@ -27,12 +25,15 @@
 
 /* PHY 0 is RTL8211FDI phy */
 #define BOARD_PHY0_ADDRESS      (0x00U)           /* Phy address of enet port 0. */
-#define BOARD_PHY0_MDIO_BASE    ENET_BASE         /* MDIO MAC controller base address. */
-#define BOARD_PHY0_MDIO_OPS     &enet_ops         /* MDIO MAC controller operations. */
-#define BOARD_PHY0_OPS          &phyar8031_ops    /* PHY operations. */
+#define BOARD_PHY0_OPS          phyar8031_ops    /* PHY operations. */
 
 #define BOARD_PHY0_TX_LATENCY_100M (810)          /* FIXME - Needs calibration */
 #define BOARD_PHY0_RX_LATENCY_100M (810)          /* FIXME - Needs calibration */
+
+#define BOARD_NUM_MDIO             1
+#define BOARD_PHY0_MDIO_ID         0
+#define BOARD_MDIO0_DRV_TYPE       ENET_t
+#define BOARD_MDIO0_DRV_INDEX      (0)
 
 #define BOARD_NET_PORT0_MII_MODE    kENET_RgmiiMode
 #define BOARD_NET_PORT0_DRV_TYPE    ENET_t
