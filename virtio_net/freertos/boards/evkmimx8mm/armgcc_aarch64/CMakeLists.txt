@@ -33,7 +33,8 @@ SET(CommonPath "${ProjRootPath}/common")
 SET(LibsPath "${CommonPath}/libs")
 SET(AppPath "${ProjRootPath}/virtio_net")
 SET(VirtioNetPath "${HtMulticorePath}/net")
-SET(VirtioPlatformPath "${HtMulticorePath}/ports/platforms/imx8mm_ca53")
+SET(VirtioMailboxPath "${HtMulticorePath}/mailbox")
+SET(VirtioPlatPortsPath "${HtMulticorePath}/plat_ports")
 SET(VirtioIncludePath "${HtMulticorePath}/include")
 SET(VirtioPath "${HtMulticorePath}/virtio")
 
@@ -72,9 +73,10 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/hlog
     ${RtosPath}
     ${SdkDirPath}
+    ${VirtioMailboxPath}
     ${VirtioNetPath}
     ${VirtioPath}
-    ${VirtioPlatformPath}
+    ${VirtioPlatPortsPath}
 )
 
 # include entry for cmake components
@@ -118,7 +120,9 @@ include(lib_port_enet_freertos)
 include(lib_switch_hal_freertos)
 
 include(lib_virtio_net)
-include(platform_imx8mm_ca53)
+
+include(generic_software_mailbox)
+include(plat_ports_ca)
 
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
 

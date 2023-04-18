@@ -20,4 +20,13 @@
 
 #define VIRTIO_NET_MEM_BASE		0xb8400000
 
+#define ENET_PORT_BASE			ENET
+#define ENET_PORT_IRQ			ENET_IRQn
+
+extern void ENET_DriverIRQHandler(void);
+static inline void enet_hal_irq_handler(void)
+{
+	ENET_DriverIRQHandler();
+}
+
 #endif /* _APP_VIRTIO_H_ */
