@@ -11,6 +11,8 @@
 #include "clock_config.h"
 #include "pin_mux.h"
 
+phy_ar8031_resource_t phy_resource;
+
 void virtio_board_init(void)
 {
 	/* Init board cpu and hardware. */

@@ -100,8 +100,6 @@ include(driver_clock)
 include(driver_common)
 include(driver_enet)
 include(driver_iuart)
-include(driver_mdio-common)
-include(driver_mdio-enet)
 include(driver_phy-common)
 include(driver_phy-device-ar8031)
 
@@ -111,7 +109,7 @@ include(middleware_freertos-kernel_aarch64)
 
 include(utility_assert)
 include(utility_debug_console)
-include(utilities_misc_utilities)
+include(utilities_misc_utilities_aarch64)
 
 include(lib_hlog)
 
