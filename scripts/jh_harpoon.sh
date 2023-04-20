@@ -11,17 +11,40 @@ function usage ()
     echo "usage: jh_harpoon.sh <start | stop>"
 }
 
+function get_rpmsg_dev()
+{
+	if grep -q 'i.MX8MM' /sys/devices/soc0/soc_id; then
+		RPMSG_DEV=b8600000.rpmsg-ca53
+	elif grep -q 'i.MX8MN' /sys/devices/soc0/soc_id; then
+		RPMSG_DEV=b8600000.rpmsg-ca53
+	elif grep -q 'i.MX8MP' /sys/devices/soc0/soc_id; then
+		RPMSG_DEV=fe100000.rpmsg-ca53
+	elif grep -q 'i.MX93' /sys/devices/soc0/soc_id; then
+		#TODO: add i.MX93 rpmsg support
+		exit 1;
+	fi
+
+	if [[ ! -L /sys/bus/platform/devices/${RPMSG_DEV} ]]; then
+		unset RPMSG_DEV
+		echo 'The RPMsg device does not exist!'
+	fi
+}
+
 function start ()
 {
-    if [[ "${INMATE_NAME}" == "freertos" ]] && [[ ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
-        echo 'modprobe -r virtio_rpmsg_bus'
-        modprobe -r virtio_rpmsg_bus
+    if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
+        get_rpmsg_dev
 
-        echo 'Use RPMSG-based Linux control application'
-        mkdir -p /usr/local/bin
-        ln -sf /usr/bin/harpoon_ctrl_rpmsg "${HC_RPMSG_SHORT_CUT}"
-    else
-        rm -f "${HC_RPMSG_SHORT_CUT}"
+        if [[ "${INMATE_NAME}" == "freertos" && ! -z "${RPMSG_DEV}" ]]; then
+            echo 'unbind the rpmsg-ca53 from imx_rpmsg driver'
+            echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/unbind
+
+            echo 'Use RPMSG-based Linux control application'
+            mkdir -p /usr/local/bin
+            ln -sf /usr/bin/harpoon_ctrl_rpmsg "${HC_RPMSG_SHORT_CUT}"
+        else
+            rm -f "${HC_RPMSG_SHORT_CUT}"
+        fi
     fi
 
     echo 'modprobe jailhouse'
@@ -39,9 +62,11 @@ function start ()
     echo 'Starting inmate cell'
     jailhouse cell start "${INMATE_NAME}"
 
-    if [[ "${INMATE_NAME}"  == "freertos" ]] && [[ ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
-        echo 'modprobe virtio_rpmsg_bus'
-        modprobe virtio_rpmsg_bus
+    if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
+        if [[ "${INMATE_NAME}" == "freertos" && ! -z "${RPMSG_DEV}" ]]; then
+            echo 're-bind the rpmsg-ca53 to imx_rpmsg driver'
+            echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/bind
+        fi
     fi
 
     if [[ "${INMATE_BIN}" =~ .*"virtio_net.bin" ]]; then
@@ -59,9 +84,13 @@ function start ()
 
 function stop ()
 {
-    if [[ "${INMATE_NAME}" == "freertos" ]]; then
-        echo 'Restore default (ivshmem) Linux control application'
-        rm -f "${HC_RPMSG_SHORT_CUT}"
+    if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
+        get_rpmsg_dev
+
+        if [[ "${INMATE_NAME}" == "freertos" && ! -z "${RPMSG_DEV}" ]]; then
+            echo 'Restore default (ivshmem) Linux control application'
+            rm -f "${HC_RPMSG_SHORT_CUT}"
+        fi
     fi
 
     if [[ "${INMATE_BIN}" =~ .*"virtio_net.bin" ]]; then
