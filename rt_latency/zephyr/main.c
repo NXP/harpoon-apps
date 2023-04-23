@@ -10,9 +10,7 @@
 
 #include "os/assert.h"
 
-#include "ivshmem.h"
 #include "hlog.h"
-#include "mailbox.h"
 #include "rt_latency.h"
 
 #define STACK_SIZE 4096
@@ -33,6 +31,7 @@ static struct main_ctx{
 	int test_case_id;
 	bool started;
 	struct rt_latency_ctx rt_ctx;
+	struct ctrl_ctx ctrl;
 	struct k_thread tc_thread[MAX_TC_THREADS];
 	int threads_running_count;
 } main_ctx;
@@ -230,26 +229,19 @@ void destroy_test_case(void *context)
 void main(void)
 {
 	struct main_ctx *ctx = &main_ctx;
-	struct ivshmem mem;
-	struct mailbox m;
 	int rc;
-	void *tp = NULL;
 
 	log_info("running\n");
 
 	memset(ctx, 0, sizeof(*ctx));
 
-	rc = ivshmem_init(0, &mem);
-	os_assert(!rc, "ivshmem initialization failed, can not proceed\n");
-
-	os_assert(mem.out_size, "ivshmem mis-configuration, can not proceed\n");
-
-	mailbox_init(&m, mem.out[0], mem.out[mem.id], false, tp);
-
 	ctx->started = false;
 
+	rc = ctrl_ctx_init(&ctx->ctrl);
+	os_assert(!rc, "ctrl context failed!");
+
 	do {
-		command_handler(ctx, &m);
+		command_handler(ctx, &ctx->ctrl.mb);
 
 		k_msleep(100);
 
