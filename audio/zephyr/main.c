@@ -53,6 +53,8 @@ void main(void)
 {
 	struct k_thread data_thread[DATA_THREADS];
 	struct k_thread ctrl_thread;
+	k_tid_t thread_ret;
+	int ret;
 	void *context;
 	int i;
 
@@ -64,13 +66,22 @@ void main(void)
 	os_assert(context, "control initialization failed!");
 
 	for (i = 0; i < DATA_THREADS; i++) {
-		k_thread_create(&data_thread[i], data_stack[i], STACK_SIZE,
+		thread_ret = k_thread_create(&data_thread[i], data_stack[i], STACK_SIZE,
 				data_task, context, &i, NULL,
-				K_HIGHEST_THREAD_PRIO, 0, K_NO_WAIT);
-		k_thread_cpu_pin(&data_thread[i], i);
+				K_HIGHEST_THREAD_PRIO, 0, K_FOREVER);
+		os_assert(thread_ret != NULL, "k_thread_create() failed");
+		ret = k_thread_cpu_pin(&data_thread[i], i);
+		os_assert(ret == 0, "k_thread_cpu_pin() failed");
 	}
 
-	k_thread_create(&ctrl_thread, ctrl_stack, STACK_SIZE,
+	thread_ret = k_thread_create(&ctrl_thread, ctrl_stack, STACK_SIZE,
 		ctrl_task, context, NULL, NULL,
-		K_LOWEST_APPLICATION_THREAD_PRIO, 0, K_NO_WAIT);
+		K_LOWEST_APPLICATION_THREAD_PRIO, 0, K_FOREVER);
+	os_assert(thread_ret != NULL, "k_thread_create() failed");
+	ret = k_thread_cpu_pin(&ctrl_thread, 0);
+	os_assert(ret == 0, "k_thread_cpu_pin() failed");
+
+	k_thread_start(&ctrl_thread);
+	for (i = 0; i < DATA_THREADS; i++)
+		k_thread_start(&data_thread[i]);
 }
