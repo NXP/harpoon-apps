@@ -18,6 +18,7 @@
 #define BOARD_PHY0_OPS          &phyar8031_ops    /* PHY operations. */
 
 #define BOARD_NET_PORT0_MII_MODE    kENET_RgmiiMode
+#define BOARD_ENET_CLOCK_FREQ       (CLOCK_GetFreq(kCLOCK_EnetIpgClk))
 
 extern phy_ar8031_resource_t phy_resource;
 
