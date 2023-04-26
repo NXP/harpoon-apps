@@ -212,7 +212,7 @@ Jailhouse, running in the Linux root cell, provides the necessary tools to creat
 ```bash
 modprobe jailhouse
 jailhouse enable /usr/share/jailhouse/cells/imx8mp.cell
-jailhouse cell create /usr/share/jailhouse/cells/imx8mp-xxx.cell
+jailhouse cell create /usr/share/jailhouse/cells/imx8mp-harpoon-xxx.cell
 jailhouse cell load xxx /usr/share/harpoon/inmates/xxx/rt_latency.bin --address 0xc0000000
 jailhouse cell start xxx
 

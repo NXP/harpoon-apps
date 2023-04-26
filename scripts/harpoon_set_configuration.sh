@@ -53,7 +53,7 @@ fi
 if [ "$2" == "audio" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-audio.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}-audio.cell
 	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
@@ -65,7 +65,7 @@ elif [ "$2" == "audio_smp" ]; then
 	fi
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-audio.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}-audio.cell
 	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio_smp.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
@@ -77,7 +77,7 @@ elif [ "$2" == "avb" ]; then
 	fi
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-avb.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}-avb.cell
 	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
@@ -85,7 +85,7 @@ elif [ "$2" == "avb" ]; then
 elif [ "$2" == "hello" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}.cell
 	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/hello_world.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
@@ -93,7 +93,7 @@ elif [ "$2" == "hello" ]; then
 elif [ "$2" == "industrial" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-industrial.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}-industrial.cell
 	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/industrial.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
@@ -101,7 +101,7 @@ elif [ "$2" == "industrial" ]; then
 elif [ "$2" == "latency" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}.cell
 	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/rt_latency.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
@@ -109,7 +109,7 @@ elif [ "$2" == "latency" ]; then
 elif [ "$2" == "virtio_net" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-${RTOS}-industrial.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}-industrial.cell
 	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/virtio_net.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
