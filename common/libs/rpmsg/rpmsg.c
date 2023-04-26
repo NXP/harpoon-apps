@@ -177,7 +177,7 @@ int rpmsg_transport_init(int link_id, int ept_addr, const char *sn,
 	*tp = ept;
 	*cmd = os_malloc(1024);
 	os_assert(*cmd, "malloc mailbox memory failded, cannot proceed\n");
-	*resp = *cmd + 512;
+	*resp = (char *)*cmd + 512;
 	memset(*cmd, 0, 1024);
 
 	return 0;
