@@ -148,7 +148,7 @@ struct rpmsg_instance *rpmsg_init(int link_id)
 		return NULL;
 	}
 
-	rpmsg_lite_wait_for_link_up(ri->rl_inst);
+	rpmsg_lite_wait_for_link_up(ri->rl_inst, RL_BLOCK);
 
 	os_printf("\r\nRPMSG link up\r\n");
 
