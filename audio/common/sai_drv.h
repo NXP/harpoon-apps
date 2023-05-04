@@ -86,7 +86,7 @@ static inline void __sai_enable_irq(void *base, bool rx_irq, bool tx_irq)
 {
 	if (rx_irq) {
 		/* Enable Rx interrupt */
-#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+#if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
 		/* Use FIFO request interrupt and fifo error*/
 		SAI_RxEnableInterrupts(base,
 				I2S_TCSR_FEIE_MASK | I2S_TCSR_FRIE_MASK);
@@ -98,7 +98,7 @@ static inline void __sai_enable_irq(void *base, bool rx_irq, bool tx_irq)
 
 	if (tx_irq) {
 		/* Enable Tx interrupt */
-#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+#if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
 		/* Use FIFO request interrupt and fifo error*/
 		SAI_TxEnableInterrupts(base,
 				I2S_TCSR_FEIE_MASK | I2S_TCSR_FRIE_MASK);
@@ -113,7 +113,7 @@ static inline void __sai_disable_irq(void *base, bool rx_irq, bool tx_irq)
 {
 	if (rx_irq) {
 		/* Disable Rx interrupt */
-#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+#if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
 		SAI_RxDisableInterrupts(base,
 				I2S_TCSR_FEIE_MASK | I2S_TCSR_FRIE_MASK);
 #else
@@ -124,7 +124,7 @@ static inline void __sai_disable_irq(void *base, bool rx_irq, bool tx_irq)
 
 	if (tx_irq) {
 		/* Disable Tx interrupt */
-#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+#if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
 		/* Use FIFO request interrupt and fifo error*/
 		SAI_TxDisableInterrupts(base,
 				I2S_TCSR_FEIE_MASK | I2S_TCSR_FRIE_MASK);

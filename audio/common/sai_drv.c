@@ -216,7 +216,7 @@ static void sai_irq_handler(void *data)
 	uint32_t reg_rcsr = base->RCSR;
 	uint32_t reg_tcsr = base->TCSR;
 
-#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+#if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
 	if ((reg_rcsr & (I2S_RCSR_FRIE_MASK | I2S_RCSR_FEIE_MASK))
 			&& (reg_rcsr & (I2S_RCSR_FRF_MASK | I2S_RCSR_FEF_MASK)))
 #else
@@ -226,7 +226,7 @@ static void sai_irq_handler(void *data)
 	{
 		SAI_TransferRxHandleIRQ(base, &dev->sai_rx_handle);
 	}
-#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+#if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
 	if ((reg_tcsr & (I2S_TCSR_FRIE_MASK | I2S_TCSR_FEIE_MASK))
 			&& (reg_tcsr & (I2S_TCSR_FRF_MASK | I2S_TCSR_FEF_MASK)))
 #else
