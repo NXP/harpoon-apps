@@ -111,10 +111,10 @@ int rpmsg_destroy_ept(struct rpmsg_ept *ept)
 	return ret;
 }
 
-static void rpmsg_mailbox_init(void)
+static void rpmsg_mailbox_init(void *mbox)
 {
 	os_irq_register(RL_GEN_SW_MBOX_IRQ, gen_sw_mbox_handler,
-			(void *)RL_GEN_SW_MBOX_BASE, OS_IRQ_PRIO_DEFAULT);
+			mbox, OS_IRQ_PRIO_DEFAULT);
 	os_irq_enable(RL_GEN_SW_MBOX_IRQ);
 }
 
@@ -140,10 +140,10 @@ struct rpmsg_instance *rpmsg_init(int link_id)
 			OS_MEM_CACHE_NONE | OS_MEM_PERM_RW);
 	os_assert(ret == 0, "os_mmu_map() failed\n");
 
-	rpmsg_mailbox_init();
+	rpmsg_mailbox_init(ri->mbox_va);
 
 	os_printf("\r\nRPMSG init ...\r\n");
-	ri->rl_inst = rpmsg_lite_remote_init((void *)RPMSG_LITE_SHMEM_BASE, link_id, RL_NO_FLAGS);
+	ri->rl_inst = rpmsg_lite_remote_init(ri->rpmsg_shmem_va, link_id, RL_NO_FLAGS);
 	if (!ri->rl_inst) {
 		os_free(ri);
 		return NULL;
