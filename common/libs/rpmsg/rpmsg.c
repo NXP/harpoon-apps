@@ -113,6 +113,7 @@ int rpmsg_destroy_ept(struct rpmsg_ept *ept)
 
 static void rpmsg_mailbox_init(void *mbox)
 {
+	gen_sw_mailbox_init(mbox);
 	os_irq_register(RL_GEN_SW_MBOX_IRQ, gen_sw_mbox_handler,
 			mbox, OS_IRQ_PRIO_DEFAULT);
 	os_irq_enable(RL_GEN_SW_MBOX_IRQ);
