@@ -19,8 +19,7 @@ struct os_counter_ops {
 	uint8_t (*os_counter_get_num_of_channels)(const os_counter_t *dev);
 	int (*os_counter_get_value)(const os_counter_t *dev, uint32_t *cnt);
 	bool (*os_counter_is_counting_up)(const os_counter_t *dev);
-	uint32_t (*os_counter_us_to_ticks)(const os_counter_t *dev, uint64_t period_us);
-	uint64_t (*os_counter_ticks_to_ns)(const os_counter_t *dev, uint32_t ticks);
+	uint32_t (*os_counter_get_frequency)(const os_counter_t *dev);
 	uint32_t (*os_counter_get_top_value)(const os_counter_t *dev);
 	int (*os_counter_set_channel_alarm)(os_counter_t *dev, uint8_t chan_id,
 		const struct os_counter_alarm_cfg *alarm_cfg);

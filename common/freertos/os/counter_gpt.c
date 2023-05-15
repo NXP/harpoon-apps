@@ -14,7 +14,7 @@
 #include "fsl_gpt.h"
 
 /* FIXME use fsl_clock to get the frequency */
-#define SOURCE_CLOCK_FREQ_MHZ	24
+#define SOURCE_CLOCK_FREQ_HZ	24000000
 
 static int os_counter_gpt_get_value(const os_counter_t *dev, uint32_t *cnt);
 
@@ -133,14 +133,9 @@ static bool os_counter_gpt_is_counting_up(const os_counter_t *dev)
 	return true;
 }
 
-static uint32_t os_counter_gpt_us_to_ticks(const os_counter_t *dev, uint64_t period_us)
+static uint32_t os_counter_gpt_get_frequency(const os_counter_t *dev)
 {
-	return period_us * SOURCE_CLOCK_FREQ_MHZ;
-}
-
-static uint64_t os_counter_gpt_ticks_to_ns(const os_counter_t *dev, uint32_t ticks)
-{
-	return (1000 * (uint64_t)ticks) / SOURCE_CLOCK_FREQ_MHZ;
+	return SOURCE_CLOCK_FREQ_HZ;
 }
 
 static uint32_t os_counter_gpt_get_top_value(const os_counter_t *dev)
@@ -228,8 +223,7 @@ static const struct os_counter_ops gpt_counter_ops = {
 	.os_counter_get_num_of_channels = os_counter_gpt_get_num_of_channels,
 	.os_counter_get_value = os_counter_gpt_get_value,
 	.os_counter_is_counting_up = os_counter_gpt_is_counting_up,
-	.os_counter_us_to_ticks = os_counter_gpt_us_to_ticks,
-	.os_counter_ticks_to_ns = os_counter_gpt_ticks_to_ns,
+	.os_counter_get_frequency = os_counter_gpt_get_frequency,
 	.os_counter_get_top_value = os_counter_gpt_get_top_value,
 	.os_counter_set_channel_alarm = os_counter_gpt_set_channel_alarm,
 	.os_counter_cancel_channel_alarm = os_counter_gpt_cancel_channel_alarm,

@@ -6,6 +6,9 @@
 
 #include "os/counter.h"
 
+#define USEC_PER_SEC	1000000
+#define NSEC_PER_SEC	1000000000
+
 int os_counter_start(os_counter_t *dev)
 {
 	return dev->ops->os_counter_start(dev);
@@ -26,14 +29,16 @@ bool os_counter_is_counting_up(const os_counter_t *dev)
 	return dev->ops->os_counter_is_counting_up(dev);
 }
 
-uint32_t os_counter_us_to_ticks(const os_counter_t *dev, uint64_t period_us)
+uint32_t os_counter_us_to_ticks(const os_counter_t *dev, uint64_t time_us)
 {
-	return dev->ops->os_counter_us_to_ticks(dev, period_us);
+	uint64_t ticks = (time_us * dev->ops->os_counter_get_frequency(dev)) / USEC_PER_SEC;
+
+	return ticks;
 }
 
 uint64_t os_counter_ticks_to_ns(const os_counter_t *dev, uint32_t ticks)
 {
-	return dev->ops->os_counter_ticks_to_ns(dev, ticks);
+	return (NSEC_PER_SEC * (uint64_t)ticks) / dev->ops->os_counter_get_frequency(dev);
 }
 
 uint32_t os_counter_get_top_value(const os_counter_t *dev)
