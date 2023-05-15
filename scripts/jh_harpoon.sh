@@ -35,7 +35,7 @@ function start ()
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         get_rpmsg_dev
 
-        if [[ "${INMATE_NAME}" == "freertos" && ! -z "${RPMSG_DEV}" ]]; then
+        if [[ ! -z "${RPMSG_DEV}" ]] && [[ ! "${INMATE_NAME}" == "zephyr" || "${INMATE_BIN}" =~ .*"rt_latency.bin" ]]; then
             echo 'unbind the rpmsg-ca53 from imx_rpmsg driver'
             echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/unbind
 
@@ -63,7 +63,7 @@ function start ()
     jailhouse cell start "${INMATE_NAME}"
 
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
-        if [[ "${INMATE_NAME}" == "freertos" && ! -z "${RPMSG_DEV}" ]]; then
+        if [[ ! -z "${RPMSG_DEV}" ]] && [[ ! "${INMATE_NAME}" == "zephyr" || "${INMATE_BIN}" =~ .*"rt_latency.bin" ]]; then
             # delay here to ensure the slave side ready to kick
             sleep 0.5
             echo 're-bind the rpmsg-ca53 to imx_rpmsg driver'
@@ -89,7 +89,7 @@ function stop ()
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         get_rpmsg_dev
 
-        if [[ "${INMATE_NAME}" == "freertos" && ! -z "${RPMSG_DEV}" ]]; then
+        if [[ ! -z "${RPMSG_DEV}" ]] && [[ ! "${INMATE_NAME}" == "zephyr" || "${INMATE_BIN}" =~ .*"rt_latency.bin" ]]; then
             echo 'Restore default (ivshmem) Linux control application'
             rm -f "${HC_RPMSG_SHORT_CUT}"
         fi
