@@ -64,6 +64,8 @@ function start ()
 
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         if [[ "${INMATE_NAME}" == "freertos" && ! -z "${RPMSG_DEV}" ]]; then
+            # delay here to ensure the slave side ready to kick
+            sleep 0.5
             echo 're-bind the rpmsg-ca53 to imx_rpmsg driver'
             echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/bind
         fi
