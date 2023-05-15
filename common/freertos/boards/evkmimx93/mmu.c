@@ -98,6 +98,14 @@ static const struct ARM_MMU_region mmu_regions[] = {
 			      GIC_DISTRIBUTOR_BASE, KB(1024),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
 
+	MMU_REGION_FLAT_ENTRY("TPM2",
+			      TPM2_BASE, KB(64),
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
+
+	MMU_REGION_FLAT_ENTRY("TPM4",
+			      TPM4_BASE, KB(64),
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
+
 	MMU_REGION_FLAT_ENTRY("IOMUXC",
 			      IOMUXC1_BASE, KB(64),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
