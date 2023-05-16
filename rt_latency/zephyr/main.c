@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP.
+ * Copyright 2022-2023 NXP.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -15,7 +15,7 @@
 
 #define STACK_SIZE 4096
 
-K_THREAD_STACK_DEFINE(gpt_stack, STACK_SIZE);
+K_THREAD_STACK_DEFINE(counter_stack, STACK_SIZE);
 
 K_THREAD_STACK_DEFINE(cpu_load_stack, STACK_SIZE);
 
@@ -37,7 +37,7 @@ static struct main_ctx{
 } main_ctx;
 
 
-static void gpt_latency_test(void *p1, void *p2, void *p3)
+static void counter_latency_test(void *p1, void *p2, void *p3)
 {
 	struct rt_latency_ctx *ctx = p1;
 	const struct device *dev = ctx->dev;
@@ -93,7 +93,7 @@ static void print_stats_func(void *p1, void *p2, void *p3)
 int start_test_case(void *context, int test_case_id)
 {
 	struct main_ctx *ctx = context;
-	const struct device *gpt_dev;
+	const struct device *counter_dev;
 	const struct device *irq_load_dev;
 	struct k_thread *benchmark_thread;
 	struct k_thread *cpu_load_thread;
@@ -124,21 +124,29 @@ int start_test_case(void *context, int test_case_id)
 	k_busy_wait(USEC_PER_MSEC * 300);
 
 	/* Create GPT threads with Highest Priority*/
-	gpt_dev = DEVICE_DT_GET(DT_NODELABEL(gpt1));
-	if(!gpt_dev) {
+#ifdef CONFIG_BOARD_MIMX93_EVK_A55
+	counter_dev = DEVICE_DT_GET(DT_NODELABEL(tpm2));
+#else
+	counter_dev = DEVICE_DT_GET(DT_NODELABEL(gpt1));
+#endif
+	if (!counter_dev) {
 		log_err("Unable to get counter device\n");
 		goto err;
 	}
 
-	/* Use the second GPT Counter to create irq load with lower priority */
+	/* Use the second counter instance to create irq load with lower priority */
+#ifdef CONFIG_BOARD_MIMX93_EVK_A55
+	irq_load_dev = DEVICE_DT_GET(DT_NODELABEL(tpm4));
+#else
 	irq_load_dev = DEVICE_DT_GET(DT_NODELABEL(gpt2));
-	if(!irq_load_dev) {
+#endif
+	if (!irq_load_dev) {
 		log_err("Unable to get counter device\n");
 		goto err;
 	}
 
 	/* Initialize test cases' context */
-	ret = rt_latency_init((void *)gpt_dev, (void *)irq_load_dev, &ctx->rt_ctx);
+	ret = rt_latency_init((void *)counter_dev, (void *)irq_load_dev, &ctx->rt_ctx);
 	if (ret != 0) {
 		log_err("Initialization failed!\n");
 		goto err;
@@ -146,8 +154,8 @@ int start_test_case(void *context, int test_case_id)
 
 	benchmark_thread = &ctx->tc_thread[ctx->threads_running_count++];
 	/* Benchmark task: main "high prio IRQ" task */
-	k_thread_create(benchmark_thread, gpt_stack, STACK_SIZE,
-		gpt_latency_test, &ctx->rt_ctx, NULL, NULL,
+	k_thread_create(benchmark_thread, counter_stack, STACK_SIZE,
+		counter_latency_test, &ctx->rt_ctx, NULL, NULL,
 		K_HIGHEST_THREAD_PRIO, 0, K_FOREVER);
 
 	k_busy_wait(USEC_PER_MSEC * 300);

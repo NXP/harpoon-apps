@@ -1,0 +1,11 @@
+#define IRQ_HIGHEST_PRIORITY	0
+
+&tpm2 {
+	interrupts = <GIC_SPI 37 IRQ_TYPE_LEVEL
+		IRQ_HIGHEST_PRIORITY>;
+	status = "okay";
+};
+
+&tpm4 {
+	status = "okay";
+};
