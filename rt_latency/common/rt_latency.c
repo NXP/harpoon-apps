@@ -119,7 +119,7 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
 		os_counter_start(ctx->irq_load_dev);
 		cnt = COUNTER_PERIOD_US_VAL - 1;
-		load_alarm_cfg.ticks = os_counter_us_to_ticks(dev, cnt);
+		load_alarm_cfg.ticks = os_counter_us_to_ticks(ctx->irq_load_dev, cnt);
 		load_alarm_cfg.flags = 0;
 		load_alarm_cfg.user_data = ctx;
 		load_alarm_cfg.callback = load_alarm_handler;
