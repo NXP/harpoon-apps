@@ -40,6 +40,9 @@ void BOARD_InitDebugConsole(void);
 void BOARD_InitMemory(void);
 void BOARD_RdcInit(void);
 
+void BOARD_ClockSourceFreqInit(void);
+void BOARD_LpuartClockSetup(void);
+
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */
