@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -48,6 +48,9 @@
 
 /* Region will be accessible to user mode */
 #define OS_MEM_PERM_USER	K_MEM_PERM_USER
+
+/* Region will be mapped to 1:1 virtual and physical address */
+#define OS_MEM_DIRECT_MAP	K_MEM_DIRECT_MAP
 
 static inline int os_mmu_map(const char *name, uint8_t **virt, uintptr_t phys, size_t size, uint32_t attrs)
 {
