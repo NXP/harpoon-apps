@@ -138,7 +138,7 @@ struct rpmsg_instance *rpmsg_init(int link_id)
 	os_assert(ret == 0, "os_mmu_map() failed\n");
 	ret = os_mmu_map("VRINGBUF", (uint8_t **)&ri->rpmsg_buf_va,
 			(uintptr_t)RPMSG_BUF_BASE, MB(1),
-			OS_MEM_CACHE_NONE | OS_MEM_PERM_RW);
+			OS_MEM_CACHE_NONE | OS_MEM_PERM_RW | OS_MEM_DIRECT_MAP);
 	os_assert(ret == 0, "os_mmu_map() failed\n");
 
 	rpmsg_mailbox_init(ri->mbox_va);
