@@ -124,24 +124,16 @@ int start_test_case(void *context, int test_case_id)
 	k_busy_wait(USEC_PER_MSEC * 300);
 
 	/* Create GPT threads with Highest Priority*/
-#ifdef CONFIG_BOARD_MIMX93_EVK_A55
-	counter_dev = DEVICE_DT_GET(DT_NODELABEL(tpm2));
-#else
-	counter_dev = DEVICE_DT_GET(DT_NODELABEL(gpt1));
-#endif
+	counter_dev = DEVICE_DT_GET(DT_ALIAS(counter0));
 	if (!counter_dev) {
-		log_err("Unable to get counter device\n");
+		log_err("Unable to get main counter device\n");
 		goto err;
 	}
 
 	/* Use the second counter instance to create irq load with lower priority */
-#ifdef CONFIG_BOARD_MIMX93_EVK_A55
-	irq_load_dev = DEVICE_DT_GET(DT_NODELABEL(tpm4));
-#else
-	irq_load_dev = DEVICE_DT_GET(DT_NODELABEL(gpt2));
-#endif
+	irq_load_dev = DEVICE_DT_GET(DT_ALIAS(counter1));
 	if (!irq_load_dev) {
-		log_err("Unable to get counter device\n");
+		log_err("Unable to get IRQ load counter device\n");
 		goto err;
 	}
 
