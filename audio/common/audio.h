@@ -52,6 +52,7 @@ extern const struct audio_pipeline_config pipeline_full_config;
 extern const struct audio_pipeline_config pipeline_full_avb_config;
 extern const struct audio_pipeline_config pipeline_full_thread_0_config;
 extern const struct audio_pipeline_config pipeline_full_thread_1_config;
+extern const struct audio_pipeline_config pipeline_mcr_avb_config;
 
 /* assign_nonzero_valid_val(): Validate and assign nonzero value.
  * "value" == 0: "var" use default value, return 0;

@@ -795,3 +795,114 @@ const struct audio_pipeline_config pipeline_full_thread_1_config = {
 	.buffer_storage = 0,
 };
 #endif
+
+#if (CONFIG_GENAVB_ENABLE == 1)
+const struct audio_pipeline_config pipeline_mcr_avb_config = {
+
+	.name = "AVB audio pipeline (with MCR support)",
+
+	.stages = 3,
+
+	.stage[0] = {
+
+		.elements = 3,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 440,
+				.amplitude = 0.5,
+			},
+			.outputs = 1,
+			.output = {0},
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_SAI_SOURCE,
+			.u.sai_source = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 2,
+							},
+						},
+					},
+				},
+			},
+			.outputs = 2,
+			.output = {1, },	/* 1 - 2 */
+		},
+
+		.element[2] = {
+			.type = AUDIO_ELEMENT_AVTP_SOURCE,
+			.u.avtp_source = {
+				.stream_n = 2,
+			},
+			.outputs = 4,
+			.output = {3, },	/* 3 - 6 */
+		},
+	},
+
+	.stage[1] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_ROUTING,
+			.u.routing = {
+
+			},
+
+			.inputs = 7,
+			.input = {0, }, 	/* 0 - 6 */
+
+			.outputs = 6,
+			.output = {7, },	/* 7 - 12 */
+		},
+	},
+
+	.stage[2] = {
+
+		.elements = 2,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SINK,
+			.u.sai_sink = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 2,
+							},
+						},
+					},
+				},
+			},
+
+			.inputs = 2,
+			.input = {7, },	/* 7 - 8 */
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_AVTP_SINK,
+			.u.avtp_sink = {
+				.stream_n = 2,
+			},
+
+			.inputs = 4,
+			.input = {9, },	/* 9 - 12 */
+		},
+	},
+
+	.buffers = 13,
+
+	.buffer_storage = 13,
+};
+#endif /* #if (CONFIG_GENAVB_ENABLE == 1) */

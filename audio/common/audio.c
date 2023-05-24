@@ -121,6 +121,11 @@ static struct play_pipeline_config play_pipeline_full_avb_config = {
 		&pipeline_full_avb_config,
 	}
 };
+static struct play_pipeline_config play_pipeline_mcr_avb_config = {
+	.cfg = {
+		&pipeline_mcr_avb_config,
+	}
+};
 #endif
 
 const static struct mode_handler g_handler[] =
@@ -161,7 +166,7 @@ const static struct mode_handler g_handler[] =
 		.stats = play_pipeline_stats,
 		.ctrl = play_pipeline_ctrl_avb,
 		.data = &play_pipeline_full_avb_config,
-	}
+	},
 #endif
 #ifdef CONFIG_SMP
 	[5] = {
@@ -170,6 +175,16 @@ const static struct mode_handler g_handler[] =
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
 		.data = &play_pipeline_smp_config,
+	}
+#endif
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[6] = {
+		.init = play_pipeline_init_avb,
+		.exit = play_pipeline_exit_avb,
+		.run = play_pipeline_run,
+		.stats = play_pipeline_stats,
+		.ctrl = play_pipeline_ctrl_avb,
+		.data = &play_pipeline_mcr_avb_config,
 	}
 #endif
 };

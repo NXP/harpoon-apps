@@ -60,6 +60,7 @@ static void audio_usage(void)
 		"\t               3 - audio pipeline\n"
 		"\t               4 - AVB audio pipeline\n"
 		"\t               5 - SMP audio pipeline\n"
+		"\t               6 - AVB audio pipeline (with MCR support)\n"
 		"\t-s             stop running audio mode\n"
 	);
 }
