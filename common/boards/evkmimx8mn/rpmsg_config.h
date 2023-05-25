@@ -106,7 +106,7 @@
 #define RL_GEN_SW_MBOX_IRQ (109)
 //@}
 
-//! @def RL_GEN_SW_MBOX_IRQ
+//! @def RL_GEN_SW_MBOX_REMOTE_IRQ
 //!
 //! Specify the interrupt number to trigger for notifying remote when send message.
 #define RL_GEN_SW_MBOX_REMOTE_IRQ (108)

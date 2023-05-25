@@ -36,6 +36,7 @@ SET(SdkDirPath "${ProjDirPath}/../../../../../../mcux-sdk")
 SET(RtosPath "${ProjDirPath}/../../../../../../FreeRTOS-Kernel")
 SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/${BoardName}")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
+SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/${BoardName}")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX8ML8")
@@ -105,6 +106,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonPath}
     ${CommonPath}/freertos
     ${CommonPath}/libs
+    ${CommonBoardPath}
     ${BoardPath}
     ${AppBoardPath}
     ${GenAVBPath}/include

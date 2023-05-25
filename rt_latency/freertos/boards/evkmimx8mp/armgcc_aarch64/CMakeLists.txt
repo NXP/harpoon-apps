@@ -31,6 +31,7 @@ SET(SdkDirPath "${ProjDirPath}/../../../../../../mcux-sdk")
 SET(RtosPath "${ProjDirPath}/../../../../../../FreeRTOS-Kernel")
 SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/evkmimx8mp")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
+SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/evkmimx8mp")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/evkmimx8mp")
 SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
@@ -58,6 +59,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonPath}
     ${CommonPath}/freertos
     ${CommonPath}/libs/stats
+    ${CommonBoardPath}
     ${BoardPath}
     ${AppBoardPath}
     ${SdkDirPath}/devices/MIMX8ML8
