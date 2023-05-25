@@ -21,14 +21,8 @@
 #include "os/semaphore.h"
 
 #include "stats.h"
-#include "ivshmem.h"
 #include "hlog.h"
-#include "mailbox.h"
 #include "version.h"
-
-#ifdef MBOX_TRANSPORT_RPMSG
-#include "rpmsg.h"
-#endif
 
 #include "rt_latency.h"
 
@@ -60,6 +54,7 @@ static struct main_ctx{
 	bool started;
 
 	struct rt_latency_ctx rt_ctx;
+	struct ctrl_ctx ctrl;
 
 	/* hard-coded number of elements ; only used to create/delete test case's
 	* task handles, all at once */
@@ -244,30 +239,19 @@ err:
 void main_task(void *pvParameters)
 {
 	struct main_ctx *ctx = pvParameters;
-	struct mailbox m;
-	void *cmd, *resp;
-	void *tp = NULL;
 	int rc;
 
 	log_info("Harpoon v%s\n", VERSION);
 
 	log_info("running\n");
 
-#ifdef MBOX_TRANSPORT_RPMSG
-	rc = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw",
-				  &tp, &cmd, &resp);
-	os_assert(!rc, "rpmsg transport initialization failed, cannot proceed\n");
-#else /* IVSHMEM */
-	rc = ivshmem_transport_init(0, NULL, &tp, &cmd, &resp);
-	os_assert(!rc, "ivshmem transport initialization failed, cannot proceed\n");
-#endif
-
-	mailbox_init(&m, cmd, resp, false, tp);
-
 	ctx->started = false;
 
+	rc = ctrl_ctx_init(&ctx->ctrl);
+	os_assert(!rc, "ctrl context failed!");
+
 	do {
-		command_handler(ctx, &m);
+		command_handler(ctx, &ctx->ctrl.mb);
 
 		vTaskDelay(pdMS_TO_TICKS(100));
 

@@ -16,6 +16,9 @@
 #include "hrpn_ctrl.h"
 #include "mailbox.h"
 #include "rt_latency.h"
+#include "rpmsg.h"
+
+#define EPT_ADDR (30)
 
 static inline uint32_t calc_diff_ns(const void *dev,
 			uint32_t cnt_1, uint32_t cnt_2)
@@ -333,4 +336,19 @@ void command_handler(void *ctx, struct mailbox *m)
 		response(m, HRPN_RESP_STATUS_ERROR);
 		break;
 	}
+}
+
+int ctrl_ctx_init(struct ctrl_ctx *ctrl)
+{
+	void *cmd, *resp;
+	void *tp = NULL;
+	int rc;
+
+	rc = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw",
+				  &tp, &cmd, &resp);
+	os_assert(!rc, "rpmsg transport initialization failed, cannot proceed\n");
+	rc = mailbox_init(&ctrl->mb, cmd, resp, false, tp);
+	os_assert(!rc, "mailbox initialization failed!");
+
+	return rc;
 }

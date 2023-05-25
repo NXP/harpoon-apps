@@ -9,6 +9,7 @@
 
 #include "os/semaphore.h"
 #include "stats.h"
+#include "mailbox.h"
 
 /* Time period between two statistics logs (seconds) */
 #define STATS_PERIOD_SEC					   (10)
@@ -107,6 +108,10 @@ struct rt_latency_ctx {
 	struct hist irq_to_sched_hist;
 };
 
+struct ctrl_ctx {
+	struct mailbox mb;
+};
+
 int rt_latency_init(const void *dev,
 		const void *irq_load_dev, struct rt_latency_ctx *ctx);
 int rt_latency_test(struct rt_latency_ctx *ctx);
@@ -116,6 +121,7 @@ void print_stats(struct rt_latency_ctx *ctx);
 void cpu_load(struct rt_latency_ctx *ctx);
 void cache_inval(void);
 void command_handler(void *ctx, struct mailbox *m);
+int ctrl_ctx_init(struct ctrl_ctx *ctrl);
 
 /* OS specific functions */
 int start_test_case(void *context, int test_case_id);
