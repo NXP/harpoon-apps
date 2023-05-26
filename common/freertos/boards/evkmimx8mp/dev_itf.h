@@ -13,13 +13,22 @@
 #include "fsl_clock.h"
 #include "fsl_enet_qos.h"
 
+#define FracPLL_FDIV_CTL1_DENOM 65536ULL
+#define FracPLL_FDIV_CTL1_Offset (8U)
+extern const ccm_analog_frac_pll_config_t g_audioPll1Config;
+
+
 /*
  * 24MHz XTAL oscillator
  * Primary clock source for all PLLs
  */
 static inline uint32_t dev_get_pll_ref_freq(void)
 {
-	return CLOCK_GetFreq(kCLOCK_Osc24MClk);
+    uint8_t preDiv   = g_audioPll1Config.preDiv;
+    uint8_t postDiv  = g_audioPll1Config.postDiv;
+	uint32_t parent_clk = CLOCK_GetPllRefClkFreq(kCLOCK_AudioPll1Ctrl);
+
+	return parent_clk / ((uint32_t)preDiv * (1ULL << postDiv));
 }
 
 /*
@@ -27,22 +36,24 @@ static inline uint32_t dev_get_pll_ref_freq(void)
  */
 static inline void dev_write_audio_pll_num(uint32_t num)
 {
-	/* TODO */
+	CCM_ANALOG_TUPLE_REG_OFF(CCM_ANALOG, kCLOCK_AudioPll1Ctrl, FracPLL_FDIV_CTL1_Offset) = (int16_t)num;
 }
 
 static inline uint32_t dev_read_audio_pll_num(void)
 {
-	/* TODO */ return 0;
+	uint32_t fracCfg2 = CCM_ANALOG_TUPLE_REG_OFF(CCM_ANALOG, kCLOCK_AudioPll1Ctrl, FracPLL_FDIV_CTL1_Offset);
+	return (uint32_t)CCM_BIT_FIELD_EXTRACTION(fracCfg2, CCM_ANALOG_AUDIO_PLL1_FDIV_CTL1_PLL_DSM_MASK,
+														CCM_ANALOG_AUDIO_PLL1_FDIV_CTL1_PLL_DSM_SHIFT);
 }
 
 static inline uint32_t dev_read_audio_pll_denom(void)
 {
-	/* TODO */ return 0;
+	return FracPLL_FDIV_CTL1_DENOM;
 }
 
 static inline uint32_t dev_read_audio_pll_post_div(void)
 {
-	/* TODO */ return 0;
+	return (uint32_t)g_audioPll1Config.mainDiv;
 }
 
 /*
