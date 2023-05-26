@@ -10,22 +10,12 @@
 
 unsigned int BOARD_GPT_clk_src(void *base)
 {
-#ifdef BOARD_GPT_REC_BASE
-    if (base == BOARD_GPT_REC_BASE)
-        return BOARD_GPT_REC_CLK_SOURCE_TYPE;
-    else
-#endif
-        return kGPT_ClockSource_Periph;
+	return kGPT_ClockSource_Periph;
 }
 
 unsigned int BOARD_GPT_clk_freq(void *base)
 {
-#ifdef BOARD_GPT_REC_BASE
-    if (base == BOARD_GPT_REC_BASE)
-        return BOARD_GPT_REC_CLK_EXT_FREQ;
-    else
-#endif
-        return dev_get_gpt_ipg_freq(base);
+	return dev_get_gpt_ipg_freq(base);
 }
 
 int BOARD_NetPort_Get_MAC(unsigned int port, uint8_t *mac)

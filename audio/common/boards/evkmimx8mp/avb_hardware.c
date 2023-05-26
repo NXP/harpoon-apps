@@ -98,8 +98,8 @@ static void enet_qos_clock_config(void)
 static void gpt_clock_config(void)
 {
 	CLOCK_DisableClock(kCLOCK_Gpt1);
-	CLOCK_SetRootMux(kCLOCK_RootGpt1, kCLOCK_GptRootmuxOsc24M);
-	CLOCK_SetRootDivider(kCLOCK_RootGpt1, 1U, 1U);
+	CLOCK_SetRootMux(kCLOCK_RootGpt1, kCLOCK_GptRootmuxAudioPll1);
+	CLOCK_SetRootDivider(kCLOCK_RootGpt1, 1U, 32U); // 393216000HZ / 32 = 12,288MHz
 	CLOCK_EnableClock(kCLOCK_Gpt1);
 
 	CLOCK_DisableClock(kCLOCK_Gpt2);
@@ -138,4 +138,6 @@ void avb_hardware_init(void)
 
 	/* Set this bit to enable ENET_QOS RGMII TX clock output on TX_CLK pad. */
 	IOMUXC_GPR->GPR1 |= IOMUXC_GPR_GPR1_IOMUXC_GPR_ENET_QOS_RGMII_EN(1);
+	/* Select GPT1 capture channel 2 input: ENET_QOS_TIMER1_EVENT */
+	IOMUXC_GPR->GPR1 |= IOMUXC_GPR_GPR1_GPR_GPT1_CAPIN2_SEL(1);
 }
