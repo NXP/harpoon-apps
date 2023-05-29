@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP.
+ * Copyright 2021-2023 NXP.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,7 +20,7 @@
 
 #define EPT_ADDR (30)
 
-static inline uint32_t calc_diff_ns(const void *dev,
+static inline uint32_t calc_diff_ns(os_counter_t *dev,
 			uint32_t cnt_1, uint32_t cnt_2)
 {
 	uint32_t diff;
@@ -55,7 +55,7 @@ static inline uint32_t calc_diff_ns(const void *dev,
  *
  * @current_counter: counter value when the IRQ occurred
  */
-static void latency_alarm_handler(const void *dev, uint8_t chan_id,
+static void latency_alarm_handler(os_counter_t *dev, uint8_t chan_id,
 			  uint32_t irq_counter,
 			  void *user_data)
 {
@@ -68,7 +68,7 @@ static void latency_alarm_handler(const void *dev, uint8_t chan_id,
 
 #define IRQ_LOAD_ISR_DURATION_US	10
 
-static void load_alarm_handler(const void *dev, uint8_t chan_id,
+static void load_alarm_handler(os_counter_t *dev, uint8_t chan_id,
 			  uint32_t irq_counter,
 			  void *user_data)
 {
@@ -101,7 +101,7 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 	uint32_t now;
 	uint64_t irq_delay;
 	uint64_t irq_to_sched;
-	const void *dev = ctx->dev;
+	os_counter_t *dev = ctx->dev;
 	static uint32_t ticks = 0;
 
 	/* only compute it once for all */
@@ -208,7 +208,7 @@ void print_stats(struct rt_latency_ctx *ctx)
 void rt_latency_destroy(struct rt_latency_ctx *ctx)
 {
 	int err;
-	const void *dev = ctx->dev;
+	os_counter_t *dev = ctx->dev;
 
 	if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD) {
 		err = os_sem_destroy(&ctx->cpu_load_sem);
@@ -248,8 +248,8 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx)
 	ctx->irq_load_dev = NULL;
 }
 
-int rt_latency_init(const void *dev,
-		const void *irq_load_dev, struct rt_latency_ctx *ctx)
+int rt_latency_init(os_counter_t *dev,
+		os_counter_t *irq_load_dev, struct rt_latency_ctx *ctx)
 {
 	int err;
 

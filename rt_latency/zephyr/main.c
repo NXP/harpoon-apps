@@ -40,7 +40,7 @@ static struct main_ctx{
 static void counter_latency_test(void *p1, void *p2, void *p3)
 {
 	struct rt_latency_ctx *ctx = p1;
-	const struct device *dev = ctx->dev;
+	const struct device *dev = (const struct device *)ctx->dev;
 	int ret;
 
 	k_object_access_grant(dev, k_current_get());
@@ -138,7 +138,7 @@ int start_test_case(void *context, int test_case_id)
 	}
 
 	/* Initialize test cases' context */
-	ret = rt_latency_init((void *)counter_dev, (void *)irq_load_dev, &ctx->rt_ctx);
+	ret = rt_latency_init((os_counter_t *)counter_dev, (os_counter_t *)irq_load_dev, &ctx->rt_ctx);
 	if (ret != 0) {
 		log_err("Initialization failed!\n");
 		goto err;

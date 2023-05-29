@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -13,7 +13,6 @@
 #include "board.h"
 #include "fsl_device_registers.h"
 #include "fsl_debug_console.h"
-#include "fsl_gpt.h"
 
 /* Harpoon-apps includes. */
 #include "os/assert.h"
@@ -46,8 +45,6 @@
 /*******************************************************************************
  * Globals
  ******************************************************************************/
-
-GPT_Type *gpt_devices[NUM_OF_COUNTER] = {GPT1, GPT2};
 
 static struct main_ctx{
 	bool started;
@@ -152,8 +149,8 @@ void destroy_test_case(void *context)
 int start_test_case(void *context, int test_case_id)
 {
 	struct main_ctx *ctx = context;
-	void *dev;
-	void *irq_load_dev = NULL;
+	os_counter_t *main_counter_dev;
+	os_counter_t *irq_load_dev;
 	int hnd_idx = 0;
 	BaseType_t xResult;
 
@@ -163,8 +160,8 @@ int start_test_case(void *context, int test_case_id)
 	log(INFO, "---\n");
 	log_info("Running test case %d:\n", test_case_id);
 
-	dev = gpt_devices[0]; /* GPT1 */
-	irq_load_dev = gpt_devices[1]; /* GPT2 */
+	main_counter_dev = GET_COUNTER_DEVICE_INSTANCE(0); //GPT1
+	irq_load_dev = GET_COUNTER_DEVICE_INSTANCE(1); //GPT2
 
 	/* Initialize test case load conditions based on test case ID */
 	ctx->rt_ctx.tc_load = rt_latency_get_tc_load(test_case_id);
@@ -174,7 +171,7 @@ int start_test_case(void *context, int test_case_id)
 	}
 
 	/* Initialize test cases' context */
-	xResult = rt_latency_init(dev, irq_load_dev, &ctx->rt_ctx);
+	xResult = rt_latency_init(main_counter_dev, irq_load_dev, &ctx->rt_ctx);
 	if (xResult) {
 		log_err("Initialization failed!\n");
 		goto err;

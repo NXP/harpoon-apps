@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -15,26 +15,6 @@
 
 /* FIXME use fsl_clock to get the frequency */
 #define SOURCE_CLOCK_FREQ_MHZ	24
-
-/*
- * Support all GPT counters.
- * Note that each counter supports 3 Output Compare channels
- */
-#define NB_COUNTERS		(sizeof(gpt_devices) / sizeof(GPT_Type *) - 1)
-/* TODO: support multiple channels */
-#define NB_CHANNELS		1
-
-struct counter_alarm {
-	/* TODO: Add a mutex lock to protect both entries below */
-	const void *dev; /* NULL if HW not initialized */
-	const struct os_counter_alarm_cfg *alarms[NB_CHANNELS];
-};
-
-/* only used to compute NB_COUNTERS */
-static GPT_Type *gpt_devices[] = GPT_BASE_PTRS;
-
-/* index 0 is unused to match MCUXpresso array definitions */
-static struct counter_alarm counters[NB_COUNTERS + 1];
 
 /*
  * @returns the index number of the specified peripheral,
@@ -57,53 +37,29 @@ static uint8_t gpt_get_index(const GPT_Type *base)
 	return index;
 }
 
-/*
- * @returns the interrupt vector for the specified GPT peripheral
- */
-static IRQn_Type gpt_get_irqn(const GPT_Type *base)
+static int set_alarm(os_counter_t *dev, uint8_t chan_id,
+		const struct os_counter_alarm_cfg *alarm_cfg)
 {
-	const IRQn_Type irqs[] = GPT_IRQS;
-	uint8_t index = gpt_get_index(base);
+	struct os_counter_alarm_cfg *alarm = &dev->alarms[chan_id];
 
-	return irqs[index];
+	os_assert(dev->initialized != true, "GPT device %p not initialized!", dev->base);
+
+	/* save the alarm config */
+	alarm->callback = alarm_cfg->callback;
+	alarm->user_data = alarm_cfg->user_data;
+
+	return (dev->initialized) ? 0 : -1;
 }
 
-static int set_alarm(const void *dev, uint8_t chan_id,
-		const struct os_counter_alarm_cfg *alarm)
+static void reset_alarm(os_counter_t *dev, uint8_t chan_id)
 {
-	uint8_t i = gpt_get_index(dev);
-	struct counter_alarm *counter = &counters[i];
-
-	os_assert(counter->dev != NULL, "Device %p not initialized!", dev);
-
-	/* save the reference of the alarm config */
-	counter->alarms[chan_id] = alarm;
-
-	return (counter->dev) ? 0 : -1;
-}
-
-static void reset_alarm(const void *dev, uint8_t chan_id)
-{
-	uint8_t i = gpt_get_index(dev);
-	struct counter_alarm *counter = &counters[i];
+	struct os_counter_alarm_cfg *alarm = &dev->alarms[chan_id];
 
 	/* reset alarm config */
-	counter->alarms[chan_id] = NULL;
+	alarm->callback = NULL;
 }
 
-static const struct os_counter_alarm_cfg *get_alarm(const void *dev, uint8_t chan_id)
-{
-	uint8_t i = gpt_get_index(dev);
-	struct counter_alarm *counter = &counters[i];
-	const struct os_counter_alarm_cfg *alarm = NULL;
-
-	if (counter && counter->dev)
-		alarm = counter->alarms[chan_id];
-
-	return alarm;
-}
-
-static void gpt_irq_ack(const void *dev, uint8_t chan_id)
+static void gpt_irq_ack(const os_counter_t *dev, uint8_t chan_id)
 {
 	/* TODO: support multiple channels */
 	if (chan_id != kGPT_OutputCompare_Channel1) {
@@ -111,18 +67,19 @@ static void gpt_irq_ack(const void *dev, uint8_t chan_id)
 		log_err("Channel ID (%d) not supported!\n", chan_id);
 
 	} else {
-		GPT_DisableInterrupts((GPT_Type *)dev, kGPT_OutputCompare1InterruptEnable);
-		GPT_ClearStatusFlags((GPT_Type *)dev, kGPT_OutputCompare1Flag);
+		GPT_DisableInterrupts((GPT_Type *)dev->base, kGPT_OutputCompare1InterruptEnable);
+		GPT_ClearStatusFlags((GPT_Type *)dev->base, kGPT_OutputCompare1Flag);
 	}
 }
 
-static void gpt_irq_handler(void *dev)
+static void gpt_irq_handler(void *irq_dev)
 {
+	os_counter_t *dev = (os_counter_t *)irq_dev;
 	const struct os_counter_alarm_cfg *alarm;
-	uint32_t now;
-	int ret;
 	/* TODO: support multiple channels */
 	uint8_t chan_id = kGPT_OutputCompare_Channel1;
+	uint32_t now;
+	int ret;
 
 	ret = os_counter_get_value(dev, &now);
 	if (ret)
@@ -130,95 +87,88 @@ static void gpt_irq_handler(void *dev)
 
 	gpt_irq_ack(dev, chan_id);
 
-	/* retrieve callback for this counter/channel and call it */
-	alarm = get_alarm(dev, chan_id);
+	alarm = &dev->alarms[chan_id];
 
-	if (alarm && alarm->callback)
+	if (alarm->callback)
 		alarm->callback(dev, chan_id, now, alarm->user_data);
 
 	reset_alarm(dev, chan_id);
 }
 
-static void counter_init(const void *dev)
+static void counter_init(os_counter_t *dev)
 {
+	IRQn_Type irqn = dev->irqn;
 	gpt_config_t gptConfig;
-	IRQn_Type irqn = gpt_get_irqn(dev);
-	struct counter_alarm *counter;
 	int ret;
-
-	os_assert(dev != NULL, "Null pointer!");
-	os_assert(irqn != NotAvail_IRQn, "Unknown IRQn for device %p", dev);
 
 	GPT_GetDefaultConfig(&gptConfig);
 	gptConfig.enableFreeRun = true;
 	gptConfig.clockSource = kGPT_ClockSource_Periph;
 	gptConfig.divider = 1;
-	GPT_Init((GPT_Type *)(dev), &gptConfig);
+	GPT_Init((GPT_Type *)(dev->base), &gptConfig);
 
 	ret = os_irq_register(irqn, gpt_irq_handler, (void *)dev, OS_IRQ_PRIO_DEFAULT);
 	os_assert(!ret, "Failed to register counter's IRQ! (%d)", ret);
 	os_irq_enable(irqn);
 
-	counter = &counters[gpt_get_index(dev)];
-	counter->dev = dev;
+	dev->initialized = true;
 
-	log_debug("counter %d using GPT dev %p irq %d initialized\n",
-			gpt_get_index(dev), dev, irqn);
+	log_debug("GPT dev %p irq %d initialized\n",
+		dev->base, irqn);
 }
 
-int os_counter_start(const void *dev)
+int os_counter_start(os_counter_t *dev)
 {
-	uint8_t index = gpt_get_index(dev);
-	struct counter_alarm *counter = &counters[index];
+	uint8_t index = gpt_get_index(dev->base);
 
-	os_assert(index != 0, "Unknown device %p", dev);
+	os_assert(index != 0, "Unknown device %p", dev->base);
 
-	if (!counter->dev)
+	if (!dev->initialized)
 		counter_init(dev);
 
-	GPT_StartTimer((GPT_Type *)dev);
+	GPT_StartTimer((GPT_Type *)dev->base);
 
 	return 0;
 }
 
-int os_counter_stop(const void *dev)
+int os_counter_stop(const os_counter_t *dev)
 {
-	GPT_StopTimer((GPT_Type *)dev);
+	GPT_StopTimer((GPT_Type *)dev->base);
 
 	return 0;
 }
 
-int os_counter_get_value(const void *dev, uint32_t *cnt)
+int os_counter_get_value(const os_counter_t *dev, uint32_t *cnt)
 {
 	if (!cnt)
 		return -1;
 
-	*cnt = GPT_GetCurrentTimerCount((GPT_Type *)dev);
+	*cnt = GPT_GetCurrentTimerCount((GPT_Type *)dev->base);
 
 	return 0;
 }
 
-bool os_counter_is_counting_up(const void *dev)
+bool os_counter_is_counting_up(const os_counter_t *dev)
 {
 	return true;
 }
 
-uint32_t os_counter_us_to_ticks(const void *dev, uint64_t period_us)
+uint32_t os_counter_us_to_ticks(const os_counter_t *dev, uint64_t period_us)
 {
 	return period_us * SOURCE_CLOCK_FREQ_MHZ;
 }
 
-uint64_t os_counter_ticks_to_ns(const void *dev, uint32_t ticks)
+uint64_t os_counter_ticks_to_ns(const os_counter_t *dev, uint32_t ticks)
 {
 	return (1000 * (uint64_t)ticks) / SOURCE_CLOCK_FREQ_MHZ;
 }
 
-uint32_t os_counter_get_top_value(const void *dev)
+uint32_t os_counter_get_top_value(const os_counter_t *dev)
 {
 	return UINT32_MAX;
 }
 
-uint8_t os_counter_get_num_of_channels(const void *dev)
+uint8_t os_counter_get_num_of_channels(const os_counter_t *dev)
 {
 	return NB_CHANNELS;
 }
@@ -227,7 +177,7 @@ uint8_t os_counter_get_num_of_channels(const void *dev)
  * After expiration alarm can be set again, disabling is not needed.
  * When alarm expiration handler is called, channel is considered available and can be set again in that context.
  */
-int os_counter_set_channel_alarm(const void *dev, uint8_t chan_id,
+int os_counter_set_channel_alarm(os_counter_t *dev, uint8_t chan_id,
 		const struct os_counter_alarm_cfg *alarm_cfg)
 {
 	int ret = 0;
@@ -264,14 +214,14 @@ int os_counter_set_channel_alarm(const void *dev, uint8_t chan_id,
 		next += current;
 	}
 
-	GPT_EnableInterrupts((GPT_Type *)dev, kGPT_OutputCompare1InterruptEnable);
-	GPT_SetOutputCompareValue((GPT_Type *)dev, kGPT_OutputCompare_Channel1, next);
+	GPT_EnableInterrupts((GPT_Type *)dev->base, kGPT_OutputCompare1InterruptEnable);
+	GPT_SetOutputCompareValue((GPT_Type *)dev->base, kGPT_OutputCompare_Channel1, next);
 
 exit:
 	return ret;
 }
 
-int os_counter_cancel_channel_alarm(const void *dev, uint8_t chan_id)
+int os_counter_cancel_channel_alarm(os_counter_t *dev, uint8_t chan_id)
 {
 	int ret = 0;
 
@@ -283,11 +233,22 @@ int os_counter_cancel_channel_alarm(const void *dev, uint8_t chan_id)
 		goto exit;
 	}
 
-	GPT_DisableInterrupts((GPT_Type *)dev, kGPT_OutputCompare1InterruptEnable);
-	GPT_ClearStatusFlags((GPT_Type *)dev, kGPT_OutputCompare1Flag);
+	GPT_DisableInterrupts((GPT_Type *)dev->base, kGPT_OutputCompare1InterruptEnable);
+	GPT_ClearStatusFlags((GPT_Type *)dev->base, kGPT_OutputCompare1Flag);
 
 	reset_alarm(dev, chan_id);
 
 exit:
 	return ret;
 }
+
+/* Init the generic counter structs. */
+os_counter_t freertos_counter_instance_0 = {
+       .base = GPT1,
+       .irqn = GPT1_IRQn,
+};
+
+os_counter_t freertos_counter_instance_1 = {
+       .base = GPT2,
+       .irqn = GPT2_IRQn,
+};

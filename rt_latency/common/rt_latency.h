@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP.
+ * Copyright 2021-2023 NXP.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,6 +8,7 @@
 #define _RT_LATENCY_H_
 
 #include "os/semaphore.h"
+#include "os/counter.h"
 #include "stats.h"
 #include "mailbox.h"
 
@@ -89,8 +90,8 @@ static inline int rt_latency_get_tc_load(int test_case_id)
 }
 
 struct rt_latency_ctx {
-	const void *dev;
-	const void *irq_load_dev;
+	os_counter_t *dev;
+	os_counter_t *irq_load_dev;
 
 	int tc_load; /* bitmask of the above RT_LATENCY_WITH_xxx test case load conditions */
 
@@ -112,8 +113,8 @@ struct ctrl_ctx {
 	struct mailbox mb;
 };
 
-int rt_latency_init(const void *dev,
-		const void *irq_load_dev, struct rt_latency_ctx *ctx);
+int rt_latency_init(os_counter_t *dev,
+		os_counter_t *irq_load_dev, struct rt_latency_ctx *ctx);
 int rt_latency_test(struct rt_latency_ctx *ctx);
 void rt_latency_destroy(struct rt_latency_ctx *ctx);
 
