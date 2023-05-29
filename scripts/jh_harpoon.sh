@@ -36,8 +36,10 @@ function start ()
         get_rpmsg_dev
 
         if [[ ! -z "${RPMSG_DEV}" ]] && [[ ! "${INMATE_NAME}" == "zephyr" || "${INMATE_BIN}" =~ .*"rt_latency.bin" ]]; then
-            echo 'unbind the rpmsg-ca53 from imx_rpmsg driver'
-            echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/unbind
+            if [[ -L "/sys/bus/platform/drivers/imx-rpmsg/${RPMSG_DEV}" ]]; then
+                echo 'unbind the rpmsg-ca53 from imx_rpmsg driver'
+                echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/unbind
+            fi
 
             echo 'Use RPMSG-based Linux control application'
             mkdir -p /usr/local/bin
