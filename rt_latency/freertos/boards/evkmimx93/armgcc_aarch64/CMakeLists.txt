@@ -26,6 +26,8 @@ SET(CMAKE_STATIC_LIBRARY_SUFFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_PREFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_SUFFIX)
 
+SET(BoardName "evkmimx93")
+
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
 SET(SdkDirPath "${ProjDirPath}/../../../../../../mcux-sdk")
 SET(RtosPath "${ProjDirPath}/../../../../../../FreeRTOS-Kernel")
@@ -58,6 +60,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}/common
     ${AppPath}/freertos
     ${AppPath}/include
+    ${AppPath}/common/boards/${BoardName}
     ${BoardPath}
     ${CommonPath}
     ${CommonPath}/freertos

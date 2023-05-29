@@ -220,6 +220,7 @@ exit:
 	return ret;
 }
 
+#if defined(BOARD_COUNTER_0_BASE) || defined(BOARD_COUNTER_1_BASE)
 static const struct os_counter_ops tpm_counter_ops = {
 	.os_counter_start = os_counter_tpm_start,
 	.os_counter_stop = os_counter_tpm_stop,
@@ -231,15 +232,20 @@ static const struct os_counter_ops tpm_counter_ops = {
 	.os_counter_set_channel_alarm = os_counter_tpm_set_channel_alarm,
 	.os_counter_cancel_channel_alarm = os_counter_tpm_cancel_channel_alarm,
 };
+#endif
 
+#if defined(BOARD_COUNTER_0_BASE) && defined(BOARD_COUNTER_0_IRQ)
 os_counter_t freertos_counter_instance_0 = {
-	.base = TPM2,
-	.irqn = TPM2_IRQn,
+	.base = BOARD_COUNTER_0_BASE,
+	.irqn = BOARD_COUNTER_0_IRQ,
 	.ops = &tpm_counter_ops,
 };
+#endif
 
+#if defined(BOARD_COUNTER_1_BASE) && defined(BOARD_COUNTER_1_IRQ)
 os_counter_t freertos_counter_instance_1 = {
-	.base = TPM4,
-	.irqn = TPM4_IRQn,
+	.base = BOARD_COUNTER_1_BASE,
+	.irqn = BOARD_COUNTER_1_IRQ,
 	.ops = &tpm_counter_ops,
 };
+#endif

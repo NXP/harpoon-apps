@@ -6,6 +6,8 @@
 #ifndef _FREERTOS_COUNTER_H_
 #define _FREERTOS_COUNTER_H_
 
+#include "board.h"
+
 /* OSAL includes.*/
 #include "os/counter.h"
 #include "os/irq.h"
@@ -36,8 +38,12 @@ struct os_counter {
 
 #define OS_COUNTER_ALARM_CFG_ABSOLUTE (1 << 0)
 
+#if defined(BOARD_COUNTER_0_BASE) && defined(BOARD_COUNTER_0_IRQ)
 extern os_counter_t freertos_counter_instance_0;
+#endif
+#if defined(BOARD_COUNTER_1_BASE) && defined(BOARD_COUNTER_1_IRQ)
 extern os_counter_t freertos_counter_instance_1;
+#endif
 
 #define GET_COUNTER_DEVICE_INSTANCE(inst)      (&freertos_counter_instance_ ## inst)
 

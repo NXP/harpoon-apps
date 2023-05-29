@@ -217,6 +217,7 @@ exit:
 	return ret;
 }
 
+#if defined(BOARD_COUNTER_0_BASE) || defined(BOARD_COUNTER_1_BASE)
 static const struct os_counter_ops gpt_counter_ops = {
 	.os_counter_start = os_counter_gpt_start,
 	.os_counter_stop = os_counter_gpt_stop,
@@ -228,15 +229,20 @@ static const struct os_counter_ops gpt_counter_ops = {
 	.os_counter_set_channel_alarm = os_counter_gpt_set_channel_alarm,
 	.os_counter_cancel_channel_alarm = os_counter_gpt_cancel_channel_alarm,
 };
+#endif
 
+#if defined(BOARD_COUNTER_0_BASE) && defined(BOARD_COUNTER_0_IRQ)
 os_counter_t freertos_counter_instance_0 = {
-	.base = GPT1,
-	.irqn = GPT1_IRQn,
+	.base = BOARD_COUNTER_0_BASE,
+	.irqn = BOARD_COUNTER_0_IRQ,
 	.ops = &gpt_counter_ops,
 };
+#endif
 
+#if defined(BOARD_COUNTER_1_BASE) && defined(BOARD_COUNTER_1_IRQ)
 os_counter_t freertos_counter_instance_1 = {
-	.base = GPT2,
-	.irqn = GPT2_IRQn,
+	.base = BOARD_COUNTER_1_BASE,
+	.irqn = BOARD_COUNTER_1_IRQ,
 	.ops = &gpt_counter_ops,
 };
+#endif
