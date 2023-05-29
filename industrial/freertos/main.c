@@ -10,6 +10,7 @@
 #include "board.h"
 #include "hlog.h"
 #include "os/assert.h"
+#include "os/counter.h"
 
 #include "clock_config.h"
 #include "pin_mux.h"
@@ -19,7 +20,7 @@
 
 #define main_task_PRIORITY	(configMAX_PRIORITIES - 8)
 
-void *os_counter = (GPT_Type*) GPT1;
+os_counter_t *os_counter = GET_COUNTER_DEVICE_INSTANCE(0);
 
 const struct industrial_use_case use_cases[] =
 {

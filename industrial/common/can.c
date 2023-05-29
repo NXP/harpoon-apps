@@ -46,7 +46,7 @@
 #define PROCESS_ALARM_PERIOD_US		1200U
 #define MEGA						1000000U
 
-extern void *os_counter;
+extern os_counter_t *os_counter;
 
 enum {
 	TEST_4_MB = 0,
@@ -177,7 +177,7 @@ static void can_irq_handler(void *data)
 		ctx->event_send(ctx->event_data, EVENT_TYPE_IRQ, 0);
 }
 
-static void alarm_handler(const void *dev, uint8_t chan_id,
+static void alarm_handler(os_counter_t *dev, uint8_t chan_id,
 			  uint32_t irq_counter,
 			  void *user_data)
 {
