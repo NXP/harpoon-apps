@@ -25,11 +25,15 @@ static int set_alarm(os_counter_t *dev, uint8_t chan_id,
 
 	os_assert(dev->initialized == true, "GPT device %p not initialized!", dev->base);
 
+	/* Fail if alarm already set for this channel. */
+	if (alarm->callback)
+		return -1;
+
 	/* save the alarm config */
 	alarm->callback = alarm_cfg->callback;
 	alarm->user_data = alarm_cfg->user_data;
 
-	return (dev->initialized) ? 0 : -1;
+	return 0;
 }
 
 static void reset_alarm(os_counter_t *dev, uint8_t chan_id)
