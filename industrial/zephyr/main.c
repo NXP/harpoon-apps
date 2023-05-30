@@ -43,32 +43,10 @@ const struct industrial_use_case use_cases[] =
 		},
 		.ops = {
 			[0] = {
-				.init = can_init_loopback,
+				.init = can_init,
 				.exit = can_exit,
-				.pre_exit = can_pre_exit,
 				.run = can_run,
 				.stats = can_stats,
-			},
-			[1] = {
-				.init = can_init_interrupt,
-				.exit = can_exit,
-				.pre_exit = can_pre_exit,
-				.run = can_run,
-				.stats = can_stats,
-			},
-			[2] = {
-				.init = can_init_pingpong,
-				.exit = can_exit,
-				.pre_exit = can_pre_exit,
-				.run = can_run,
-				.stats = can_stats,
-			},
-			[3] = {
-				.init = flexcan_init,
-				.exit = flexcan_exit,
-				.pre_exit = can_pre_exit,
-				.run = flexcan_run,
-				.stats = flexcan_stats,
 			},
 		},
 	},

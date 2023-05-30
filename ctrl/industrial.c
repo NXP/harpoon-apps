@@ -18,10 +18,7 @@ void can_usage(void)
 	printf(
 		"\nIndustrial CAN options:\n"
 		"\t-r <id>        run CAN mode id:\n"
-		"\t               0 - loopback\n"
-		"\t               1 - interrupt\n"
-		"\t               2 - pingpong\n"
-		"\t               3 - init\n"
+		"\t               0 - Multiple Nodes and Messages Tx+Rx\n"
 		"\t-n <node_type> acting as node 'A' or 'B' (default 'A')\n"
 		"\t               0 - node 'A'\n"
 		"\t               1 - node 'B'\n"
