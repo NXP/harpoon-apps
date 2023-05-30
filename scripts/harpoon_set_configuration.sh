@@ -3,7 +3,7 @@
 function usage ()
 {
 	echo "harpoon_set_configuration.sh <freertos | zephyr> <audio | audio_smp | avb | hello | industrial | latency | virtio_net>"
-	echo "virtio_net: this application is only available for FreeRTOS on evkimx8mm"
+	echo "virtio_net: this application is only available for FreeRTOS on evkimx8mm/p and evkimx93"
 }
 
 function detect_machine ()
@@ -44,7 +44,7 @@ if [ -z $SOC ]; then
 fi
 
 if [ "$2" == "virtio_net" ]; then
-	if [[ "$SOC" != "imx8mm" || "$RTOS" != "freertos"  ]]; then
+	if [[ "$SOC" == "imx8mn" || "$RTOS" != "freertos"  ]]; then
 		usage
 		exit 7
 	fi
@@ -109,7 +109,7 @@ elif [ "$2" == "latency" ]; then
 elif [ "$2" == "virtio_net" ]; then
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
-	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}-industrial.cell
+	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}-virtio.cell
 	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/virtio_net.bin
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
