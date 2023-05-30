@@ -17,7 +17,7 @@ struct avtp_source_element_config {
 	unsigned int stream_n;			/* number of streams */
 
 	struct avtp_source_stream_config {
-		/* avtp config unused for now */
+		unsigned int flags;
 	} stream [AVTP_RX_STREAM_N];
 };
 

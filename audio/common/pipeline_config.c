@@ -841,6 +841,8 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 			.type = AUDIO_ELEMENT_AVTP_SOURCE,
 			.u.avtp_source = {
 				.stream_n = 2,
+				.stream[0].flags = GENAVB_STREAM_FLAGS_MCR,
+				.stream[1].flags = GENAVB_STREAM_FLAGS_MCR,
 			},
 			.outputs = 4,
 			.output = {3, },	/* 3 - 6 */

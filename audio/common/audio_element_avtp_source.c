@@ -28,6 +28,7 @@ struct avtp_output {
 struct avtp_stream {
 	unsigned int id;
 	unsigned int connected;
+	unsigned int connection_flags;
 
 	struct genavb_stream_handle *handle;
 	unsigned int batch_size_ns;
@@ -138,7 +139,7 @@ static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int s
 	else
 		cur_batch_size = stream->cur_batch_size;
 
-	params->flags = 0; /* disable media clock recovery */
+	params->flags = stream->connection_flags;
 
 	/* Create new AVTP stream, update stream_handle */
 	if ((avb_result = genavb_stream_create(handle, &stream->handle, params, &cur_batch_size, 0)) != GENAVB_SUCCESS) {
@@ -445,6 +446,7 @@ int avtp_source_element_init(struct audio_element *element, struct audio_element
 	k = 0;
 	for (i = 0; i < avtp->stream_n; i++) {
 		avtp->stream[i].connected = 0;
+		avtp->stream[i].connection_flags = config->u.avtp_source.stream[i].flags;
 
 		for (j = 0; j < avtp_source_channel_n()	; j++, k++) {
 			avtp->stream[i].channel_buf[j] = &buffer[config->output[k]];
