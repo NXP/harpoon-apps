@@ -2,6 +2,7 @@
 Description=Control Harpoon application with Jailhouse
 
 [Service]
+Type=oneshot
 User=root
 ExecStart=/usr/share/harpoon/scripts/jh_harpoon.sh start
 ExecStop=/usr/share/harpoon/scripts/jh_harpoon.sh stop
