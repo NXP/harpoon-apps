@@ -53,11 +53,6 @@ void i2c_test(void)
     os_printf("I2C in polling mode\r\n");
 #endif
 
-    /* Configure and enable I2C3 */
-    CLOCK_SetRootMux(kCLOCK_RootI2c3, kCLOCK_I2cRootmuxSysPll1Div5); /* Set I2C source to SysPLL1 Div5 160MHZ */
-    CLOCK_SetRootDivider(kCLOCK_RootI2c3, 1U, 10U);                  /* Set root clock to 160MHZ / 10 = 16MHZ */
-    CLOCK_EnableClock(kCLOCK_I2c3);
-
     /* Initialise I2C */
     I2C_MasterGetDefaultConfig(&i2c_config);
     i2c_config.baudRate_Bps = I2C_BAUDRATE;
