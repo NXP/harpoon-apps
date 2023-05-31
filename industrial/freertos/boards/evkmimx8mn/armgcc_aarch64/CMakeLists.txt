@@ -137,6 +137,8 @@ include(device_system_ca53)
 include(common_freertos)
 include(common_freertos_core_armv8a)
 
+include(driver_counter_gpt)
+
 include(component_iuart_adapter)
 include(component_lists)
 include(component_serial_manager)

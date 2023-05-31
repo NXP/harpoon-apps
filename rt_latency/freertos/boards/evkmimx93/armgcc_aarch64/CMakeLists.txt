@@ -96,6 +96,8 @@ include(device_system_ca55)
 include(common_freertos)
 include(common_freertos_core_armv8a)
 
+include(driver_counter_tpm)
+
 include(lib_hlog)
 
 include(component_lpuart_adapter)
