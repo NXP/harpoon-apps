@@ -13,6 +13,7 @@
 #include "board_test.h"
 #include "clock_config.h"
 #include "i2c_test.h"
+#include "app_i2c.h"
 #ifdef I2C_USE_IRQ
 #include "os/irq.h"
 #endif
@@ -65,16 +66,16 @@ static void i2c_irq_handler(void *data)
 static void test_i2c(void)
 {
 #ifdef I2C_USE_IRQ
-    /* Register I2C3 interrupt */
-    os_irq_register(I2C3_IRQn, i2c_irq_handler, NULL, OS_IRQ_PRIO_DEFAULT + 1);
+    /* Register I2C interrupt */
+    os_irq_register(I2C_IRQn, i2c_irq_handler, NULL, OS_IRQ_PRIO_DEFAULT + 1);
 #endif
 
     /* Run i2c tests */
     i2c_test();
 
 #ifdef I2C_USE_IRQ
-    /* Unregister I2C3 interrupt */
-    os_irq_unregister(I2C3_IRQn);
+    /* Unregister I2C interrupt */
+    os_irq_unregister(I2C_IRQn);
 #endif
 }
 

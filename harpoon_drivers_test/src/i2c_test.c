@@ -1,30 +1,16 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021,2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "fsl_i2c.h"
 #include "i2c_test.h"
 #include "os/stdio.h"
+#include "app_i2c.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-
-/* I2C */
-#define I2C_INSTANCE I2C3
-#define I2C_MASTER_CLK_FREQ                                                                 \
-    (CLOCK_GetPllFreq(kCLOCK_SystemPll1Ctrl) / (CLOCK_GetRootPreDivider(kCLOCK_RootI2c3)) / \
-     (CLOCK_GetRootPostDivider(kCLOCK_RootI2c3)) / 5) /* SYSTEM PLL1 DIV5 */
-
-#ifdef CPU_MIMX8ML8DVNLZ_ca53
-#define I2C_ADDR     0x50  /* Type-C0 on i.MX8MP EVK */
-#else
-#define I2C_ADDR     0x4a  /* PCM1863 on Hifiberry DAC+ ADC Pro */
-#endif
-
-#define I2C_BAUDRATE 100000U
 
 #ifdef I2C_USE_IRQ
 i2c_master_handle_t g_m_handle;
