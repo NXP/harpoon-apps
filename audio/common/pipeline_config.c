@@ -604,6 +604,12 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 	.buffers = 17,
 
 	.buffer_storage = 17,
+	.storage = {
+		[5] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[6] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[7] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[8] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+	},
 };
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
 

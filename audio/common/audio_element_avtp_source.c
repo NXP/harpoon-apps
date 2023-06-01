@@ -4,16 +4,20 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <math.h>
 #include "audio_element_avtp_source.h"
 #include "audio_element.h"
 #include "audio_format.h"
+#include "audio_pipeline.h"
 #include "avb_tsn/genavb.h"
+#include "genavb/clock.h"
 #include "genavb/genavb.h"
 #include "mailbox.h"
 #include "hlog.h"
 #include "hrpn_ctrl.h"
 
 #include "os/semaphore.h"
+#include "types.h"
 
 /*
  * AVTP source: AVB audio stream listener
@@ -33,16 +37,19 @@ struct avtp_stream {
 	struct genavb_stream_handle *handle;
 	unsigned int batch_size_ns;
 	unsigned int cur_batch_size;
+	unsigned int sample_size;
 
 	struct audio_buffer *channel_buf[AVTP_RX_CHANNEL_N];	/* output audio buffer address */
 
 	unsigned int err;
+	unsigned int clock_err;
+	unsigned int sync_err;
 	unsigned int underflow;
 	unsigned int overflow;
 	unsigned int received;
 
-	unsigned int count;		/* small logic that avoid reading */
-	unsigned int until;		/* data when stream in underflow. */
+	bool first_start;
+	float sample_dt;
 
 	bool convert;
 	bool invert;			/* format conversion */
@@ -131,7 +138,9 @@ static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int s
 	stream->shift = shift;
 	stream->mask = mask;
 
-	cur_batch_size = element->period * avdecc_fmt_sample_size(&params->format);
+	stream->sample_dt = ((float)NSECS_PER_SEC) / (float)element->sample_rate;
+	stream->sample_size = avdecc_fmt_sample_size(&params->format);
+	cur_batch_size = element->period * stream->sample_size;
 	stream->cur_batch_size = cur_batch_size;
 
 	if (element->period < avdecc_fmt_samples_per_packet(&params->format, params->stream_class))
@@ -151,8 +160,7 @@ static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int s
 	log_info("  stream batch size: %u\n", stream->cur_batch_size);
 	log_info("  batch size: %u\n", cur_batch_size);
 
-	stream->count = 0;
-	stream->until = 1;
+	stream->first_start = true;
 
 	os_sem_take(&avtp->semaphore, 0, OS_SEM_TIMEOUT_MAX);
 	stream->connected = 1;
@@ -249,7 +257,20 @@ err:
 	return -1;
 }
 
-static int listener_receive(struct avtp_source_element *avtp, unsigned int stream_index, unsigned int period)
+#define  GENAVB_PROCESSING_TIME		500000U
+#define  CFG_TOLERATED_DELAY        10000U
+static int listener_timestamp_accept(unsigned int ts, unsigned int now, unsigned int period, unsigned int sample_rate)
+{
+	/* Timestamp + playback offset must be after now (otherwise packet are too late) */
+	/* Timestamp must be before now + transit time + timing uncertainty (otherwise they arrived too early) */
+	if (avtp_after(ts + (unsigned int)(period * NSECS_PER_SEC / sample_rate), now)
+	&& avtp_before(ts, now + GENAVB_PROCESSING_TIME + CFG_TOLERATED_DELAY))
+		return 1;
+
+	return 0;
+}
+
+static int listener_receive(struct avtp_source_element *avtp, unsigned int stream_index, unsigned int period, unsigned int sample_rate)
 {
 	struct avtp_stream *stream = &avtp->stream[stream_index];
 	int i, j, k;
@@ -258,26 +279,91 @@ static int listener_receive(struct avtp_source_element *avtp, unsigned int strea
 	uint32_t data[AVTP_RX_CHANNEL_N * PERIOD_MAX];
 	int ret = -1;
 
-	if (stream->count < stream->until) {
-		/* tempo to accumulate enough data on the AVB network */
-		stream->count++;
+	if (stream->first_start) {
+#define  MAX_EVENTS		12
+		struct genavb_event event[MAX_EVENTS] = {0};
+		struct genavb_event *event_ts = NULL;
+		unsigned int event_len = MAX_EVENTS;
+		float tmp_float;
+		uint32_t periods_to_wait;
+		uint64_t now;
+		int idx;
 
-		goto exit;
-	}
+		read_bytes = genavb_stream_receive(stream->handle, &data, stream->cur_batch_size, event, &event_len);
 
-	read_bytes = genavb_stream_receive(stream->handle, &data, stream->cur_batch_size, NULL, NULL);
+		if (read_bytes < 0) {
+			stream->sync_err++;
+			stream->first_start = true;
 
-	if (read_bytes < 0) {
-		stream->err++;
-		stream->count = 0;
+			goto exit;
 
-		goto exit;
+		} else if (read_bytes < stream->cur_batch_size) {
+			stream->sync_err++;
+			stream->first_start = true;
 
-	} else if (read_bytes < stream->cur_batch_size) {
-		stream->underflow++;
-		stream->count = 0;
+			goto exit;
+		}
 
-		goto exit;
+		if (genavb_clock_gettime64(GENAVB_CLOCK_GPTP_0_0, &now) < 0) {
+			stream->clock_err++;
+			goto exit;
+		}
+
+		for (idx = 0; idx < event_len; idx++) {
+			if (event[idx].event_mask  & (AVTP_TIMESTAMP_INVALID | AVTP_TIMESTAMP_UNCERTAIN))
+				continue;
+
+			if (listener_timestamp_accept(event[idx].ts, now, period, sample_rate)) {
+				stream->sync_err++;
+				goto exit;
+			}
+
+			if (!event_ts)
+				event_ts = &event[idx];
+		}
+
+		if (!event_ts) {
+			stream->sync_err++;
+			goto exit;
+		}
+
+		/* Calculate the delay between the current time and the time when the audio should be played */
+		tmp_float = (float)(event_ts->ts - (uint32_t)now);
+		/* take into account event index offset */
+		tmp_float -= ((float)event_ts->index / stream->sample_size) * stream->sample_dt;
+		/* take into account worst case processing time */
+		tmp_float += (float)GENAVB_PROCESSING_TIME;
+		tmp_float = tmp_float / (period * stream->sample_dt);
+		/* ceil to get upper value and take 1 period of processing into account */
+		periods_to_wait = (unsigned int)ceilf(tmp_float);
+
+		if (periods_to_wait >= AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE - 2) {
+			stream->sync_err++;
+
+			goto exit;
+		}
+
+		for (i = 0; i < avtp_source_channel_n(); i++)
+			audio_buf_reset(stream->channel_buf[i]);
+
+		for (j = 0; j < avtp_source_channel_n()	; j++)
+			audio_buf_write_silence(stream->channel_buf[j], periods_to_wait * period);
+
+		stream->first_start = false;
+	} else {
+		read_bytes = genavb_stream_receive(stream->handle, &data, stream->cur_batch_size, NULL, NULL);
+		if (read_bytes < 0) {
+			stream->err++;
+			stream->first_start = true;
+
+			goto exit;
+
+		} else if (read_bytes < stream->cur_batch_size) {
+			stream->underflow++;
+			stream->first_start = true;
+
+			goto exit;
+		}
 	}
 
 	stream->received++;
@@ -315,7 +401,7 @@ static int avtp_source_element_run(struct audio_element *element)
 		stream = &avtp->stream[i];
 
 		if (stream->connected)
-			ret = listener_receive(avtp, i, element->period);
+			ret = listener_receive(avtp, i, element->period, element->sample_rate);
 		else
 			ret = -1;
 
@@ -343,7 +429,7 @@ static void avtp_source_element_reset(struct audio_element *element)
 
 	for (i = 0; i < avtp->stream_n; i++) {
 		stream = &avtp->stream[i];
-		stream->count = 0;
+		stream->first_start = true;
 		do {
 			if (stream->handle)
 				read_bytes = genavb_stream_receive(stream->handle, &data, stream->cur_batch_size, NULL, NULL);
@@ -391,9 +477,10 @@ static void avtp_source_element_stats(struct audio_element *element)
 			avtp->stream[i].connected);
 		log_info("  batch size: %u\n",
 			avtp->stream[i].cur_batch_size);
-		log_info("  underflow: %u, overflow: %u err: %u received: %u\n",
+		log_info("  underflow: %u, overflow: %u err: %u, clock_err: %u, sync_err: %u, received: %u\n",
 			avtp->stream[i].underflow, avtp->stream[i].overflow,
-			avtp->stream[i].err, avtp->stream[i].received);
+			avtp->stream[i].err, avtp->stream[i].clock_err, avtp->stream[i].sync_err,
+		    avtp->stream[i].received);
 	}
 }
 
