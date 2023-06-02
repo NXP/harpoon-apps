@@ -1,21 +1,28 @@
 cmake_minimum_required(VERSION 3.13.1)
 
-set(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
-set(CommonPath "${ProjDirPath}/../../common")
-set(AppPath "${ProjDirPath}/..")
-
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(audio)
 
-if(CONFIG_BOARD_MIMX8MP_EVK_A53)
-  set(BoardName "evkmimx8mp")
-elseif(CONFIG_BOARD_MIMX8MM_EVK_A53)
+if(CONFIG_BOARD_MIMX8MM_EVK_A53)
   set(BoardName "evkmimx8mm")
 elseif(CONFIG_BOARD_MIMX8MN_EVK_A53)
   set(BoardName "evkmimx8mn")
+elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
+  set(BoardName "evkmimx8mp")
 else()
   message(FATAL_ERROR "unsupported board")
 endif()
+
+set(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
+set(CommonPath "${ProjDirPath}/../../common")
+set(CommonBoardPath "${ProjDirPath}/../../common/boards/${BoardName}")
+set(AppPath "${ProjDirPath}/..")
+set(MulticorePath "${ProjDirPath}/../../../middleware/multicore")
+
+# config to select component, the format is CONFIG_USE_${component}
+set(CONFIG_USE_middleware_zephyr-kernel true)
+set(CONFIG_USE_middleware_multicore_rpmsg_lite_zephyr true)
+ADD_DEFINITIONS(-DAARCH64=1)
 
 zephyr_include_directories(
 	${AppPath}/common
@@ -30,6 +37,7 @@ zephyr_include_directories(
 	${CommonPath}/libs
 	${CommonPath}/libs/stats
 	${CommonPath}/zephyr/boards
+	${CommonBoardPath}
 	${ProjDirPath}
 	)
 
@@ -41,6 +49,8 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/stats
+    ${CommonPath}/libs/rpmsg
+    ${MulticorePath}
 )
 
 zephyr_compile_definitions(OS_ZEPHYR)
@@ -62,6 +72,20 @@ include(lib_hlog)
 include(lib_jailhouse)
 include(lib_mailbox)
 include(lib_stats)
+include(lib_rpmsg)
+
+include(middleware_multicore_rpmsg_lite_aarch64_zephyr)
+include(middleware_multicore_rpmsg_lite_zephyr)
+
+if(CONFIG_BOARD_MIMX8MM_EVK_A53)
+  include(middleware_multicore_rpmsg_lite_MIMX8MM6)
+elseif(CONFIG_BOARD_MIMX8MN_EVK_A53)
+  include(middleware_multicore_rpmsg_lite_MIMX8MN6)
+elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
+  include(middleware_multicore_rpmsg_lite_MIMX8ML8)
+else()
+  message(FATAL_ERROR "unsupported board")
+endif()
 
 target_sources(app PRIVATE
 	       main.c

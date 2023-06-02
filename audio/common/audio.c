@@ -12,7 +12,6 @@
 #include "os/unistd.h"
 #include "os/cpu_load.h"
 
-#include "ivshmem.h"
 #include "mailbox.h"
 #include "hrpn_ctrl.h"
 
@@ -26,15 +25,12 @@
 #include "sai_config.h"
 
 #include "audio_pipeline.h"
+#include "rpmsg.h"
+
+#define EPT_ADDR	(30)
 
 #if (CONFIG_GENAVB_ENABLE == 1)
 #include "system_config.h"
-#endif
-
-#ifdef MBOX_TRANSPORT_RPMSG
-#include "rpmsg.h"
-
-#define EPT_ADDR (30)
 #endif
 
 struct mode_handler {
@@ -54,9 +50,11 @@ struct mode_handler {
 static const int supported_period[] = {2, 4, 8, 16, 32};
 static const uint32_t supported_rate[] = {44100, 48000, 88200, 96000, 176400, 192000};
 
-struct data_ctx {
-	struct ivshmem mem;
+struct ctrl_ctx {
 	struct mailbox mb;
+};
+
+struct data_ctx {
 	uint8_t thread_count;
 	uint8_t pipeline_count;
 
@@ -78,6 +76,7 @@ struct data_ctx {
 		void *handle;
 	} thread_data_ctx[MAX_AUDIO_DATA_THREADS];
 
+	struct ctrl_ctx ctrl;
 	const struct mode_handler *handler;
 	os_sem_t reset_sem;
 };
@@ -586,7 +585,7 @@ exit:
 static void audio_command_handler(struct data_ctx *ctx)
 {
 	struct hrpn_command cmd;
-	struct mailbox *m = &ctx->mb;;
+	struct mailbox *m = &ctx->ctrl.mb;
 	unsigned int len;
 	int rc = 0;
 
@@ -676,8 +675,9 @@ void *audio_control_init(uint8_t thread_count)
 {
 	int err, i;
 	struct data_ctx *audio_ctx;
+	void *cmd = NULL;
+	void *resp = NULL;
 	void *tp = NULL;
-	void *cmd, *resp;
 
 	audio_ctx = os_malloc(sizeof(*audio_ctx));
 	os_assert(audio_ctx, "Audio context failed with memory allocation error");
@@ -685,16 +685,11 @@ void *audio_control_init(uint8_t thread_count)
 
 	audio_ctx->thread_count = thread_count;
 
-#ifdef MBOX_TRANSPORT_RPMSG
 	err = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw",
 				   &tp, &cmd, &resp);
-	os_assert(!err, "rpmsg transport initialization failed, cannot proceed\n");
-#else /* IVSHMEM */
-	err = ivshmem_transport_init(0, &audio_ctx->mem, &tp, &cmd, &resp);
-	os_assert(!err, "ivshmem transport initialization failed, cannot proceed\n");
-#endif
+	os_assert(!err, "rpmsg transport initialization failed!");
 
-	err = mailbox_init(&audio_ctx->mb, cmd, resp, false, tp);
+	err = mailbox_init(&audio_ctx->ctrl.mb, cmd, resp, false, tp);
 	os_assert(!err, "mailbox initialization failed!");
 
 	for (i = 0; i < thread_count; i++) {
