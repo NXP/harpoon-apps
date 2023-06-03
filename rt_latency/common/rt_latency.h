@@ -19,7 +19,10 @@
 #define LATENCY_STATS_PERIOD_SEC				   (10)
 
 /* Time for counter alarm timeout (us) */
-#define COUNTER_PERIOD_US_VAL			   (20000)
+#define COUNTER_PERIOD_US_VAL			   (100)
+
+/* Timeout to wait for timer irq (ms) */
+#define COUNTER_IRQ_TIMEOUT_MS			   (10)
 
 /* Time between two cache invalidation instructions (ms) */
 #define CACHE_INVAL_PERIOD_MS				 (100)
@@ -99,6 +102,7 @@ typedef struct rt_latency_stats {
 	struct stats irq_to_sched;
 	struct hist irq_to_sched_hist;
 
+	uint32_t late_alarm_sched;
 	bool pending;
 
 } rt_latency_stats_t;

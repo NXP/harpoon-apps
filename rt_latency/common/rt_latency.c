@@ -144,6 +144,7 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 		os_assert(!err, "semaphore init failed!");
 	}
 
+retry:
 	/* Configure IRQ latency testing alarm */
 	os_counter_get_value(dev, &cnt);
 	alarm_cfg.ticks = cnt + ticks;
@@ -157,8 +158,17 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 	os_assert(!err, "Counter set alarm failed (err: %d)", err);
 
 	/* Sync current thread with alarm callback function thanks to a semaphore */
-	err = os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
-	os_assert(!err, "Can't take the semaphore (err: %d)", err);
+	err = os_sem_take(&ctx->semaphore, 0, COUNTER_IRQ_TIMEOUT_MS);
+	if (err < 0) {
+		/* waiting period timed out: probably late alarm scheduling and waiting for counter wrap. */
+		os_counter_cancel_channel_alarm(dev, 0);
+		/* There is a small race window between cancel alarm and alarm callback
+		 * giving the semaphore. But the difference between the small timeout
+		 * and the time for timer (few minutes at 24Mhz) to wrap covers that.
+		 */
+		ctx->stats.late_alarm_sched++;
+		goto retry;
+	}
 
 	/* Woken up... fetch counter value to compute latency */
 	os_counter_get_value(dev, &now);
@@ -217,6 +227,7 @@ void print_stats(struct rt_latency_ctx *ctx)
 		stats_compute(&ctx->stats_snapshot.irq_to_sched);
 		stats_print(&ctx->stats_snapshot.irq_to_sched);
 		hist_print(&ctx->stats_snapshot.irq_to_sched_hist);
+		log_info("late alarm scheduling: %u\n", ctx->stats_snapshot.late_alarm_sched);
 		log_info("\n");
 
 		ctx->stats_snapshot.pending = false;
@@ -263,6 +274,8 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx)
 	stats_reset(&ctx->stats.irq_to_sched);
 	hist_reset(&ctx->stats.irq_to_sched_hist);
 
+	ctx->stats.late_alarm_sched = 0;
+
 	ctx->dev = NULL;
 	ctx->irq_load_dev = NULL;
 }
@@ -282,6 +295,8 @@ int rt_latency_init(os_counter_t *dev,
 	hist_init(&ctx->stats.irq_to_sched_hist, 20, 1000);
 
 	ctx->stats_snapshot.pending = false;
+
+	ctx->stats.late_alarm_sched = 0;
 
 	err = os_sem_init(&ctx->semaphore, 0);
 	os_assert(!err, "semaphore creation failed!");
