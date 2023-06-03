@@ -17,8 +17,7 @@ function get_rpmsg_dev()
 	elif grep -q 'i.MX8MP' /sys/devices/soc0/soc_id; then
 		RPMSG_DEV=fe100000.rpmsg-ca53
 	elif grep -q 'i.MX93' /sys/devices/soc0/soc_id; then
-		#TODO: add i.MX93 rpmsg support
-		exit 1;
+		RPMSG_DEV=fe100000.rpmsg-ca55
 	fi
 
 	if [[ ! -L /sys/bus/platform/devices/${RPMSG_DEV} ]]; then
