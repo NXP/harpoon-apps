@@ -8,26 +8,79 @@ function usage ()
     echo "usage: jh_harpoon.sh <start | stop>"
 }
 
+# Detect the platform we are running on.
+function detect_soc ()
+{
+    if grep -q 'i.MX8MM' /sys/devices/soc0/soc_id; then
+        echo 'imx8mm'
+    elif grep -q 'i.MX8MN' /sys/devices/soc0/soc_id; then
+        echo 'imx8mn'
+    elif grep -q 'i.MX8MP' /sys/devices/soc0/soc_id; then
+        echo 'imx8mp'
+    elif grep -q 'i.MX93' /sys/devices/soc0/soc_id; then
+        echo 'imx93'
+    else
+        echo 'Unknown'
+    fi
+}
+
 function get_rpmsg_dev()
 {
-	if grep -q 'i.MX8MM' /sys/devices/soc0/soc_id; then
-		RPMSG_DEV=b8600000.rpmsg-ca53
-	elif grep -q 'i.MX8MN' /sys/devices/soc0/soc_id; then
-		RPMSG_DEV=b8600000.rpmsg-ca53
-	elif grep -q 'i.MX8MP' /sys/devices/soc0/soc_id; then
-		RPMSG_DEV=fe100000.rpmsg-ca53
-	elif grep -q 'i.MX93' /sys/devices/soc0/soc_id; then
-		RPMSG_DEV=fe100000.rpmsg-ca55
-	fi
+    case $SOC in
+    'imx8mm'|'imx8mm')
+        RPMSG_DEV=b8600000.rpmsg-ca53
+        ;;
+    'imx8mp')
+        RPMSG_DEV=fe100000.rpmsg-ca53
+        ;;
+    'imx93')
+        RPMSG_DEV=fe100000.rpmsg-ca55
+        ;;
+    *)
+        echo "Unsupported SoC"
+        exit 1
+    esac
 
-	if [[ ! -L /sys/bus/platform/devices/${RPMSG_DEV} ]]; then
-		unset RPMSG_DEV
-		echo 'The RPMsg device does not exist!'
-	fi
+    if [[ ! -L /sys/bus/platform/devices/${RPMSG_DEV} ]]; then
+        unset RPMSG_DEV
+        echo 'The RPMsg device does not exist!'
+    fi
+}
+
+# $1: cpu core number
+function disable_cpu_idle()
+{
+    # Disable CPU idle deep state transitions exceeding 1us
+    if [ -e "/sys/devices/system/cpu/cpu"$1"/power/pm_qos_resume_latency_us" ]; then
+        echo "1" > /sys/devices/system/cpu/cpu"$1"/power/pm_qos_resume_latency_us
+    fi
+}
+
+function set_real_time_configuration()
+{
+    if [ "$SOC" = "imx93" ]; then
+        if [ -e /sys/devices/platform/imx93-lpm/auto_clk_gating ]; then
+            echo "Disable auto clock gating"
+            echo 0 > /sys/devices/platform/imx93-lpm/auto_clk_gating
+        fi
+
+        # Disable CPU idle for all cores
+        disable_cpu_idle 0
+        disable_cpu_idle 1
+
+        # Unbind the BBNSM RTC device
+        BBNSM_RTC_DEV="44440000.bbnsm:rtc"
+        if [ -L /sys/bus/platform/drivers/bbnsm_rtc/${BBNSM_RTC_DEV} ]; then
+            echo "Unbind RTC device"
+            echo "${BBNSM_RTC_DEV}" > /sys/bus/platform/drivers/bbnsm_rtc/unbind
+        fi
+    fi
 }
 
 function start ()
 {
+    set_real_time_configuration
+
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         get_rpmsg_dev
 
@@ -104,6 +157,9 @@ if [ ! $# -eq 1 ]; then
     usage
     exit 1
 fi
+
+# Detect the SoC we're running on.
+SOC=$(detect_soc)
 
 CONF_FILE=/etc/harpoon/harpoon.conf
 
