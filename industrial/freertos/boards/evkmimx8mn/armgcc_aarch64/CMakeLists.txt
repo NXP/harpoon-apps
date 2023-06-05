@@ -9,9 +9,6 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.12.0)
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
-# Select RPMSG as mailbox transport layer
-add_compile_definitions(MBOX_TRANSPORT_RPMSG)
-
 # config to select component, the format is CONFIG_USE_${component}
 set(CONFIG_USE_middleware_freertos-kernel_MIMX8MN6 true)
 set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)

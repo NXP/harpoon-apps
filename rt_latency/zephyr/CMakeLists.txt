@@ -17,9 +17,6 @@ set(CommonBoardPath "${ProjDirPath}/../../common/boards/${BoardName}")
 set(AppPath "${ProjDirPath}/..")
 set(MulticorePath "${ProjDirPath}/../../../middleware/multicore")
 
-# Select RPMSG as mailbox transport layer
-add_compile_definitions(MBOX_TRANSPORT_RPMSG)
-
 # config to select component, the format is CONFIG_USE_${component}
 set(CONFIG_USE_middleware_zephyr-kernel true)
 set(CONFIG_USE_middleware_multicore_rpmsg_lite_zephyr true)

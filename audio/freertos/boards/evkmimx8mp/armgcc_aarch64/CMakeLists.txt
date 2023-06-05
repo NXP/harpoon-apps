@@ -12,9 +12,6 @@ SET (Tutorial_VERSION_MINOR 0)
 # ENABLE DRIVER CACHE CONTROL
 ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
 
-# Select RPMSG as mailbox transport layer
-add_compile_definitions(MBOX_TRANSPORT_RPMSG)
-
 # config to select component, the format is CONFIG_USE_${component}
 set(CONFIG_USE_middleware_freertos-kernel_MIMX8ML8 true)
 set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
