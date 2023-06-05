@@ -12,40 +12,21 @@
  * Definitions
  ******************************************************************************/
 
-#ifdef I2C_USE_IRQ
-i2c_master_handle_t g_m_handle;
-volatile bool g_MasterCompletionFlag = false;
-#endif
-
 uint8_t i2c_buf[256];
 
 #ifdef I2C_USE_IRQ
-/* i2c_callback
- * This function is called by I2C driver when a non-blocking operation is completed
- */
-static void i2c_callback(I2C_Type *base, i2c_master_handle_t *handle, status_t status, void *userData)
-{
-    /* Signal transfer success when received success status. */
-    if (status == kStatus_Success)
-        g_MasterCompletionFlag = true;
-    else
-        os_printf("%s: received error %d\r\n", __FUNCTION__, status);
-}
-
 /* i2c_test_irq_handler
  * This function is called by I2C ISR handler
  */
 void i2c_test_irq_handler(void)
 {
-    I2C_MasterTransferHandleIRQ(I2C_INSTANCE, &g_m_handle);
+    i2c_driver_irq_handler();
 }
 #endif
 
 void i2c_test(void)
 {
     int i;
-    i2c_master_config_t i2c_config;
-    i2c_master_transfer_t i2c_transfer;
 
 #ifdef I2C_USE_IRQ
     os_printf("I2C in interrupt mode\r\n");
@@ -54,39 +35,13 @@ void i2c_test(void)
 #endif
 
     /* Initialise I2C */
-    I2C_MasterGetDefaultConfig(&i2c_config);
-    i2c_config.baudRate_Bps = I2C_BAUDRATE;
-    I2C_MasterInit(I2C_INSTANCE, &i2c_config, I2C_MASTER_CLK_FREQ);
+    i2c_driver_init();
 
-#ifdef I2C_USE_IRQ
-    memset(&g_m_handle, 0, sizeof(g_m_handle));
-#endif
     memset(i2c_buf, 0x66, sizeof(i2c_buf));
-    memset(&i2c_transfer, 0, sizeof(i2c_transfer));
 
-#ifdef I2C_USE_IRQ
-    I2C_MasterTransferCreateHandle(I2C_INSTANCE, &g_m_handle, i2c_callback, NULL);
-#endif
-
-    /* Read all I2C registers */
-    for (i = 0; i < sizeof(i2c_buf); i++) {
-        i2c_transfer.slaveAddress   = I2C_ADDR;
-        i2c_transfer.direction      = kI2C_Read;
-        i2c_transfer.subaddress     = i;
-        i2c_transfer.subaddressSize = 1;
-        i2c_transfer.data           = &i2c_buf[i];
-        i2c_transfer.dataSize       = 1;
-        i2c_transfer.flags          = kI2C_TransferDefaultFlag;
-
-#ifdef I2C_USE_IRQ
-        I2C_MasterTransferNonBlocking(I2C_INSTANCE, &g_m_handle, &i2c_transfer);
-        /*  Wait for transfer completed. */
-        while (!g_MasterCompletionFlag) /* nothing */;
-        g_MasterCompletionFlag = false;
-#else
-        I2C_MasterTransferBlocking(I2C_INSTANCE, &i2c_transfer);
-#endif
-    }
+    /* Read I2C all registers */
+    for(i = 0; i < sizeof(i2c_buf); i++)
+        i2c_buf[i] = i2c_driver_read_reg(I2C_ADDR, i);
 
     /* Print out all I2C registers */
     os_printf("I2C registers dump for device at address 0x%x\r\n", I2C_ADDR);

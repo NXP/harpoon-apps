@@ -39,6 +39,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppBoardPath}/pin_mux.c"
     "${AppPath}/src/flexcan_test.c"
     "${AppPath}/src/i2c_test.c"
+    "${AppPath}/src/ii2c_driver.c"
     "${AppPath}/freertos/main.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"

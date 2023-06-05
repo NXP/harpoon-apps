@@ -18,4 +18,8 @@
     (CLOCK_GetPllFreq(kCLOCK_SystemPll1Ctrl) / (CLOCK_GetRootPreDivider(kCLOCK_RootI2c3)) / \
      (CLOCK_GetRootPostDivider(kCLOCK_RootI2c3)) / 5) /* SYSTEM PLL1 DIV5 */
 
+void i2c_driver_init(void);
+uint8_t i2c_driver_read_reg(uint8_t i2c_addr, uint32_t sub_addr);
+void i2c_driver_irq_handler(void);
+
 #endif /* _APP_I2C_H_ */
