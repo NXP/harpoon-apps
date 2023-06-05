@@ -13,17 +13,12 @@
 #include "os/unistd.h"
 
 #include "os/cpu_load.h"
-#include "ivshmem.h"
-#include "mailbox.h"
 #include "hrpn_ctrl.h"
 
 #include "industrial.h"
-
-#ifdef MBOX_TRANSPORT_RPMSG
 #include "rpmsg.h"
 
-#define EPT_ADDR (30)
-#endif
+#define EPT_ADDR	(30)
 
 extern const struct industrial_use_case use_cases[];
 
@@ -240,29 +235,12 @@ static int data_ctx_init(struct data_ctx *data)
 	return err;
 }
 
-static int ctrl_ctx_init(struct ctrl_ctx *ctrl)
-{
-	int err;
-	void *tp = NULL;
-	void *cmd, *resp;
-
-#ifdef MBOX_TRANSPORT_RPMSG
-	err = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw",
-				   &tp, &cmd, &resp);
-	os_assert(!err, "rpmsg transport initialization failed, cannot proceed\n");
-#else /* IVSHMEM */
-	err = ivshmem_transport_init(0, &ctrl->mem, &tp, &cmd, &resp);
-	os_assert(!err, "ivshmem transport initialization failed, cannot proceed\n");
-#endif
-	err = mailbox_init(&ctrl->mb, cmd, resp, false, tp);
-	os_assert(!err, "mailbox initialization failed!");
-
-	return err;
-}
-
 void *industrial_control_init(int nb_use_cases)
 {
 	struct industrial_ctx *ctx;
+	void *cmd = NULL;
+	void *resp = NULL;
+	void *tp = NULL;
 	int i, err;
 
 	ctx = os_malloc(sizeof(*ctx));
@@ -270,8 +248,12 @@ void *industrial_control_init(int nb_use_cases)
 
 	memset(ctx, 0, sizeof(*ctx));
 
-	err = ctrl_ctx_init(&ctx->ctrl);
-	os_assert(!err, "industrial ctrl context failed!");
+	err = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw",
+				   &tp, &cmd, &resp);
+	os_assert(!err, "rpmsg transport initialization failed!");
+
+	err = mailbox_init(&ctx->ctrl.mb, cmd, resp, false, tp);
+	os_assert(!err, "mailbox initialization failed!");
 
 	for (i = 0; i < nb_use_cases; i++) {
 		struct data_ctx *data = &ctx->data[i];

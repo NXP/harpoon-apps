@@ -7,7 +7,6 @@
 #ifndef _INDUSTRIAL_ENTRY_H_
 #define _INDUSTRIAL_ENTRY_H_
 
-#include "ivshmem.h"
 #include "mailbox.h"
 
 #include "industrial_os.h"
@@ -48,7 +47,6 @@ struct data_ctx {
 };
 
 struct ctrl_ctx {
-	struct ivshmem mem;
 	struct mailbox mb;
 };
 
