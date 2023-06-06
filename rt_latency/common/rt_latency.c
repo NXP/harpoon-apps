@@ -85,6 +85,18 @@ static void load_alarm_handler(os_counter_t *dev, uint8_t chan_id,
 	os_sem_give(&ctx->irq_load_sem, OS_SEM_FLAGS_ISR_CONTEXT);
 }
 
+static void rt_latency_stats_dump(struct rt_latency_ctx *ctx)
+{
+	if (!ctx->stats_snapshot.pending) {
+		memcpy(&ctx->stats_snapshot, &ctx->stats, sizeof(struct rt_latency_stats));
+
+		ctx->stats_snapshot.pending = true;
+
+		stats_reset(&ctx->stats.irq_delay);
+		stats_reset(&ctx->stats.irq_to_sched);
+	}
+}
+
 /*
  * Blocking function including an infinite loop ;
  * must be called by separate threads/tasks.
@@ -103,6 +115,8 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 	uint64_t irq_to_sched;
 	os_counter_t *dev = ctx->dev;
 	static uint32_t ticks = 0;
+#define LATENCY_STATS_PERIOD (LATENCY_STATS_PERIOD_SEC * 1000000 / COUNTER_PERIOD_US_VAL)
+	static uint64_t stats_cnt = 0;
 
 	/* only compute it once for all */
 	if (!ticks) {
@@ -146,19 +160,22 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 	err = os_sem_take(&ctx->semaphore, 0, OS_SEM_TIMEOUT_MAX);
 	os_assert(!err, "Can't take the semaphore (err: %d)", err);
 
-	/* Woken up... calculate latency */
+	/* Woken up... fetch counter value to compute latency */
 	os_counter_get_value(dev, &now);
+	os_counter_stop(dev);
 
 	irq_delay = calc_diff_ns(dev, ctx->time_prog, ctx->time_irq);
 
-	stats_update(&ctx->irq_delay, irq_delay);
-	hist_update(&ctx->irq_delay_hist, irq_delay);
+	stats_update(&ctx->stats.irq_delay, irq_delay);
+	hist_update(&ctx->stats.irq_delay_hist, irq_delay);
 
 	irq_to_sched = calc_diff_ns(dev, ctx->time_prog, now);
-	stats_update(&ctx->irq_to_sched, irq_to_sched);
-	hist_update(&ctx->irq_to_sched_hist, irq_to_sched);
+	stats_update(&ctx->stats.irq_to_sched, irq_to_sched);
+	hist_update(&ctx->stats.irq_to_sched_hist, irq_to_sched);
 
-	os_counter_stop(dev);
+	/* Dump statistics every TIMER_STATS_PERIOD_SEC seconds */
+	if (!(++stats_cnt % LATENCY_STATS_PERIOD))
+		rt_latency_stats_dump(ctx);
 
 	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
 		/* Waiting irq load ISR exits and then go to next loop */
@@ -192,17 +209,18 @@ void cache_inval(void)
 
 void print_stats(struct rt_latency_ctx *ctx)
 {
-	stats_compute(&ctx->irq_delay);
-	stats_print(&ctx->irq_delay);
-	stats_reset(&ctx->irq_delay);
-	hist_print(&ctx->irq_delay_hist);
+	if (ctx->stats_snapshot.pending) {
+		stats_compute(&ctx->stats_snapshot.irq_delay);
+		stats_print(&ctx->stats_snapshot.irq_delay);
+		hist_print(&ctx->stats_snapshot.irq_delay_hist);
 
-	stats_compute(&ctx->irq_to_sched);
-	stats_print(&ctx->irq_to_sched);
-	stats_reset(&ctx->irq_to_sched);
-	hist_print(&ctx->irq_to_sched_hist);
+		stats_compute(&ctx->stats_snapshot.irq_to_sched);
+		stats_print(&ctx->stats_snapshot.irq_to_sched);
+		hist_print(&ctx->stats_snapshot.irq_to_sched_hist);
+		log_info("\n");
 
-	log_info("\n");
+		ctx->stats_snapshot.pending = false;
+	}
 }
 
 void rt_latency_destroy(struct rt_latency_ctx *ctx)
@@ -235,14 +253,15 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx)
 	err = os_sem_destroy(&ctx->semaphore);
 	os_assert(!err, "Failed to destroy semaphore!");
 
-	/* print current stats before reseting them all */
+	/* dump and print current stats before reseting them all */
+	rt_latency_stats_dump(ctx);
 	print_stats(ctx);
 
-	stats_reset(&ctx->irq_delay);
-	hist_reset(&ctx->irq_delay_hist);
+	stats_reset(&ctx->stats.irq_delay);
+	hist_reset(&ctx->stats.irq_delay_hist);
 
-	stats_reset(&ctx->irq_to_sched);
-	hist_reset(&ctx->irq_to_sched_hist);
+	stats_reset(&ctx->stats.irq_to_sched);
+	hist_reset(&ctx->stats.irq_to_sched_hist);
 
 	ctx->dev = NULL;
 	ctx->irq_load_dev = NULL;
@@ -256,11 +275,13 @@ int rt_latency_init(os_counter_t *dev,
 	ctx->dev = dev;
 	ctx->irq_load_dev = irq_load_dev;
 
-	stats_init(&ctx->irq_delay, 31, "irq delay (ns)", NULL);
-	hist_init(&ctx->irq_delay_hist, 20, 1000);
+	stats_init(&ctx->stats.irq_delay, 31, "irq delay (ns)", NULL);
+	hist_init(&ctx->stats.irq_delay_hist, 20, 1000);
 
-	stats_init(&ctx->irq_to_sched, 31, "irq to sched (ns)", NULL);
-	hist_init(&ctx->irq_to_sched_hist, 20, 1000);
+	stats_init(&ctx->stats.irq_to_sched, 31, "irq to sched (ns)", NULL);
+	hist_init(&ctx->stats.irq_to_sched_hist, 20, 1000);
+
+	ctx->stats_snapshot.pending = false;
 
 	err = os_sem_init(&ctx->semaphore, 0);
 	os_assert(!err, "semaphore creation failed!");

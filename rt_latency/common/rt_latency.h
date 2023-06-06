@@ -12,8 +12,11 @@
 #include "stats.h"
 #include "mailbox.h"
 
-/* Time period between two statistics logs (seconds) */
-#define STATS_PERIOD_SEC					   (10)
+/* Time period between two statistics polling logs (seconds) */
+#define STATS_PERIOD_SEC					   (1)
+
+/* Time period between two statistics dump logs (seconds) */
+#define LATENCY_STATS_PERIOD_SEC				   (10)
 
 /* Time for counter alarm timeout (us) */
 #define COUNTER_PERIOD_US_VAL			   (20000)
@@ -89,6 +92,17 @@ static inline int rt_latency_get_tc_load(int test_case_id)
 	return mask;
 }
 
+typedef struct rt_latency_stats {
+	struct stats irq_delay;
+	struct hist irq_delay_hist;
+
+	struct stats irq_to_sched;
+	struct hist irq_to_sched_hist;
+
+	bool pending;
+
+} rt_latency_stats_t;
+
 struct rt_latency_ctx {
 	os_counter_t *dev;
 	os_counter_t *irq_load_dev;
@@ -102,11 +116,8 @@ struct rt_latency_ctx {
 	uint64_t time_irq;
 	uint32_t time_prog;
 
-	struct stats irq_delay;
-	struct hist irq_delay_hist;
-
-	struct stats irq_to_sched;
-	struct hist irq_to_sched_hist;
+	rt_latency_stats_t stats;	  /* Current stats tracked by timer task. */
+	rt_latency_stats_t stats_snapshot; /* Stats snapshot dump by timer task and printed by logging task. */
 };
 
 struct ctrl_ctx {
