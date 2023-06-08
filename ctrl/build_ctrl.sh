@@ -9,9 +9,5 @@ cmake_clean ()
 }
 
 cmake_clean
-cmake -G "Unix Makefiles" -DMBOX_TRANSPORT_RPMSG=off .
-make -j $(nproc)
-
-cmake_clean
-cmake -G "Unix Makefiles" -DMBOX_TRANSPORT_RPMSG=on .
+cmake -G "Unix Makefiles" .
 make -j $(nproc)

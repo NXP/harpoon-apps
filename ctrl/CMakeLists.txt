@@ -5,12 +5,7 @@ project(harpoon_ctrl)
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
 SET(CommonPath "${ProjDirPath}/../common")
 
-if("${MBOX_TRANSPORT_RPMSG}" STREQUAL "on")
-    add_compile_definitions(MBOX_TRANSPORT_RPMSG)
-    set(MCUX_SDK_PROJECT_NAME harpoon_ctrl_rpmsg)
-else()
-    set(MCUX_SDK_PROJECT_NAME harpoon_ctrl)
-endif()
+set(MCUX_SDK_PROJECT_NAME harpoon_ctrl)
 
 set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/mailbox
@@ -21,7 +16,6 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
    audio_pipeline.c
    common.c
    industrial.c
-   ivshmem.c
    main.c
    rpmsg.c
 )

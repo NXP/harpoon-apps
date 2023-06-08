@@ -10,15 +10,9 @@
 #include <string.h>
 #include <errno.h>
 
-#include "ivshmem.h"
 #include "mailbox.h"
-
 #include "hrpn_ctrl.h"
-
-#ifdef MBOX_TRANSPORT_RPMSG
 #include "rpmsg.h"
-#endif
-
 #include "common.h"
 
 int audio_element_routing_main(int argc, char *argv[], struct mailbox *m);
@@ -236,7 +230,6 @@ const struct cmd_handler command_handler[] = {
 
 int main(int argc, char *argv[])
 {
-	struct ivshmem mem;
 	struct mailbox m;
 	unsigned int uio_id = 0;
 	int fd, i;
@@ -250,7 +243,6 @@ int main(int argc, char *argv[])
 		goto err;
 	}
 
-#ifdef MBOX_TRANSPORT_RPMSG
 	fd = rpmsg_init(dst);
 	if (fd < 0)
 		goto err_rpmsg;
@@ -260,12 +252,6 @@ int main(int argc, char *argv[])
 	resp = cmd + 2 * 4096;
 	memset(cmd, 0, 4 * 4096);
 	tp = (void *)(uintptr_t)fd;
-#else /* IVSHMEM */
-	if (ivshmem_init(&mem, uio_id) < 0)
-		goto err_ivshmem;
-	cmd = mem.out;
-	resp = mem.in + 2 * 4096;
-#endif
 
 	if (mailbox_init(&m, cmd, resp, true, tp) < 0)
 		goto err_mailbox;
@@ -279,27 +265,18 @@ int main(int argc, char *argv[])
 	usage();
 
 exit:
-#ifdef MBOX_TRANSPORT_RPMSG
 	rpmsg_deinit(fd);
 	free(cmd);
-#else /* IVSHMEM */
-	ivshmem_exit(&mem);
-#endif
 
 	return rc;
 
 err_mailbox:
 	printf("%s: err_mailbox\n", __func__);
-#ifdef MBOX_TRANSPORT_RPMSG
 	free(cmd);
 err_malloc:
 	rpmsg_deinit(fd);
 err_rpmsg:
 	printf("%s: err_rpmsg\n", __func__);
-#else /* IVSHMEM */
-	ivshmem_exit(&mem);
-err_ivshmem:
-#endif
 
 err:
 	return -1;
