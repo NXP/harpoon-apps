@@ -3,9 +3,6 @@
 #  - a single jailhouse cell is running/will run
 #  - the cell runs one of the Harpoon images
 
-
-HC_RPMSG_SHORT_CUT=/usr/local/bin/harpoon_ctrl
-
 function usage ()
 {
     echo "usage: jh_harpoon.sh <start | stop>"
@@ -35,17 +32,9 @@ function start ()
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         get_rpmsg_dev
 
-        if [[ ! -z "${RPMSG_DEV}" ]] && [[ ! "${INMATE_NAME}" == "zephyr" || "${INMATE_BIN}" =~ .*"rt_latency.bin" ]]; then
-            if [[ -L "/sys/bus/platform/drivers/imx-rpmsg/${RPMSG_DEV}" ]]; then
-                echo 'unbind the rpmsg-ca53 from imx_rpmsg driver'
-                echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/unbind
-            fi
-
-            echo 'Use RPMSG-based Linux control application'
-            mkdir -p /usr/local/bin
-            ln -sf /usr/bin/harpoon_ctrl_rpmsg "${HC_RPMSG_SHORT_CUT}"
-        else
-            rm -f "${HC_RPMSG_SHORT_CUT}"
+        if [[ ! -z "${RPMSG_DEV}" ]] && [[ -L "/sys/bus/platform/drivers/imx-rpmsg/${RPMSG_DEV}" ]]; then
+            echo 'unbind the rpmsg-ca53 from imx_rpmsg driver'
+            echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/unbind
         fi
     fi
 
@@ -65,7 +54,7 @@ function start ()
     jailhouse cell start "${INMATE_NAME}"
 
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
-        if [[ ! -z "${RPMSG_DEV}" ]] && [[ ! "${INMATE_NAME}" == "zephyr" || "${INMATE_BIN}" =~ .*"rt_latency.bin" ]]; then
+        if [[ ! -z "${RPMSG_DEV}" ]]; then
             # delay here to ensure the slave side ready to kick
             sleep 0.5
             echo 're-bind the rpmsg-ca53 to imx_rpmsg driver'
@@ -89,11 +78,6 @@ function stop ()
 {
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         get_rpmsg_dev
-
-        if [[ ! -z "${RPMSG_DEV}" ]] && [[ ! "${INMATE_NAME}" == "zephyr" || "${INMATE_BIN}" =~ .*"rt_latency.bin" ]]; then
-            echo 'Restore default (ivshmem) Linux control application'
-            rm -f "${HC_RPMSG_SHORT_CUT}"
-        fi
     fi
 
     if [[ "${INMATE_BIN}" =~ .*"virtio_net.bin" ]]; then
