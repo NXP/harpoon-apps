@@ -40,9 +40,8 @@
 #define STACK_SIZE (configMINIMAL_STACK_SIZE + 100)
 #define MAIN_STACK_SIZE	(STACK_SIZE + 1024)
 
-#ifdef MBOX_TRANSPORT_RPMSG
 #define EPT_ADDR (30)
-#endif
+
 
 /*******************************************************************************
  * Globals
