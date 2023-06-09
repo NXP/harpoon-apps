@@ -14,7 +14,7 @@
 #include "clock_config.h"
 #include "i2c_test.h"
 #ifdef I2C_USE_IRQ
-#include "irq.h"
+#include "os/irq.h"
 #endif
 #include "pin_mux.h"
 
@@ -66,7 +66,7 @@ static void test_i2c(void)
 {
 #ifdef I2C_USE_IRQ
     /* Register I2C3 interrupt */
-    irq_register(I2C3_IRQn, i2c_irq_handler, NULL, 0);
+    os_irq_register(I2C3_IRQn, i2c_irq_handler, NULL, OS_IRQ_PRIO_DEFAULT + 1);
 #endif
 
     /* Run i2c tests */
@@ -74,7 +74,7 @@ static void test_i2c(void)
 
 #ifdef I2C_USE_IRQ
     /* Unregister I2C3 interrupt */
-    irq_unregister(I2C3_IRQn);
+    os_irq_unregister(I2C3_IRQn);
 #endif
 }
 
