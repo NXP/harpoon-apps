@@ -88,6 +88,5 @@ static void test_task(void *pvParameters)
     common_test_list();
     board_test_list();
 
-    for (;;)
-        ;
+    vTaskDelete(NULL);
 }
