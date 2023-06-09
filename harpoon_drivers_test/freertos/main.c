@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021,2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -40,10 +40,9 @@ int main(void)
 
     /* Init board cpu and hardware. */
     BOARD_InitMemory();
+    board_clock_setup();
     BOARD_InitDebugConsole();
     BOARD_InitPins();
-
-    board_clock_setup();
 
     xResult = xTaskCreate(test_task, "driver_test_task", configMINIMAL_STACK_SIZE + 100, NULL, test_task_PRIORITY, NULL);
     assert(xResult == pdPASS);
