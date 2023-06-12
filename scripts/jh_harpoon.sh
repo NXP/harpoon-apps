@@ -27,7 +27,7 @@ function detect_soc ()
 function get_rpmsg_dev()
 {
     case $SOC in
-    'imx8mm'|'imx8mm')
+    'imx8mm'|'imx8mn')
         RPMSG_DEV=b8600000.rpmsg-ca53
         ;;
     'imx8mp')
