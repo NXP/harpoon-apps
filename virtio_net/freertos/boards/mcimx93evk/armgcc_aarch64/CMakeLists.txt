@@ -9,6 +9,9 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.1.1)
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
+# ENABLE DRIVER CACHE CONTROL
+ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
+
 # ENABLE ASM
 ENABLE_LANGUAGE(ASM)
 
@@ -18,38 +21,50 @@ SET(CMAKE_STATIC_LIBRARY_SUFFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_PREFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_SUFFIX)
 
+SET(BoardName "mcimx93evk")
+
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
-SET(SdkDirPath "${ProjDirPath}/../../../../../../mcux-sdk")
-SET(RtosPath "${ProjDirPath}/../../../../../../FreeRTOS-Kernel")
-SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/evkmimx93")
-SET(CommonPath "${ProjDirPath}/../../../../../common")
-SET(AppPath "${ProjDirPath}/../../../..")
-SET(AppBoardPath "${AppPath}/freertos/boards/evkmimx93")
+SET(ProjRootPath "${ProjDirPath}/../../../../../")
+SET(SdkDirPath "${ProjRootPath}/../mcux-sdk")
+SET(RtosPath "${ProjRootPath}/../FreeRTOS-Kernel")
+SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
+SET(BoardPath "${ProjRootPath}/common/freertos/boards/${BoardName}")
+SET(CommonPath "${ProjRootPath}/common")
+SET(LibsPath "${CommonPath}/libs")
+SET(AppPath "${ProjRootPath}/virtio_net")
+SET(VirtioNetPath "${HtMulticorePath}/net")
+SET(VirtioMailboxPath "${HtMulticorePath}/mailbox")
+SET(VirtioPlatPortsPath "${HtMulticorePath}/plat_ports")
+SET(VirtioIncludePath "${HtMulticorePath}/include")
+SET(VirtioPath "${HtMulticorePath}/virtio")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
-project(hello_world)
+project(virtio_net)
 
-set(MCUX_SDK_PROJECT_NAME hello_world.elf)
+set(MCUX_SDK_PROJECT_NAME virtio_net.elf)
 
 include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
-    "${AppBoardPath}/clock_config.c"
     "${AppPath}/freertos/main.c"
-    "${AppPath}/src/hello_world.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
+    "${AppPath}/common/boards/${BoardName}/clock_config.c"
+    "${AppPath}/common/boards/${BoardName}/pin_mux.c"
+    "${AppPath}/common/boards/${BoardName}/virtio_board.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    ${AppBoardPath}
-    ${AppPath}/freertos
-    ${AppPath}/include
+    ${ProjDirPath}/..
     ${BoardPath}
+    ${AppBoardPath}
+    ${SdkDirPath}/devices/MIMX9352
+    ${AppPath}/common/boards/${BoardName}
     ${CommonPath}
     ${CommonPath}/freertos
-    ${SdkDirPath}/devices/MIMX9532
+    ${CommonPath}/libs
+    ${VirtioIncludePath}
 )
 
 set(CMAKE_MODULE_PATH
@@ -58,6 +73,10 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/hlog
     ${RtosPath}
     ${SdkDirPath}
+    ${VirtioMailboxPath}
+    ${VirtioNetPath}
+    ${VirtioPath}
+    ${VirtioPlatPortsPath}
 )
 
 # include entry for cmake components
@@ -71,16 +90,18 @@ include(device_system_ca55)
 include(common_freertos)
 include(common_freertos_core_armv8a)
 
-include(lib_hlog)
-
 include(component_lpuart_adapter)
 include(component_lists)
 include(component_serial_manager)
 include(component_serial_manager_uart)
 
+include(driver_cache_armv8a)
 include(driver_clock)
 include(driver_common)
+include(driver_enet)
 include(driver_lpuart)
+include(driver_phy-common)
+include(driver_phy-device-rtl8211f)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
@@ -89,6 +110,17 @@ include(middleware_freertos-kernel_aarch64)
 include(utility_assert)
 include(utility_debug_console)
 include(utilities_misc_utilities_aarch64)
+
+include(lib_hlog)
+
+include(lib_net_switch)
+include(lib_port_enet_freertos)
+include(lib_switch_hal_freertos)
+
+include(lib_virtio_net)
+
+include(generic_software_mailbox)
+include(plat_ports_ca)
 
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
 
@@ -103,4 +135,4 @@ target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE nosys)
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)
 
 ADD_CUSTOM_COMMAND(TARGET ${MCUX_SDK_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY}
--Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/hello_world.bin)
+-Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/virtio_net.bin)

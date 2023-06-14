@@ -3,14 +3,19 @@ SET(MCUX_DEVICE "MIMX9352_ca55")
 
 # CROSS COMPILER SETTING
 SET(CMAKE_SYSTEM_NAME Generic)
-CMAKE_MINIMUM_REQUIRED (VERSION 3.1.1)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.12.0)
 
 # THE VERSION NUMBER
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
-# ENABLE DRIVER CACHE CONTROL
-ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
+# Select RPMSG as mailbox transport layer
+add_compile_definitions(MBOX_TRANSPORT_RPMSG)
+
+# config to select component, the format is CONFIG_USE_${component}
+set(CONFIG_USE_middleware_freertos-kernel_MIMX9352 true)
+set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
+ADD_DEFINITIONS(-DAARCH64=1)
 
 # ENABLE ASM
 ENABLE_LANGUAGE(ASM)
@@ -21,62 +26,63 @@ SET(CMAKE_STATIC_LIBRARY_SUFFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_PREFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_SUFFIX)
 
-SET(BoardName "evkmimx93")
+SET(BoardName "mcimx93evk")
 
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
-SET(ProjRootPath "${ProjDirPath}/../../../../../")
-SET(SdkDirPath "${ProjRootPath}/../mcux-sdk")
-SET(RtosPath "${ProjRootPath}/../FreeRTOS-Kernel")
-SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
-SET(BoardPath "${ProjRootPath}/common/freertos/boards/${BoardName}")
-SET(CommonPath "${ProjRootPath}/common")
-SET(LibsPath "${CommonPath}/libs")
-SET(AppPath "${ProjRootPath}/virtio_net")
-SET(VirtioNetPath "${HtMulticorePath}/net")
-SET(VirtioMailboxPath "${HtMulticorePath}/mailbox")
-SET(VirtioPlatPortsPath "${HtMulticorePath}/plat_ports")
-SET(VirtioIncludePath "${HtMulticorePath}/include")
-SET(VirtioPath "${HtMulticorePath}/virtio")
+SET(SdkDirPath "${ProjDirPath}/../../../../../../mcux-sdk")
+SET(RtosPath "${ProjDirPath}/../../../../../../FreeRTOS-Kernel")
+SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/mcimx93evk")
+SET(CommonPath "${ProjDirPath}/../../../../../common")
+SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/mcimx93evk")
+SET(AppPath "${ProjDirPath}/../../../..")
+SET(AppBoardPath "${AppPath}/freertos/boards/mcimx93evk")
+SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
-project(virtio_net)
+project(rt_latency)
+set(BIN_NAME rt_latency)
 
-set(MCUX_SDK_PROJECT_NAME virtio_net.elf)
+set(MCUX_SDK_PROJECT_NAME ${BIN_NAME}.elf)
 
 include(${BoardPath}/armgcc_aarch64/flags.cmake)
 add_executable(${MCUX_SDK_PROJECT_NAME}
+    "${AppBoardPath}/clock_config.c"
     "${AppPath}/freertos/main.c"
+    "${AppPath}/common/rt_latency.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
-    "${AppPath}/common/boards/${BoardName}/clock_config.c"
-    "${AppPath}/common/boards/${BoardName}/pin_mux.c"
-    "${AppPath}/common/boards/${BoardName}/virtio_board.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    ${ProjDirPath}/..
+    ${AppPath}
+    ${AppPath}/common
+    ${AppPath}/freertos
+    ${AppPath}/include
+    ${AppPath}/common/boards/${BoardName}
+    ${BoardPath}
+    ${CommonPath}
+    ${CommonPath}/freertos
+    ${CommonPath}/libs/stats
+    ${CommonBoardPath}
     ${BoardPath}
     ${AppBoardPath}
     ${SdkDirPath}/devices/MIMX9352
-    ${AppPath}/common/boards/${BoardName}
-    ${CommonPath}
-    ${CommonPath}/freertos
-    ${CommonPath}/libs
-    ${VirtioIncludePath}
 )
 
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
+    ${CommonPath}/libs/stats
+    ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/hlog
+    ${CommonPath}/libs/mailbox
+    ${CommonPath}/libs/ctrl
+    ${CommonPath}/libs/rpmsg
+    ${MulticorePath}
     ${RtosPath}
     ${SdkDirPath}
-    ${VirtioMailboxPath}
-    ${VirtioNetPath}
-    ${VirtioPath}
-    ${VirtioPlatPortsPath}
 )
 
 # include entry for cmake components
@@ -90,6 +96,10 @@ include(device_system_ca55)
 include(common_freertos)
 include(common_freertos_core_armv8a)
 
+include(driver_counter_tpm)
+
+include(lib_hlog)
+
 include(component_lpuart_adapter)
 include(component_lists)
 include(component_serial_manager)
@@ -98,29 +108,26 @@ include(component_serial_manager_uart)
 include(driver_cache_armv8a)
 include(driver_clock)
 include(driver_common)
-include(driver_enet)
 include(driver_lpuart)
-include(driver_phy-common)
-include(driver_phy-device-rtl8211f)
+include(driver_tpm)
 
+include(lib_stats)
+include(lib_jailhouse)
+include(lib_hlog)
+include(lib_mailbox)
+include(lib_ctrl)
+include(lib_rpmsg)
+
+include(middleware_freertos-kernel_aarch64)
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
-include(middleware_freertos-kernel_aarch64)
+include(middleware_multicore_rpmsg_lite_aarch64_freertos)
+include(middleware_multicore_rpmsg_lite_freertos)
+include(middleware_multicore_rpmsg_lite_MIMX9352)
 
 include(utility_assert)
 include(utility_debug_console)
 include(utilities_misc_utilities_aarch64)
-
-include(lib_hlog)
-
-include(lib_net_switch)
-include(lib_port_enet_freertos)
-include(lib_switch_hal_freertos)
-
-include(lib_virtio_net)
-
-include(generic_software_mailbox)
-include(plat_ports_ca)
 
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
 
@@ -135,4 +142,4 @@ target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE nosys)
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)
 
 ADD_CUSTOM_COMMAND(TARGET ${MCUX_SDK_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY}
--Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/virtio_net.bin)
+	-Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/${BIN_NAME}.bin)

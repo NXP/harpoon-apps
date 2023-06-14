@@ -10,7 +10,7 @@ elseif(CONFIG_BOARD_MIMX8MN_EVK_A53)
 elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
     set(BoardName "evkmimx8mp")
 elseif(CONFIG_BOARD_MIMX93_EVK_A55)
-    set(BoardName "evkmimx93")
+    set(BoardName "mcimx93evk")
 endif()
 
 set(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
