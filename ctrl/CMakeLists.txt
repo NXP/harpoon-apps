@@ -8,7 +8,6 @@ SET(CommonPath "${ProjDirPath}/../common")
 set(MCUX_SDK_PROJECT_NAME harpoon_ctrl)
 
 set(CMAKE_MODULE_PATH
-    ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/ctrl
 )
 
@@ -25,5 +24,4 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${ProjDirPath}
 )
 
-include(lib_mailbox)
 include(lib_ctrl)

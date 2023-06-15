@@ -45,7 +45,7 @@ void ethernet_usage(void)
 	);
 }
 
-static int default_run(struct mailbox *m, uint32_t type, uint32_t mode, uint32_t role, uint32_t protocol, uint8_t *hw_addr)
+static int default_run(int fd, uint32_t type, uint32_t mode, uint32_t role, uint32_t protocol, uint8_t *hw_addr)
 {
 	struct hrpn_cmd_industrial_run run = {0,};
 	struct hrpn_response resp;
@@ -61,10 +61,10 @@ static int default_run(struct mailbox *m, uint32_t type, uint32_t mode, uint32_t
 
 	len = sizeof(resp);
 
-	return command(m, &run, sizeof(run), HRPN_RESP_TYPE_INDUSTRIAL, &resp, &len, COMMAND_TIMEOUT);
+	return command(fd, &run, sizeof(run), HRPN_RESP_TYPE_INDUSTRIAL, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int default_stop(struct mailbox *m, uint32_t type)
+static int default_stop(int fd, uint32_t type)
 {
 	struct hrpn_cmd_industrial_stop stop;
 	struct hrpn_response resp;
@@ -74,37 +74,37 @@ static int default_stop(struct mailbox *m, uint32_t type)
 
 	len = sizeof(resp);
 
-	return command(m, &stop, sizeof(stop), HRPN_RESP_TYPE_INDUSTRIAL, &resp, &len, COMMAND_TIMEOUT);
+	return command(fd, &stop, sizeof(stop), HRPN_RESP_TYPE_INDUSTRIAL, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int can_run(struct mailbox *m, uint32_t mode, uint32_t role, uint32_t protocol)
+static int can_run(int fd, uint32_t mode, uint32_t role, uint32_t protocol)
 {
-	return default_run(m, HRPN_CMD_TYPE_CAN_RUN, mode, role, protocol, NULL);
+	return default_run(fd, HRPN_CMD_TYPE_CAN_RUN, mode, role, protocol, NULL);
 }
 
-static int can_stop(struct mailbox *m)
+static int can_stop(int fd)
 {
-	return default_stop(m, HRPN_CMD_TYPE_CAN_STOP);
+	return default_stop(fd, HRPN_CMD_TYPE_CAN_STOP);
 }
 
-static int ethernet_run(struct mailbox *m, uint32_t mode, uint32_t role, uint8_t *mac_addr)
+static int ethernet_run(int fd, uint32_t mode, uint32_t role, uint8_t *mac_addr)
 {
-	return default_run(m, HRPN_CMD_TYPE_ETHERNET_RUN, mode, role, 0, mac_addr);
+	return default_run(fd, HRPN_CMD_TYPE_ETHERNET_RUN, mode, role, 0, mac_addr);
 }
 
-static int ethernet_stop(struct mailbox *m)
+static int ethernet_stop(int fd)
 {
-	return default_stop(m, HRPN_CMD_TYPE_ETHERNET_STOP);
+	return default_stop(fd, HRPN_CMD_TYPE_ETHERNET_STOP);
 }
 
-static int industrial_main(int option, char *optarg, struct mailbox *m,
-	int (*stop)(struct mailbox *))
+static int industrial_main(int option, char *optarg, int fd,
+	int (*stop)(int))
 {
 	int rc = 0;
 
 	switch (option) {
 	case 's':
-		rc = stop(m);
+		rc = stop(fd);
 		break;
 
 	default:
@@ -115,7 +115,7 @@ static int industrial_main(int option, char *optarg, struct mailbox *m,
 	return rc;
 }
 
-int can_main(int argc, char *argv[], struct mailbox *m)
+int can_main(int argc, char *argv[], int fd)
 {
 	unsigned int mode;
 	unsigned int role = 0;
@@ -146,18 +146,18 @@ int can_main(int argc, char *argv[], struct mailbox *m)
 			break;
 
 		default:
-			rc = industrial_main(option, optarg, m, can_stop);
+			rc = industrial_main(option, optarg, fd, can_stop);
 			break;
 		}
 	}
 	/* Run the case after we get all parameters */
 	if (is_run_cmd)
-		rc = can_run(m, mode, role, protocol);
+		rc = can_run(fd, mode, role, protocol);
 out:
 	return rc;
 }
 
-int ethernet_main(int argc, char *argv[], struct mailbox *m)
+int ethernet_main(int argc, char *argv[], int fd)
 {
 	unsigned int mode;
 	unsigned int role = 0;
@@ -189,13 +189,13 @@ int ethernet_main(int argc, char *argv[], struct mailbox *m)
 			break;
 
 		default:
-			rc = industrial_main(option, optarg, m, ethernet_stop);
+			rc = industrial_main(option, optarg, fd, ethernet_stop);
 			break;
 		}
 	}
 	/* Run the use case after we get all parameters */
 	if (is_run_cmd)
-		rc = ethernet_run(m, mode, role, mac_addr);
+		rc = ethernet_run(fd, mode, role, mac_addr);
 out:
 	return rc;
 }

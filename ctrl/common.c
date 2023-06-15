@@ -10,20 +10,21 @@
 
 #include "version.h"
 #include "hrpn_ctrl.h"
+#include "rpmsg.h"
 
 #include "common.h"
 
 extern const struct cmd_handler command_handler[7];
 
-int command(struct mailbox *m, void *cmd, unsigned int cmd_len, unsigned int resp_type, void *resp, unsigned int *resp_len, unsigned int timeout_ms)
+int command(int fd, void *cmd, unsigned int cmd_len, unsigned int resp_type, void *resp, unsigned int *resp_len, unsigned int timeout_ms)
 {
 	int count = timeout_ms / 100;
 	struct hrpn_response *r;
 	int rc;
 
-	rc = mailbox_cmd_send(m, cmd, cmd_len);
+	rc = rpmsg_send(fd, cmd, cmd_len);
 	if (!rc) {
-		while (mailbox_resp_recv(m, resp, resp_len) < 0) {
+		while (rpmsg_recv(fd, resp, resp_len) < 0) {
 			usleep(100000);
 			count--;
 			if (count < 0) {

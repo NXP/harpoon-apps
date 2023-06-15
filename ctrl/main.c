@@ -10,20 +10,19 @@
 #include <string.h>
 #include <errno.h>
 
-#include "mailbox.h"
 #include "hrpn_ctrl.h"
 #include "rpmsg.h"
 #include "common.h"
 
-int audio_element_routing_main(int argc, char *argv[], struct mailbox *m);
-int audio_element_main(int argc, char *argv[], struct mailbox *m);
-int audio_pipeline_main(int argc, char *argv[], struct mailbox *m);
+int audio_element_routing_main(int argc, char *argv[], int fd);
+int audio_element_main(int argc, char *argv[], int fd);
+int audio_pipeline_main(int argc, char *argv[], int fd);
 void audio_pipeline_usage(void);
 void audio_element_routing_usage(void);
 void audio_element_usage(void);
 
-int can_main(int argc, char *argv[], struct mailbox *m);
-int ethernet_main(int argc, char *argv[], struct mailbox *m);
+int can_main(int argc, char *argv[], int fd);
+int ethernet_main(int argc, char *argv[], int fd);
 void can_usage(void);
 void ethernet_usage(void);
 
@@ -59,7 +58,7 @@ static void audio_usage(void)
 	);
 }
 
-static int audio_run(struct mailbox *m, unsigned int id, unsigned int frequency, unsigned int period, uint8_t *hw_addr)
+static int audio_run(int fd, unsigned int id, unsigned int frequency, unsigned int period, uint8_t *hw_addr)
 {
 	struct hrpn_cmd_audio_run run = {0,};
 	struct hrpn_response resp;
@@ -74,10 +73,10 @@ static int audio_run(struct mailbox *m, unsigned int id, unsigned int frequency,
 
 	len = sizeof(resp);
 
-	return command(m, &run, sizeof(run), HRPN_RESP_TYPE_AUDIO, &resp, &len, COMMAND_TIMEOUT);
+	return command(fd, &run, sizeof(run), HRPN_RESP_TYPE_AUDIO, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int audio_stop(struct mailbox *m)
+static int audio_stop(int fd)
 {
 	struct hrpn_cmd_audio_stop stop;
 	struct hrpn_response resp;
@@ -87,10 +86,10 @@ static int audio_stop(struct mailbox *m)
 
 	len = sizeof(resp);
 
-	return command(m, &stop, sizeof(stop), HRPN_RESP_TYPE_AUDIO, &resp, &len, COMMAND_TIMEOUT);
+	return command(fd, &stop, sizeof(stop), HRPN_RESP_TYPE_AUDIO, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int audio_main(int argc, char *argv[], struct mailbox *m)
+static int audio_main(int argc, char *argv[], int fd)
 {
 	int option;
 	unsigned int id;
@@ -140,7 +139,7 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 			break;
 
 		case 's':
-			rc = audio_stop(m);
+			rc = audio_stop(fd);
 			break;
 
 		default:
@@ -150,13 +149,13 @@ static int audio_main(int argc, char *argv[], struct mailbox *m)
 	}
 	/* Run the case after we get all parameters */
 	if (is_run_cmd)
-		rc = audio_run(m, id, frequency, period, mac_addr);
+		rc = audio_run(fd, id, frequency, period, mac_addr);
 
 out:
 	return rc;
 }
 
-static int latency_run(struct mailbox *m, unsigned int id)
+static int latency_run(int fd, unsigned int id)
 {
 	struct hrpn_cmd_latency_run run;
 	struct hrpn_response resp;
@@ -167,10 +166,10 @@ static int latency_run(struct mailbox *m, unsigned int id)
 
 	len = sizeof(resp);
 
-	return command(m, &run, sizeof(run), HRPN_RESP_TYPE_LATENCY, &resp, &len, COMMAND_TIMEOUT);
+	return command(fd, &run, sizeof(run), HRPN_RESP_TYPE_LATENCY, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int latency_stop(struct mailbox *m)
+static int latency_stop(int fd)
 {
 	struct hrpn_cmd_latency_stop stop;
 	struct hrpn_response resp;
@@ -180,10 +179,10 @@ static int latency_stop(struct mailbox *m)
 
 	len = sizeof(resp);
 
-	return command(m, &stop, sizeof(stop), HRPN_RESP_TYPE_LATENCY, &resp, &len, COMMAND_TIMEOUT);
+	return command(fd, &stop, sizeof(stop), HRPN_RESP_TYPE_LATENCY, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int latency_main(int argc, char *argv[], struct mailbox *m)
+static int latency_main(int argc, char *argv[], int fd)
 {
 	int option;
 	unsigned int id;
@@ -199,12 +198,12 @@ static int latency_main(int argc, char *argv[], struct mailbox *m)
 				goto out;
 			}
 
-			rc = latency_run(m, id);
+			rc = latency_run(fd, id);
 
 			break;
 
 		case 's':
-			rc = latency_stop(m);
+			rc = latency_stop(fd);
 			break;
 
 		default:
@@ -230,13 +229,9 @@ const struct cmd_handler command_handler[] = {
 
 int main(int argc, char *argv[])
 {
-	struct mailbox m;
-	unsigned int uio_id = 0;
 	int fd, i;
 	int rc = 0;
-	void *cmd, *resp;
 	unsigned int dst = 30;
-	void *tp = NULL;
 
 	if (argc < 2) {
 		usage();
@@ -246,19 +241,10 @@ int main(int argc, char *argv[])
 	fd = rpmsg_init(dst);
 	if (fd < 0)
 		goto err_rpmsg;
-	cmd = malloc(4 * 4096);
-	if (!cmd)
-		goto err_malloc;
-	resp = cmd + 2 * 4096;
-	memset(cmd, 0, 4 * 4096);
-	tp = (void *)(uintptr_t)fd;
-
-	if (mailbox_init(&m, cmd, resp, true, tp) < 0)
-		goto err_mailbox;
 
 	for (i = 0; i < sizeof(command_handler) / sizeof(struct cmd_handler); i++)
 		if (!strcmp(command_handler[i].name, argv[1])) {
-			rc = command_handler[i].main(argc - 1, argv + 1, &m);
+			rc = command_handler[i].main(argc - 1, argv + 1, fd);
 			goto exit;
 		}
 
@@ -266,15 +252,8 @@ int main(int argc, char *argv[])
 
 exit:
 	rpmsg_deinit(fd);
-	free(cmd);
-
 	return rc;
 
-err_mailbox:
-	printf("%s: err_mailbox\n", __func__);
-	free(cmd);
-err_malloc:
-	rpmsg_deinit(fd);
 err_rpmsg:
 	printf("%s: err_rpmsg\n", __func__);
 

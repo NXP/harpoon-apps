@@ -56,28 +56,30 @@ static ssize_t writen(int fd, const void *buf, size_t len)
 	return (len - nr_left);
 }
 
-int rpmsg_send(void *fd_p, const void *data, uint32_t len)
+int rpmsg_send(int fd, const void *data, unsigned int len)
 {
 	int ret;
-	int fd = (uintptr_t)fd_p;
+	int err = 0;
 
 	ret = writen(fd, data, len);
 	if (ret != len)
-		return -1;
+		err = -1;
 
-	return 0;
+	return err;
 }
 
-int rpmsg_recv(void *fd_p, void *data, uint32_t len)
+int rpmsg_recv(int fd, void *data, unsigned int *len)
 {
 	int ret;
-	int fd = (uintptr_t)fd_p;
+	int err = 0;
 
-	ret = readn(fd, data, len);
-	if (ret != len)
-		return -1;
+	ret = readn(fd, data, *len);
+	if (ret < 0)
+		err = -1;
+	else
+		*len = ret;
 
-	return 0;
+	return err;
 }
 
 static int rpmsg_find_dev_idx(uint32_t dst)

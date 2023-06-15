@@ -9,7 +9,7 @@
 
 int rpmsg_init(uint32_t dst);
 void rpmsg_deinit(int fd);
-int rpmsg_send(void *fd_p, const void *data, uint32_t len);
-int rpmsg_recv(void *fd_p, void *data, uint32_t len);
+int rpmsg_send(int fd, const void *data, unsigned int len);
+int rpmsg_recv(int fd, void *data, unsigned int *len);
 
 #endif /* _RPMSG_H_ */

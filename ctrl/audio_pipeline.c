@@ -5,7 +5,6 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -52,7 +51,7 @@ void audio_element_usage(void)
 	);
 }
 
-static int audio_element_routing_connect(struct mailbox *m, unsigned int pipeline_id, unsigned int element_id, unsigned int output, unsigned int input)
+static int audio_element_routing_connect(int fd, unsigned int pipeline_id, unsigned int element_id, unsigned int output, unsigned int input)
 {
 	struct hrpn_cmd_audio_element_routing_connect connect;
 	struct hrpn_resp_audio_element_routing resp;
@@ -66,10 +65,10 @@ static int audio_element_routing_connect(struct mailbox *m, unsigned int pipelin
 	connect.input = input;
 	len = sizeof(resp);
 
-	return command(m, &connect, sizeof(connect), HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING, &resp, &len, COMMAND_TIMEOUT);
+	return command(fd, &connect, sizeof(connect), HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING, &resp, &len, COMMAND_TIMEOUT);
 }
 
-static int audio_element_routing_disconnect(struct mailbox *m, unsigned int pipeline_id, unsigned int element_id, unsigned int output)
+static int audio_element_routing_disconnect(int fd, unsigned int pipeline_id, unsigned int element_id, unsigned int output)
 {
 	struct hrpn_cmd_audio_element_routing_disconnect disconnect;
 	struct hrpn_resp_audio_element_routing resp;
@@ -82,10 +81,10 @@ static int audio_element_routing_disconnect(struct mailbox *m, unsigned int pipe
 	disconnect.output = output;
 	len = sizeof(resp);
 
-	return command(m, &disconnect, sizeof(disconnect), HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING, &resp, &len, COMMAND_TIMEOUT);
+	return command(fd, &disconnect, sizeof(disconnect), HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING, &resp, &len, COMMAND_TIMEOUT);
 }
 
-int audio_element_routing_main(int argc, char *argv[], struct mailbox *m)
+int audio_element_routing_main(int argc, char *argv[], int fd)
 {
 	int option;
 	unsigned int pipeline_id = 0;
@@ -106,12 +105,12 @@ int audio_element_routing_main(int argc, char *argv[], struct mailbox *m)
 			break;
 
 		case 'c':
-			rc = audio_element_routing_connect(m, pipeline_id, element_id, output, input);
+			rc = audio_element_routing_connect(fd, pipeline_id, element_id, output, input);
 
 			break;
 
 		case 'd':
-			rc = audio_element_routing_disconnect(m, pipeline_id, element_id, output);
+			rc = audio_element_routing_disconnect(fd, pipeline_id, element_id, output);
 
 			break;
 
@@ -152,7 +151,7 @@ out:
 	return rc;
 }
 
-static int audio_pipeline_element_dump(struct mailbox *m, unsigned int pipeline_id, unsigned int element_type, unsigned int element_id)
+static int audio_pipeline_element_dump(int fd, unsigned int pipeline_id, unsigned int element_type, unsigned int element_id)
 {
 	struct hrpn_cmd_audio_element_dump dump;
 	struct hrpn_resp_audio_element resp;
@@ -164,10 +163,10 @@ static int audio_pipeline_element_dump(struct mailbox *m, unsigned int pipeline_
 	dump.element.id = element_id;
 	len = sizeof(resp);
 
-	return command(m, &dump, sizeof(dump), HRPN_RESP_TYPE_AUDIO_ELEMENT, &resp, &len, COMMAND_TIMEOUT);
+	return command(fd, &dump, sizeof(dump), HRPN_RESP_TYPE_AUDIO_ELEMENT, &resp, &len, COMMAND_TIMEOUT);
 }
 
-int audio_element_main(int argc, char *argv[], struct mailbox *m)
+int audio_element_main(int argc, char *argv[], int fd)
 {
 	int option;
 	unsigned int pipeline_id = 0;
@@ -187,7 +186,7 @@ int audio_element_main(int argc, char *argv[], struct mailbox *m)
 			break;
 
 		case 'd':
-			audio_pipeline_element_dump(m, pipeline_id, element_type, element_id);
+			audio_pipeline_element_dump(fd, pipeline_id, element_type, element_id);
 
 			break;
 
@@ -219,7 +218,7 @@ out:
 	return rc;
 }
 
-static int audio_pipeline_dump(struct mailbox *m, unsigned int pipeline_id)
+static int audio_pipeline_dump(int fd, unsigned int pipeline_id)
 {
 	struct hrpn_cmd_audio_pipeline_dump dump;
 	struct hrpn_resp_audio_pipeline resp;
@@ -229,10 +228,10 @@ static int audio_pipeline_dump(struct mailbox *m, unsigned int pipeline_id)
 	dump.pipeline.id = pipeline_id;
 	len = sizeof(resp);
 
-	return command(m, &dump, sizeof(dump), HRPN_RESP_TYPE_AUDIO_PIPELINE, &resp, &len, COMMAND_TIMEOUT);
+	return command(fd, &dump, sizeof(dump), HRPN_RESP_TYPE_AUDIO_PIPELINE, &resp, &len, COMMAND_TIMEOUT);
 }
 
-int audio_pipeline_main(int argc, char *argv[], struct mailbox *m)
+int audio_pipeline_main(int argc, char *argv[], int fd)
 {
 	int option;
 	unsigned int pipeline_id = 0;
@@ -250,7 +249,7 @@ int audio_pipeline_main(int argc, char *argv[], struct mailbox *m)
 			break;
 
 		case 'd':
-			audio_pipeline_dump(m, pipeline_id);
+			audio_pipeline_dump(fd, pipeline_id);
 
 			break;
 
