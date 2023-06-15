@@ -110,7 +110,6 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/hlog
     ${CommonPath}/libs/jailhouse
-    ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/rpmsg
     ${CommonPath}/libs/stats
     ${MulticorePath}
@@ -158,7 +157,6 @@ include(lib_avb_tsn)
 include(lib_ctrl)
 include(lib_jailhouse)
 include(lib_hlog)
-include(lib_mailbox)
 include(lib_rpmsg)
 include(lib_stats)
 

@@ -11,17 +11,17 @@
 
 #include "os/string.h"
 
-static void ethernet_response(struct mailbox *mb, uint32_t status)
+static void ethernet_response(struct rpmsg_ept *ept, uint32_t status)
 {
 	struct hrpn_resp_industrial resp;
 
 	resp.type = HRPN_RESP_TYPE_INDUSTRIAL;
 	resp.status = status;
-	mailbox_resp_send(mb, &resp, sizeof(resp));
+	rpmsg_send(ept, &resp, sizeof(resp));
 }
 
 void ethernet_ctrl(struct hrpn_cmd_ethernet *cmd, unsigned int len,
-		   struct mailbox *mb, void *priv)
+		   struct rpmsg_ept *ept, void *priv)
 {
 	struct ethernet_ctx *ctx = priv;
 
@@ -30,7 +30,7 @@ void ethernet_ctrl(struct hrpn_cmd_ethernet *cmd, unsigned int len,
 	switch (cmd->u.common.type) {
 
 	default:
-		ethernet_response(mb, HRPN_RESP_STATUS_ERROR);
+		ethernet_response(ept, HRPN_RESP_STATUS_ERROR);
 		break;
 	}
 

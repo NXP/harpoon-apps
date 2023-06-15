@@ -28,6 +28,6 @@ enum industrial_event {
 };
 
 void ethernet_ctrl(struct hrpn_cmd_ethernet *cmd, unsigned int len,
-	       struct mailbox *m, void *priv);
+	       struct rpmsg_ept *ept, void *priv);
 
 #endif /* _INDUSTRIAL_H_ */

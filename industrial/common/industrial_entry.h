@@ -7,8 +7,7 @@
 #ifndef _INDUSTRIAL_ENTRY_H_
 #define _INDUSTRIAL_ENTRY_H_
 
-#include "mailbox.h"
-
+#include "rpmsg.h"
 #include "industrial_os.h"
 
 #include "os/mqueue.h"
@@ -47,7 +46,7 @@ struct data_ctx {
 };
 
 struct ctrl_ctx {
-	struct mailbox mb;
+	struct rpmsg_ept *ept;
 };
 
 struct industrial_ctx {

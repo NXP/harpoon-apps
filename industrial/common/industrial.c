@@ -66,13 +66,13 @@ static void industrial_stats(struct industrial_ctx *ctx)
 	}
 }
 
-static void response(struct mailbox *mb, uint32_t status)
+static void response(struct rpmsg_ept *ept, uint32_t status)
 {
 	struct hrpn_resp_industrial resp;
 
 	resp.type = HRPN_RESP_TYPE_INDUSTRIAL;
 	resp.status = status;
-	mailbox_resp_send(mb, &resp, sizeof(resp));
+	rpmsg_send(ept, &resp, sizeof(resp));
 }
 
 static void industrial_set_hw_addr(struct industrial_config *cfg, uint8_t *hw_addr)
@@ -146,13 +146,13 @@ exit:
 static void industrial_command_handler(struct industrial_ctx *ctx)
 {
 	struct hrpn_command cmd;
-	struct mailbox *mb = &ctx->ctrl.mb;
+	struct rpmsg_ept *ept = ctx->ctrl.ept;
 	struct data_ctx *data = NULL;
 	unsigned int len;
 	int rc;
 
 	len = sizeof(cmd);
-	if (mailbox_cmd_recv(mb, &cmd, &len) < 0)
+	if (rpmsg_recv(ept, &cmd, &len) < 0)
 		return;
 
 	switch (cmd.u.cmd.type) {
@@ -164,14 +164,14 @@ static void industrial_command_handler(struct industrial_ctx *ctx)
 		if (!data)
 			data = industrial_get_data_ctx(ctx, INDUSTRIAL_USE_CASE_ETHERNET);
 		if (len != sizeof(struct hrpn_cmd_industrial_run)) {
-			response(mb, HRPN_RESP_STATUS_ERROR);
+			response(ept, HRPN_RESP_STATUS_ERROR);
 			break;
 		}
 
-		log_debug("data %p: mb=%p type=%x val=%p\n", data, mb, cmd.u.cmd.type, &cmd.u.industrial_run);
+		log_debug("data %p: ept=%p type=%x val=%p\n", data, ept, cmd.u.cmd.type, &cmd.u.industrial_run);
 		rc = industrial_run(data, &cmd.u.industrial_run);
 
-		response(mb, rc);
+		response(ept, rc);
 
 		break;
 
@@ -183,18 +183,18 @@ static void industrial_command_handler(struct industrial_ctx *ctx)
 		if (!data)
 			data = industrial_get_data_ctx(ctx, INDUSTRIAL_USE_CASE_ETHERNET);
 		if (len != sizeof(struct hrpn_cmd_industrial_stop)) {
-			response(mb, HRPN_RESP_STATUS_ERROR);
+			response(ept, HRPN_RESP_STATUS_ERROR);
 			break;
 		}
 
 		rc = industrial_stop(data);
 
-		response(mb, rc);
+		response(ept, rc);
 
 		break;
 
 	default:
-		response(mb, HRPN_RESP_STATUS_ERROR);
+		response(ept, HRPN_RESP_STATUS_ERROR);
 		break;
 	}
 }
@@ -238,22 +238,15 @@ static int data_ctx_init(struct data_ctx *data)
 void *industrial_control_init(int nb_use_cases)
 {
 	struct industrial_ctx *ctx;
-	void *cmd = NULL;
-	void *resp = NULL;
-	void *tp = NULL;
-	int i, err;
+	int i, err = 0;
 
 	ctx = os_malloc(sizeof(*ctx));
 	os_assert((ctx != NULL), "memory allocation error");
 
 	memset(ctx, 0, sizeof(*ctx));
 
-	err = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw",
-				   &tp, &cmd, &resp);
-	os_assert(!err, "rpmsg transport initialization failed!");
-
-	err = mailbox_init(&ctx->ctrl.mb, cmd, resp, false, tp);
-	os_assert(!err, "mailbox initialization failed!");
+	ctx->ctrl.ept = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw");
+	os_assert(ctx->ctrl.ept, "rpmsg transport initialization failed!");
 
 	for (i = 0; i < nb_use_cases; i++) {
 		struct data_ctx *data = &ctx->data[i];

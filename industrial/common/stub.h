@@ -36,7 +36,7 @@ int x##_run(void *priv, struct event *e) \
 	 return -1; \
 } \
 void x##_ctrl(struct hrpn_cmd_ethernet *cmd, unsigned int len, \
-	       struct mailbox *mb, void *priv) \
+	       struct rpmsg_ept *ept, void *priv) \
 { \
 	log_err("not supported\n"); \
 }
