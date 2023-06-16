@@ -31,8 +31,7 @@ void rpmsg_deinit(struct rpmsg_instance *ri);
 struct rpmsg_ept *rpmsg_create_ept(struct rpmsg_instance *ri, int ept_addr, const char *sn);
 int rpmsg_destroy_ept(struct rpmsg_ept *ept);
 int rpmsg_send(struct rpmsg_ept *ept, void *data, uint32_t len);
-int rpmsg_recv(struct rpmsg_ept *ept, void *data, uint32_t len);
-int rpmsg_transport_init(int link_id, int ept_addr, const char *sn,
-				void **tp, void **cmd, void **resp);
+int rpmsg_recv(struct rpmsg_ept *ept, void *data, uint32_t *len);
+struct rpmsg_ept *rpmsg_transport_init(int link_id, int ept_addr, const char *sn);
 
 #endif /* _RPMSG_H_ */

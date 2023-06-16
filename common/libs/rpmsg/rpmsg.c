@@ -5,7 +5,7 @@
  */
 
 #include <string.h>
-#include "os/assert.h"
+#include "hlog.h"
 #include "os/mmu.h"
 #include "os/stdlib.h"
 #include "os/stdio.h"
@@ -24,16 +24,15 @@ int rpmsg_send(struct rpmsg_ept *ept, void *data, uint32_t len)
 	return ret;
 }
 
-int rpmsg_recv(struct rpmsg_ept *ept, void *data, uint32_t len)
+int rpmsg_recv(struct rpmsg_ept *ept, void *data, uint32_t *len)
 {
 	uint32_t msg_src_addr;
-	uint32_t size;
 	int32_t ret;
 
-	ret = rpmsg_queue_recv(ept->ri->rl_inst, ept->ept_q, (uint32_t *)&msg_src_addr, (char *)data, len, &size, RL_DONT_BLOCK);
+	ret = rpmsg_queue_recv(ept->ri->rl_inst, ept->ept_q, (uint32_t *)&msg_src_addr, (char *)data, *len, len, RL_DONT_BLOCK);
 	if (ret != RL_SUCCESS) {
 		if (ret != RL_ERR_NO_BUFF)
-			os_printf("rpmsg_queue_recv() failed\n");
+			log_err("rpmsg_queue_recv() failed\n");
 
 		return ret;
 	}
@@ -61,20 +60,20 @@ struct rpmsg_ept *rpmsg_create_ept(struct rpmsg_instance *ri, int ept_addr, cons
 	ept->ept_q = rpmsg_queue_create(ri->rl_inst);
 	if (!ept->ept_q)
 	{
-		os_printf("rpmsg failed to create ept queue\r\n");
+		log_err("rpmsg failed to create ept queue\n");
 		goto err_create_q;
 	}
 
 	ept->rl_ept = rpmsg_lite_create_ept(ri->rl_inst, ept_addr, rpmsg_queue_rx_cb, ept->ept_q);
 
 	if (!ept->rl_ept) {
-		os_printf("rpmsg failed to create ept\r\n");
+		log_err("rpmsg failed to create ept\n");
 		goto err_create;
 	}
 
 	ret = rpmsg_ns_announce(ri->rl_inst, ept->rl_ept, sn, RL_NS_CREATE);
 	if (ret != RL_SUCCESS) {
-		os_printf("\r\nNameservice: Create channel failed\r\n");
+		log_err("Nameservice: Create channel failed\n");
 		goto err_announce;
 	}
 
@@ -122,39 +121,60 @@ static void rpmsg_mailbox_init(void *mbox)
 struct rpmsg_instance *rpmsg_init(int link_id)
 {
 	struct rpmsg_instance *ri;
-	int ret;
 
 	ri = os_malloc(sizeof(struct rpmsg_instance));
 	if (!ri)
 		return ri;
 
-	ret = os_mmu_map("MBOX", (uint8_t **)&ri->mbox_va,
+	if (os_mmu_map("MBOX", (uint8_t **)&ri->mbox_va,
 			(uintptr_t)RL_GEN_SW_MBOX_BASE, KB(4),
-			OS_MEM_DEVICE_nGnRE | OS_MEM_PERM_RW);
-	os_assert(ret == 0, "os_mmu_map() failed\n");
-	ret = os_mmu_map("RPMSG", (uint8_t **)&ri->rpmsg_shmem_va,
+			OS_MEM_DEVICE_nGnRE | OS_MEM_PERM_RW)) {
+		log_err("MBOX os_mmu_map() failed\n");
+
+		goto err_map_mbox;
+	}
+
+	if (os_mmu_map("RPMSG", (uint8_t **)&ri->rpmsg_shmem_va,
 			(uintptr_t)RPMSG_LITE_SHMEM_BASE, KB(64),
-			OS_MEM_DEVICE_nGnRE | OS_MEM_PERM_RW);
-	os_assert(ret == 0, "os_mmu_map() failed\n");
-	ret = os_mmu_map("VRINGBUF", (uint8_t **)&ri->rpmsg_buf_va,
+			OS_MEM_DEVICE_nGnRE | OS_MEM_PERM_RW)) {
+		log_err("RPMSG os_mmu_map() failed\n");
+
+		goto err_map_rpmsg;
+	}
+
+	if (os_mmu_map("VRINGBUF", (uint8_t **)&ri->rpmsg_buf_va,
 			(uintptr_t)RPMSG_BUF_BASE, MB(1),
-			OS_MEM_CACHE_NONE | OS_MEM_PERM_RW | OS_MEM_DIRECT_MAP);
-	os_assert(ret == 0, "os_mmu_map() failed\n");
+			OS_MEM_CACHE_NONE | OS_MEM_PERM_RW | OS_MEM_DIRECT_MAP)) {
+		log_err("VRINGBUF os_mmu_map() failed\n");
+
+		goto err_map_vringbuf;
+	}
 
 	rpmsg_mailbox_init(ri->mbox_va);
 
-	os_printf("\r\nRPMSG init ...\r\n");
+	log_info("RPMSG init ...\n");
 	ri->rl_inst = rpmsg_lite_remote_init(ri->rpmsg_shmem_va, link_id, RL_NO_FLAGS);
 	if (!ri->rl_inst) {
-		os_free(ri);
-		return NULL;
+		log_err("rpmsg_lite_remote_init() failed\n");
+		goto err_rpmsg_lite_init;
 	}
 
 	rpmsg_lite_wait_for_link_up(ri->rl_inst, RL_BLOCK);
 
-	os_printf("\r\nRPMSG link up\r\n");
+	log_info("RPMSG link up\n");
 
 	return ri;
+
+err_rpmsg_lite_init:
+	os_mmu_unmap((uintptr_t)ri->rpmsg_buf_va, MB(1));
+err_map_vringbuf:
+	os_mmu_unmap((uintptr_t)ri->rpmsg_shmem_va, KB(64));
+err_map_rpmsg:
+	os_mmu_unmap((uintptr_t)ri->mbox_va, KB(4));
+err_map_mbox:
+	os_free(ri);
+
+	return NULL;
 }
 
 void rpmsg_deinit(struct rpmsg_instance *ri)
@@ -166,21 +186,27 @@ void rpmsg_deinit(struct rpmsg_instance *ri)
 	os_free(ri);
 }
 
-int rpmsg_transport_init(int link_id, int ept_addr, const char *sn,
-				void **tp, void **cmd, void **resp)
+struct rpmsg_ept *rpmsg_transport_init(int link_id, int ept_addr, const char *sn)
 {
 	struct rpmsg_instance *ri;
 	struct rpmsg_ept *ept;
 
 	ri = rpmsg_init(link_id);
-	os_assert(ri, "rpmsg initialization failed, cannot proceed\n");
-	ept = rpmsg_create_ept(ri, ept_addr, sn);
-	os_assert(ept, "rpmsg ept creation failed, cannot proceed\n");
-	*tp = ept;
-	*cmd = os_malloc(1024);
-	os_assert(*cmd, "malloc mailbox memory failded, cannot proceed\n");
-	*resp = (char *)*cmd + 512;
-	memset(*cmd, 0, 1024);
+	if (!ri) {
+		log_err("rpmsg_init() failed\n");
+		goto err_rpmsg_init;
+	}
 
-	return 0;
+	ept = rpmsg_create_ept(ri, ept_addr, sn);
+	if (!ept) {
+		log_err("rpmsg_create_ept() failed\n");
+		goto err_rpmsg_create_ept;
+	}
+
+	return ept;
+
+err_rpmsg_create_ept:
+	rpmsg_deinit(ri);
+err_rpmsg_init:
+	return NULL;
 }
