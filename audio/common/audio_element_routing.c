@@ -11,7 +11,7 @@
 #include "audio_format.h"
 #include "hrpn_ctrl.h"
 #include "hlog.h"
-#include "mailbox.h"
+#include "rpmsg.h"
 
 struct routing_output {
 	unsigned int input;	/* input mapped to this output */
@@ -27,18 +27,18 @@ struct routing_element {
 	struct audio_buffer silence; /* internal buffer with silence, used for "disconnected" outputs */
 };
 
-static void routing_element_response(struct mailbox *m, uint32_t status)
+static void routing_element_response(struct rpmsg_ept *ept, uint32_t status)
 {
 	struct hrpn_resp_audio_element_routing resp;
 
-	if (m) {
+	if (ept) {
 		resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING;
 		resp.status = status;
-		mailbox_resp_send(m, &resp, sizeof(resp));
+		rpmsg_send(ept, &resp, sizeof(resp));
 	}
 }
 
-int routing_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_routing *cmd, unsigned int len, struct mailbox *m)
+int routing_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_routing *cmd, unsigned int len, struct rpmsg_ept *ept)
 {
 	struct routing_element *routing;
 	unsigned int output, input;
@@ -90,12 +90,12 @@ int routing_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_el
 
 	os_sem_give(&routing->semaphore, 0);
 
-	routing_element_response(m, HRPN_RESP_STATUS_SUCCESS);
+	routing_element_response(ept, HRPN_RESP_STATUS_SUCCESS);
 
 	return 0;
 
 err:
-	routing_element_response(m, HRPN_RESP_STATUS_ERROR);
+	routing_element_response(ept, HRPN_RESP_STATUS_ERROR);
 
 	return -1;
 }

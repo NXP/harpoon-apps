@@ -12,7 +12,7 @@
 #include "os/unistd.h"
 #include "os/cpu_load.h"
 
-#include "mailbox.h"
+#include "rpmsg.h"
 #include "hrpn_ctrl.h"
 
 #include "audio.h"
@@ -25,7 +25,6 @@
 #include "sai_config.h"
 
 #include "audio_pipeline.h"
-#include "rpmsg.h"
 
 #define EPT_ADDR	(30)
 
@@ -51,7 +50,7 @@ static const int supported_period[] = {2, 4, 8, 16, 32};
 static const uint32_t supported_rate[] = {44100, 48000, 88200, 96000, 176400, 192000};
 
 struct ctrl_ctx {
-	struct mailbox mb;
+	struct rpmsg_ept *ept;
 };
 
 struct data_ctx {
@@ -456,13 +455,13 @@ static void audio_stats(struct data_ctx *ctx)
 	}
 }
 
-static void response(struct mailbox *m, uint32_t status)
+static void response(struct rpmsg_ept *ept, uint32_t status)
 {
 	struct hrpn_resp_audio resp;
 
 	resp.type = HRPN_RESP_TYPE_AUDIO;
 	resp.status = status;
-	mailbox_resp_send(m, &resp, sizeof(resp));
+	rpmsg_send(ept, &resp, sizeof(resp));
 }
 
 static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
@@ -585,36 +584,36 @@ exit:
 static void audio_command_handler(struct data_ctx *ctx)
 {
 	struct hrpn_command cmd;
-	struct mailbox *m = &ctx->ctrl.mb;
+	struct rpmsg_ept *ept= ctx->ctrl.ept;
 	unsigned int len;
 	int rc = 0;
 
 	len = sizeof(cmd);
-	if (mailbox_cmd_recv(m, &cmd, &len) < 0)
+	if (rpmsg_recv(ept, &cmd, &len) < 0)
 		return;
 
 	switch (cmd.u.cmd.type) {
 	case HRPN_CMD_TYPE_AUDIO_RUN:
 		if (len != sizeof(struct hrpn_cmd_audio_run)) {
-			response(m, HRPN_RESP_STATUS_ERROR);
+			response(ept, HRPN_RESP_STATUS_ERROR);
 			break;
 		}
 
 		rc = audio_run(ctx, &cmd.u.audio_run);
 
-		response(m, rc);
+		response(ept, rc);
 
 		break;
 
 	case HRPN_CMD_TYPE_AUDIO_STOP:
 		if (len != sizeof(struct hrpn_cmd_audio_stop)) {
-			response(m, HRPN_RESP_STATUS_ERROR);
+			response(ept, HRPN_RESP_STATUS_ERROR);
 			break;
 		}
 
 		rc = audio_stop(ctx);
 
-		response(m, rc);
+		response(ept, rc);
 
 		break;
 
@@ -622,12 +621,12 @@ static void audio_command_handler(struct data_ctx *ctx)
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_DUMP:
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_CONNECT:
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_DISCONNECT:
-		audio_pipeline_ctrl(&cmd.u.audio_pipeline, len, m);
+		audio_pipeline_ctrl(&cmd.u.audio_pipeline, len, ept);
 
 		break;
 
 	default:
-		response(m, HRPN_RESP_STATUS_ERROR);
+		response(ept, HRPN_RESP_STATUS_ERROR);
 		break;
 	}
 }
@@ -673,11 +672,9 @@ void audio_control_loop(void *context)
 
 void *audio_control_init(uint8_t thread_count)
 {
-	int err, i;
 	struct data_ctx *audio_ctx;
-	void *cmd = NULL;
-	void *resp = NULL;
-	void *tp = NULL;
+	int i;
+	int err = 0;
 
 	audio_ctx = os_malloc(sizeof(*audio_ctx));
 	os_assert(audio_ctx, "Audio context failed with memory allocation error");
@@ -685,12 +682,8 @@ void *audio_control_init(uint8_t thread_count)
 
 	audio_ctx->thread_count = thread_count;
 
-	err = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw",
-				   &tp, &cmd, &resp);
-	os_assert(!err, "rpmsg transport initialization failed!");
-
-	err = mailbox_init(&audio_ctx->ctrl.mb, cmd, resp, false, tp);
-	os_assert(!err, "mailbox initialization failed!");
+	audio_ctx->ctrl.ept = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw");
+	os_assert(audio_ctx->ctrl.ept, "rpmsg transport initialization failed!");
 
 	for (i = 0; i < thread_count; i++) {
 		err = os_sem_init(&audio_ctx->thread_data_ctx[i].semaphore, 1);

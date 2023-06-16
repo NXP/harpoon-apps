@@ -10,7 +10,7 @@
 #include "audio_element.h"
 #include "hlog.h"
 #include "hrpn_ctrl.h"
-#include "mailbox.h"
+#include "rpmsg.h"
 #include "libs/stats/stats.h"
 
 #include "sai_drv.h"
@@ -109,18 +109,18 @@ exit:
 	return;
 }
 
-static void pll_element_response(struct mailbox *m, uint32_t status)
+static void pll_element_response(struct rpmsg_ept *ept, uint32_t status)
 {
 	struct hrpn_resp_audio_element resp;
 
-	if (m) {
+	if (ept) {
 		resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT_PLL;
 		resp.status = status;
-		mailbox_resp_send(m, &resp, sizeof(resp));
+		rpmsg_send(ept, &resp, sizeof(resp));
 	}
 }
 
-int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_pll *cmd, unsigned int len, struct mailbox *m)
+int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_pll *cmd, unsigned int len, struct rpmsg_ept *ept)
 {
 	struct pll_element *pll;
 
@@ -168,12 +168,12 @@ int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_elemen
 		break;
 	}
 
-	pll_element_response(m, HRPN_RESP_STATUS_SUCCESS);
+	pll_element_response(ept, HRPN_RESP_STATUS_SUCCESS);
 
 	return 0;
 
 err:
-	pll_element_response(m, HRPN_RESP_STATUS_ERROR);
+	pll_element_response(ept, HRPN_RESP_STATUS_ERROR);
 	return -1;
 }
 

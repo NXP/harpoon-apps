@@ -10,7 +10,7 @@
 #include "audio_pipeline.h"
 #include "hrpn_ctrl.h"
 #include "hlog.h"
-#include "mailbox.h"
+#include "rpmsg.h"
 
 #define STORAGE_DEFAULT_PERIODS 2
 
@@ -95,14 +95,14 @@ static struct audio_buffer *audio_pipeline_shared_buffer_find(unsigned shared_id
 	return NULL;
 }
 
-static void audio_pipeline_response(struct mailbox *m, uint32_t status)
+static void audio_pipeline_response(struct rpmsg_ept *ept, uint32_t status)
 {
 	struct hrpn_resp_audio_pipeline resp;
 
-	if (m) {
+	if (ept) {
 		resp.type = HRPN_RESP_TYPE_AUDIO_PIPELINE;
 		resp.status = status;
-		mailbox_resp_send(m, &resp, sizeof(resp));
+		rpmsg_send(ept, &resp, sizeof(resp));
 	}
 }
 
@@ -117,7 +117,7 @@ static void audio_routing_dump(struct audio_pipeline *pipeline)
 	}
 }
 
-int audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, struct mailbox *m)
+int audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, struct rpmsg_ept *ept)
 {
 	struct audio_pipeline *pipeline = NULL;
 	struct audio_element *element = NULL;
@@ -138,7 +138,7 @@ int audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, s
 		audio_pipeline_dump(pipeline);
 		audio_routing_dump(pipeline);
 
-		audio_pipeline_response(m, HRPN_RESP_STATUS_SUCCESS);
+		audio_pipeline_response(ept, HRPN_RESP_STATUS_SUCCESS);
 
 		break;
 
@@ -146,7 +146,7 @@ int audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, s
 		if (pipeline && (len >= sizeof(struct hrpn_cmd_audio_element_common)))
 			element = audio_pipeline_element_find(pipeline, cmd->u.element.u.common.element.type, cmd->u.element.u.common.element.id);
 
-		rc = audio_element_ctrl(element, &cmd->u.element, len, m);
+		rc = audio_element_ctrl(element, &cmd->u.element, len, ept);
 
 		break;
 	}
@@ -154,7 +154,7 @@ int audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, s
 	return rc;
 
 err:
-	audio_pipeline_response(m, HRPN_RESP_STATUS_ERROR);
+	audio_pipeline_response(ept, HRPN_RESP_STATUS_ERROR);
 
 	return -1;
 }

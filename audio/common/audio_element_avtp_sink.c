@@ -13,7 +13,7 @@
 #include "genavb/types.h"
 #include "hlog.h"
 #include "hrpn_ctrl.h"
-#include "mailbox.h"
+#include "rpmsg.h"
 
 #include "os/semaphore.h"
 
@@ -181,18 +181,18 @@ exit:
 	return;
 }
 
-static void avtp_sink_element_response(struct mailbox *m, uint32_t status)
+static void avtp_sink_element_response(struct rpmsg_ept *ept, uint32_t status)
 {
 	struct hrpn_resp_audio_element resp;
 
-	if (m) {
+	if (ept) {
 		resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT_AVTP;
 		resp.status = status;
-		mailbox_resp_send(m, &resp, sizeof(resp));
+		rpmsg_send(ept, &resp, sizeof(resp));
 	}
 }
 
-int avtp_sink_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_avtp *cmd, unsigned int len, struct mailbox *m)
+int avtp_sink_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_avtp *cmd, unsigned int len, struct rpmsg_ept *ept)
 {
 	struct avtp_sink_element *avtp;
 
@@ -234,12 +234,12 @@ int avtp_sink_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_
 		break;
 	}
 
-	avtp_sink_element_response(m, HRPN_RESP_STATUS_SUCCESS);
+	avtp_sink_element_response(ept, HRPN_RESP_STATUS_SUCCESS);
 
 	return 0;
 
 err:
-	avtp_sink_element_response(m, HRPN_RESP_STATUS_ERROR);
+	avtp_sink_element_response(ept, HRPN_RESP_STATUS_ERROR);
 
 	return -1;
 }

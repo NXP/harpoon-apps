@@ -33,7 +33,6 @@ zephyr_include_directories(
 	${CommonPath}/libs/ctrl
 	${CommonPath}/libs/hlog
 	${CommonPath}/libs/jailhouse
-	${CommonPath}/libs/mailbox
 	${CommonPath}/libs
 	${CommonPath}/libs/stats
 	${CommonPath}/zephyr/boards
@@ -47,7 +46,6 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/hlog
     ${CommonPath}/libs/jailhouse
-    ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/stats
     ${CommonPath}/libs/rpmsg
     ${MulticorePath}
@@ -70,7 +68,6 @@ zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8524 CODEC_WM8524_ENABLE=1)
 include(lib_ctrl)
 include(lib_hlog)
 include(lib_jailhouse)
-include(lib_mailbox)
 include(lib_stats)
 include(lib_rpmsg)
 
