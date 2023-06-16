@@ -9,9 +9,6 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.12.0)
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
-# Select RPMSG as mailbox transport layer
-add_compile_definitions(MBOX_TRANSPORT_RPMSG)
-
 # config to select component, the format is CONFIG_USE_${component}
 set(CONFIG_USE_middleware_freertos-kernel_MIMX9352 true)
 set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
@@ -77,7 +74,6 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/stats
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/hlog
-    ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/rpmsg
     ${MulticorePath}
@@ -114,7 +110,6 @@ include(driver_tpm)
 include(lib_stats)
 include(lib_jailhouse)
 include(lib_hlog)
-include(lib_mailbox)
 include(lib_ctrl)
 include(lib_rpmsg)
 

@@ -32,7 +32,6 @@ zephyr_include_directories(
 	${CommonBoardPath}
 	${CommonPath}/libs/jailhouse
 	${CommonPath}/libs/hlog
-	${CommonPath}/libs/mailbox
 	${CommonPath}/libs/ctrl
 	${ProjDirPath}
 	)
@@ -43,7 +42,6 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/hlog
-    ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/stats
     ${CommonPath}/libs/rpmsg
     ${MulticorePath}
@@ -54,7 +52,6 @@ zephyr_compile_definitions(OS_ZEPHYR)
 include(lib_stats)
 include(lib_jailhouse)
 include(lib_hlog)
-include(lib_mailbox)
 include(lib_ctrl)
 include(lib_rpmsg)
 

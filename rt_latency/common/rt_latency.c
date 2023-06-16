@@ -14,9 +14,7 @@
 #include "stats.h"
 
 #include "hrpn_ctrl.h"
-#include "mailbox.h"
 #include "rt_latency.h"
-#include "rpmsg.h"
 
 #define EPT_ADDR (30)
 
@@ -319,72 +317,67 @@ int rt_latency_init(os_counter_t *dev,
 	return err;
 }
 
-static void response(struct mailbox *m, uint32_t status)
+static void response(struct rpmsg_ept *ept, uint32_t status)
 {
 	struct hrpn_resp_latency resp;
 
 	resp.type = HRPN_RESP_TYPE_LATENCY;
 	resp.status = status;
-	mailbox_resp_send(m, &resp, sizeof(resp));
+	rpmsg_send(ept, &resp, sizeof(resp));
 }
 
-void command_handler(void *ctx, struct mailbox *m)
+void command_handler(void *ctx, struct rpmsg_ept *ept)
 {
 	struct hrpn_command cmd;
 	unsigned int len;
 	int ret;
 
 	len = sizeof(cmd);
-	if (mailbox_cmd_recv(m, &cmd, &len) < 0)
+	if (rpmsg_recv(ept, &cmd, &len) < 0)
 		return;
 
 	switch (cmd.u.cmd.type) {
 	case HRPN_CMD_TYPE_LATENCY_RUN:
 		if (len != sizeof(struct hrpn_cmd_latency_run)) {
-			response(m, HRPN_RESP_STATUS_ERROR);
+			response(ept, HRPN_RESP_STATUS_ERROR);
 			break;
 		}
 
 		if (cmd.u.latency_run.id >= RT_LATENCY_TEST_CASE_MAX) {
-			response(m, HRPN_RESP_STATUS_ERROR);
+			response(ept, HRPN_RESP_STATUS_ERROR);
 			break;
 		}
 
 		ret = start_test_case(ctx, cmd.u.latency_run.id);
 		if (ret)
-			response(m, HRPN_RESP_STATUS_ERROR);
+			response(ept, HRPN_RESP_STATUS_ERROR);
 		else
-			response(m, HRPN_RESP_STATUS_SUCCESS);
+			response(ept, HRPN_RESP_STATUS_SUCCESS);
 
 		break;
 
 	case HRPN_CMD_TYPE_LATENCY_STOP:
 		if (len != sizeof(struct hrpn_cmd_latency_stop)) {
-			response(m, HRPN_RESP_STATUS_ERROR);
+			response(ept, HRPN_RESP_STATUS_ERROR);
 			break;
 		}
 
 		destroy_test_case(ctx);
-		response(m, HRPN_RESP_STATUS_SUCCESS);
+		response(ept, HRPN_RESP_STATUS_SUCCESS);
 		break;
 
 	default:
-		response(m, HRPN_RESP_STATUS_ERROR);
+		response(ept, HRPN_RESP_STATUS_ERROR);
 		break;
 	}
 }
 
 int ctrl_ctx_init(struct ctrl_ctx *ctrl)
 {
-	void *cmd, *resp;
-	void *tp = NULL;
-	int rc;
+	int rc = 0;
 
-	rc = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw",
-				  &tp, &cmd, &resp);
-	os_assert(!rc, "rpmsg transport initialization failed, cannot proceed\n");
-	rc = mailbox_init(&ctrl->mb, cmd, resp, false, tp);
-	os_assert(!rc, "mailbox initialization failed!");
+	ctrl->ept = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw");
+	os_assert(ctrl->ept, "rpmsg transport initialization failed, cannot proceed\n");
 
 	return rc;
 }

@@ -10,7 +10,7 @@
 #include "os/semaphore.h"
 #include "os/counter.h"
 #include "stats.h"
-#include "mailbox.h"
+#include "rpmsg.h"
 
 /* Time period between two statistics polling logs (seconds) */
 #define STATS_PERIOD_SEC					   (1)
@@ -125,7 +125,7 @@ struct rt_latency_ctx {
 };
 
 struct ctrl_ctx {
-	struct mailbox mb;
+	struct rpmsg_ept *ept;
 };
 
 int rt_latency_init(os_counter_t *dev,
@@ -136,7 +136,7 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx);
 void print_stats(struct rt_latency_ctx *ctx);
 void cpu_load(struct rt_latency_ctx *ctx);
 void cache_inval(void);
-void command_handler(void *ctx, struct mailbox *m);
+void command_handler(void *ctx, struct rpmsg_ept *ept);
 int ctrl_ctx_init(struct ctrl_ctx *ctrl);
 
 /* OS specific functions */

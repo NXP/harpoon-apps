@@ -241,7 +241,7 @@ void main(void)
 	os_assert(!rc, "ctrl context failed!");
 
 	do {
-		command_handler(ctx, &ctx->ctrl.mb);
+		command_handler(ctx, ctx->ctrl.ept);
 
 		k_msleep(100);
 

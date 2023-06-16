@@ -252,7 +252,7 @@ void main_task(void *pvParameters)
 	os_assert(!rc, "ctrl context failed!");
 
 	do {
-		command_handler(ctx, &ctx->ctrl.mb);
+		command_handler(ctx, ctx->ctrl.ept);
 
 		vTaskDelay(pdMS_TO_TICKS(100));
 

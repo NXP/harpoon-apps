@@ -71,7 +71,6 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/stats
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/hlog
-    ${CommonPath}/libs/mailbox
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/rpmsg
     ${MulticorePath}
@@ -106,7 +105,6 @@ include(driver_iuart)
 include(lib_stats)
 include(lib_jailhouse)
 include(lib_hlog)
-include(lib_mailbox)
 include(lib_ctrl)
 include(lib_rpmsg)
 
