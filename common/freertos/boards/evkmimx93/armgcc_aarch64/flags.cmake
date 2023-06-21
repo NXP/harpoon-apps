@@ -201,7 +201,7 @@ SET(CMAKE_C_FLAGS_DDR_RELEASE " \
     -DDEBUG_CONSOLE_RX_ENABLE=0 \
     -DFSL_RTOS_FREE_RTOS \
     -DMCUXPRESSO_SDK \
-    -O2 \
+    -O3 \
     -mcpu=cortex-a55 \
     -Wall \
     -Werror \
