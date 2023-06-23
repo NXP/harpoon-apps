@@ -539,6 +539,7 @@ void can_exit(void *priv)
 
 	os_counter_stop(os_counter);
 	can_disable_interrupt(ctx);
+	FLEXCAN_Deinit(ctx->base);
 	os_free(ctx);
 
 	log_info("END\n");
