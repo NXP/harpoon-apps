@@ -13,6 +13,7 @@
 #include "genavb/clock.h"
 #include "genavb/genavb.h"
 #include "rpmsg.h"
+#include "genavb/sr_class.h"
 #include "hlog.h"
 #include "hrpn_ctrl.h"
 
@@ -33,6 +34,7 @@ struct avtp_stream {
 	unsigned int id;
 	unsigned int connected;
 	unsigned int connection_flags;
+	unsigned int sr_class;
 
 	struct genavb_stream_handle *handle;
 	unsigned int batch_size_ns;
@@ -149,6 +151,7 @@ static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int s
 		cur_batch_size = stream->cur_batch_size;
 
 	params->flags = stream->connection_flags;
+	stream->sr_class = params->stream_class;
 
 	/* Create new AVTP stream, update stream_handle */
 	if ((avb_result = genavb_stream_create(handle, &stream->handle, params, &cur_batch_size, 0)) != GENAVB_SUCCESS) {
@@ -258,13 +261,13 @@ err:
 }
 
 #define  GENAVB_PROCESSING_TIME		500000U
-#define  CFG_TOLERATED_DELAY        10000U
-static int listener_timestamp_accept(unsigned int ts, unsigned int now, unsigned int period, unsigned int sample_rate)
+static int listener_timestamp_accept(unsigned int ts, unsigned int now, unsigned int period, unsigned int sample_rate, unsigned int sr_class)
 {
 	/* Timestamp + playback offset must be after now (otherwise packet are too late) */
 	/* Timestamp must be before now + transit time + timing uncertainty (otherwise they arrived too early) */
-	if (avtp_after(ts + (unsigned int)(period * NSECS_PER_SEC / sample_rate), now)
-	&& avtp_before(ts, now + GENAVB_PROCESSING_TIME + CFG_TOLERATED_DELAY))
+	if (avtp_after(ts + GENAVB_PROCESSING_TIME, now)
+	&& avtp_before(ts, now + sr_class_max_transit_time(sr_class)
+				+ sr_class_max_timing_uncertainty(sr_class)))
 		return 1;
 
 	return 0;
@@ -287,6 +290,7 @@ static int listener_receive(struct avtp_source_element *avtp, unsigned int strea
 		float tmp_float;
 		uint32_t periods_to_wait;
 		uint64_t now;
+		unsigned int ts;
 		int idx;
 
 		read_bytes = genavb_stream_receive(stream->handle, &data, stream->cur_batch_size, event, &event_len);
@@ -313,7 +317,8 @@ static int listener_receive(struct avtp_source_element *avtp, unsigned int strea
 			if (event[idx].event_mask  & (AVTP_TIMESTAMP_INVALID | AVTP_TIMESTAMP_UNCERTAIN))
 				continue;
 
-			if (listener_timestamp_accept(event[idx].ts, now, period, sample_rate)) {
+			ts = event[idx].ts - (event[idx].index / stream->sample_size) * (unsigned int)stream->sample_dt;
+			if (!listener_timestamp_accept(ts, now, period, sample_rate, stream->sr_class)) {
 				stream->sync_err++;
 				goto exit;
 			}
