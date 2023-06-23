@@ -46,6 +46,9 @@ struct avtp_stream {
 	unsigned int err;
 	unsigned int clock_err;
 	unsigned int sync_err;
+	unsigned int ts_err;
+	unsigned int event_err;
+	unsigned int start_underflow;
 	unsigned int underflow;
 	unsigned int overflow;
 	unsigned int received;
@@ -302,7 +305,7 @@ static int listener_receive(struct avtp_source_element *avtp, unsigned int strea
 			goto exit;
 
 		} else if (read_bytes < stream->cur_batch_size) {
-			stream->sync_err++;
+			stream->start_underflow++;
 			stream->first_start = true;
 
 			goto exit;
@@ -319,7 +322,7 @@ static int listener_receive(struct avtp_source_element *avtp, unsigned int strea
 
 			ts = event[idx].ts - (event[idx].index / stream->sample_size) * (unsigned int)stream->sample_dt;
 			if (!listener_timestamp_accept(ts, now, period, sample_rate, stream->sr_class)) {
-				stream->sync_err++;
+				stream->ts_err++;
 				goto exit;
 			}
 
@@ -328,7 +331,7 @@ static int listener_receive(struct avtp_source_element *avtp, unsigned int strea
 		}
 
 		if (!event_ts) {
-			stream->sync_err++;
+			stream->event_err++;
 			goto exit;
 		}
 
@@ -482,10 +485,12 @@ static void avtp_source_element_stats(struct audio_element *element)
 			avtp->stream[i].connected);
 		log_info("  batch size: %u\n",
 			avtp->stream[i].cur_batch_size);
-		log_info("  underflow: %u, overflow: %u err: %u, clock_err: %u, sync_err: %u, received: %u\n",
-			avtp->stream[i].underflow, avtp->stream[i].overflow,
-			avtp->stream[i].err, avtp->stream[i].clock_err, avtp->stream[i].sync_err,
-		    avtp->stream[i].received);
+		log_info("  underflow: %u, overflow: %u, err: %u, received: %u\n",
+			avtp->stream[i].underflow, avtp->stream[i].overflow, avtp->stream[i].err,
+			avtp->stream[i].received);
+		log_info("  sync errors => read: %u, underflow: %u, clock: %u, ts: %u, event: %u\n",
+			avtp->stream[i].sync_err, avtp->stream[i].start_underflow, avtp->stream[i].clock_err,
+		    avtp->stream[i].ts_err, avtp->stream[i].event_err);
 	}
 }
 
