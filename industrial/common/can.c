@@ -188,7 +188,7 @@ static void alarm_handler(os_counter_t *dev, uint8_t chan_id,
 
 }
 
-static void alarm_trigger(struct can_ctx *ctx, uint32_t us)
+static int alarm_trigger(struct can_ctx *ctx, uint32_t us)
 {
 	int err = 0;
 	uint64_t ticks = os_counter_us_to_ticks(os_counter, us);
@@ -201,8 +201,11 @@ static void alarm_trigger(struct can_ctx *ctx, uint32_t us)
 	err = os_counter_set_channel_alarm(os_counter, 0, &ctx->alarm_cfg);
 
 	/* Counter set alarm failed */
-	if (err == -1)
+	if (err < 0) {
 		ctx->alarm_err++;
+	}
+
+	return err;
 }
 
 uint32_t get_global_irq_mask(struct node_config node, uint8_t message_buffer_number)
@@ -476,7 +479,9 @@ int can_run(void *priv, struct event *e)
 		}
 		can_enable_interrupt(ctx);
 		os_counter_start(os_counter);
-		alarm_trigger(ctx, PROCESS_ALARM_PERIOD_US);
+
+		if (alarm_trigger(ctx, PROCESS_ALARM_PERIOD_US) < 0)
+			break;
 
 		status = 0;
 		break;
@@ -503,7 +508,9 @@ int can_run(void *priv, struct event *e)
 			if (ctx->mb[i].conf.tx)
 				mb_tx_process(&ctx->mb[i], ctx->base, ctx->use_canfd, e);
 		}
-		alarm_trigger(ctx, PROCESS_ALARM_PERIOD_US);
+
+		if (alarm_trigger(ctx, PROCESS_ALARM_PERIOD_US) < 0)
+			break;
 
 		status = 0;
 		break;
@@ -519,7 +526,7 @@ void can_stats(void *priv)
 {
 	struct can_ctx *ctx = priv;
 
-	log_info("|Mbit/s: %9u|TX period µs: %5u|global irq: %+u|\n", ctx->bps/MEGA, PROCESS_ALARM_PERIOD_US, ctx->global_irq_count);
+	log_info("|Mbit/s: %9u|TX period us: %5u|global irq: %+u|\n", ctx->bps/MEGA, PROCESS_ALARM_PERIOD_US, ctx->global_irq_count);
 	for (int i= 0; i < ctx->mb_number; i++) {
 		if (ctx->mb[i].conf.tx) {
 			log_info("|TX mb: %u, id: %x|==>|irq: %10u|tx: %10u|busy  : %5u|fail: %3u|\n",
@@ -538,6 +545,7 @@ void can_exit(void *priv)
 	struct can_ctx *ctx = priv;
 
 	os_counter_stop(os_counter);
+	os_counter_cancel_channel_alarm(os_counter, 0);
 	can_disable_interrupt(ctx);
 	FLEXCAN_Deinit(ctx->base);
 	os_free(ctx);
