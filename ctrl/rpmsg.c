@@ -26,10 +26,12 @@ static ssize_t readn(int fd, void *buf, size_t len)
 	pos = buf;
 	while (nr_left > 0) {
 		nr_read = read(fd, pos, nr_left);
-		if (nr_read < 0)
-			return nr_read;
-		else if (!nr_read)
-			break;
+		if (nr_read <= 0)
+			if (!nr_read || errno == EAGAIN)
+				break;
+			else
+				return nr_read;
+
 		nr_left -= nr_read;
 		pos += nr_read;
 	}
@@ -47,8 +49,12 @@ static ssize_t writen(int fd, const void *buf, size_t len)
 	pos = (char *)buf;
 	while (nr_left > 0) {
 		nr_write = write(fd, pos, nr_left);
-		if (nr_write < 0)
-			return nr_write;
+		if (nr_write <= 0)
+			if (!nr_write || errno == EAGAIN)
+				break;
+			else
+				return nr_write;
+
 		nr_left -= nr_write;
 		pos += nr_write;
 	}
@@ -132,7 +138,7 @@ int rpmsg_init(uint32_t dst)
 		goto err;
 	}
 
-	fd = open(rpmsg_dev, O_RDWR);
+	fd = open(rpmsg_dev, O_RDWR | O_NONBLOCK);
 	if (fd < 0)
 		printf("failed to open RPMSG dev: %s\n", rpmsg_dev);
 
