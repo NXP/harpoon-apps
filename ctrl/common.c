@@ -24,7 +24,7 @@ int command(int fd, void *cmd, unsigned int cmd_len, unsigned int resp_type, voi
 
 	rc = rpmsg_send(fd, cmd, cmd_len);
 	if (!rc) {
-		while (rpmsg_recv(fd, resp, resp_len) < 0) {
+		while (rpmsg_recv(fd, resp, resp_len, 0) < 0) {
 			usleep(100000);
 			count--;
 			if (count < 0) {

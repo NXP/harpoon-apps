@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <poll.h>
 
 #include "rpmsg.h"
 
@@ -74,17 +75,27 @@ int rpmsg_send(int fd, const void *data, unsigned int len)
 	return err;
 }
 
-int rpmsg_recv(int fd, void *data, unsigned int *len)
+int rpmsg_recv(int fd, void *data, unsigned int *len, int timeout)
 {
-	int ret;
-	int err = 0;
+	int ret, err = -1;
+	struct pollfd pfd;
 
-	ret = readn(fd, data, *len);
-	if (ret < 0)
-		err = -1;
-	else
-		*len = ret;
+	pfd.fd = fd;
+	pfd.events = POLLIN;
 
+	if (poll(&pfd, 1, timeout) < 0) {
+		perror("poll()");
+		goto out;
+	}
+
+	if (pfd.revents & POLLIN) {
+		ret = readn(fd, data, *len);
+		if (ret >= 0) {
+			*len = ret;
+			err = 0;
+		}
+	}
+out:
 	return err;
 }
 
