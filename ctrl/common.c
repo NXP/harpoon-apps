@@ -18,20 +18,14 @@ extern const struct cmd_handler command_handler[7];
 
 int command(int fd, void *cmd, unsigned int cmd_len, unsigned int resp_type, void *resp, unsigned int *resp_len, unsigned int timeout_ms)
 {
-	int count = timeout_ms / 100;
 	struct hrpn_response *r;
 	int rc;
 
 	rc = rpmsg_send(fd, cmd, cmd_len);
 	if (!rc) {
-		while (rpmsg_recv(fd, resp, resp_len, 0) < 0) {
-			usleep(100000);
-			count--;
-			if (count < 0) {
-				rc = -1;
-				printf("command timeout\n");
-				goto exit;
-			}
+		if (rpmsg_recv(fd, resp, resp_len, (int)timeout_ms) < 0) {
+			printf("command timeout\n");
+			goto exit;
 		}
 
 		r = resp;
