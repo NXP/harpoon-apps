@@ -232,16 +232,13 @@ static void can_disable_interrupt(struct can_ctx *ctx)
 	os_irq_unregister(EXAMPLE_FLEXCAN_IRQn);
 }
 
-static void can_config(struct can_ctx *ctx)
+static int can_config(struct can_ctx *ctx)
 {
 	flexcan_config_t flexcanConfig;
+	int status = 0;
 
 	FLEXCAN_GetDefaultConfig(&flexcanConfig);
 	flexcanConfig.enableIndividMask = true;
-	if (!ctx) {
-		log_err("No context found\n");
-		return;
-	}
 
 	if (ctx->use_canfd)
 		ctx->bps = flexcanConfig.baudRateFD;
@@ -267,13 +264,17 @@ static void can_config(struct can_ctx *ctx)
 #endif
 
 	log_info("Init FlexCAN with clock freq %lu Hz\n", ctx->clk_freq );
+	FLEXCAN_Init(ctx->base, &flexcanConfig, ctx->clk_freq);
 	if (ctx->use_canfd) {
-		FLEXCAN_FDInit(ctx->base, &flexcanConfig, ctx->clk_freq , BYTES_IN_MB, true);
-		if (!(ctx->base->MCR & CAN_MCR_FDEN_MASK))
+		if (FLEXCAN_IsInstanceHasFDMode(ctx->base)) {
+			FLEXCAN_FDInit(ctx->base, &flexcanConfig, ctx->clk_freq , BYTES_IN_MB, true);
+		} else {
 			log_err("CAN FD not supported\n");
-	} else {
-		FLEXCAN_Init(ctx->base, &flexcanConfig, ctx->clk_freq);
+			status  = -1;
+		}
 	}
+
+	return status;
 }
 
 static void mb_tx_setup(struct message_buffer *mb, CAN_Type *base, bool is_canfd)
@@ -452,9 +453,16 @@ void *can_init(void *parameters)
 	}
 
 	hardware_flexcan_init();
-	can_config(ctx);
+	if (can_config(ctx) < 0)
+		goto err_config;
 
 	return ctx;
+
+err_config:
+	FLEXCAN_Deinit(ctx->base);
+	os_free(ctx);
+
+	return NULL;
 }
 
 int can_run(void *priv, struct event *e)
