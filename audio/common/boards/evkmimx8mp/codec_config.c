@@ -117,6 +117,7 @@ end:
 int32_t codec_setup(enum codec_id cid)
 {
 	int32_t err;
+	wm8960_handle_t *devHandle;
 
 	if (cid == CODEC_ID_HIFIBERRY) {
 		/* Setup I2C clock */
@@ -153,6 +154,19 @@ int32_t codec_setup(enum codec_id cid)
 		err = CODEC_SetVolume(&wm8960_codec_handle, kWM8960_HeadphoneRight, 75);
 		if (err != kStatus_Success) {
 			log_err("WM8960 set volume failed (err %d)\n", err);
+			goto end;
+		}
+		/* Setup ADC Data Output Select */
+		devHandle = (wm8960_handle_t *)((uintptr_t)(((codec_handle_t *)&wm8960_codec_handle)->codecDevHandle));
+		err = WM8960_ModifyReg(devHandle, WM8960_ADDCTL1, 0x0C, 4);
+		if (err != kStatus_Success) {
+			log_err("WM8960 set ADC Data Output Select failed (err %d)\n", err);
+			goto end;
+		}
+		/* Setup ADC Polarity */
+		err = WM8960_ModifyReg(devHandle, WM8960_DACCTL1, 0x06, 3);
+		if (err != kStatus_Success) {
+			log_err("WM8960 set ADC Polarity failed (err %d)\n", err);
 			goto end;
 		}
 		err = kStatus_Success;
