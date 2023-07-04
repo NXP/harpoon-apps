@@ -10,21 +10,21 @@
 #include "queue.h"
 #include "timers.h"
 
-#include "fsl_device_registers.h"
-#include "fsl_debug_console.h"
 #include "board.h"
-
-#include "os/stdio.h"
 #include "net/port_enet.h"
 #include "net/net_switch.h"
-#include "os/unistd.h"
 #include "virtio_board.h"
 #include "virtio-net.h"
 #include "app_virtio_config.h"
+#include "os/stdio.h"
+#include "os/unistd.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+
+/* Unmask this macro to print switch statistics with 10s period. */
+#define KEEP_SILENT
 
 /* Task priorities. */
 #define virtio_task_PRIORITY (configMAX_PRIORITIES - 1)
@@ -61,20 +61,24 @@ static void virtio_task(void *pvParameters)
 	int ret;
 	void *switch_dev;
 
+	os_printf("\r\nStarting Virtio networking backend...\r\n");
+
 	switch_dev = switch_init();
 	if (!switch_dev) {
 		os_printf("Networking switch initialization failed!\r\n");
 		goto err;
 	}
 
-	enet_port_init(switch_dev);
-	os_printf("Switch enabled with enet remote port\r\n");
-
 	ret = virtio_net_init((void *)VIRTIO_NET_MEM_BASE, switch_dev);
-	os_printf("virtio network device initialized (return %d)!\r\n", ret);
+	os_printf("virtio network device initialization %s!\r\n", ret ? "failed": "succeed");
 
+	ret = enet_port_init(switch_dev);
+	os_printf("Switch enabled with enet remote port %s!\r\n", ret ? "failed": "succeed");
+
+#ifndef KEEP_SILENT
 	/* dead loop */
 	switch_print_stats(switch_dev);
+#endif
 err:
 	vTaskSuspend(NULL);
 }
