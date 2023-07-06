@@ -51,7 +51,7 @@ int alarm_net_transmit(struct alarm_task *a_task, int msg_id, void *buf, int len
     struct tsn_common_hdr *hdr = sock->buf;
     int total_len = (len + sizeof(*hdr));
     int status;
-    uint64_t now;
+    uint64_t now = 0;
 
     if (total_len >= task->params->tx_buf_size)
         goto err;

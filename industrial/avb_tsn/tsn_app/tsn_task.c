@@ -33,7 +33,7 @@ void tsn_task_stats_init(struct tsn_task *task)
 
 void tsn_task_stats_start(struct tsn_task *task)
 {
-    uint64_t now;
+    uint64_t now = 0;
     int32_t sched_err;
 
     task->stats.sched++;
@@ -61,7 +61,7 @@ void tsn_task_stats_start(struct tsn_task *task)
 
 void tsn_task_stats_end(struct tsn_task *task)
 {
-    uint64_t now;
+    uint64_t now = 0;
     int32_t proc_time;
     int32_t total_time;
 
