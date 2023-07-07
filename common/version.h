@@ -7,8 +7,8 @@
 #define _VERSION_H_
 
 #define VERSION_MAJOR 2 /* eg API breaking */
-#define VERSION_MDIUM 3 /* Feature  update */
-#define VERSION_MINOR 0 /* Bufix /  Hotfix */
+#define VERSION_MDIUM 4 /* Feature  update */
+#define VERSION_MINOR 0 /* Bugfix /  Hotfix */
 
 
 #define _STRINGIFY(x) #x
