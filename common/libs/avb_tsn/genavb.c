@@ -274,14 +274,13 @@ int gavb_port_stats_init(unsigned int port_id)
     }
 
     stats->num = num;
-    stats->str_len = GENAVB_PORT_STATS_STR_LEN;
-    stats->names = pvPortMalloc(num * GENAVB_PORT_STATS_STR_LEN);
+    stats->names = pvPortMalloc(num * sizeof(char *));
     if (!stats->names) {
         ERR("pvPortMalloc() failed\n");
         goto err;
     }
 
-    if (genavb_port_stats_get_strings(port_id, stats->names, num * GENAVB_PORT_STATS_STR_LEN) != GENAVB_SUCCESS) {
+    if (genavb_port_stats_get_strings(port_id, stats->names, num * sizeof(char *)) != GENAVB_SUCCESS) {
         ERR("genavb_port_stats_get_strings() failed\n");
         goto err;
     }

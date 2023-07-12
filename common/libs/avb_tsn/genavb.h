@@ -11,10 +11,9 @@
 #include "genavb/clock.h"
 
 struct port_stats {
-    char *names;
+    const char **names;
     uint64_t *values;
     int num;
-    int str_len;
 };
 
 struct gavb_pps {
