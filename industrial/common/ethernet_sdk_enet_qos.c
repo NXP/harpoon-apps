@@ -410,7 +410,6 @@ static int enet_qos_phy_init(phy_handle_t *phyHandle, bool loopback)
     }
 
     phyConfig.autoNeg = true;
-    PHY_EnableLoopback(phyHandle, kPHY_LocalLoop, kPHY_Speed1000M, false);
     do
     {
         status = PHY_Init(phyHandle, &phyConfig);
