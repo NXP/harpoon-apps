@@ -25,7 +25,7 @@
 #define OS_MEM_DEVICE_GRE	K_MEM_ARM_DEVICE_GRE
 
 /* No caching. */
-#define OS_MEM_CACHE_NONE	K_MEM_CACHE_NONE
+#define OS_MEM_CACHE_NONE	K_MEM_ARM_NORMAL_NC
 
 /* Write-through caching. */
 #define OS_MEM_CACHE_WT		K_MEM_CACHE_WT
