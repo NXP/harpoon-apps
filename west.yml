@@ -17,7 +17,7 @@ manifest:
   projects:
     - name: zephyr
       remote: nxpzephyr
-      revision: 99167658f4f923374fed2a4c9aebabc2b1691a51
+      revision: d3644304707ef83fc34096454524fbda72f41ccb
     - name: mcux-sdk
       remote: nxpmcuxpresso
       revision: e44f3ae816e19743551ea6be28c1efba7d6f1905
@@ -39,7 +39,7 @@ manifest:
       revision: 66a180f8b67fb3fdd11271bb31f5abec42fa2f62
     - name: heterogeneous-multicore
       remote: nxprealtimeedgesw
-      revision: 33f240780cc992be41b73203c5185db26aa4b9a6
+      revision: d76985437c8324ed82845498847430e086253705
     - name: mcux-sdk-middleware-multicore
       remote: nxpmcuxpresso
       revision: 2d89233a3be1f9533bd948f33dd6d0275d72cedd
