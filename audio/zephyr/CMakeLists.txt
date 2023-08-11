@@ -3,12 +3,26 @@ cmake_minimum_required(VERSION 3.13.1)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(audio)
 
+set(MCUX_SDK_PROJECT_NAME app)
+
 if(CONFIG_BOARD_MIMX8MM_EVK_A53)
   set(BoardName "evkmimx8mm")
+  set(TARGET "zephyr_imx8mm_ca53")
+  if(NOT CONFIG_SMP)
+    set(CONFIG_USE_GENAVB ON)
+  endif()
 elseif(CONFIG_BOARD_MIMX8MN_EVK_A53)
   set(BoardName "evkmimx8mn")
+  set(TARGET "zephyr_imx8mn_ca53")
+  if(NOT CONFIG_SMP)
+    set(CONFIG_USE_GENAVB ON)
+  endif()
 elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
   set(BoardName "evkmimx8mp")
+  set(TARGET "zephyr_imx8mp_ca53")
+  if(NOT CONFIG_SMP)
+    set(CONFIG_USE_GENAVB ON)
+  endif()
 else()
   message(FATAL_ERROR "unsupported board")
 endif()
@@ -21,6 +35,10 @@ set(MulticorePath "${ProjDirPath}/../../../middleware/multicore")
 
 SET(ProjRootPath "${ProjDirPath}/../../")
 SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
+
+if(CONFIG_USE_GENAVB)
+  include(genavb.cmake)
+endif()
 
 # config to select component, the format is CONFIG_USE_${component}
 set(CONFIG_USE_middleware_zephyr-kernel true)
@@ -43,8 +61,6 @@ zephyr_include_directories(
 	${ProjDirPath}
 	)
 
-set(MCUX_SDK_PROJECT_NAME app)
-
 set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/hlog
@@ -57,7 +73,6 @@ set(CMAKE_MODULE_PATH
 
 zephyr_compile_definitions(OS_ZEPHYR)
 zephyr_compile_definitions(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
-zephyr_compile_definitions(CONFIG_AUD_DISABLE_ENET)
 # HifiBerry Codec
 zephyr_compile_definitions(CODEC_MULTI_ADAPTERS=1)
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_PCM512X CODEC_PCM512X_ENABLE=1)
@@ -68,6 +83,10 @@ zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8960 CODEC_WM8960_ENABLE=1)
 # EVK onboard Codec WM8524
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8524 CODEC_WM8524)
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8524 CODEC_WM8524_ENABLE=1)
+
+if(NOT CONFIG_USE_GENAVB)
+  zephyr_compile_definitions(CONFIG_AUD_DISABLE_ENET)
+endif()
 
 include(lib_ctrl)
 include(lib_hlog)

@@ -24,6 +24,9 @@ manifest:
     - name: GenAVB_TSN
       revision: 6aa2f518cd39425719c7374676e376d08c9d0358
       path: gen_avb_sdk
+    - name: rtos-abstraction-layer
+      revision: 10228a4b59d9811084dfc6eeec2ee162006a8338
+      path: rtos-abstraction-layer
     - name: hal_nxp
       remote: nxpzephyr
       revision: 45ac8c57f22cd612a288a0416683efb251afad9e
