@@ -12,6 +12,12 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/uart.c
 )
 
+if(CONFIG_USE_GENAVB)
+    target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+      ${CMAKE_CURRENT_LIST_DIR}/stub.c
+    )
+endif()
+
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/.
 )
