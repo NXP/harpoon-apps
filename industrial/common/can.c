@@ -18,12 +18,6 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define EXAMPLE_CAN                FLEXCAN1
-#define EXAMPLE_FLEXCAN_IRQn       CAN_FD1_IRQn
-#define EXAMPLE_CAN_CLK_FREQ                                                                    \
-    (CLOCK_GetPllFreq(kCLOCK_SystemPll1Ctrl) / (CLOCK_GetRootPreDivider(kCLOCK_RootFlexCan1)) / \
-     (CLOCK_GetRootPostDivider(kCLOCK_RootFlexCan1)))
-/* Set USE_IMPROVED_TIMING_CONFIG macro to use api to calculates the improved CAN / CAN FD timing values. */
 #define USE_IMPROVED_TIMING_CONFIG (1U)
 
 /*
