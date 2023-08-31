@@ -41,11 +41,11 @@ static void STATS_Heap(void)
     FreeHeap = xPortGetFreeHeapSize();
     UsedHeap = configTOTAL_HEAP_SIZE - FreeHeap;
 
-    PRINTF("Heap used: %u, free: %u, min free: %u\n",
+    os_printf("Heap used: %u, free: %u, min free: %u\n",
            UsedHeap, FreeHeap,
            xPortGetMinimumEverFreeHeapSize());
 
-    PRINTF("Malloc failed counter: %u\n\n", malloc_failed_count);
+    os_printf("Malloc failed counter: %u\n\n", malloc_failed_count);
 }
 #endif
 
@@ -90,7 +90,7 @@ static void STATS_TasksCPULoad(struct TasksCPULoad_Ctx *Ctx)
 
     DeltaTotalTime = TotalTime - Ctx->LastTotalTime;
 
-    PRINTF("Name          Prio   %%CPU    MinStackFree\n");
+    os_printf("Name          Prio   %%CPU    MinStackFree\n");
 
     for (i = 0; i < NbTasks; i++) {
         TaskStatus_t *CurrentTaskStatus, *LastTaskStatus;
@@ -106,13 +106,13 @@ static void STATS_TasksCPULoad(struct TasksCPULoad_Ctx *Ctx)
             TotalTaskTime += DeltaTaskTime;
             PercentUsage = (double)(DeltaTaskTime * 100) / (double)DeltaTotalTime;
 
-            PRINTF("%-13s %d     %5.2f    %u\n",
+            os_printf("%-13s %d     %5.2f    %u\n",
                    CurrentTaskStatus->pcTaskName,
                    CurrentTaskStatus->uxCurrentPriority,
                    PercentUsage,
                    CurrentTaskStatus->usStackHighWaterMark);
         } else {
-            PRINTF("%-13s %d     ---\n",
+            os_printf("%-13s %d     ---\n",
                    CurrentTaskStatus->pcTaskName,
                    CurrentTaskStatus->uxCurrentPriority);
         }
@@ -123,7 +123,7 @@ static void STATS_TasksCPULoad(struct TasksCPULoad_Ctx *Ctx)
     else
         PercentUsage = (double)((DeltaTotalTime - TotalTaskTime) * 100) / (double)DeltaTotalTime;
 
-    PRINTF("%-13s %d     %5.2f\n", "other", 0, PercentUsage);
+    os_printf("%-13s %d     %5.2f\n", "other", 0, PercentUsage);
 
     Ctx->LastTaskStatusArray = TaskStatusArray;
     Ctx->TaskStatusArray = LastTaskStatusArray;
@@ -191,7 +191,7 @@ static void STATS_TotalCPULoad(unsigned int periodMs)
     uint32_t idleCnt = idleCounter;
     float cpu_load = 100.0 - ((idleCnt - lastIdleCounter) / (BOARD_IDLE_COUNT_PER_S * (periodMs / 1000.0))) * 100.0;
 
-    PRINTF("Total CPU load : %5.2f\n\n", cpu_load);
+    os_printf("Total CPU load : %5.2f\n\n", cpu_load);
 
     lastIdleCounter = idleCnt;
 }

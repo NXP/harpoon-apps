@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include "fsl_debug_console.h"
+#include "os/stdio.h"
 #include "types.h"
 #include "genavb/clock.h"
 
@@ -32,9 +32,9 @@ int app_log_level_set(char *level_str);
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#define DBG_OUT_BASE(fmt, args...) PRINTF("DBG  %11llu app %-25s: %-25s: " fmt, app_log_time_s, __FILENAME__, __FUNCTION__, ##args)
-#define INF_OUT_BASE(fmt, args...) PRINTF("INFO %11llu app %-25s: " fmt, app_log_time_s, __FUNCTION__, ##args)
-#define ERR_OUT_BASE(fmt, args...) PRINTF("ERR  %11llu app %-25s: " fmt, app_log_time_s, __FUNCTION__, ##args)
+#define DBG_OUT_BASE(fmt, args...) os_printf("DBG  %11llu app %-25s: %-25s: " fmt, app_log_time_s, __FILENAME__, __FUNCTION__, ##args)
+#define INF_OUT_BASE(fmt, args...) os_printf("INFO %11llu app %-25s: " fmt, app_log_time_s, __FUNCTION__, ##args)
+#define ERR_OUT_BASE(fmt, args...) os_printf("ERR  %11llu app %-25s: " fmt, app_log_time_s, __FUNCTION__, ##args)
 
 #if PRINT_LEVEL >= VERBOSE_DEBUG
 #define DBG_OUT(fmt, args...)               \
