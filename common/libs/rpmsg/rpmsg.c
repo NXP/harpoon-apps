@@ -118,7 +118,7 @@ static void rpmsg_mailbox_init(void *mbox)
 	os_irq_enable(RL_GEN_SW_MBOX_IRQ);
 }
 
-struct rpmsg_instance *rpmsg_init(int link_id)
+struct rpmsg_instance *rpmsg_init(int link_id, bool is_coherent)
 {
 	struct rpmsg_instance *ri;
 
@@ -136,7 +136,8 @@ struct rpmsg_instance *rpmsg_init(int link_id)
 
 	if (os_mmu_map("RPMSG", (uint8_t **)&ri->rpmsg_shmem_va,
 			(uintptr_t)RPMSG_LITE_SHMEM_BASE, KB(64),
-			OS_MEM_DEVICE_nGnRE | OS_MEM_PERM_RW)) {
+			(is_coherent ? OS_MEM_CACHE_WB : OS_MEM_DEVICE_nGnRE) |
+			OS_MEM_PERM_RW)) {
 		log_err("RPMSG os_mmu_map() failed\n");
 
 		goto err_map_rpmsg;
@@ -144,7 +145,8 @@ struct rpmsg_instance *rpmsg_init(int link_id)
 
 	if (os_mmu_map("VRINGBUF", (uint8_t **)&ri->rpmsg_buf_va,
 			(uintptr_t)RPMSG_BUF_BASE, MB(1),
-			OS_MEM_CACHE_NONE | OS_MEM_PERM_RW | OS_MEM_DIRECT_MAP)) {
+			(is_coherent ? OS_MEM_CACHE_WB : OS_MEM_CACHE_NONE) |
+			OS_MEM_PERM_RW | OS_MEM_DIRECT_MAP)) {
 		log_err("VRINGBUF os_mmu_map() failed\n");
 
 		goto err_map_vringbuf;
@@ -191,7 +193,7 @@ struct rpmsg_ept *rpmsg_transport_init(int link_id, int ept_addr, const char *sn
 	struct rpmsg_instance *ri;
 	struct rpmsg_ept *ept;
 
-	ri = rpmsg_init(link_id);
+	ri = rpmsg_init(link_id, true);
 	if (!ri) {
 		log_err("rpmsg_init() failed\n");
 		goto err_rpmsg_init;
