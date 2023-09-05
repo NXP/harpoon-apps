@@ -10,6 +10,7 @@
 #include "hlog.h"
 #include "os/assert.h"
 #include "os/stdlib.h"
+#include "os/counter.h"
 
 #include "clock_config.h"
 #include "pin_mux.h"
@@ -24,7 +25,7 @@ K_THREAD_STACK_DEFINE(data_stack2, STACK_SIZE);
 K_THREAD_STACK_DEFINE(ctrl_stack, STACK_SIZE);
 K_THREAD_STACK_DEFINE(gpt_stack, STACK_SIZE);
 
-void *os_counter = DEVICE_DT_GET(DT_NODELABEL(gpt1));
+const os_counter_t *os_counter = (os_counter_t *)DEVICE_DT_GET(DT_ALIAS(counter0));
 
 struct z_thread_stack_element *data_stacks[] =
 {
