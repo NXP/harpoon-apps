@@ -9,6 +9,8 @@ elseif(CONFIG_BOARD_MIMX8MN_EVK_A53)
   set(BoardName "evkmimx8mn")
 elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
   set(BoardName "evkmimx8mp")
+elseif(CONFIG_BOARD_MIMX93_EVK_A55)
+  set(BoardName "mcimx93evk")
 else()
   message(FATAL_ERROR "unsupported board")
 endif()
@@ -71,6 +73,8 @@ elseif(CONFIG_BOARD_MIMX8MN_EVK_A53)
   include(middleware_multicore_rpmsg_lite_MIMX8MN6)
 elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
   include(middleware_multicore_rpmsg_lite_MIMX8ML8)
+elseif(CONFIG_BOARD_MIMX93_EVK_A55)
+  include(middleware_multicore_rpmsg_lite_MIMX9352)
 else()
   message(FATAL_ERROR "unsupported board")
 endif()
@@ -78,7 +82,6 @@ endif()
 target_sources(app PRIVATE
 	       main.c
 	       ${AppPath}/common/boards/${BoardName}/clock_config.c
-	       ${AppPath}/common/boards/${BoardName}/hardware_ethernet.c
 	       ${AppPath}/common/boards/${BoardName}/pin_mux.c
 	       ${AppPath}/common/ethernet.c
 	       ${AppPath}/common/industrial.c
@@ -89,10 +92,19 @@ if(CONFIG_BOARD_MIMX8MP_EVK_A53)
 	       ${AppPath}/common/boards/${BoardName}/hardware_flexcan.c
 	       ${AppPath}/common/can.c
 	       ${AppPath}/common/ethernet_sdk_enet_qos.c
+	       ${AppPath}/common/boards/${BoardName}/hardware_ethernet.c
+	      )
+elseif(CONFIG_BOARD_MIMX93_EVK_A55)
+  target_sources(app PRIVATE
+	       ${AppPath}/common/boards/${BoardName}/hardware_flexcan.c
+	       ${AppPath}/common/can.c
+	       ${AppPath}/common/boards/${BoardName}/stub.c
+	       ${CommonBoardPath}/clock_init.c
 	      )
 else()
   target_sources(app PRIVATE
 	       ${AppPath}/common/boards/${BoardName}/stub.c
 	       ${AppPath}/common/ethernet_sdk_enet.c
+	       ${AppPath}/common/boards/${BoardName}/hardware_ethernet.c
 	      )
 endif()
