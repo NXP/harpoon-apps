@@ -1,14 +1,11 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-#ifndef _FREERTOS_STDIO_H_
-#define _FREERTOS_STDIO_H_
-
 #include "fsl_debug_console.h"
 
-static inline int os_printf(const char *fmt_s, ...)
+int os_printf(const char *fmt_s, ...)
 {
     int rc;
     va_list ap;
@@ -20,9 +17,7 @@ static inline int os_printf(const char *fmt_s, ...)
     return rc;
 }
 
-static inline int os_vprintf(const char *fmt_s, va_list ap)
+int os_vprintf(const char *fmt_s, va_list ap)
 {
     return DbgConsole_Vprintf(fmt_s, ap);
 }
-
-#endif /* #ifndef _FREERTOS_STDIO_H_ */

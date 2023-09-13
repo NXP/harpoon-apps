@@ -9,7 +9,7 @@
 #if defined(OS_ZEPHYR)
   #include "zephyr/os/stdio.h"
 #elif defined(FSL_RTOS_FREE_RTOS)
-  #include "freertos/os/stdio.h"
+  #include <stdarg.h>
 #endif
 
 int os_printf(const char *fmt_s, ...);
