@@ -19,6 +19,9 @@ set(CommonBoardPath "${ProjDirPath}/../../common/boards/${BoardName}")
 set(AppPath "${ProjDirPath}/..")
 set(MulticorePath "${ProjDirPath}/../../../middleware/multicore")
 
+SET(ProjRootPath "${ProjDirPath}/../../")
+SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
+
 # config to select component, the format is CONFIG_USE_${component}
 set(CONFIG_USE_middleware_zephyr-kernel true)
 set(CONFIG_USE_middleware_multicore_rpmsg_lite_zephyr true)
@@ -46,6 +49,7 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/hlog
     ${CommonPath}/libs/stats
     ${CommonPath}/libs/rpmsg
+    ${HtMulticorePath}/libs/gen_sw_mbox
     ${MulticorePath}
 )
 

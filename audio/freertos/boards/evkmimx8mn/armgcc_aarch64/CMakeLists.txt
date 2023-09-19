@@ -45,6 +45,9 @@ SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX8MN6")
 SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 
+SET(ProjRootPath "${ProjDirPath}/../../../../../")
+SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
+
 SET(GenAVBPath "${ProjDirPath}/../../../../../../gen_avb_sdk")
 # RTOS abstraction layer configuration
 SET(RTOS_ABSTRACTION_LAYER_DIR "${GenAVBPath}/freertos/freertos")
@@ -127,6 +130,7 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/rpmsg
     ${CommonPath}/libs/stats
+    ${HtMulticorePath}/libs/gen_sw_mbox
     ${MulticorePath}
     ${RtosPath}
     ${SdkDirPath}
