@@ -12,6 +12,8 @@
 #include "os/irq.h"
 
 #include "rpmsg.h"
+#include "gen_sw_mbox.h"
+#include "gen_sw_mbox_config.h"
 
 #define RPMSG_LITE_SHMEM_BASE	(VDEV0_VRING_BASE)
 
@@ -110,12 +112,11 @@ int rpmsg_destroy_ept(struct rpmsg_ept *ept)
 	return ret;
 }
 
-static void rpmsg_mailbox_init(void *mbox)
+static void rpmsg_mailbox_init(void)
 {
-	gen_sw_mailbox_init(mbox);
-	os_irq_register(RL_GEN_SW_MBOX_IRQ, gen_sw_mbox_handler,
-			mbox, OS_IRQ_PRIO_DEFAULT);
-	os_irq_enable(RL_GEN_SW_MBOX_IRQ);
+	gen_sw_mbox_init();
+	gen_sw_mbox_register((void *)GEN_SW_MBOX_BASE, GEN_SW_MBOX_IRQ,
+			     GEN_SW_MBOX_REMOTE_IRQ, GEN_SW_MBOX_IRQ_PRIO);
 }
 
 struct rpmsg_instance *rpmsg_init(int link_id, bool is_coherent)
@@ -125,14 +126,6 @@ struct rpmsg_instance *rpmsg_init(int link_id, bool is_coherent)
 	ri = os_malloc(sizeof(struct rpmsg_instance));
 	if (!ri)
 		return ri;
-
-	if (os_mmu_map("MBOX", (uint8_t **)&ri->mbox_va,
-			(uintptr_t)RL_GEN_SW_MBOX_BASE, KB(4),
-			OS_MEM_DEVICE_nGnRE | OS_MEM_PERM_RW)) {
-		log_err("MBOX os_mmu_map() failed\n");
-
-		goto err_map_mbox;
-	}
 
 	if (os_mmu_map("RPMSG", (uint8_t **)&ri->rpmsg_shmem_va,
 			(uintptr_t)RPMSG_LITE_SHMEM_BASE, KB(64),
@@ -152,7 +145,7 @@ struct rpmsg_instance *rpmsg_init(int link_id, bool is_coherent)
 		goto err_map_vringbuf;
 	}
 
-	rpmsg_mailbox_init(ri->mbox_va);
+	rpmsg_mailbox_init();
 
 	log_info("RPMSG init ...\n");
 	ri->rl_inst = rpmsg_lite_remote_init(ri->rpmsg_shmem_va, link_id, RL_NO_FLAGS);
@@ -172,8 +165,6 @@ err_rpmsg_lite_init:
 err_map_vringbuf:
 	os_mmu_unmap((uintptr_t)ri->rpmsg_shmem_va, KB(64));
 err_map_rpmsg:
-	os_mmu_unmap((uintptr_t)ri->mbox_va, KB(4));
-err_map_mbox:
 	os_free(ri);
 
 	return NULL;
@@ -184,7 +175,6 @@ void rpmsg_deinit(struct rpmsg_instance *ri)
 	rpmsg_lite_deinit(ri->rl_inst);
 	os_mmu_unmap((uintptr_t)ri->rpmsg_buf_va, MB(1));
 	os_mmu_unmap((uintptr_t)ri->rpmsg_shmem_va, KB(64));
-	os_mmu_unmap((uintptr_t)ri->mbox_va, KB(4));
 	os_free(ri);
 }
 

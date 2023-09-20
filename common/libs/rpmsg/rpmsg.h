@@ -13,7 +13,6 @@
 
 struct rpmsg_instance {
 	struct rpmsg_lite_instance *volatile rl_inst;
-	void *mbox_va;
 	void *rpmsg_shmem_va;
 	void *rpmsg_buf_va;
 };
