@@ -77,6 +77,34 @@ function set_real_time_configuration()
     fi
 }
 
+function gpio_start ()
+{
+    if [[ "${INMATE_BIN}" =~ .*"industrial.bin" && "$SOC" = "imx93" ]]; then
+        # Set ADP5585 EXP_SEL GPIO as output low
+        echo 'gpioset -z -c gpiochip5 4=0'
+        gpioset -z -c gpiochip5 4=0
+
+        # Set ADP5585 CAN_STBY GPIO as output low
+        echo 'gpioset -z -c gpiochip5 5=0'
+        gpioset -z -c gpiochip5 5=0
+    fi
+}
+
+function gpio_stop ()
+{
+    # Kill all gpioset commands and restore GPIOs state
+    if [[ "${INMATE_BIN}" =~ .*"industrial.bin" && "$SOC" = "imx93" ]]; then
+        echo 'killall "gpioset"'
+        killall "gpioset"
+
+        # Restore input direction for ADP5585 EXP_SEL GPIO
+        echo 'gpioget -l -c gpiochip5 4'
+        gpioget -l -c gpiochip5 4
+        echo 'gpioget -l -c gpiochip5 5'
+        gpioget -l -c gpiochip5 5
+    fi
+}
+
 function start ()
 {
     set_real_time_configuration
@@ -124,10 +152,14 @@ function start ()
         echo 'modprobe virtio_net'
         modprobe virtio_net
     fi
+
+    gpio_start
 }
 
 function stop ()
 {
+    gpio_stop
+
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         get_rpmsg_dev
     fi
