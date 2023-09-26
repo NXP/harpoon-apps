@@ -41,7 +41,7 @@ SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/${BoardName}
 SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/${BoardName}")
 SET(AppPath "${ProjDirPath}/../../../..")
-SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
+SET(AppBoardPath "${CommonPath}/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX8MN6")
 SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 

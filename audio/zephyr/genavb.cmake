@@ -12,8 +12,7 @@ set(CONFIG "endpoint_avb")
 add_subdirectory(${GenAVBPath} "${GenAVBBuildPath}")
 
 zephyr_include_directories(
-# FIXME move common files (dev_itf.h) to common folder and create common board.h files for zephyr
-  ${CommonPath}/freertos/boards/${BoardName}
+  ${CommonPath}/zephyr/boards/${BoardName}
   ${CommonPath}/libs/avb_tsn
   ${GenAVBPath}/include
   ${GenAVBPath}/include/freertos
