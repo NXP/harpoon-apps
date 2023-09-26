@@ -154,20 +154,20 @@ int STATS_Async(void (*Func)(void *Data), void *Data)
     Msg.Func = Func;
     Msg.Data = Data;
 
-    return xQueueSend(Ctx->qHandle, &Msg, 0);
+    return xQueueSend(Ctx->qHandle, &Msg, pdMS_TO_TICKS(0));
 }
 
 static void STATS_AsyncProcess(struct Async_Ctx *Ctx, unsigned int WaitMs)
 {
     struct Async_Msg Msg;
-    TickType_t Last, Now;
+    unsigned int Last, Now;
     unsigned int Elapsed, Timeout;
 
-    Timeout = pdMS_TO_TICKS(WaitMs);
+    Timeout = pdTICKS_TO_UINT(pdMS_TO_TICKS(WaitMs));
     Last = xTaskGetTickCount();
 
     while (true) {
-        if (xQueueReceive(Ctx->qHandle, &Msg, Timeout) == pdPASS) {
+        if (xQueueReceive(Ctx->qHandle, &Msg, pdUINT_TO_TICKS(Timeout)) == pdPASS) {
             Msg.Func(Msg.Data);
 
             Now = xTaskGetTickCount();
