@@ -7,9 +7,7 @@
 #ifndef _STATS_H_
 #define _STATS_H_
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
+#include "rtos_abstraction_layer.h"
 
 #define STATS_MAX_TASKS     18
 #define ASYNC_NUM_MSG       16

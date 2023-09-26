@@ -43,6 +43,8 @@ SET(SdkBoardPath "${SdkDirPath}/devices/MIMX8MM6")
 SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 
 SET(GenAVBPath "${ProjDirPath}/../../../../../../gen_avb_sdk")
+# RTOS abstraction layer configuration
+SET(RTOS_ABSTRACTION_LAYER_DIR "${GenAVBPath}/freertos/freertos")
 SET(GenAVBBuildPath "${CMAKE_CURRENT_BINARY_DIR}/gen_avb_build")
 SET(FREERTOS_SDK ${SdkDirPath})
 SET(FREERTOS_DIR ${RtosPath})

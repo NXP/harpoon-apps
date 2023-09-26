@@ -6,7 +6,7 @@
 #include "log.h"
 #include "genavb.h"
 #include "storage.h"
-#include "FreeRTOS.h"
+#include "rtos_abstraction_layer.h"
 
 #include "genavb/config.h"
 #include "genavb/genavb.h"

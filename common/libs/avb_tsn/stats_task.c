@@ -8,7 +8,7 @@
 #include "log.h"
 #include "stats.h"
 
-#include "FreeRTOS.h"
+#include "rtos_abstraction_layer.h"
 #include "stats_task.h"
 
 /*******************************************************************************
