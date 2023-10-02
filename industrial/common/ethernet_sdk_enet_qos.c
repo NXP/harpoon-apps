@@ -17,7 +17,6 @@
 
 #define ENET_PHY_MIIMODE        kENET_QOS_RgmiiMode
 
-#define ENET_PTP_REF_CLK      50000000UL
 #define ENET_QOS_RXBD_NUM                     (4)
 #define ENET_QOS_TXBD_NUM                     (4)
 #define ENET_QOS_RXQUEUE_USE                  (3)
@@ -256,7 +255,7 @@ static void enet_qos_prepare_configuration(enet_qos_config_t *config, enet_qos_p
     /* Shoule enable the promiscuous mode and enable the store and forward
      * to make the timestamp is always updated correclty in the descriptors. */
     config->specialControl = kENET_QOS_PromiscuousEnable | kENET_QOS_StoreAndForward;
-    config->csrClock_Hz    = CLOCK_GetEnetAxiFreq();
+    config->csrClock_Hz    = EXAMPLE_ENET_QOS_CLK_FREQ;
 
     ptpConfig->tsRollover         = kENET_QOS_DigitalRollover;
     ptpConfig->systemTimeClock_Hz = refClock;
@@ -391,7 +390,7 @@ static int enet_qos_phy_init(phy_handle_t *phyHandle, bool loopback)
     phyConfig.ops = &EXAMPLE_PHY;
     phyConfig.resource = &phy_resource;
 
-    enet_ipg_freq = CLOCK_GetFreq(kCLOCK_EnetIpgClk);
+    enet_ipg_freq = EXAMPLE_ENET_QOS_CLK_FREQ;
 
     MDIO_Init(enet_ipg_freq);
 

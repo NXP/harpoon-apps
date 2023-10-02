@@ -74,6 +74,8 @@ int BOARD_NetPort_Get_MAC(unsigned int port, uint8_t *mac);
 #define EXAMPLE_ENET_QOS_OPS    enet_qos_ops
 #define EXAMPLE_PHY             phyrtl8211f_ops
 #define EXAMPLE_ENET_QOS_IRQ    ENET_QOS_IRQn
+#define ENET_PTP_REF_CLK        50000000UL
+#define EXAMPLE_ENET_QOS_CLK_FREQ     (CLOCK_GetEnetAxiFreq())
 
 /* Define Flexcan application dependencies */
 #define EXAMPLE_CAN                FLEXCAN1
