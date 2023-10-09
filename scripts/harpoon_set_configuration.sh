@@ -71,10 +71,6 @@ elif [ "$2" == "audio_smp" ]; then
 	INMATE_NAME=${RTOS}
 	EOF
 elif [ "$2" == "avb" ]; then
-	if [[ "$RTOS" != "freertos" ]]; then
-		echo "Unsupported RTOS"
-		exit 4
-	fi
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
 	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}-avb.cell
