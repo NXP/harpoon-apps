@@ -28,11 +28,11 @@ SET(BoardName "mcimx93evk")
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
 SET(SdkDirPath "${ProjDirPath}/../../../../../../mcux-sdk")
 SET(RtosPath "${ProjDirPath}/../../../../../../FreeRTOS-Kernel")
-SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/mcimx93evk")
+SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/${BoardName}")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
-SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/mcimx93evk")
+SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/${BoardName}")
 SET(AppPath "${ProjDirPath}/../../../..")
-SET(AppBoardPath "${AppPath}/freertos/boards/mcimx93evk")
+SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 
 SET(ProjRootPath "${ProjDirPath}/../../../../../")
@@ -53,6 +53,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/rt_latency.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
+    "${CommonBoardPath}/clock_init.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE

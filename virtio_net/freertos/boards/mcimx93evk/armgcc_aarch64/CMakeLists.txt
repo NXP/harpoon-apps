@@ -37,6 +37,7 @@ SET(VirtioMailboxPath "${HtMulticorePath}/mailbox")
 SET(VirtioPlatPortsPath "${HtMulticorePath}/plat_ports")
 SET(VirtioIncludePath "${HtMulticorePath}/include")
 SET(VirtioPath "${HtMulticorePath}/virtio")
+SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/${BoardName}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -53,6 +54,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/boards/${BoardName}/virtio_board.c"
+    "${CommonBoardPath}/clock_init.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
@@ -61,6 +63,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppBoardPath}
     ${SdkDirPath}/devices/MIMX9352
     ${AppPath}/common/boards/${BoardName}
+    ${CommonBoardPath}
     ${CommonPath}
     ${CommonPath}/freertos
     ${CommonPath}/libs

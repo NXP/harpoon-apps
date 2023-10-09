@@ -5,7 +5,7 @@
  */
 
 #include "fsl_clock.h"
-#include "board.h"
+#include "clock_init.h"
 
 static void BOARD_TpmClockSetup(void)
 {

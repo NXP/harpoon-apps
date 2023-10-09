@@ -5,6 +5,8 @@ SET(MCUX_DEVICE "MIMX9352_ca55")
 SET(CMAKE_SYSTEM_NAME Generic)
 CMAKE_MINIMUM_REQUIRED (VERSION 3.1.1)
 
+SET(BoardName "mcimx93evk")
+
 # THE VERSION NUMBER
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
@@ -25,6 +27,7 @@ SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/mcimx93evk")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/mcimx93evk")
+SET(CommonBoardPath "${CommonPath}/boards/${BoardName}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -40,6 +43,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/src/hello_world.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
+    "${CommonBoardPath}/clock_init.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
@@ -50,6 +54,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonPath}
     ${CommonPath}/freertos
     ${SdkDirPath}/devices/MIMX9532
+    ${CommonBoardPath}
 )
 
 set(CMAKE_MODULE_PATH

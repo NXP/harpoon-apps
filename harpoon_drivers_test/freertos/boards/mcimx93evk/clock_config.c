@@ -6,6 +6,7 @@
 
 #include "board.h"
 #include "fsl_clock.h"
+#include "clock_init.h"
 
 static void lpi2c_clock_setup(void)
 {

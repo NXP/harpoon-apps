@@ -18,13 +18,16 @@ SET(CMAKE_STATIC_LIBRARY_SUFFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_PREFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_SUFFIX)
 
+SET(BoardName "mcimx93evk")
+
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
 SET(SdkDirPath "${ProjDirPath}/../../../../../../mcux-sdk")
 SET(RtosPath "${ProjDirPath}/../../../../../../FreeRTOS-Kernel")
-SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/mcimx93evk")
+SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/${BoardName}")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
+SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/${BoardName}")
 SET(AppPath "${ProjDirPath}/../../../..")
-SET(AppBoardPath "${AppPath}/freertos/boards/mcimx93evk")
+SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -42,6 +45,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/freertos/main.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
+    "${CommonBoardPath}/clock_init.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
@@ -52,6 +56,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${BoardPath}
     ${AppBoardPath}
     ${SdkDirPath}/devices/MIMX9532
+    ${CommonBoardPath}
 )
 
 set(CMAKE_MODULE_PATH
