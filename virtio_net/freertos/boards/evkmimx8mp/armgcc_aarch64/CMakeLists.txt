@@ -71,6 +71,7 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
     ${CommonPath}/libs/hlog
+    ${HtMulticorePath}/libs/gen_sw_mbox
     ${RtosPath}
     ${SdkDirPath}
     ${VirtioMailboxPath}
