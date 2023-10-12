@@ -82,12 +82,6 @@
 #define RL_DEBUG_CHECK_BUFFERS (0)
 //@}
 
-//! @def RL_GEN_SW_MBOX_BASE
-//!
-//! Specify the sharing memory base address used for mailbox.
-#define RL_GEN_SW_MBOX_BASE (0xfe000000)
-//@}
-
 //! @def VDEV0_VRING_BASE
 //!
 //! Specify the sharing memory base address used for RPMSG.
@@ -98,18 +92,6 @@
 //!
 //! Specify the sharing memory base address used for RPMSG buffer.
 #define RPMSG_BUF_BASE		(0xfe200000U)
-//@}
-
-//! @def RL_GEN_SW_MBOX_IRQ
-//!
-//! Specify the interrupt number for handling the received message.
-#define RL_GEN_SW_MBOX_IRQ (183)
-//@}
-
-//! @def RL_GEN_SW_MBOX_REMOTE_IRQ
-//!
-//! Specify the interrupt number to trigger for notifying remote when send message.
-#define RL_GEN_SW_MBOX_REMOTE_IRQ (182)
 //@}
 
 //! @def RL_BOARD_RPMSG_LINK_ID
