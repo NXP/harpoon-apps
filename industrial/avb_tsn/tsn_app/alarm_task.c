@@ -16,7 +16,7 @@ static void net_callback(void *data)
     struct tsn_task *task = container_of(sock, struct tsn_task, sock_rx[sock->id]);
     struct alarm_task *a_task = task->ctx;
 
-    if (xQueueSend(a_task->queue.handle, &sock, 0) != pdTRUE) {
+    if (xQueueSend(a_task->queue.handle, &sock, pdMS_TO_TICKS(0)) != pdTRUE) {
         ERR("xQueueSendFromISR() failed\n\r");
     }
 }
