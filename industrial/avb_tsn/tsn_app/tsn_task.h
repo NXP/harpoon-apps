@@ -14,6 +14,7 @@
 #include "libs/stats/stats.h"
 #include "genavb/clock.h"
 #include "genavb/timer.h"
+#include "genavb/socket.h"
 #include "genavb/tsn.h"
 
 #define MAX_RX_SOCKET 2
