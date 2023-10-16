@@ -298,17 +298,17 @@ void ethernet_avb_tsn_exit(void *priv)
 		log_err("gavb_stack_exit() failed\n");
 	}
 
-	irq_unregister(BOARD_GENAVB_TIMER_0_IRQ);
-	irq_unregister(BOARD_NET_PORT0_DRV_IRQ0);
+	os_irq_unregister(BOARD_GENAVB_TIMER_0_IRQ);
+	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ0);
 
 #ifdef BOARD_NET_PORT0_DRV_IRQ1_HND
-	irq_unregister(BOARD_NET_PORT0_DRV_IRQ1);
+	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ1);
 #endif
 #ifdef BOARD_NET_PORT0_DRV_IRQ2_HND
-	irq_unregister(BOARD_NET_PORT0_DRV_IRQ2);
+	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ2);
 #endif
 #ifdef BOARD_NET_PORT0_DRV_IRQ3_HND
-	irq_unregister(BOARD_NET_PORT0_DRV_IRQ3);
+	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ3);
 #endif
 
 	os_free(ctx);
