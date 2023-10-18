@@ -26,7 +26,7 @@ struct rpmsg_ept {
 	const char *sn;
 };
 
-struct rpmsg_instance *rpmsg_init(int link_id);
+struct rpmsg_instance *rpmsg_init(int link_id, bool is_coherent);
 void rpmsg_deinit(struct rpmsg_instance *ri);
 struct rpmsg_ept *rpmsg_create_ept(struct rpmsg_instance *ri, int ept_addr, const char *sn);
 int rpmsg_destroy_ept(struct rpmsg_ept *ept);
