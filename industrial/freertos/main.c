@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -66,13 +66,13 @@ static void hardware_setup(void)
 {
 	BOARD_InitMemory();
 
+	board_clock_setup();
+
 	BOARD_InitDebugConsole();
 
 	BOARD_RdcInit();
 
 	BOARD_InitPins();
-
-	board_clock_setup();
 }
 
 static void data_task(void *context)
