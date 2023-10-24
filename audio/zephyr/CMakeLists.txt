@@ -124,7 +124,12 @@ target_sources(app PRIVATE
 	       ${AppPath}/common/boards/${BoardName}/pin_mux.c
 	       ${AppPath}/common/boards/${BoardName}/sai_clock_config.c
 	       ${AppPath}/common/boards/${BoardName}/sai_config.c
-	       ${AppPath}/common/pipeline_config.c
 	       ${AppPath}/common/play_pipeline.c
 	       ${AppPath}/common/sai_drv.c
 	       )
+
+if(CONFIG_BOARD_MIMX8MM_EVK_A53 OR CONFIG_BOARD_MIMX8MN_EVK_A53 OR CONFIG_BOARD_MIMX8MP_EVK_A53)
+target_sources(app PRIVATE
+	       ${AppPath}/common/pipeline_config.c
+               )
+endif()
