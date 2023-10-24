@@ -34,7 +34,7 @@ extern void BOARD_NET_PORT0_DRV_IRQ2_HND(void);
 extern void BOARD_NET_PORT0_DRV_IRQ3_HND(void);
 #endif
 
-extern void BOARD_GPT_0_IRQ_HANDLER(void);
+extern void BOARD_GENAVB_TIMER_0_IRQ_HANDLER(void);
 
 #define STATS_PERIOD_MS 2000
 
@@ -248,7 +248,7 @@ static int avb_setup(struct pipeline_ctx *ctx)
 	os_irq_register(BOARD_NET_PORT0_DRV_IRQ3, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ3_HND, NULL, OS_IRQ_PRIO_DEFAULT);
 #endif
 
-	os_irq_register(BOARD_GPT_0_IRQ, (void (*)(void(*)))BOARD_GPT_0_IRQ_HANDLER, NULL, OS_IRQ_PRIO_DEFAULT);
+	os_irq_register(BOARD_GENAVB_TIMER_0_IRQ, (void (*)(void(*)))BOARD_GENAVB_TIMER_0_IRQ_HANDLER, NULL, OS_IRQ_PRIO_DEFAULT);
 
 	rc = gavb_stack_init();
 	if (rc) {
@@ -292,7 +292,7 @@ static void avb_close(struct pipeline_ctx *ctx)
 	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ3);
 #endif
 
-	os_irq_unregister(BOARD_GPT_0_IRQ);
+	os_irq_unregister(BOARD_GENAVB_TIMER_0_IRQ);
 
 	avb_hardware_exit();
 }

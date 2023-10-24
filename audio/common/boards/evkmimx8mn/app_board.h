@@ -120,6 +120,9 @@
 #define BOARD_GPT_0_BASE                         GPT2
 #define BOARD_GPT_0_IRQ                          GPT2_IRQn
 
+#define BOARD_GENAVB_TIMER_0_IRQ                 BOARD_GPT_0_IRQ
+#define BOARD_GENAVB_TIMER_0_IRQ_HANDLER         BOARD_GPT_0_IRQ_HANDLER
+
 unsigned int BOARD_GPT_clk_src(void *base);
 unsigned int BOARD_GPT_clk_freq(void *base);
 int BOARD_NetPort_Get_MAC(unsigned int port, uint8_t *mac);
