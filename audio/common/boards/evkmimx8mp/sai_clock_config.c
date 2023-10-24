@@ -165,7 +165,22 @@ uint32_t sai_select_audio_pll_mux(int sai_id, int srate)
 	return __get_pll_from_srate(srate);
 }
 
-uint32_t get_sai_clock_root(uint32_t id)
+static uint32_t get_sai_clock_root(uint32_t id)
 {
 	return sai_clock_root[id];
+}
+
+uint32_t get_sai_clock_freq(unsigned int sai_active_index)
+{
+	uint32_t sai_clock_root;
+	int sai_id;
+
+	os_assert(sai_active_index < sai_active_list_nelems, "%u not a valid active index", sai_active_index);
+
+	sai_id = get_sai_id(sai_active_list[sai_active_index].sai_base);
+	os_assert(sai_id, "SAI%d enabled but not supported in this platform!", sai_active_index);
+
+	sai_clock_root = get_sai_clock_root(sai_id - 1);
+
+	return CLOCK_GetPllFreq(sai_active_list[sai_active_index].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
 }

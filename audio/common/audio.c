@@ -283,7 +283,7 @@ static void sai_setup(struct data_ctx *ctx)
 
 	/* Configure each active SAI */
 	for (i = 0; i < sai_active_list_nelems; i++) {
-		uint32_t sai_clock_root, pll_id;
+		uint32_t pll_id;
 		int sai_id;
 		enum codec_id cid;
 		int32_t ret;
@@ -296,8 +296,7 @@ static void sai_setup(struct data_ctx *ctx)
 		sai_id = get_sai_id(sai_active_list[i].sai_base);
 		os_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
 
-		sai_clock_root = get_sai_clock_root(sai_id - 1);
-		sai_config.source_clock_hz = CLOCK_GetPllFreq(sai_active_list[i].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
+		sai_config.source_clock_hz = get_sai_clock_freq(i);
 
 		sai_config.tx_sync_mode = sai_active_list[i].tx_sync_mode;
 		sai_config.rx_sync_mode = sai_active_list[i].rx_sync_mode;
