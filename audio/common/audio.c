@@ -44,7 +44,6 @@ struct mode_handler {
 #define DEFAULT_PERIOD		8
 #define DEFAULT_SAMPLE_RATE	48000
 #define USE_TX_IRQ		1
-#define SAI_DEV_IRQ_SOURCE	1
 
 static const int supported_period[] = {2, 4, 8, 16, 32};
 static const uint32_t supported_rate[] = {44100, 48000, 88200, 96000, 176400, 192000};
@@ -59,6 +58,7 @@ struct data_ctx {
 
 	/* SAI data for hardware setup */
 	struct sai_device dev[SAI_TX_MAX_INSTANCE];
+	uint32_t sai_dev_irq_source;
 	sai_word_width_t bit_width;
 	sai_sample_rate_t sample_rate;
 	uint32_t chan_numbers;
@@ -230,9 +230,9 @@ static void rx_callback(uint8_t status, void *user_data)
 	struct data_ctx *ctx = (struct data_ctx *)user_data;
 
 #if USE_TX_IRQ
-	sai_disable_irq(&ctx->dev[SAI_DEV_IRQ_SOURCE], false, true);
+	sai_disable_irq(&ctx->dev[ctx->sai_dev_irq_source], false, true);
 #else
-	sai_disable_irq(&ctx->dev[SAI_DEV_IRQ_SOURCE], true, false);
+	sai_disable_irq(&ctx->dev[ctx->sai_dev_irq_source], true, false);
 #endif
 
 	ctx->callback++;
@@ -281,6 +281,9 @@ static void sai_setup(struct data_ctx *ctx)
 
 	log_info("enter\n");
 
+	/* Always use last SAI device as IRQ source. */
+	ctx->sai_dev_irq_source = sai_active_list_nelems - 1;
+
 	/* Configure each active SAI */
 	for (i = 0; i < sai_active_list_nelems; i++) {
 		uint32_t pll_id;
@@ -302,7 +305,7 @@ static void sai_setup(struct data_ctx *ctx)
 		sai_config.rx_sync_mode = sai_active_list[i].rx_sync_mode;
 		sai_config.msel = sai_active_list[i].msel;
 
-		if (i == SAI_DEV_IRQ_SOURCE) {
+		if (i == ctx->sai_dev_irq_source) {
 			/* SAI instance used as IRQ source */
 			sai_config.rx_callback = rx_callback;
 			sai_config.rx_user_data = ctx;
@@ -399,9 +402,9 @@ static void audio_reset(struct data_ctx *ctx, unsigned int id)
 
 	if (id == 0) {
 #if USE_TX_IRQ
-		sai_enable_irq(&ctx->dev[SAI_DEV_IRQ_SOURCE], false, true);
+		sai_enable_irq(&ctx->dev[ctx->sai_dev_irq_source], false, true);
 #else
-		sai_enable_irq(&ctx->dev[SAI_DEV_IRQ_SOURCE], true, false);
+		sai_enable_irq(&ctx->dev[ctx->sai_dev_irq_source], true, false);
 #endif
 	}
 
@@ -430,9 +433,9 @@ void audio_process_data(void *context, uint8_t thread_id)
 			} else {
 				if (thread_id == 0 && e.type == EVENT_TYPE_DATA) {
 #if USE_TX_IRQ
-					sai_enable_irq(&ctx->dev[SAI_DEV_IRQ_SOURCE], false, true);
+					sai_enable_irq(&ctx->dev[ctx->sai_dev_irq_source], false, true);
 #else
-					sai_enable_irq(&ctx->dev[SAI_DEV_IRQ_SOURCE], true, false);
+					sai_enable_irq(&ctx->dev[ctx->sai_dev_irq_source], true, false);
 #endif
 				}
 			}
