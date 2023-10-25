@@ -130,6 +130,7 @@ target_sources(app PRIVATE
 
 if(CONFIG_BOARD_MIMX8MM_EVK_A53 OR CONFIG_BOARD_MIMX8MN_EVK_A53 OR CONFIG_BOARD_MIMX8MP_EVK_A53)
 target_sources(app PRIVATE
+	       ${AppPath}/common/audio_pll14xx.c
 	       ${AppPath}/common/pipeline_config.c
                )
 endif()
