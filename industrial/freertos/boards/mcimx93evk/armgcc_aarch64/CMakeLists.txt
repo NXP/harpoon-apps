@@ -36,6 +36,9 @@ SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX9352")
 SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 
+SET(ProjRootPath "${ProjDirPath}/../../../../../")
+SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
+
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
@@ -82,6 +85,7 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/rpmsg
     ${CommonPath}/libs/stats
+    ${HtMulticorePath}/libs/gen_sw_mbox
     ${MulticorePath}
     ${RtosPath}
     ${SdkDirPath}
