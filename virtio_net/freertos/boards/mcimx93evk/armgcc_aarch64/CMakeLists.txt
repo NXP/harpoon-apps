@@ -33,10 +33,10 @@ SET(CommonPath "${ProjRootPath}/common")
 SET(LibsPath "${CommonPath}/libs")
 SET(AppPath "${ProjRootPath}/virtio_net")
 SET(VirtioNetPath "${HtMulticorePath}/net")
-SET(VirtioMailboxPath "${HtMulticorePath}/mailbox")
-SET(VirtioPlatPortsPath "${HtMulticorePath}/plat_ports")
+SET(VirtioMailboxPath "${HtMulticorePath}/virtio/mailbox")
+SET(VirtioPlatPortsPath "${HtMulticorePath}/virtio/plat_ports")
 SET(VirtioIncludePath "${HtMulticorePath}/include")
-SET(VirtioPath "${HtMulticorePath}/virtio")
+SET(VirtioDevPath "${HtMulticorePath}/virtio/devices")
 SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/${BoardName}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -79,7 +79,7 @@ set(CMAKE_MODULE_PATH
     ${SdkDirPath}
     ${VirtioMailboxPath}
     ${VirtioNetPath}
-    ${VirtioPath}
+    ${VirtioDevPath}
     ${VirtioPlatPortsPath}
 )
 
