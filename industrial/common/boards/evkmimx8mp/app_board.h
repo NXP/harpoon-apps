@@ -49,8 +49,6 @@
 #define BOARD_NET_PORT0_1588_TIMER_CHANNEL_2      kENET_QOS_PtpPpsIstance3
 #define BOARD_NET_PORT0_1588_TIMER_EVENT_CHANNEL  kENET_QOS_PtpPpsIstance1
 
-#define BOARD_NUM_GPT           1
-
 #define BOARD_NET_PORT0_1588_TIMER_PPS            kENET_QOS_PtpPpsIstance3 /* FIXME - Need to identify timer channel with PPS output */
 
 #define BOARD_NET_PORT0_PHY_INDEX   (0)
