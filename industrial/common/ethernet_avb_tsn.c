@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -37,7 +37,7 @@ extern void BOARD_NET_PORT0_DRV_IRQ2_HND(void);
 extern void BOARD_NET_PORT0_DRV_IRQ3_HND(void);
 #endif
 
-extern void BOARD_GPT_0_IRQ_HANDLER(void);
+extern void BOARD_GENAVB_TIMER_0_IRQ_HANDLER(void);
 
 #if BUILD_MOTOR == 1
 static struct controller_ctx ctrl1;
@@ -298,7 +298,7 @@ void ethernet_avb_tsn_exit(void *priv)
 		log_err("gavb_stack_exit() failed\n");
 	}
 
-	irq_unregister(BOARD_GPT_0_IRQ);
+	irq_unregister(BOARD_GENAVB_TIMER_0_IRQ);
 	irq_unregister(BOARD_NET_PORT0_DRV_IRQ0);
 
 #ifdef BOARD_NET_PORT0_DRV_IRQ1_HND
@@ -365,7 +365,7 @@ void *ethernet_avb_tsn_init(void *parameters)
 	os_irq_register(BOARD_NET_PORT0_DRV_IRQ3, (void (*)(void(*)))BOARD_NET_PORT0_DRV_IRQ3_HND, NULL, OS_IRQ_PRIO_DEFAULT);
 #endif
 
-	os_irq_register(BOARD_GPT_0_IRQ, (void (*)(void(*)))BOARD_GPT_0_IRQ_HANDLER, NULL, OS_IRQ_PRIO_DEFAULT);
+	os_irq_register(BOARD_GENAVB_TIMER_0_IRQ, (void (*)(void(*)))BOARD_GENAVB_TIMER_0_IRQ_HANDLER, NULL, OS_IRQ_PRIO_DEFAULT);
 
 	if (STATS_TaskInit(NULL, NULL, STATS_PERIOD_MS) < 0)
 		log_err("STATS_TaskInit() failed\n");

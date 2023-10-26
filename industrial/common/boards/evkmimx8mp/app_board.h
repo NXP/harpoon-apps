@@ -60,6 +60,9 @@
 #define BOARD_GPT_0_BASE                         GPT2
 #define BOARD_GPT_0_IRQ                          GPT2_IRQn
 
+#define BOARD_GENAVB_TIMER_0_IRQ                 BOARD_GPT_0_IRQ
+#define BOARD_GENAVB_TIMER_0_IRQ_HANDLER         BOARD_GPT_0_IRQ_HANDLER
+
 /* Define device counter instances */
 #define BOARD_COUNTER_0_BASE    GPT1
 #define BOARD_COUNTER_0_IRQ     GPT1_IRQn
