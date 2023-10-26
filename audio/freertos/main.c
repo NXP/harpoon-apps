@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -23,6 +23,9 @@
 
 static void hardware_setup(void)
 {
+	/* Init all clocks before any other init functions (especially uart init) */
+	BOARD_InitClocks();
+
 	BOARD_InitMemory();
 
 	BOARD_InitDebugConsole();
@@ -30,8 +33,6 @@ static void hardware_setup(void)
 	BOARD_RdcInit();
 
 	BOARD_InitPins();
-
-	BOARD_InitClocks();
 }
 
 static void data_task(void *pvParameters)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,9 +8,10 @@
 #define _CODEC_CONFIG_H_
 
 enum codec_id {
-    CODEC_ID_HIFIBERRY,
-    CODEC_ID_WM8524,
-    CODEC_ID_WM8960
+	CODEC_ID_HIFIBERRY,
+	CODEC_ID_WM8524,
+	CODEC_ID_WM8960,
+	CODEC_ID_WM8962
 };
 
 int32_t codec_setup(enum codec_id cid);
