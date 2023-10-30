@@ -23,6 +23,9 @@ elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
   if(NOT CONFIG_SMP)
     set(CONFIG_USE_GENAVB ON)
   endif()
+elseif(CONFIG_BOARD_MIMX93_EVK_A55)
+  set(BoardName "mcimx93evk")
+  set(TARGET "zephyr_imx93_ca55")
 else()
   message(FATAL_ERROR "unsupported board")
 endif()
@@ -77,6 +80,9 @@ zephyr_compile_definitions(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 zephyr_compile_definitions(CODEC_MULTI_ADAPTERS=1)
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_PCM512X CODEC_PCM512X_ENABLE=1)
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_PCM186X CODEC_PCM186X_ENABLE=1)
+# EVK onboard Codec WM8962
+zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8962 CODEC_WM8962)
+zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8962 CODEC_WM8962_ENABLE=1)
 # EVK onboard Codec WM8960
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8960 CODEC_WM8960)
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8960 CODEC_WM8960_ENABLE=1)
@@ -103,6 +109,8 @@ elseif(CONFIG_BOARD_MIMX8MN_EVK_A53)
   include(middleware_multicore_rpmsg_lite_MIMX8MN6)
 elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
   include(middleware_multicore_rpmsg_lite_MIMX8ML8)
+elseif(CONFIG_BOARD_MIMX93_EVK_A55)
+  include(middleware_multicore_rpmsg_lite_MIMX9352)
 else()
   message(FATAL_ERROR "unsupported board")
 endif()
@@ -132,5 +140,10 @@ if(CONFIG_BOARD_MIMX8MM_EVK_A53 OR CONFIG_BOARD_MIMX8MN_EVK_A53 OR CONFIG_BOARD_
 target_sources(app PRIVATE
 	       ${AppPath}/common/audio_pll14xx.c
 	       ${AppPath}/common/pipeline_config.c
+               )
+elseif(CONFIG_BOARD_MIMX93_EVK_A55)
+target_sources(app PRIVATE
+	       ${AppPath}/common/pipeline_config_single_sai.c
+	       ${CommonBoardPath}/clock_init.c
                )
 endif()

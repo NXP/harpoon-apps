@@ -7,7 +7,6 @@
 #include <zephyr/device.h>
 #include <zephyr/kernel.h>
 
-#include "app_board.h"
 #include "hlog.h"
 #include "os/assert.h"
 
