@@ -8,7 +8,11 @@
 #define _APP_MMU_H_
 
 #define APP_MMU_ENTRIES		\
-	MMU_REGION_FLAT_ENTRY("CAN2",				\
+	MMU_REGION_FLAT_ENTRY("ENET_QOS",                               \
+			      ENET_QOS_BASE, KB(64),                    \
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),  \
+									\
+	MMU_REGION_FLAT_ENTRY("CAN2",					\
 			      CAN2_BASE, KB(64),			\
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),  \
 									\

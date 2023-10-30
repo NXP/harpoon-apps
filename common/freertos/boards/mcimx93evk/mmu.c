@@ -106,6 +106,10 @@ static const struct ARM_MMU_region mmu_regions[] = {
 			      TPM4_BASE, KB(64),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
 
+	MMU_REGION_FLAT_ENTRY("WAKEUPMIX1",
+			      BLK_CTRL_WAKEUPMIX1_BASE, KB(64),
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
+
 	MMU_REGION_FLAT_ENTRY("IOMUXC",
 			      IOMUXC1_BASE, KB(64),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
