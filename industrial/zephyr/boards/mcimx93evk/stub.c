@@ -5,5 +5,3 @@
  */
 
 #include "stub.h"
-
-STUB_INDUSTRIAL_USE_CASE(ethernet_avb_tsn);
