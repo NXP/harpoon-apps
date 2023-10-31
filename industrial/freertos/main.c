@@ -58,6 +58,12 @@ const struct industrial_use_case use_cases[] =
 				.run = ethernet_sdk_enet_run,
 				.stats = ethernet_sdk_enet_stats,
 			},
+			[2] = {
+				.init = ethernet_sdk_enet_loopback_init,
+				.exit = ethernet_sdk_enet_loopback_exit,
+				.run = ethernet_sdk_enet_loopback_run,
+				.stats = ethernet_sdk_enet_loopback_stats,
+			},
 		},
 	},
 };

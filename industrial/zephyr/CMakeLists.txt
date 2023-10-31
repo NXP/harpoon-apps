@@ -86,6 +86,7 @@ target_sources(app PRIVATE
 	       ${AppPath}/common/boards/${BoardName}/pin_mux.c
 	       ${AppPath}/common/ethernet.c
 	       ${AppPath}/common/industrial.c
+	       ${AppPath}/zephyr/boards/${BoardName}/stub.c
 	       )
 if(CONFIG_BOARD_MIMX8MP_EVK_A53)
   target_sources(app PRIVATE
@@ -102,7 +103,6 @@ elseif(CONFIG_BOARD_MIMX93_EVK_A55)
 	      )
 else()
   target_sources(app PRIVATE
-	       ${AppPath}/common/boards/${BoardName}/stub.c
 	       ${AppPath}/common/ethernet_sdk_enet.c
 	      )
 endif()

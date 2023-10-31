@@ -60,10 +60,10 @@ const struct industrial_use_case use_cases[] =
 		},
 		.ops = {
 			[0] = {
-				.init = NULL,
-				.exit = NULL,
-				.run = NULL,
-				.stats = NULL,
+				.init = ethernet_avb_tsn_init,
+				.exit = ethernet_avb_tsn_exit,
+				.run = ethernet_avb_tsn_run,
+				.stats = ethernet_avb_tsn_stats,
 			},
 			[1] = {
 				.init = ethernet_sdk_enet_init,
