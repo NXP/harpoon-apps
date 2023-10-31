@@ -38,7 +38,7 @@ SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/${BoardName}
 SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/${BoardName}")
 SET(AppPath "${ProjDirPath}/../../../..")
-SET(AppBoardPath "${CommonPath}/boards/${BoardName}")
+SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX9352")
 SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 
@@ -97,7 +97,6 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}/common/boards/${BoardName}
     ${AppPath}/common/boards/include
     ${AppPath}/freertos
-    ${AppPath}/freertos/boards/${BoardName}
     ${CommonPath}
     ${CommonPath}/freertos
     ${CommonPath}/libs
