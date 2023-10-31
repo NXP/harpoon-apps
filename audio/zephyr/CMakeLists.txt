@@ -90,6 +90,9 @@ zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8960 CODEC_WM8960_ENABLE=1)
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8524 CODEC_WM8524)
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8524 CODEC_WM8524_ENABLE=1)
 
+# Cortex-A55 core maximum clock frequency
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX93_EVK_A55 SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1700000000UL)
+
 if(NOT CONFIG_USE_GENAVB)
   zephyr_compile_definitions(CONFIG_AUD_DISABLE_ENET)
 endif()
