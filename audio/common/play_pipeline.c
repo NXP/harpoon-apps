@@ -294,6 +294,8 @@ static void avb_close(struct pipeline_ctx *ctx)
 
 	os_irq_unregister(BOARD_GENAVB_TIMER_0_IRQ);
 
+	STATS_TaskExit();
+
 	avb_hardware_exit();
 }
 

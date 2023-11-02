@@ -250,7 +250,7 @@ int STATS_TaskInit(void (*PeriodicFn)(void *Data), void *Data, unsigned int Peri
 
     if (xTaskCreate(STATS_Task, STATS_TASK_NAME,
                     STATS_TASK_STACK_SIZE, Ctx,
-                    STATS_TASK_PRIORITY, NULL) != pdPASS) {
+                    STATS_TASK_PRIORITY, &Ctx->stats_task_handle) != pdPASS) {
         ERR("xTaskCreate(%s) failed\n", STATS_TASK_NAME);
         goto exit;
     }
@@ -259,4 +259,11 @@ int STATS_TaskInit(void (*PeriodicFn)(void *Data), void *Data, unsigned int Peri
 
 exit:
     return -1;
+}
+
+void STATS_TaskExit()
+{
+    struct StatsTask_Ctx *Ctx = &StatsTask;
+
+    vTaskDelete(Ctx->stats_task_handle);
 }
