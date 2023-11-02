@@ -151,7 +151,7 @@ int32_t codec_setup(enum codec_id cid)
 			goto end;
 		}
 		/* Set volume on both channels */
-		err = CODEC_SetVolume(&wm8960_codec_handle, kWM8960_HeadphoneRight, 75);
+		err = CODEC_SetVolume(&wm8960_codec_handle, (kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight), 75);
 		if (err != kStatus_Success) {
 			log_err("WM8960 set volume failed (err %d)\n", err);
 			goto end;
