@@ -22,11 +22,17 @@ list(APPEND CMAKE_MODULE_PATH
   ${CommonPath}/libs/avb_tsn
 )
 
+# Set ENET driver defines for i.MX 8MM
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MM_EVK_A53 FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MN_EVK_A53 FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MM_EVK_A53 ENET_ENHANCEDBUFFERDESCRIPTOR_MODE)
+# Set ENET driver defines for i.MX 8MN
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MN_EVK_A53 FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MN_EVK_A53 ENET_ENHANCEDBUFFERDESCRIPTOR_MODE)
+# Set ENET_QoS driver defines for i.MX 8MP
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MP_EVK_A53 FSL_ETH_ENABLE_CACHE_CONTROL)
+# Set ENET_QoS driver defines for i.MX 93
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX93_EVK_A55 FSL_ETH_ENABLE_CACHE_CONTROL)
+
 zephyr_compile_definitions(CONFIG_GENAVB_ENABLE)
 
 add_library(avb-core-lib STATIC IMPORTED)
