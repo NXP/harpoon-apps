@@ -205,6 +205,37 @@ cd harpoon-apps/rt_latency/zephyr/boards/evkmimx8mp/armgcc_aarch64/
 ```
 Please refer to https://docs.zephyrproject.org/latest/develop/west/install.html for more details.
 
+### Using Build Helper Script
+"build_apps.sh" is a build helper script. It can be used to build all or multiple applications by specifying application name, baord or target OS. The following is script's helper information:
+```bash
+./build_apps.sh [clean]                                 - build or clean all applications
+./build_apps.sh [clean] [os] [board-list] [app-list]    - build or clean specified applications
+                                                        - os: specify freertos or zephyr or both if no specified.
+                                                        - board-list: specify one or some or all boards if no specified: evkmimx8mm evkmimx8mn evkmimx8mp mcimx93evk
+                                                        - app-list: specify one or some or all applications if no specified: audio harpoon_drivers_test hello_world industrial rt_latency virtio_net
+```
+Before executing the script, as mentioned above, the enviroment variables "ARMGCC_DIR" and "Zephyr_DIR" (if build Zephyr applications) need to be set.
+
+Then execute the script, for example:
+
+Building all applications in harpoon_apps:
+```bash
+./build_apps.sh
+```
+Building all FreeRTOS audio and rt_latency applications:
+```bash
+./build_apps.sh freertos audio rt_latency
+```
+Cleaning all previously built applications in harpoon_apps:
+```bash
+./build_apps.sh clean
+```
+Cleaning all hello_world applications previously built in harpoon_apps:
+```bash
+./build_apps.sh hello_world clean
+```
+All resulting binaries can be found in "deploy/images" root directory of harpoon_apps, and clean command will delete related binaries in "deploy/images" directory.
+
 ## Running the reference applications
 
 Jailhouse, running in the Linux root cell, provides the necessary tools to create, load and execute the reference applications built within this repository ; this example gives the commands for a inmate cell for i.MX 8MP EVK, replace "xxx" with "freertos" for FreeRTOS or "zephyr" for Zephyr:
