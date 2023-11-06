@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #include "fsl_codec_common.h"
+#include "fsl_sai.h"
 #include "codec_config.h"
 
 #include "os/assert.h"
@@ -76,8 +77,19 @@ int32_t codec_setup(enum codec_id cid)
 			.div = 1
 		};
 
+		sai_master_clock_t saiMasterCfg = {
+			.mclkOutputEnable = true,
+		};
+
 		CLOCK_SetRootClock(kCLOCK_Root_Lpi2c1, &lpi2cClkCfg);
 		CLOCK_EnableClock(kCLOCK_Lpi2c1);
+
+		/* select MCLK direction(Enable MCLK clock):
+		 * The WM8962 codec won't output any sound unless we enable the SAI master clock first.
+		 */
+		saiMasterCfg.mclkSourceClkHz = WM8962_SAI_CLK_FREQ;            /* setup source clock for MCLK */
+		saiMasterCfg.mclkHz          = saiMasterCfg.mclkSourceClkHz; /* setup target clock of MCLK */
+		SAI_SetMasterClockConfig(SAI3_SAI, &saiMasterCfg);
 
 		wm8962Config.i2cConfig.codecI2CSourceClock = BOARD_CODEC_I2C_CLOCK_FREQ;
 		wm8962Config.format.mclk_HZ                = WM8962_SAI_CLK_FREQ;
