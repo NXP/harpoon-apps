@@ -37,12 +37,12 @@ static inline uint32_t dev_read_audio_pll_num(void)
 
 static inline uint32_t dev_read_audio_pll_denom(void)
 {
-	/* TODO */ return 0;
+	/* TODO */ return 1;
 }
 
 static inline uint32_t dev_read_audio_pll_post_div(void)
 {
-	/* TODO */ return 0;
+	/* TODO */ return 1;
 }
 
 /*
