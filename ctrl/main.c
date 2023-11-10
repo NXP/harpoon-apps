@@ -40,7 +40,8 @@ static void audio_usage(void)
 	printf(
 		"\nAudio options:\n"
 		"\t-f <frequency> audio clock frequency (in Hz)\n"
-		"\t               Supporting 44100, 48000, 88200, 176400, 96000, 192000 Hz\n"
+		"\t               imx8m{n,m,p}: supporting 44100, 48000, 88200, 96000, 176400, 192000 Hz\n"
+		"\t               imx93: supporting 48000, 96000 Hz\n"
 		"\t               Will use default frequency 48000Hz if not specified\n"
 		"\t-p <frames>    audio processing period (in frames)\n"
 		"\t               Supporting 2, 4, 8, 16, 32 frames\n"
