@@ -241,11 +241,19 @@ All resulting binaries can be found in "deploy/images" root directory of harpoon
 Jailhouse, running in the Linux root cell, provides the necessary tools to create, load and execute the reference applications built within this repository ; this example gives the commands for a inmate cell for i.MX 8MP EVK, replace "xxx" with "freertos" for FreeRTOS or "zephyr" for Zephyr:
 
 ```bash
+# RPMSG device on i.MX 8M Plus EVK for example
+RPMSG_DEV=fe100000.rpmsg-ca53
+# unbind the rpmsg device from imx_rpmsg driver
+echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/unbind
+
 modprobe jailhouse
 jailhouse enable /usr/share/jailhouse/cells/imx8mp.cell
 jailhouse cell create /usr/share/jailhouse/cells/imx8mp-harpoon-xxx.cell
 jailhouse cell load xxx /usr/share/harpoon/inmates/xxx/rt_latency.bin --address 0xc0000000
 jailhouse cell start xxx
+
+# bind the rpmsg device to imx_rpmsg driver
+echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/bind
 
 harpoon_ctrl latency -r 1   # start rt_latency test case 1
 
