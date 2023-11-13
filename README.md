@@ -70,7 +70,7 @@ Replace ```${revision}``` with any Harpoon release you wish to use. This can als
 # Repository structure
 
 The aim of this repository is to provide a comprehensive set of reference applications.
-It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as well as the MCUXpresso SDK (including drivers and libraries):
+It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as well as the MCUXpresso SDK (including drivers and libraries) and multiple middleware stacks:
 
 ```bash
 .
@@ -151,6 +151,8 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   ├── README.md
 │   └── west.yml
 ├── FreeRTOS-Kernel                         <-- RTOS Kernel Git tree
+├── gen_avb_sdk                             <-- GenAVB/TSN stack
+├── heterogeneous-multicore                 <--- Heterogeneous Multicore Framework
 ├── mcux-sdk                                <-- MCUXpresso Git tree
 │   ├── ...
 │   ├── components
@@ -163,6 +165,8 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   ├── middleware
 │   ├── tools
 │   └── utilities
+└── middleware                              <-- multicore and rpmsg-lite middleware
+└── rtos-abstraction-layer                  <-- RTOS Abstraction Layer
 └── zephyr                                  <-- Imported Zephyr module
 ```
 
