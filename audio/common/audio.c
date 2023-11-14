@@ -42,11 +42,11 @@ struct mode_handler {
 };
 
 #define DEFAULT_PERIOD		8
-#define DEFAULT_SAMPLE_RATE	48000
+#define DEFAULT_SAMPLE_RATE	48000U
 #define USE_TX_IRQ		1
 
 static const int supported_period[] = {2, 4, 8, 16, 32};
-static const uint32_t supported_rate[] = {44100, 48000, 88200, 96000, 176400, 192000};
+static const uint32_t supported_rate[] = SUPPORTED_RATES;
 
 struct ctrl_ctx {
 	struct rpmsg_ept *ept;

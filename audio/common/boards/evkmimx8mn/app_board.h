@@ -75,6 +75,8 @@
 #define DEMO_AUDIO_DATA_CHANNEL		(2U)
 #define DEMO_AUDIO_BIT_WIDTH		kSAI_WordWidth32bits
 
+#define SUPPORTED_RATES				{44100, 48000, 88200, 96000, 176400, 192000}
+
 /* Network Port configuration */
 #ifndef CONFIG_AUD_DISABLE_ENET
 #define BOARD_NUM_PORTS        1
