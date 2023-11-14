@@ -95,3 +95,12 @@ Description and comments:    Library and applications to support inter-core comm
 Release Location:            https://github.com/nxp-real-time-edge-sw/heterogeneous-multicore branch master (tag Real-Time-Edge-v2.6-202307)
 Origin:                      NXP (BSD-3-Clause)
 --------------------------------------------
+Package:                     rtos-abstraction-layer
+Outgoing License:            BSD-3-Clause
+License File:                LICENSE.txt
+Type of Content:             source code
+Description and comments:    An abstraction layer for Real-Time Operating Systems.
+Release Location:            https://github.com/NXP/rtos-abstraction-layer (tag 0_1_0)
+Origin:                      Amazon (MIT) - https://github.com/nxp-mcuxpresso/FreeRTOS-Kernel.git
+                             NXP (MIT, BSD-3-Clause) - https://github.com/NXP/rtos-abstraction-layer/blob/0_1/SCR-rtos-abstraction-layer.txt
+--------------------------------------------
