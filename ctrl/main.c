@@ -53,8 +53,8 @@ static void audio_usage(void)
 		"\t               2 - playback & recording (loopback)\n"
 		"\t               3 - audio pipeline\n"
 		"\t               4 - AVB audio pipeline\n"
-		"\t               5 - SMP audio pipeline\n"
-		"\t               6 - AVB audio pipeline (with MCR support)\n"
+		"\t               5 - SMP audio pipeline on imx8m{n,m,p}\n"
+		"\t               6 - AVB audio pipeline (with MCR support) only on i.mx8mp\n"
 		"\t-s             stop running audio mode\n"
 	);
 }
