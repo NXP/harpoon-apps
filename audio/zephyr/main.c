@@ -36,7 +36,7 @@ static void hardware_setup(void)
 
 static void data_task(void *context, void *thread_id, void *p3)
 {
-	uint8_t id = *(uint8_t *)thread_id;
+	uint8_t id = (uint8_t)(uintptr_t)thread_id;
 
 	do {
 		audio_process_data(context, id);
@@ -66,7 +66,7 @@ void main(void)
 
 	for (i = 0; i < DATA_THREADS; i++) {
 		thread_ret = k_thread_create(&data_thread[i], data_stack[i], STACK_SIZE,
-				data_task, context, &i, NULL,
+				data_task, context, (void *)(uintptr_t)i, NULL,
 				K_HIGHEST_THREAD_PRIO, 0, K_FOREVER);
 		os_assert(thread_ret != NULL, "k_thread_create() failed");
 		ret = k_thread_cpu_pin(&data_thread[i], i);
