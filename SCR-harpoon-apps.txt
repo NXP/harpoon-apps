@@ -1,7 +1,7 @@
 NXP Software Content Register
 
 Release: Harpoon Apps
-Version: 2.4
+Version: 2.5
 
 --------------------------------------------
 Package:                     Harpoon Apps
@@ -13,7 +13,7 @@ Description and comments:    Harpoon application examples
                              SDK-based examples to show how to use peripheral
                              drivers, integrate middleware and execute application
                              inside jailhouse cells on a ARM Cortex-A53 core.
-Release Location:            https://github.com/NXP/harpoon-apps (tag harpoon_2.4.0)
+Release Location:            https://github.com/NXP/harpoon-apps (tag harpoon_2.5.0)
 Origin:                      NXP (BSD-3-Clause)
 --------------------------------------------
 Package:                     MCUXpresso_SDK
@@ -22,7 +22,7 @@ License File:                mcux-sdk/LA_OPT_NXP_Software_License.txt
 Type of Content:             source code
 Description and comments:    Full SDK including device system files,
                              middleware components, board peripheral drivers, etc.
-Release Location:            https://github.com/nxp-mcuxpresso/mcux-sdk branch feature/aarch64_support (tag MCUX_2.13.1_aarch64_0.1)
+Release Location:            https://github.com/nxp-mcuxpresso/mcux-sdk branch feature/aarch64_support (tag MCUX_2.13.1_aarch64_0.2)
 Origin:                      NXP (LA_OPT_NXP_Software_License)
 --------------------------------------------
 Package:                     CMSIS_5
@@ -31,7 +31,7 @@ License File:                mcux-sdk/CMSIS/LICENSE.txt
 Type of Content:             source code
 Description and comments:    Vendor-independent hardware abstraction layer for microcontrollers that are based
                              on Arm Cortex processors.
-Release Location:            https://github.com/nxp-mcuxpresso/CMSIS_5.git (tag MCUX_2.13.0_aarch64_0.1)
+Release Location:            https://github.com/nxp-mcuxpresso/CMSIS_5.git (tag MCUX_2.13.0_aarch64_0.2)
 Origin:                      ARM (Apache-2.0) - https://github.com/ARM-software/CMSIS_5.git
 --------------------------------------------
 Package:                     Multicore SDK
@@ -39,7 +39,7 @@ Outgoing License:            BSD-3-Clause
 License File:                mcux-sdk/COPYING-BSD-3
 Type of Content:             source code
 Description and comments:    NXP Multicore Software Development Kit.
-Release Location:            https://github.com/nxp-mcuxpresso/mcux-sdk-middleware-multicore branch feature/heterogeneous_multicore (tag Real-Time-Edge-v2.6-202307)
+Release Location:            https://github.com/nxp-mcuxpresso/mcux-sdk-middleware-multicore branch feature/heterogeneous_multicore (tag Real-Time-Edge-v2.7-202312)
 Origin:                      NXP (BSD-3-Clause) - https://github.com/nxp-mcuxpresso/mcux-sdk/blob/MCUX_2.13.1/SW-Content-Register.txt#L165
 --------------------------------------------
 Package:                     RPMsg-Lite
@@ -50,7 +50,7 @@ Description and comments:    Lightweight implementation of the Remote Processor
                              Messaging (RPMsg) protocol, originally implemented
                              in the Open Asymmetric Multi Processing (OpenAMP)
                              framework.
-Release Location:            https://github.com/nxp-mcuxpresso/rpmsg-lite branch feature/heterogeneous_multicore (tag Real-Time-Edge-v2.6-202307)
+Release Location:            https://github.com/nxp-mcuxpresso/rpmsg-lite branch feature/heterogeneous_multicore (tag Real-Time-Edge-v2.7-202312)
 Origin:                      NXP (BSD-3-Clause)
                              Mentor Graphics, Ltd. (BSD-3-Clause) - https://github.com/OpenAMP/open-amp (lib/rpmsg)
 --------------------------------------------
@@ -59,7 +59,7 @@ Outgoing License:            MIT
 License File:                FreeRTOS-Kernel/License.md
 Type of Content:             source code
 Description and comments:    IoT operating system for microcontrollers with added ARM Cortex-A53 support
-Release Location:            https://github.com/nxp-mcuxpresso/FreeRTOS-Kernel.git (tag MCUX_2.13.1_aarch64_0.1)
+Release Location:            https://github.com/nxp-mcuxpresso/FreeRTOS-Kernel.git (tag MCUX_2.13.1_aarch64_0.2)
 Origin:                      Amazon (MIT)
 --------------------------------------------
 Package:                     Zephyr
@@ -67,7 +67,7 @@ Outgoing License:            Apache-2.0
 License File:                zephyr/LICENSE
 Type of Content:             source code
 Description and comments:    Open source scalable real-time operating system
-Release Location:            https://github.com/nxp-zephyr/zephyr.git (tag harpoon_2.4.0)
+Release Location:            https://github.com/nxp-zephyr/zephyr.git (tag harpoon_2.5.0)
 Origin:                      https://github.com/zephyrproject-rtos/zephyr.git
 --------------------------------------------
 Package:                     hal_nxp
@@ -75,7 +75,7 @@ Outgoing License:            LA_OPT_NXP_Software_License - Additional distributi
 License File:                modules/hal/mcux/mcux-sdk/LA_OPT_NXP_Software_License.txt
 Type of Content:             source code
 Description and comments:    SDK files for Zephyr
-Release Location:            https://github.com/nxp-zephyr/hal_nxp.git (tag harpoon_2.4.0)
+Release Location:            https://github.com/nxp-zephyr/hal_nxp.git (tag harpoon_2.5.0)
 Origin:                      https://github.com/nxp-zephyr/hal_nxp.git
 --------------------------------------------
 Package:                     genavb-sdk
@@ -83,8 +83,8 @@ Outgoing License:            BSD-3-Clause
 License File:                gen_avb_sdk/licenses/BSD-3-Clause
 Type of Content:             source code
 Description and comments:    GenAVB/TSN protocol stack for NXP MPUs and MCUs processors.
-Release Location:            https://github.com/NXP/GenAVB_TSN (tag 5_7_0)
-Origin:                      NXP (BSD-3-Clause) - https://github.com/NXP/GenAVB_TSN/blob/5_7/SCR_genavb-release.txt
+Release Location:            https://github.com/NXP/GenAVB_TSN (tag 5_10_0)
+Origin:                      NXP (BSD-3-Clause) - https://github.com/NXP/GenAVB_TSN/blob/5_10/SCR_genavb-release.txt
 --------------------------------------------
 Package:                     Heterogeneous_Multicore
 Outgoing License:            BSD-3-Clause
@@ -92,7 +92,7 @@ License Files:               LICENSE.txt
 Type of Content:             source code, project files, linker files
 Description and comments:    Library and applications to support inter-core communication and
                              resource sharing between heterogeneous multicore.
-Release Location:            https://github.com/nxp-real-time-edge-sw/heterogeneous-multicore branch master (tag Real-Time-Edge-v2.6-202307)
+Release Location:            https://github.com/nxp-real-time-edge-sw/heterogeneous-multicore branch master (tag Real-Time-Edge-v2.7-202312)
 Origin:                      NXP (BSD-3-Clause)
 --------------------------------------------
 Package:                     rtos-abstraction-layer
