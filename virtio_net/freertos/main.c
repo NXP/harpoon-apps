@@ -8,8 +8,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
-#include "timers.h"
-
 #include "board.h"
 #include "net/port_enet.h"
 #include "net/net_switch.h"
@@ -17,7 +15,6 @@
 #include "virtio-net.h"
 #include "app_virtio_config.h"
 #include "os/stdio.h"
-#include "os/unistd.h"
 
 /*******************************************************************************
  * Definitions

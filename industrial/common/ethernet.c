@@ -5,11 +5,8 @@
  */
 
 #include "ethernet.h"
-#include "app_board.h"
 #include "hrpn_ctrl.h"
 #include "industrial.h"
-
-#include "os/string.h"
 
 static void ethernet_response(struct rpmsg_ept *ept, uint32_t status)
 {

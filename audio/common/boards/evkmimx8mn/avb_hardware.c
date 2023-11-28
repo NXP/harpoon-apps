@@ -7,9 +7,7 @@
 #include "avb_hardware.h"
 
 #include "fsl_clock.h"
-#include "fsl_enet.h"
 #include "fsl_iomuxc.h"
-#include "pin_mux.h"
 
 static void pin_mux_enet(void)
 {

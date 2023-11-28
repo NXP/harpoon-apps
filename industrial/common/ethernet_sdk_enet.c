@@ -11,9 +11,7 @@
 #include "hrpn_ctrl.h"
 #include "industrial.h"
 
-#include "os/irq.h"
 #include "os/stdlib.h"
-#include "os/string.h"
 #include "os/unistd.h"
 
 #define ENET_PHY_ADDRESS                BOARD_PHY0_ADDRESS

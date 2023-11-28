@@ -7,7 +7,6 @@
 #include "avb_hardware.h"
 #include "fsl_enet_qos.h"
 #include "fsl_iomuxc.h"
-#include "pin_mux.h"
 
 static void pin_mux_enet_qos(void)
 {
