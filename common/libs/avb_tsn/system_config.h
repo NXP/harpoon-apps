@@ -1,5 +1,5 @@
 /*
- * Copyright 2019,2022 NXP
+ * Copyright 2019, 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -48,7 +48,7 @@ struct system_config {
 };
 
 int system_config_set_net(unsigned int port_id, uint8_t *hw_addr);
-struct net_config *system_config_get_net(int port_id);
+struct net_config *system_config_get_net(unsigned int port_id);
 struct app_config *system_config_get_app(void);
 struct avb_app_config *system_config_get_avb_app(void);
 uint32_t system_config_get_app_mode(void);

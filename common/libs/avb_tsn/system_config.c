@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 NXP
+ * Copyright 2019, 2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -24,7 +24,7 @@ exit:
 	return ret;
 }
 
-struct net_config *system_config_get_net(int port_id)
+struct net_config *system_config_get_net(unsigned int port_id)
 {
 	char port[10];
 
