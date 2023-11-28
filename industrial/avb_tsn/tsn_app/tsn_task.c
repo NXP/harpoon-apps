@@ -360,7 +360,7 @@ static void tsn_net_fp_config_enable(struct tsn_task *task)
     }
 
     for (i = 0; i < QOS_PRIORITY_MAX; i++) {
-        if (priority_to_traffic_class_map(CFG_TRAFFIC_CLASS_MAX, CFG_SR_CLASS_MAX)[i] >= tclass)
+        if (map[i] >= tclass)
             config.u.cfg_802_1Q.admin_status[i] = GENAVB_FP_ADMIN_STATUS_EXPRESS;
         else
             config.u.cfg_802_1Q.admin_status[i] = GENAVB_FP_ADMIN_STATUS_PREEMPTABLE;
