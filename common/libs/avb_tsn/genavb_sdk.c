@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "board.h"
-#include "dev_itf.h"
+#include "genavb_sdk.h"
+#include "hlog.h"
 #include "system_config.h"
 
 # if defined(BOARD_NUM_GPT) && (BOARD_NUM_GPT > 0)
@@ -42,4 +42,21 @@ int BOARD_NetPort_Get_MAC(unsigned int port, uint8_t *mac)
     memcpy(mac, net_cfg->hw_addr, 6);
 
     return 0;
+}
+
+int sdk_printf(const char *fmt_s, ...)
+{
+    va_list ap;
+    int rc;
+
+    va_start(ap, fmt_s);
+    rc = os_vprintf(fmt_s, ap);
+    va_end(ap);
+
+    return rc;
+}
+
+int sdk_vprintf(const char *fmt_s, va_list ap)
+{
+    return os_vprintf(fmt_s, ap);
 }

@@ -4,7 +4,6 @@ message("lib_hlog component is included.")
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/hlog.c
-    ${CMAKE_CURRENT_LIST_DIR}/sdk_printf.c
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE

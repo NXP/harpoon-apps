@@ -7,17 +7,13 @@
 /*
  * Device interface for genAVB
  */
-#ifndef _DEV_ITF_H_
-#define _DEV_ITF_H_
-
-#include "fsl_clock.h"
-#include "fsl_enet_qos.h"
+#include "genavb_sdk.h"
 
 /*
  * 24MHz XTAL oscillator
  * Primary clock source for all PLLs
  */
-static inline uint32_t dev_get_pll_ref_freq(void)
+uint32_t dev_get_pll_ref_freq(void)
 {
 	/* TODO */ return 0;
 }
@@ -25,22 +21,22 @@ static inline uint32_t dev_get_pll_ref_freq(void)
 /*
  * Audio Pll tuning
  */
-static inline void dev_write_audio_pll_num(uint32_t num)
+void dev_write_audio_pll_num(uint32_t num)
 {
 	/* TODO */
 }
 
-static inline uint32_t dev_read_audio_pll_num(void)
+uint32_t dev_read_audio_pll_num(void)
 {
 	/* TODO */ return 0;
 }
 
-static inline uint32_t dev_read_audio_pll_denom(void)
+uint32_t dev_read_audio_pll_denom(void)
 {
 	/* TODO */ return 1;
 }
 
-static inline uint32_t dev_read_audio_pll_post_div(void)
+uint32_t dev_read_audio_pll_post_div(void)
 {
 	/* TODO */ return 1;
 }
@@ -48,7 +44,7 @@ static inline uint32_t dev_read_audio_pll_post_div(void)
 /*
  * Enet QOS module frequency (clk_csr_i)
  */
-static inline uint32_t dev_get_enet_core_freq(void *base)
+uint32_t dev_get_enet_core_freq(void *base)
 {
 	if (base == ENET_QOS)
 		return CLOCK_GetIpFreq(kCLOCK_Root_WakeupAxi);
@@ -57,9 +53,20 @@ static inline uint32_t dev_get_enet_core_freq(void *base)
 }
 
 /*
+ * Enet Qos 1588 timer frequency (ptp_ref_i)
+ */
+uint32_t dev_get_enet_1588_freq(void *base)
+{
+	if (base == ENET_QOS)
+		return CLOCK_GetIpFreq(kCLOCK_Root_EnetTimer2);
+	else
+		return 0;
+}
+
+/*
  * TPM counter input frequency (lptpm_clk)
  */
-static inline uint32_t dev_get_tpm_counter_freq(void *base)
+uint32_t dev_get_tpm_counter_freq(void *base)
 {
 	if (base == TPM1)
 		return CLOCK_GetIpFreq(kCLOCK_Root_BusAon);
@@ -76,16 +83,3 @@ static inline uint32_t dev_get_tpm_counter_freq(void *base)
 	else
 		return 0;
 }
-
-/*
- * Enet Qos 1588 timer frequency (ptp_ref_i)
- */
-static inline uint32_t dev_get_enet_1588_freq(void *base)
-{
-	if (base == ENET_QOS)
-		return CLOCK_GetIpFreq(kCLOCK_Root_EnetTimer2);
-	else
-		return 0;
-}
-
-#endif /* _DEV_ITF_H_ */

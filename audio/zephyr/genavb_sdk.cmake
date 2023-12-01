@@ -8,17 +8,23 @@ set(CMAKE_TOOLCHAIN_FILE "${ProjDirPath}/../../../modules/hal/nxp/tools/cmake_to
 set(FREERTOS_SDK "${ProjDirPath}/../../../modules/hal/nxp/mcux/mcux-sdk")
 set(FREERTOS_DIR "${RTOS_ABSTRACTION_LAYER_DIR}/zephyr")
 set(FREERTOS_APPS "${ProjDirPath}/../../")
-set(CONFIG "endpoint_tsn")
+
+if(CONFIG_BOARD_MIMX8MM_EVK_A53)
+  set(TARGET "zephyr_imx8mm_ca53")
+elseif(CONFIG_BOARD_MIMX8MN_EVK_A53)
+  set(TARGET "zephyr_imx8mn_ca53")
+elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
+  set(TARGET "zephyr_imx8mp_ca53")
+elseif(CONFIG_BOARD_MIMX93_EVK_A55)
+  set(TARGET "zephyr_imx93_ca55")
+endif()
+
+set(CONFIG "endpoint_avb")
+
 add_subdirectory(${GenAVBPath} "${GenAVBBuildPath}")
 
-# Overwrite unsupported configurations
-add_compile_options(-DSERIAL_MODE=0)
-add_compile_options(-DBUILD_MOTOR=0)
-
 zephyr_include_directories(
-  ${AppPath}/avb_tsn/tsn_app
   ${CommonPath}/zephyr/boards/${BoardName}
-  ${CommonPath}/libs
   ${CommonPath}/libs/avb_tsn
   ${GenAVBPath}/include
   ${GenAVBPath}/include/freertos
@@ -26,31 +32,34 @@ zephyr_include_directories(
 
 list(APPEND CMAKE_MODULE_PATH
   ${CommonPath}/libs/avb_tsn
-  ${CommonPath}/libs/stats
 )
 
+# Set ENET driver defines for i.MX 8MM
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MM_EVK_A53 FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MN_EVK_A53 FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MM_EVK_A53 ENET_ENHANCEDBUFFERDESCRIPTOR_MODE)
+# Set ENET driver defines for i.MX 8MN
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MN_EVK_A53 FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MN_EVK_A53 ENET_ENHANCEDBUFFERDESCRIPTOR_MODE)
+# Set ENET_QoS driver defines for i.MX 8MP
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MP_EVK_A53 FSL_ETH_ENABLE_CACHE_CONTROL)
+# Set ENET_QoS driver defines for i.MX 93
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX93_EVK_A55 FSL_ETH_ENABLE_CACHE_CONTROL)
+
 zephyr_compile_definitions(CONFIG_GENAVB_ENABLE)
 
 add_library(avb-core-lib STATIC IMPORTED)
+
 set_target_properties(avb-core-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/libstack-core.a)
 add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-freertos)
 
 include(lib_avb_tsn)
-include(lib_stats)
 
 target_sources(app PRIVATE
-  ${AppPath}/avb_tsn/tsn_app/alarm_task.c
-  ${AppPath}/avb_tsn/tsn_app/configs.c
-  ${AppPath}/avb_tsn/tsn_app/cyclic_task.c
-  ${AppPath}/avb_tsn/tsn_app/tsn_task.c
-  ${AppPath}/avb_tsn/tsn_app/tsn_tasks_config.c
-  ${AppPath}/common/ethernet_avb_tsn.c
+  ${AppPath}/common/audio_element_avtp_sink.c
+  ${AppPath}/common/audio_element_avtp_source.c
+  ${AppPath}/common/avb_config.c
+  ${AppPath}/common/boards/${BoardName}/avb_hardware.c
+  ${CommonPath}/boards/${BoardName}/genavb_sdk.c
 )
 
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)

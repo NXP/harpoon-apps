@@ -5,9 +5,9 @@ SET(MCUX_DEVICE "MIMX9352_ca55")
 SET(CMAKE_SYSTEM_NAME Generic)
 CMAKE_MINIMUM_REQUIRED (VERSION 3.12.0)
 
-# THE VERSION NUMBER
-SET (Tutorial_VERSION_MAJOR 1)
-SET (Tutorial_VERSION_MINOR 0)
+project(audio)
+
+set(MCUX_SDK_PROJECT_NAME ${CMAKE_PROJECT_NAME}.elf)
 
 # ENABLE DRIVER CACHE CONTROL
 ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
@@ -46,17 +46,6 @@ SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 SET(ProjRootPath "${ProjDirPath}/../../../../../")
 SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
 
-SET(GenAVBPath "${ProjDirPath}/../../../../../../gen_avb_sdk")
-# RTOS abstraction layer configuration
-SET(RTOS_ABSTRACTION_LAYER_DIR "${GenAVBPath}/freertos/freertos")
-SET(GenAVBBuildPath "${CMAKE_CURRENT_BINARY_DIR}/gen_avb_build")
-SET(FREERTOS_SDK ${SdkDirPath})
-SET(FREERTOS_DIR ${RtosPath})
-SET(FREERTOS_APPS "${ProjDirPath}/../../../../..")
-SET(TARGET "freertos_imx93_ca55")
-SET(CONFIG "endpoint_avb")
-ADD_SUBDIRECTORY(${GenAVBPath} "${GenAVBBuildPath}")
-
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 
@@ -65,18 +54,19 @@ add_compile_options(-DCODEC_WM8962)
 add_compile_options(-DCODEC_WM8962_ENABLE=1)
 add_compile_options(-DCONFIG_GENAVB_ENABLE=1)
 
-project(audio)
-set(BIN_NAME audio)
+add_executable(${MCUX_SDK_PROJECT_NAME})
 
-set(MCUX_SDK_PROJECT_NAME ${BIN_NAME}.elf)
+if(CONFIG_USE_GENAVB)
+  include(genavb_sdk.cmake)
+endif()
 
 include(${BoardPath}/armgcc_aarch64/flags.cmake)
-add_executable(${MCUX_SDK_PROJECT_NAME}
+
+target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/sai_drv.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
-    "${AppPath}/common/boards/${BoardName}/avb_hardware.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/boards/${BoardName}/sai_config.c"
@@ -85,8 +75,6 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/audio.c"
     "${AppPath}/common/audio_buffer.c"
     "${AppPath}/common/audio_element.c"
-    "${AppPath}/common/audio_element_avtp_sink.c"
-    "${AppPath}/common/audio_element_avtp_source.c"
     "${AppPath}/common/audio_element_dtmf.c"
     "${AppPath}/common/audio_element_pll.c"
     "${AppPath}/common/audio_element_routing.c"
@@ -94,7 +82,6 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
     "${AppPath}/common/audio_element_sai_source.c"
     "${AppPath}/common/audio_element_sine.c"
     "${AppPath}/common/audio_pipeline.c"
-    "${AppPath}/common/avb_config.c"
     "${AppPath}/common/pipeline_config_single_sai.c"
     "${AppPath}/common/play_pipeline.c"
     "${CommonBoardPath}/clock_init.c"
@@ -112,8 +99,6 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonBoardPath}
     ${BoardPath}
     ${AppBoardPath}
-    ${GenAVBPath}/include
-    ${GenAVBPath}/include/freertos
     ${SdkDirPath}/devices/MIMX9352
     ${SdkDirPath}/drivers/enet_qos
 )
@@ -121,7 +106,6 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
-    ${CommonPath}/libs/avb_tsn
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/hlog
     ${CommonPath}/libs/jailhouse
@@ -132,14 +116,6 @@ set(CMAKE_MODULE_PATH
     ${RtosPath}
     ${SdkDirPath}
 )
-
-add_library(avb-core-lib STATIC IMPORTED)
-set_target_properties(avb-core-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/libstack-core.a)
-
-add_library(srp-lib STATIC IMPORTED)
-set_target_properties(srp-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/srp)
-
-add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-freertos srp-lib)
 
 # include entry for cmake components
 
@@ -152,7 +128,6 @@ include(device_system_ca55)
 include(common_freertos)
 include(common_freertos_core_armv8a)
 
-include(lib_avb_tsn)
 include(lib_ctrl)
 include(lib_hlog)
 include(lib_jailhouse)
@@ -192,12 +167,6 @@ include(utilities_misc_utilities_aarch64)
 
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
 
-target_link_libraries(srp-lib INTERFACE stack-freertos)
-
-target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE avb-core-lib)
-
-target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE stack-freertos)
-
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE m)
 
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE c)
@@ -209,4 +178,4 @@ target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE nosys)
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)
 
 ADD_CUSTOM_COMMAND(TARGET ${MCUX_SDK_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY}
--Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/${BIN_NAME}.bin)
+-Obinary ${EXECUTABLE_OUTPUT_PATH}/${MCUX_SDK_PROJECT_NAME} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_PROJECT_NAME}.bin)
