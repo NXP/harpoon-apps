@@ -27,7 +27,7 @@ zephyr_include_directories(
   ${CommonPath}/zephyr/boards/${BoardName}
   ${CommonPath}/libs/avb_tsn
   ${GenAVBPath}/include
-  ${GenAVBPath}/include/freertos
+  ${GenAVBPath}/include/rtos
 )
 
 list(APPEND CMAKE_MODULE_PATH
@@ -50,7 +50,7 @@ zephyr_compile_definitions(CONFIG_GENAVB_ENABLE)
 add_library(avb-core-lib STATIC IMPORTED)
 
 set_target_properties(avb-core-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/libstack-core.a)
-add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-freertos)
+add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-rtos)
 
 include(lib_avb_tsn)
 
@@ -64,5 +64,5 @@ target_sources(app PRIVATE
 
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE avb-core-lib)
-target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE stack-freertos)
+target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE stack-rtos)
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)

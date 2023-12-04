@@ -1,7 +1,7 @@
 set(GenAVBPath "${ProjDirPath}/../../../../../../gen_avb_sdk")
 
 # RTOS abstraction layer configuration
-set(RTOS_ABSTRACTION_LAYER_DIR "${GenAVBPath}/freertos/freertos")
+set(RTOS_ABSTRACTION_LAYER_DIR "${GenAVBPath}/rtos/freertos")
 set(GenAVBBuildPath "${CMAKE_CURRENT_BINARY_DIR}/gen_avb_build")
 
 set(FREERTOS_SDK ${SdkDirPath})
@@ -22,7 +22,7 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${GenAVBPath}/include
-    ${GenAVBPath}/include/freertos
+    ${GenAVBPath}/include/rtos
 )
 
 list(APPEND CMAKE_MODULE_PATH
@@ -33,11 +33,11 @@ add_library(avb-core-lib STATIC IMPORTED)
 
 set_target_properties(avb-core-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/libstack-core.a)
 
-add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-freertos)
+add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-rtos)
 
 include(lib_avb_tsn)
 
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE avb-core-lib)
-target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE stack-freertos)
+target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE stack-rtos)
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)
