@@ -33,15 +33,11 @@ add_library(avb-core-lib STATIC IMPORTED)
 
 set_target_properties(avb-core-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/libstack-core.a)
 
-add_library(srp-lib STATIC IMPORTED)
-set_target_properties(srp-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/srp)
-
-add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-freertos srp-lib)
+add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-freertos)
 
 include(lib_avb_tsn)
 
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
-target_link_libraries(srp-lib INTERFACE stack-freertos)
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE avb-core-lib)
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE stack-freertos)
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--end-group)
