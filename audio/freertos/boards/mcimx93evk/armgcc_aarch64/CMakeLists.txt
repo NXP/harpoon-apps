@@ -12,10 +12,6 @@ set(MCUX_SDK_PROJECT_NAME ${CMAKE_PROJECT_NAME}.elf)
 # ENABLE DRIVER CACHE CONTROL
 ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
 
-# config to select component, the format is CONFIG_USE_${component}
-set(CONFIG_USE_middleware_freertos-kernel_MIMX9352 true)
-set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
-ADD_DEFINITIONS(-DAARCH64=1)
 ADD_DEFINITIONS(-DSDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1700000000UL)
 
 # ENABLE ASM
@@ -41,10 +37,7 @@ SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/${BoardName}")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX9352")
-SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
-
 SET(ProjRootPath "${ProjDirPath}/../../../../../")
-SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/freertos")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -116,8 +109,6 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/rpmsg
     ${CommonPath}/libs/stats
-    ${HtMulticorePath}/libs/gen_sw_mbox
-    ${MulticorePath}
     ${RtosPath}
     ${SdkDirPath}
     ${RtosAbstractionLayerPath}
@@ -140,7 +131,7 @@ include(common_freertos_core_armv8a)
 include(lib_ctrl)
 include(lib_hlog)
 include(lib_jailhouse)
-include(lib_rpmsg)
+include(lib_rpmsg_freertos)
 include(lib_stats)
 
 include(component_codec_adapters)
@@ -168,9 +159,6 @@ include(driver_wm8962)
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
 include(middleware_freertos-kernel_aarch64)
-include(middleware_multicore_rpmsg_lite_aarch64_freertos)
-include(middleware_multicore_rpmsg_lite_freertos)
-include(middleware_multicore_rpmsg_lite_MIMX9352)
 
 include(utility_assert)
 include(utility_debug_console)

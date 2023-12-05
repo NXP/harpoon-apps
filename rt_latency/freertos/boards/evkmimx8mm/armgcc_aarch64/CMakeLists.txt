@@ -9,11 +9,6 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.12.0)
 SET (Tutorial_VERSION_MAJOR 1)
 SET (Tutorial_VERSION_MINOR 0)
 
-# config to select component, the format is CONFIG_USE_${component}
-set(CONFIG_USE_middleware_freertos-kernel_MIMX8MM6 true)
-set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
-ADD_DEFINITIONS(-DAARCH64=1)
-
 # ENABLE ASM
 ENABLE_LANGUAGE(ASM)
 
@@ -33,10 +28,7 @@ SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/evkmimx8mm")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/evkmimx8mm")
-SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
-
 SET(ProjRootPath "${ProjDirPath}/../../../../../")
-SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/freertos")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -77,8 +69,6 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/hlog
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/rpmsg
-    ${HtMulticorePath}/libs/gen_sw_mbox
-    ${MulticorePath}
     ${RtosPath}
     ${SdkDirPath}
     ${RtosAbstractionLayerPath}
@@ -115,14 +105,11 @@ include(lib_stats)
 include(lib_jailhouse)
 include(lib_hlog)
 include(lib_ctrl)
-include(lib_rpmsg)
+include(lib_rpmsg_freertos)
 
 include(middleware_freertos-kernel_aarch64)
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)
-include(middleware_multicore_rpmsg_lite_aarch64_freertos)
-include(middleware_multicore_rpmsg_lite_freertos)
-include(middleware_multicore_rpmsg_lite_MIMX8MM6)
 
 include(utility_assert)
 include(utility_debug_console)
