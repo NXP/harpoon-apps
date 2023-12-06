@@ -11,6 +11,10 @@
 #include "app_board.h"
 #include "hlog.h"
 
+#define WM8962_THREED1					0x10CU
+#define WM8962_THREED1_ADCMONOMIX_MASK	0x40U
+#define WM8962_THREED1_ADCMONOMIX_SHIFT	0x06U
+
 static codec_handle_t wm8962_codec_handle;
 
 wm8962_config_t wm8962Config = {
@@ -68,6 +72,7 @@ end:
 int32_t codec_setup(enum codec_id cid)
 {
 	int32_t err;
+	wm8962_handle_t *devHandle;
 
 	if (cid == CODEC_ID_WM8962) {
 		/* Setup I2C clock */
@@ -105,6 +110,17 @@ int32_t codec_setup(enum codec_id cid)
 		err = CODEC_SetVolume(&wm8962_codec_handle, (kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight), 75);
 		if (err != kStatus_Success) {
 			log_err("WM8962 set volume failed (err %d)\n", err);
+			goto end;
+		}
+
+		/* To have a stereo signal from a mono channel microphone on the EVK:
+		* Enable ADC Monomix to mix both Right and Left ADC signals
+		*/
+		devHandle = (wm8962_handle_t *)((uintptr_t)(((codec_handle_t *)&wm8962_codec_handle)->codecDevHandle));
+
+		err = WM8962_ModifyReg(devHandle, WM8962_THREED1, WM8962_THREED1_ADCMONOMIX_MASK, 1 << WM8962_THREED1_ADCMONOMIX_SHIFT);
+		if (err != kStatus_Success) {
+			log_err("WM8962 enable ADC Monomix failed (err %d)\n", err);
 			goto end;
 		}
 		err = kStatus_Success;
