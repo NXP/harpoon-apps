@@ -59,7 +59,7 @@ if [ "$2" == "audio" ]; then
 	INMATE_NAME=${RTOS}
 	EOF
 elif [ "$2" == "audio_smp" ]; then
-	if [[ "$RTOS" != "zephyr" ]]; then
+	if [[ "$RTOS" != "zephyr" || "$SOC" == "imx93" ]]; then
 		echo "Unsupported RTOS"
 		exit 4
 	fi
