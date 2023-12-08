@@ -4,9 +4,9 @@ set(GenAVBPath "${ProjDirPath}/../../../../../../gen_avb_sdk")
 set(RTOS_ABSTRACTION_LAYER_DIR "${GenAVBPath}/rtos/freertos")
 set(GenAVBBuildPath "${CMAKE_CURRENT_BINARY_DIR}/gen_avb_build")
 
-set(FREERTOS_SDK ${SdkDirPath})
-set(FREERTOS_DIR ${RtosPath})
-set(FREERTOS_APPS "${ProjDirPath}/../../../../..")
+set(MCUX_SDK ${SdkDirPath})
+set(RTOS_DIR ${RtosPath})
+set(RTOS_APPS "${ProjDirPath}/../../../../..")
 set(TARGET "freertos_imx8mm_ca53")
 set(CONFIG "endpoint_avb")
 
