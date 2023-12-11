@@ -174,7 +174,7 @@ const static struct mode_handler g_handler[] =
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
 		.data = &play_pipeline_smp_config,
-	}
+	},
 #endif
 #if (CONFIG_GENAVB_ENABLE == 1)
 	[6] = {
@@ -184,7 +184,7 @@ const static struct mode_handler g_handler[] =
 		.stats = play_pipeline_stats,
 		.ctrl = play_pipeline_ctrl_avb,
 		.data = &play_pipeline_mcr_avb_config,
-	}
+	},
 #endif
 };
 
