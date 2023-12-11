@@ -655,7 +655,11 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
             {
                 testTxNum++;
                 while (kStatus_Success != ENET_QOS_SendFrame(EXAMPLE_ENET_QOS_BASE, &g_handle, &g_frame[ringId][0],
-                                                             ENET_QOS_FRAME_LENGTH, ringId, false, NULL))
+                                                             ENET_QOS_FRAME_LENGTH, ringId, false, NULL
+#if FSL_ENET_QOS_DRIVER_VERSION >= MAKE_VERSION(2, 6, 0)
+                                                             , kENET_QOS_TxOffloadDisable
+#endif
+                                                            ))
                 {
                 }
                 ringId = (ringId + 2) % 3;
