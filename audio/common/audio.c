@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,6 +20,7 @@
 
 #include "app_board.h"
 #include "codec_config.h"
+#include "pin_mux.h"
 #include "sai_clock_config.h"
 #include "sai_drv.h"
 #include "sai_config.h"
@@ -46,7 +47,6 @@ struct mode_handler {
 #define USE_TX_IRQ		1
 
 static const int supported_period[] = {2, 4, 8, 16, 32};
-static const uint32_t supported_rate[] = SUPPORTED_RATES;
 
 struct ctrl_ctx {
 	struct rpmsg_ept *ept;
@@ -63,6 +63,7 @@ struct data_ctx {
 	sai_sample_rate_t sample_rate;
 	uint32_t chan_numbers;
 	uint8_t period;
+	bool use_audio_hat;
 
 	uint64_t callback;
 
@@ -316,6 +317,9 @@ static void sai_setup(struct data_ctx *ctx)
 			sai_config.working_mode = SAI_POLLING_MODE;
 		}
 
+		if (ctx->use_audio_hat)
+			log_info("MX93AUD-HAT selected\n");
+
 		/* Configure attached codec */
 		cid = sai_active_list[i].cid;
 		ret = codec_setup(cid);
@@ -506,7 +510,10 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 		goto exit;
 	}
 
-	if (assign_nonzero_valid_val(rate, run->frequency, supported_rate) != 0) {
+	/* If user configured rate is zero, set to default */
+	rate = (run->frequency == 0) ? DEFAULT_SAMPLE_RATE : run->frequency;
+
+	if (!codec_is_rate_supported(rate, run->use_audio_hat )) {
 		log_err("Rate %d Hz is not supported\n", run->frequency);
 		goto exit;
 	}
@@ -516,10 +523,14 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	ctx->chan_numbers = DEMO_AUDIO_DATA_CHANNEL;
 	ctx->bit_width = DEMO_AUDIO_BIT_WIDTH;
 	ctx->period = period;
+	ctx->use_audio_hat = run->use_audio_hat;
 	cfg.rate = rate;
 	cfg.period = period;
 
 	audio_check_params(&cfg, run->id);
+
+	pin_mux_dynamic_config(ctx->use_audio_hat);
+	sai_set_audio_hat_codec(ctx->use_audio_hat);
 
 	for (i = 0; i < pipeline_count; i++) {
 		cfg.data = (void *)play_cfg->cfg[i];

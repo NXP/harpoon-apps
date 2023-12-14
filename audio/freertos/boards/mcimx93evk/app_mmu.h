@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,6 +8,14 @@
 #define _APP_MMU_H_
 
 #define APP_MMU_ENTRIES		\
+	MMU_REGION_FLAT_ENTRY("LPI2C4",					\
+			      LPI2C4_BASE, KB(64),			\
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),	\
+									\
+	MMU_REGION_FLAT_ENTRY("GPIO2",					\
+			      GPIO2_BASE, KB(64),			\
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),  \
+									\
 	MMU_REGION_FLAT_ENTRY("ENET_QOS",				\
 			      ENET_QOS_BASE, KB(64),			\
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),  \

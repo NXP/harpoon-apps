@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -42,6 +42,7 @@ static void audio_usage(void)
 		"\t-f <frequency> audio clock frequency (in Hz)\n"
 		"\t               imx8m{n,m,p}: supporting 44100, 48000, 88200, 96000, 176400, 192000 Hz\n"
 		"\t               imx93: supporting 48000, 96000 Hz\n"
+		"\t                      supporting 48000, 96000, 192000 Hz using MX93AUD-HAT\n"
 		"\t               Will use default frequency 48000Hz if not specified\n"
 		"\t-p <frames>    audio processing period (in frames)\n"
 		"\t               Supporting 2, 4, 8, 16, 32 frames\n"
@@ -55,11 +56,12 @@ static void audio_usage(void)
 		"\t               4 - AVB audio pipeline\n"
 		"\t               5 - SMP audio pipeline on imx8m{n,m,p}\n"
 		"\t               6 - AVB audio pipeline (with MCR support) only on i.mx8mp\n"
+		"\t-H             select the MX93AUD-HAT extension audio board. Only on i.mx93\n"
 		"\t-s             stop running audio mode\n"
 	);
 }
 
-static int audio_run(int fd, unsigned int id, unsigned int frequency, unsigned int period, uint8_t *hw_addr)
+static int audio_run(int fd, unsigned int id, unsigned int frequency, unsigned int period, uint8_t *hw_addr, bool use_audio_hat)
 {
 	struct hrpn_cmd_audio_run run = {0,};
 	struct hrpn_response resp;
@@ -69,6 +71,7 @@ static int audio_run(int fd, unsigned int id, unsigned int frequency, unsigned i
 	run.id = id;
 	run.frequency = frequency;
 	run.period = period;
+	run.use_audio_hat = use_audio_hat;
 
 	memcpy(run.addr, hw_addr, sizeof(run.addr));
 
@@ -97,10 +100,11 @@ static int audio_main(int argc, char *argv[], int fd)
 	int rc = 0;
 	unsigned int frequency = 0;
 	unsigned int period = 0;
+	bool use_audio_hat = false;
 	uint8_t mac_addr[6] = MAC_ADDRESS_DEFAULT;
 	bool is_run_cmd = false;
 
-	while ((option = getopt(argc, argv, "f:p:r:a:sv")) != -1) {
+	while ((option = getopt(argc, argv, "f:p:r:a:Hsv")) != -1) {
 		switch (option) {
 		case 'f':
 			if (strtoul_check(optarg, NULL, 0, &frequency) < 0) {
@@ -139,8 +143,18 @@ static int audio_main(int argc, char *argv[], int fd)
 			is_run_cmd = true;
 			break;
 
+		case 'H':
+			use_audio_hat = true;
+			break;
+
 		case 's':
 			rc = audio_stop(fd);
+			if (system("/usr/share/harpoon/scripts/harpoon_configure.sh audio stop") != 0) {
+				printf("configure script failed.\n");
+				rc = -1;
+				goto out;
+			}
+
 			break;
 
 		default:
@@ -148,9 +162,24 @@ static int audio_main(int argc, char *argv[], int fd)
 			break;
 		}
 	}
-	/* Run the case after we get all parameters */
+
+	if (use_audio_hat && is_run_cmd) {
+		if (system("/usr/share/harpoon/scripts/harpoon_configure.sh audio start_audio_hat") != 0) {
+			printf("configure script failed.\n");
+			rc = -1;
+			goto out;
+		}
+	} else if (is_run_cmd) {
+		if (system("/usr/share/harpoon/scripts/harpoon_configure.sh audio start") != 0) {
+			printf("configure script failed.\n");
+			rc = -1;
+			goto out;
+		}
+	}
+
+	/* Run the case after we get all parameters */	
 	if (is_run_cmd)
-		rc = audio_run(fd, id, frequency, period, mac_addr);
+		rc = audio_run(fd, id, frequency, period, mac_addr, use_audio_hat);
 
 out:
 	return rc;

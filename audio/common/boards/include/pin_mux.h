@@ -8,5 +8,6 @@
 #define _PIN_MUX_H_
 
 void BOARD_InitPins(void);
+void pin_mux_dynamic_config(bool use_audio_hat);
 
 #endif /* _PIN_MUX_H_ */

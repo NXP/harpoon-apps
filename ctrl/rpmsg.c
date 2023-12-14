@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <poll.h>
+#include <string.h>
 
 #include "rpmsg.h"
 
@@ -147,9 +148,14 @@ int rpmsg_init(uint32_t dst)
 		goto err;
 	}
 
-	fd = open(rpmsg_dev, O_RDWR | O_NONBLOCK);
+	/* Add the close-on-exec flag for the rpmsg device file descriptor to avoid keeping it open
+	* in child processes launched by the runtime configuration through the system() call.
+	* Otherwise, the control application will fail to open the device again.
+	*/
+	fd = open(rpmsg_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+
 	if (fd < 0)
-		printf("failed to open RPMSG dev: %s\n", rpmsg_dev);
+		printf("failed to open RPMSG dev: %s, errno: %s\n", rpmsg_dev, strerror(errno));
 
 	return fd;
 

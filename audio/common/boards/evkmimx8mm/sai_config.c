@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -37,3 +37,7 @@ struct sai_active_config sai_active_list[] = {
 };
 
 int32_t sai_active_list_nelems = ARRAY_SIZE(sai_active_list);
+
+void sai_set_audio_hat_codec(bool use_audio_hat) {
+	return;
+}

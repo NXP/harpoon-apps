@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,6 +7,7 @@
 #define _HRPN_CTRL_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "hrpn_ctrl_audio_pipeline.h"
 
@@ -78,6 +79,7 @@ struct hrpn_cmd_audio_run {
 	uint32_t id;
 	uint32_t frequency;
 	uint32_t period;
+	bool use_audio_hat;
 	uint8_t addr[6];
 };
 

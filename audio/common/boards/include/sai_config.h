@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,5 +20,6 @@ struct sai_active_config {
 
 extern struct sai_active_config sai_active_list[];
 extern int32_t sai_active_list_nelems;
+void sai_set_audio_hat_codec(bool use_audio_hat);
 
 #endif /* _SAI_CONFIG_H_ */

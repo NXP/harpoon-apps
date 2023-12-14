@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -177,4 +177,11 @@ int32_t codec_close(enum codec_id cid)
 
 end:
 	return err;
+}
+
+bool codec_is_rate_supported(uint32_t rate, bool use_audio_hat)
+{
+	uint32_t supported_rates[] = SUPPORTED_RATES;
+
+	return is_value_in_array(rate, supported_rates, ARRAY_SIZE(supported_rates));
 }
