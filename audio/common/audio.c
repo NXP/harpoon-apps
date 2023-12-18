@@ -134,6 +134,12 @@ static struct play_pipeline_config play_pipeline_avb_smp_config = {
 		&pipeline_full_avb_thread_1_config,
 	}
 };
+static struct play_pipeline_config play_pipeline_mcr_smp_config = {
+	.cfg = {
+		&pipeline_mcr_avb_thread_0_config,
+		&pipeline_mcr_avb_thread_1_config,
+	}
+};
 #endif
 
 const static struct mode_handler g_handler[] =
@@ -203,6 +209,14 @@ const static struct mode_handler g_handler[] =
 		.stats = play_pipeline_stats,
 		.ctrl = play_pipeline_ctrl_avb,
 		.data = &play_pipeline_avb_smp_config,
+	},
+	[8] = {
+		.init = play_pipeline_init_avb,
+		.exit = play_pipeline_exit_avb,
+		.run = play_pipeline_run,
+		.stats = play_pipeline_stats,
+		.ctrl = play_pipeline_ctrl_avb,
+		.data = &play_pipeline_mcr_smp_config,
 	},
 #endif
 };

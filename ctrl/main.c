@@ -57,6 +57,7 @@ static void audio_usage(void)
 		"\t               5 - SMP audio pipeline on imx8m{n,m,p}\n"
 		"\t               6 - AVB audio pipeline (with MCR support) only on i.mx8mp\n"
 		"\t               7 - SMP + AVB audio pipeline on imx8m{n,m,p}\n"
+		"\t               8 - SMP + AVB audio pipeline (with MCR support) only on i.mx8mp\n"
 		"\t-H             select the MX93AUD-HAT extension audio board. Only on i.mx93\n"
 		"\t-s             stop running audio mode\n"
 	);

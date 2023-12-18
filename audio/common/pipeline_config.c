@@ -1104,3 +1104,156 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 	},
 };
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
+
+#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
+
+const struct audio_pipeline_config pipeline_mcr_avb_thread_0_config = {
+
+	.name = "AVB audio pipeline for thread 0",
+
+	.stages = 2,
+
+	.stage[0] = {
+
+		.elements = 3,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 440,
+				.amplitude = 0.5,
+			},
+			.outputs = 1,
+			.output = {0},
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_SAI_SOURCE,
+			.u.sai_source = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 2,
+							},
+						},
+					},
+				},
+			},
+			.outputs = 2,
+			.output = {1, },	/* 1 - 2 */
+		},
+
+		.element[2] = {
+			.type = AUDIO_ELEMENT_AVTP_SOURCE,
+			.u.avtp_source = {
+				.stream_n = 2,
+				.stream[0].flags = GENAVB_STREAM_FLAGS_MCR,
+				.stream[1].flags = GENAVB_STREAM_FLAGS_MCR,
+			},
+			.outputs = 4,
+			.output = {3, },	/* 3 - 6 */
+		},
+	},
+
+	.stage[1] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_ROUTING,
+			.u.routing = {
+
+			},
+
+			.inputs = 7,
+			.input = {0, }, 	/* 0 - 6 */
+
+			.outputs = 6,
+			.output = {7, },	/* 7 - 12 */
+		},
+	},
+
+	.buffers = 13,
+
+	.buffer = {
+		[7] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 0},
+		[8] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 1},
+		[9] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 2},
+		[10] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 3},
+		[11] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 4},
+		[12] = {.flags = AUDIO_BUFFER_FLAG_SHARED, .shared_id = 5},
+	},
+	.buffer_storage = 13,
+
+	.storage = {
+		[7] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[8] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[9] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[10] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[11] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[12] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+	},
+};
+
+const struct audio_pipeline_config pipeline_mcr_avb_thread_1_config = {
+
+	.name = "AVB audio pipeline for thread 1",
+
+	.stages = 1,
+
+	.stage[0] = {
+
+		.elements = 2,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SINK,
+			.u.sai_sink = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 2,
+							},
+						},
+					},
+				},
+			},
+
+			.inputs = 2,
+			.input = {0, },	/* 0 - 1 */
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_AVTP_SINK,
+			.u.avtp_sink = {
+				.stream_n = 2,
+			},
+
+			.inputs = 4,
+			.input = {2, },	/* 2 - 5 */
+		},
+	},
+
+
+	.buffers = 6,
+
+	.buffer = {
+		[0] = { .flags = AUDIO_BUFFER_FLAG_SHARED_USER, .shared_id = 0},
+		[1] = { .flags = AUDIO_BUFFER_FLAG_SHARED_USER, .shared_id = 1},
+		[2] = { .flags = AUDIO_BUFFER_FLAG_SHARED_USER, .shared_id = 2},
+		[3] = { .flags = AUDIO_BUFFER_FLAG_SHARED_USER, .shared_id = 3},
+		[4] = { .flags = AUDIO_BUFFER_FLAG_SHARED_USER, .shared_id = 4},
+		[5] = { .flags = AUDIO_BUFFER_FLAG_SHARED_USER, .shared_id = 5},
+	},
+
+	.buffer_storage = 0,
+};
+
+#endif /* #if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1) */
