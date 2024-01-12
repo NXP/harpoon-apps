@@ -154,7 +154,7 @@ int STATS_Async(void (*Func)(void *Data), void *Data)
     Msg.Func = Func;
     Msg.Data = Data;
 
-    return xQueueSend(Ctx->qHandle, &Msg, pdMS_TO_TICKS(0));
+    return xQueueSend(Ctx->qHandle, &Msg, RTOS_NO_WAIT);
 }
 
 static void STATS_AsyncProcess(struct Async_Ctx *Ctx, unsigned int WaitMs)
@@ -163,11 +163,11 @@ static void STATS_AsyncProcess(struct Async_Ctx *Ctx, unsigned int WaitMs)
     unsigned int Last, Now;
     unsigned int Elapsed, Timeout;
 
-    Timeout = pdTICKS_TO_UINT(pdMS_TO_TICKS(WaitMs));
+    Timeout = RTOS_TICKS_TO_UINT(RTOS_MS_TO_TICKS(WaitMs));
     Last = xTaskGetTickCount();
 
     while (true) {
-        if (xQueueReceive(Ctx->qHandle, &Msg, pdUINT_TO_TICKS(Timeout)) == pdPASS) {
+        if (xQueueReceive(Ctx->qHandle, &Msg, RTOS_UINT_TO_TICKS(Timeout)) == pdPASS) {
             Msg.Func(Msg.Data);
 
             Now = xTaskGetTickCount();
@@ -224,7 +224,7 @@ static void STATS_Task(void *pvParameters)
 #if CONFIG_STATS_ASYNC
         STATS_AsyncProcess(&Ctx->Async, Ctx->PeriodMs);
 #else
-        vTaskDelay(pdMS_TO_TICKS(Ctx->PeriodMs));
+        vTaskDelay(RTOS_MS_TO_TICKS(Ctx->PeriodMs));
 #endif
         STATS_TaskPeriodic(Ctx);
     }
