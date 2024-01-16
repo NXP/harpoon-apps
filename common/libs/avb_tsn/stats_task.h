@@ -34,9 +34,8 @@ struct Async_Msg {
 };
 
 struct Async_Ctx {
-    QueueHandle_t qHandle;
     uint8_t qBuffer[ASYNC_NUM_MSG * sizeof(struct Async_Msg)];
-    StaticQueue_t qData;
+    rtos_mqueue_t qObj;
 };
 
 struct StatsTask_Ctx {

@@ -135,9 +135,8 @@ static void STATS_TasksCPULoad(struct TasksCPULoad_Ctx *Ctx)
 #if CONFIG_STATS_ASYNC
 static int STATS_AsyncInit(struct Async_Ctx *Ctx)
 {
-    Ctx->qHandle = xQueueCreateStatic(ASYNC_NUM_MSG, sizeof(struct Async_Msg),
-                                      Ctx->qBuffer, &Ctx->qData);
-    if (!Ctx->qHandle)
+    if (rtos_mqueue_init(&Ctx->qObj, ASYNC_NUM_MSG, sizeof(struct Async_Msg),
+                                      Ctx->qBuffer) < 0)
         goto err;
 
     return 0;
@@ -154,7 +153,7 @@ int STATS_Async(void (*Func)(void *Data), void *Data)
     Msg.Func = Func;
     Msg.Data = Data;
 
-    return xQueueSend(Ctx->qHandle, &Msg, RTOS_NO_WAIT);
+    return rtos_mqueue_send(&Ctx->qObj, &Msg, RTOS_NO_WAIT);
 }
 
 static void STATS_AsyncProcess(struct Async_Ctx *Ctx, unsigned int WaitMs)
@@ -167,7 +166,7 @@ static void STATS_AsyncProcess(struct Async_Ctx *Ctx, unsigned int WaitMs)
     Last = xTaskGetTickCount();
 
     while (true) {
-        if (xQueueReceive(Ctx->qHandle, &Msg, RTOS_UINT_TO_TICKS(Timeout)) == pdPASS) {
+        if (rtos_mqueue_receive(&Ctx->qObj, &Msg, RTOS_UINT_TO_TICKS(Timeout)) == 0) {
             Msg.Func(Msg.Data);
 
             Now = xTaskGetTickCount();
