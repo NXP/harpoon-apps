@@ -156,7 +156,7 @@ static void main_cyclic(void *data)
     struct cyclic_task *c_task = data;
     struct tsn_task *task = c_task->task;
     uint32_t notify;
-    TickType_t timeout = pdMS_TO_TICKS(2000);
+    TickType_t timeout = RTOS_MS_TO_TICKS(2000);
     unsigned int num_sched_stats = CYCLIC_STAT_PERIOD_SEC * (NSECS_PER_SEC / task->params->task_period_ns);
 
     while (true) {

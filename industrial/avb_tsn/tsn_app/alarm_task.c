@@ -16,7 +16,7 @@ static void net_callback(void *data)
     struct tsn_task *task = container_of(sock, struct tsn_task, sock_rx[sock->id]);
     struct alarm_task *a_task = task->ctx;
 
-    if (xQueueSend(a_task->queue.handle, &sock, pdMS_TO_TICKS(0)) != pdTRUE) {
+    if (xQueueSend(a_task->queue.handle, &sock, RTOS_MS_TO_TICKS(0)) != pdTRUE) {
         ERR("xQueueSendFromISR() failed\n\r");
     }
 }
@@ -28,7 +28,7 @@ static void main_alarm_monitor(void *data)
     while (true) {
         struct net_socket *sock;
 
-        if (xQueueReceive(a_task->queue.handle, &sock, pdMS_TO_TICKS(10000)) != pdTRUE)
+        if (xQueueReceive(a_task->queue.handle, &sock, RTOS_MS_TO_TICKS(10000)) != pdTRUE)
             continue;
 
         while (tsn_net_receive_sock(sock) == NET_OK) {
@@ -138,7 +138,7 @@ static void main_alarm_io(void *data)
     struct alarm_task *a_task = data;
 
     while (true) {
-        vTaskDelay(pdMS_TO_TICKS(10000));
+        vTaskDelay(RTOS_MS_TO_TICKS(10000));
         alarm_net_transmit(a_task, 0, NULL, 0);
     }
 }
