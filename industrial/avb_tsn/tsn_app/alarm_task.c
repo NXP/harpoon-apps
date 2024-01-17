@@ -16,7 +16,7 @@ static void net_callback(void *data)
     struct tsn_task *task = container_of(sock, struct tsn_task, sock_rx[sock->id]);
     struct alarm_task *a_task = task->ctx;
 
-    if (xQueueSend(a_task->queue.handle, &sock, RTOS_MS_TO_TICKS(0)) != pdTRUE) {
+    if (rtos_mqueue_send(a_task->queue.handle, &sock, RTOS_NO_WAIT) < 0) {
         ERR("xQueueSendFromISR() failed\n\r");
     }
 }
@@ -28,7 +28,7 @@ static void main_alarm_monitor(void *data)
     while (true) {
         struct net_socket *sock;
 
-        if (xQueueReceive(a_task->queue.handle, &sock, RTOS_MS_TO_TICKS(10000)) != pdTRUE)
+        if (rtos_mqueue_receive(a_task->queue.handle, &sock, RTOS_MS_TO_TICKS(10000)) < 0)
             continue;
 
         while (tsn_net_receive_sock(sock) == NET_OK) {
@@ -95,10 +95,10 @@ int alarm_task_monitor_init(struct alarm_task *a_task,
     params->rx_params[0].addr.port = 0;
     params->num_rx_socket = 1;
 
-    a_task->queue.handle = xQueueCreate(a_task->queue.length,
-                                        sizeof(struct net_socket *));
+    a_task->queue.handle = rtos_mqueue_alloc_init(a_task->queue.length,
+                                                  sizeof(struct net_socket *));
     if (!a_task->queue.handle) {
-        ERR("xQueueCreate failed\n");
+        ERR("rtos_mqueue_alloc_init failed\n");
         goto err;
     }
 
@@ -120,7 +120,7 @@ int alarm_task_monitor_init(struct alarm_task *a_task,
 
 err:
     if (a_task->queue.handle)
-        vQueueDelete(a_task->queue.handle);
+        rtos_mqueue_destroy(a_task->queue.handle);
 
     return -1;
 }
@@ -130,7 +130,7 @@ void alarm_task_monitor_exit(struct alarm_task *a_task)
     tsn_task_unregister(&a_task->task);
 
     if (a_task->queue.handle)
-        vQueueDelete(a_task->queue.handle);
+        rtos_mqueue_destroy(a_task->queue.handle);
 }
 
 static void main_alarm_io(void *data)

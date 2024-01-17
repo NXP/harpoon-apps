@@ -20,7 +20,7 @@ struct alarm_task {
     int num_peers;
     int stream_id;
     struct {
-        QueueHandle_t handle;
+        rtos_mqueue_t *handle;
         UBaseType_t length;
     } queue;
     void (*net_rx_func)(void *ctx, int msg_id, int src_id, void *buf, int len);
