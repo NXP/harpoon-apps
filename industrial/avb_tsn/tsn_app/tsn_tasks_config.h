@@ -7,8 +7,7 @@
 #ifndef _TSN_TASKS_CONFIG_H_
 #define _TSN_TASKS_CONFIG_H_
 
-#include "FreeRTOS.h"
-#include "task.h"
+#include "rtos_abstraction_layer.h"
 
 #include "genavb/tsn.h"
 #include "genavb/qos.h"

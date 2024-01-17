@@ -7,8 +7,7 @@
 #ifndef _ALARM_TASK_H_
 #define _ALARM_TASK_H_
 
-#include "FreeRTOS.h"
-#include "queue.h"
+#include "rtos_abstraction_layer.h"
 
 #include "tsn_task.h"
 #include "tsn_tasks_config.h"

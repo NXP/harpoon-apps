@@ -7,9 +7,7 @@
 #ifndef _TSN_TASK_H_
 #define _TSN_TASK_H_
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "timers.h"
+#include "rtos_abstraction_layer.h"
 
 #include "libs/stats/stats.h"
 #include "genavb/clock.h"
