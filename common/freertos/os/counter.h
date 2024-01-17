@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -32,6 +32,7 @@ struct os_counter_ops {
 struct os_counter {
 	void *base;
 	IRQn_Type irqn;
+	unsigned int irq_prio;
 	bool initialized; /* True if HW is initialized */
 	const struct os_counter_ops *ops; //the hardware specific counter ops
 	struct os_counter_alarm_cfg alarms[NB_CHANNELS];

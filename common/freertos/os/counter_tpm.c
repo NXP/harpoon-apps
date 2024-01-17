@@ -94,7 +94,7 @@ static void counter_init(os_counter_t *dev)
 	/* Set the modulo to max value. */
 	base->MOD = TPM_MAX_COUNTER_VALUE(base);
 
-	ret = os_irq_register(irqn, tpm_irq_handler, (void *)dev, OS_IRQ_PRIO_DEFAULT);
+	ret = os_irq_register(irqn, tpm_irq_handler, (void *)dev, dev->irq_prio);
 	rtos_assert(!ret, "Failed to register counter's IRQ! (%d)", ret);
 	os_irq_enable(irqn);
 
@@ -234,18 +234,20 @@ static const struct os_counter_ops tpm_counter_ops = {
 };
 #endif
 
-#if defined(BOARD_COUNTER_0_BASE) && defined(BOARD_COUNTER_0_IRQ)
+#if defined(BOARD_COUNTER_0_BASE) && defined(BOARD_COUNTER_0_IRQ) && defined(BOARD_COUNTER_0_IRQ_PRIO)
 os_counter_t freertos_counter_instance_0 = {
 	.base = BOARD_COUNTER_0_BASE,
 	.irqn = BOARD_COUNTER_0_IRQ,
+	.irq_prio = BOARD_COUNTER_0_IRQ_PRIO,
 	.ops = &tpm_counter_ops,
 };
 #endif
 
-#if defined(BOARD_COUNTER_1_BASE) && defined(BOARD_COUNTER_1_IRQ)
+#if defined(BOARD_COUNTER_1_BASE) && defined(BOARD_COUNTER_1_IRQ) && defined(BOARD_COUNTER_1_IRQ_PRIO)
 os_counter_t freertos_counter_instance_1 = {
 	.base = BOARD_COUNTER_1_BASE,
 	.irqn = BOARD_COUNTER_1_IRQ,
+	.irq_prio = BOARD_COUNTER_1_IRQ_PRIO,
 	.ops = &tpm_counter_ops,
 };
 #endif

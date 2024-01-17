@@ -91,7 +91,7 @@ static void counter_init(os_counter_t *dev)
 	gptConfig.divider = 1;
 	GPT_Init((GPT_Type *)(dev->base), &gptConfig);
 
-	ret = os_irq_register(irqn, gpt_irq_handler, (void *)dev, OS_IRQ_PRIO_DEFAULT);
+	ret = os_irq_register(irqn, gpt_irq_handler, (void *)dev, dev->irq_prio);
 	rtos_assert(!ret, "Failed to register counter's IRQ! (%d)", ret);
 	os_irq_enable(irqn);
 
@@ -231,18 +231,20 @@ static const struct os_counter_ops gpt_counter_ops = {
 };
 #endif
 
-#if defined(BOARD_COUNTER_0_BASE) && defined(BOARD_COUNTER_0_IRQ)
+#if defined(BOARD_COUNTER_0_BASE) && defined(BOARD_COUNTER_0_IRQ) && defined(BOARD_COUNTER_0_IRQ_PRIO)
 os_counter_t freertos_counter_instance_0 = {
 	.base = BOARD_COUNTER_0_BASE,
 	.irqn = BOARD_COUNTER_0_IRQ,
+	.irq_prio = BOARD_COUNTER_0_IRQ_PRIO,
 	.ops = &gpt_counter_ops,
 };
 #endif
 
-#if defined(BOARD_COUNTER_1_BASE) && defined(BOARD_COUNTER_1_IRQ)
+#if defined(BOARD_COUNTER_1_BASE) && defined(BOARD_COUNTER_1_IRQ) && defined(BOARD_COUNTER_1_IRQ_PRIO)
 os_counter_t freertos_counter_instance_1 = {
 	.base = BOARD_COUNTER_1_BASE,
 	.irqn = BOARD_COUNTER_1_IRQ,
+	.irq_prio = BOARD_COUNTER_1_IRQ_PRIO,
 	.ops = &gpt_counter_ops,
 };
 #endif
