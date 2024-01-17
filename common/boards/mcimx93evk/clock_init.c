@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,14 +8,6 @@
 
 void BOARD_ClockSourceFreqInit(void)
 {
-	g_clockSourceFreq[kCLOCK_Osc24M]          = 24000000U;
-	g_clockSourceFreq[kCLOCK_SysPll1]         = 4000000000U;
-	g_clockSourceFreq[kCLOCK_SysPll1Pfd0]     = 1000000000U;
-	g_clockSourceFreq[kCLOCK_SysPll1Pfd0Div2] = 500000000U;
-	g_clockSourceFreq[kCLOCK_SysPll1Pfd1]     = 800000000U;
-	g_clockSourceFreq[kCLOCK_SysPll1Pfd1Div2] = 400000000U;
-	g_clockSourceFreq[kCLOCK_SysPll1Pfd2]     = 625000000U;
-	g_clockSourceFreq[kCLOCK_SysPll1Pfd2Div2] = 312500000U;
 	g_clockSourceFreq[kCLOCK_AudioPll1Out]    = 393216000U;
 	g_clockSourceFreq[kCLOCK_AudioPll1]       = 393216000U;
 }
