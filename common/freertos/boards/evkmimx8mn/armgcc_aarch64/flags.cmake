@@ -10,7 +10,6 @@ SET(CMAKE_ASM_FLAGS_DEBUG " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -26,7 +25,6 @@ SET(CMAKE_ASM_FLAGS_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -42,7 +40,6 @@ SET(CMAKE_ASM_FLAGS_DDR_DEBUG " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -58,7 +55,6 @@ SET(CMAKE_ASM_FLAGS_DDR_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -74,7 +70,6 @@ SET(CMAKE_ASM_FLAGS_RAM_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -91,7 +86,6 @@ SET(CMAKE_ASM_FLAGS_FLASH_DEBUG " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -121,7 +115,6 @@ SET(CMAKE_C_FLAGS_DEBUG " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -151,7 +144,6 @@ SET(CMAKE_C_FLAGS_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -181,7 +173,6 @@ SET(CMAKE_C_FLAGS_DDR_DEBUG " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -211,7 +202,6 @@ SET(CMAKE_C_FLAGS_DDR_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -242,7 +232,6 @@ SET(CMAKE_C_FLAGS_FLASH_DEBUG " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -std=gnu99 \
 ")
@@ -269,7 +258,6 @@ SET(CMAKE_CXX_FLAGS_DEBUG " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -fno-rtti \
     -fno-exceptions \
@@ -297,7 +285,6 @@ SET(CMAKE_CXX_FLAGS_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -fno-rtti \
     -fno-exceptions \
@@ -325,7 +312,6 @@ SET(CMAKE_CXX_FLAGS_DDR_DEBUG " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -fno-rtti \
     -fno-exceptions \
@@ -353,7 +339,6 @@ SET(CMAKE_CXX_FLAGS_DDR_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -fno-rtti \
     -fno-exceptions \
@@ -380,7 +365,6 @@ SET(CMAKE_CXX_FLAGS_RAM_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -fno-rtti \
     -fno-exceptions \
@@ -393,7 +377,6 @@ SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -Xlinker \
     --gc-sections \
@@ -414,7 +397,6 @@ SET(CMAKE_EXE_LINKER_FLAGS_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -Xlinker \
     --gc-sections \
@@ -436,7 +418,6 @@ SET(CMAKE_EXE_LINKER_FLAGS_DDR_DEBUG " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -Xlinker \
     --gc-sections \
@@ -457,7 +438,6 @@ SET(CMAKE_EXE_LINKER_FLAGS_DDR_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -Xlinker \
     --gc-sections \
@@ -478,7 +458,6 @@ SET(CMAKE_EXE_LINKER_FLAGS_RAM_RELEASE " \
     -fno-common \
     -ffunction-sections \
     -fdata-sections \
-    -ffreestanding \
     -fno-builtin \
     -Xlinker \
     --gc-sections \
