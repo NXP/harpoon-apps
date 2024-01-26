@@ -89,6 +89,9 @@ zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8960 CODEC_WM8960_ENABLE=1)
 # EVK onboard Codec WM8524
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8524 CODEC_WM8524)
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8524 CODEC_WM8524_ENABLE=1)
+# MX93AUD-HAT Codec CS42448
+zephyr_compile_definitions_ifdef(CONFIG_CODEC_CS42448 CODEC_CS42448)
+zephyr_compile_definitions_ifdef(CONFIG_CODEC_CS42448 CODEC_CS42448_ENABLE=1)
 
 # Cortex-A55/A53 core maximum clock frequency
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MM_EVK_A53 SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1800000000UL)
