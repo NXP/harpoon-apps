@@ -122,7 +122,7 @@ int gavb_stack_init(void)
     int i;
     int rc = 0;
 
-    genavb_config = pvPortMalloc(sizeof(struct genavb_config));
+    genavb_config = rtos_malloc(sizeof(struct genavb_config));
 
     if (!genavb_config) {
         rc = -1;
@@ -196,7 +196,7 @@ int gavb_stack_init(void)
 
 exit:
     if (genavb_config)
-        vPortFree(genavb_config);
+        rtos_free(genavb_config);
 
     return rc;
 }
@@ -274,9 +274,9 @@ int gavb_port_stats_init(unsigned int port_id)
     }
 
     stats->num = num;
-    stats->names = pvPortMalloc(num * sizeof(char *));
+    stats->names = rtos_malloc(num * sizeof(char *));
     if (!stats->names) {
-        ERR("pvPortMalloc() failed\n");
+        ERR("rtos_malloc() failed\n");
         goto err;
     }
 
@@ -285,9 +285,9 @@ int gavb_port_stats_init(unsigned int port_id)
         goto err;
     }
 
-    stats->values = pvPortMalloc(num * sizeof(uint64_t));
+    stats->values = rtos_malloc(num * sizeof(uint64_t));
     if (!stats->values) {
-        ERR("pvPortMalloc() failed\n");
+        ERR("rtos_malloc() failed\n");
         goto err;
     }
 
@@ -295,7 +295,7 @@ int gavb_port_stats_init(unsigned int port_id)
 
 err:
     if (stats->names)
-        vPortFree(stats->names);
+        rtos_free(stats->names);
 
     return -1;
 }
@@ -305,10 +305,10 @@ void gavb_port_stats_exit(unsigned int port_id)
     struct port_stats *stats = &port_stats[port_id];
 
     if (stats->values)
-        vPortFree(stats->values);
+        rtos_free(stats->values);
 
     if (stats->names)
-        vPortFree(stats->names);
+        rtos_free(stats->names);
 }
 
 struct port_stats *gavb_port_stats_get(unsigned int port_id)
