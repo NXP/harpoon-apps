@@ -8,6 +8,10 @@
 
 void BOARD_ClockSourceFreqInit(void)
 {
+	g_clockSourceFreq[kCLOCK_ArmPll]          = 1700000000U;
+	g_clockSourceFreq[kCLOCK_ArmPllOut]       = 1700000000U;
+	g_clockSourceFreq[kCLOCK_DramPll]         = 933000000U;
+	g_clockSourceFreq[kCLOCK_DramPllOut]      = 933000000U;
 	g_clockSourceFreq[kCLOCK_AudioPll1Out]    = 393216000U;
 	g_clockSourceFreq[kCLOCK_AudioPll1]       = 393216000U;
 }
