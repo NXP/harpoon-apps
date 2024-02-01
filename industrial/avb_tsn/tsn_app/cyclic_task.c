@@ -55,13 +55,17 @@ static void cyclic_stats_dump(struct cyclic_task *c_task)
 static void timer_callback(void *data, int count)
 {
     struct tsn_task *task = (struct tsn_task *)data;
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    struct cyclic_task *c_task = task->ctx;
+    struct cyclic_event e;
+    bool yield = false;
 
     if (count < 0)
         task->clock_discont = 1;
 
-    vTaskNotifyGiveFromISR(task->handle, &xHigherPriorityTaskWoken);
-    rtos_yield_from_isr(xHigherPriorityTaskWoken);
+    e.type = CYCLIC_EVENT_TYPE_TIMER;
+
+    rtos_mqueue_send_from_isr(c_task->queue_h, &e, RTOS_NO_WAIT, &yield);
+    rtos_yield_from_isr(yield);
 }
 
 static void cyclic_net_receive(struct cyclic_task *c_task)
@@ -155,16 +159,17 @@ static void main_cyclic(void *data)
 {
     struct cyclic_task *c_task = data;
     struct tsn_task *task = c_task->task;
-    uint32_t notify;
-    TickType_t timeout = RTOS_MS_TO_TICKS(2000);
+    struct cyclic_event e;
+    int ret;
+    rtos_tick_t timeout = RTOS_MS_TO_TICKS(2000);
     unsigned int num_sched_stats = CYCLIC_STAT_PERIOD_SEC * (NSECS_PER_SEC / task->params->task_period_ns);
 
     while (true) {
         /*
          * Wait to be woken-up by the timer
          */
-        notify = ulTaskNotifyTake(pdTRUE, timeout);
-        if (!notify) {
+        ret = rtos_mqueue_receive(c_task->queue_h, &e, timeout);
+        if (ret < 0) {
             if (c_task->loop_func)
                 c_task->loop_func(c_task->ctx, -1);
 
@@ -277,7 +282,7 @@ int cyclic_task_init(struct cyclic_task *c_task,
 
     tx_stream = tsn_conf_get_stream(c_task->tx_socket.stream_id);
     if (!tx_stream)
-        goto err;
+        goto err_get_config;
 
     memcpy(&params->tx_params[0].addr, &tx_stream->address,
            sizeof(struct net_address));
@@ -293,12 +298,18 @@ int cyclic_task_init(struct cyclic_task *c_task,
     for (i = 0; i < c_task->num_peers; i++) {
         rx_stream = tsn_conf_get_stream(c_task->rx_socket[i].stream_id);
         if (!rx_stream)
-            goto err;
+            goto err_get_config;
 
         memcpy(&params->rx_params[i].addr, &rx_stream->address,
                sizeof(struct net_address));
         params->rx_params[i].addr.port = 0;
         params->num_rx_socket++;
+    }
+
+    c_task->queue_h = rtos_mqueue_alloc_init(CYCLIC_EVENT_QUEUE_LENGTH, sizeof(struct cyclic_event));
+    if (!c_task->queue_h) {
+        ERR("rtos_mqueue_alloc_init failed\n");
+        goto err_mqueue;
     }
 
     c_task->net_rx_func = net_rx_func;
@@ -308,7 +319,7 @@ int cyclic_task_init(struct cyclic_task *c_task,
     rc = tsn_task_register(&c_task->task, params, c_task->id, main_cyclic, c_task, timer_callback);
     if (rc < 0) {
         ERR("tsn_task_register rc = %d\n", __func__, rc);
-        goto err;
+        goto err_task_register;
     }
 
     for (i = 0; i < c_task->num_peers; i++) {
@@ -325,11 +336,17 @@ int cyclic_task_init(struct cyclic_task *c_task,
 
     return 0;
 
-err:
+err_task_register:
+    rtos_mqueue_destroy(c_task->queue_h);
+err_mqueue:
+err_get_config:
     return -1;
 }
 
 void cyclic_task_exit(struct cyclic_task *c_task)
 {
     tsn_task_unregister(&c_task->task);
+
+    if (c_task->queue_h)
+        rtos_mqueue_destroy(c_task->queue_h);
 }

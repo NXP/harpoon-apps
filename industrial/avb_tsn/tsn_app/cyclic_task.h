@@ -12,6 +12,16 @@
 #include "monitoring_stats.h"
 
 #define CYCLIC_STAT_PERIOD_SEC 5
+#define CYCLIC_EVENT_QUEUE_LENGTH 1
+
+struct cyclic_event {
+    unsigned int type;
+    void *data;
+};
+
+enum cyclic_event_type {
+    CYCLIC_EVENT_TYPE_TIMER = 0,
+};
 
 struct socket_stats {
     bool pending;
@@ -45,6 +55,7 @@ struct cyclic_task {
     void (*net_rx_func)(void *ctx, int msg_id, int src_id, void *buf, int len);
     void (*loop_func)(void *ctx, int timer_status);
     void *ctx;
+    rtos_mqueue_t *queue_h;
 };
 
 int cyclic_task_init(struct cyclic_task *c_task,
