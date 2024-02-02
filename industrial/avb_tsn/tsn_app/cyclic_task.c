@@ -61,7 +61,7 @@ static void timer_callback(void *data, int count)
         task->clock_discont = 1;
 
     vTaskNotifyGiveFromISR(task->handle, &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    rtos_yield_from_isr(xHigherPriorityTaskWoken);
 }
 
 static void cyclic_net_receive(struct cyclic_task *c_task)
