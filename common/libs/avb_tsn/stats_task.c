@@ -15,7 +15,7 @@
  * Definitions
  ******************************************************************************/
 #define STATS_TASK_NAME       "stats"
-#define STATS_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 185)
+#define STATS_TASK_STACK_SIZE (RTOS_MINIMAL_STACK_SIZE + 185)
 #define STATS_TASK_PRIORITY   5
 
 /*******************************************************************************
@@ -163,13 +163,13 @@ static void STATS_AsyncProcess(struct Async_Ctx *Ctx, unsigned int WaitMs)
     unsigned int Elapsed, Timeout;
 
     Timeout = RTOS_TICKS_TO_UINT(RTOS_MS_TO_TICKS(WaitMs));
-    Last = xTaskGetTickCount();
+    Last = rtos_get_current_time();
 
     while (true) {
         if (rtos_mqueue_receive(&Ctx->qObj, &Msg, RTOS_UINT_TO_TICKS(Timeout)) == 0) {
             Msg.Func(Msg.Data);
 
-            Now = xTaskGetTickCount();
+            Now = rtos_get_current_time();
             Elapsed = Now - Last;
 
             if (Elapsed < Timeout) {
@@ -223,7 +223,7 @@ static void STATS_Task(void *pvParameters)
 #if CONFIG_STATS_ASYNC
         STATS_AsyncProcess(&Ctx->Async, Ctx->PeriodMs);
 #else
-        vTaskDelay(RTOS_MS_TO_TICKS(Ctx->PeriodMs));
+        rtos_sleep(RTOS_MS_TO_TICKS(Ctx->PeriodMs));
 #endif
         STATS_TaskPeriodic(Ctx);
     }
@@ -247,10 +247,8 @@ int STATS_TaskInit(void (*PeriodicFn)(void *Data), void *Data, unsigned int Peri
         ERR("STATS_AsyncInit failed \n");
 #endif
 
-    if (xTaskCreate(STATS_Task, STATS_TASK_NAME,
-                    STATS_TASK_STACK_SIZE, Ctx,
-                    STATS_TASK_PRIORITY, &Ctx->stats_task_handle) != pdPASS) {
-        ERR("xTaskCreate(%s) failed\n", STATS_TASK_NAME);
+    if (rtos_thread_create(&Ctx->stats_task, STATS_TASK_PRIORITY, 0, STATS_TASK_STACK_SIZE, STATS_TASK_NAME, STATS_Task, Ctx) < 0) {
+        ERR("rtos_thread_create(%s) failed\n", STATS_TASK_NAME);
         goto exit;
     }
 
@@ -264,5 +262,5 @@ void STATS_TaskExit()
 {
     struct StatsTask_Ctx *Ctx = &StatsTask;
 
-    vTaskDelete(Ctx->stats_task_handle);
+    rtos_thread_abort(&Ctx->stats_task);
 }

@@ -40,7 +40,7 @@ static void socket_stats_dump(struct socket *sock)
     stats_reset(&sock->stats.traffic_latency);
     sock->stats_snap.pending = true;
 
-    if (STATS_Async(socket_stats_print, sock) != pdTRUE)
+    if (STATS_Async(socket_stats_print, sock) < 0)
         sock->stats_snap.pending = false;
 }
 

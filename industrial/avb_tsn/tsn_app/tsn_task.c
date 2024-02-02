@@ -126,7 +126,7 @@ static void tsn_task_stats_dump(struct tsn_task *task)
     stats_reset(&task->stats.total_time);
     task->stats_snap.pending = true;
 
-    if (STATS_Async(tsn_task_stats_print, task) != pdTRUE)
+    if (STATS_Async(tsn_task_stats_print, task) < 0)
         task->stats_snap.pending = false;
 }
 
@@ -149,7 +149,7 @@ void net_socket_stats_dump(struct net_socket *sock)
     memcpy(&sock->stats_snap, &sock->stats, sizeof(struct net_socket_stats));
     sock->stats_snap.pending = true;
 
-    if (STATS_Async(net_socket_stats_print, sock) != pdTRUE)
+    if (STATS_Async(net_socket_stats_print, sock) < 0)
         sock->stats_snap.pending = false;
 }
 
@@ -734,8 +734,7 @@ int tsn_task_register(struct tsn_task **task, struct tsn_task_params *params,
     tsn_task_stats_init(*task);
 
     if (main_loop) {
-        if (xTaskCreate(main_loop, task_name, params->stack_depth,
-                        ctx, params->priority, &(*task)->handle) != pdPASS) {
+        if (rtos_thread_create(&(*task)->thread, params->priority, 0, params->stack_depth, task_name, main_loop, ctx) < 0) {
             ERR("xTaskCreate failed\n\r");
             goto net_exit;
         }
@@ -763,7 +762,7 @@ timer_destroy:
 
 task_delete:
     if (main_loop)
-        vTaskDelete((*task)->handle);
+        rtos_thread_abort(&(*task)->thread);
 
 net_exit:
     tsn_task_net_exit(*task);
@@ -782,8 +781,8 @@ void tsn_task_unregister(struct tsn_task **task)
         genavb_timer_destroy((*task)->timer);
 
     /* task_delete */
-    if ((*task)->handle)
-        vTaskDelete((*task)->handle);
+    if (&(*task)->thread)
+        rtos_thread_abort(&(*task)->thread);
 
     /* net_exit */
     tsn_task_net_exit(*task);

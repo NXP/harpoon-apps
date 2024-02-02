@@ -48,7 +48,7 @@ struct StatsTask_Ctx {
     void (*PeriodicFn)(void *Data);
     void *PeriodicData;
     unsigned int PeriodMs;
-    TaskHandle_t stats_task_handle;
+    rtos_thread_t stats_task;
 };
 
 int STATS_TaskInit(void (*PeriodicFn)(void *data), void *Data, unsigned int PeriodMs);

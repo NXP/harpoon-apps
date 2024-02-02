@@ -138,7 +138,7 @@ static void main_alarm_io(void *data)
     struct alarm_task *a_task = data;
 
     while (true) {
-        vTaskDelay(RTOS_MS_TO_TICKS(10000));
+        rtos_sleep(RTOS_MS_TO_TICKS(10000));
         alarm_net_transmit(a_task, 0, NULL, 0);
     }
 }

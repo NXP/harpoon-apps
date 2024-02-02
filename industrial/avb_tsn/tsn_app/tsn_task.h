@@ -32,7 +32,7 @@ enum net_flags {
 };
 
 struct tsn_task_params {
-    UBaseType_t priority;
+    unsigned int priority;
     unsigned short stack_depth;
 
     genavb_clock_id_t clk_id;
@@ -91,7 +91,7 @@ struct net_socket {
 
 struct tsn_task {
     int id;
-    TaskHandle_t handle;
+    rtos_thread_t thread;
     struct genavb_timer *timer;
     struct tsn_task_params *params;
     void *ctx;
