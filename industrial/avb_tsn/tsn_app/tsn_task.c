@@ -620,7 +620,7 @@ static int tsn_task_net_init(struct tsn_task *task)
             goto close_sock_rx;
         }
 
-        sock->buf = pvPortMalloc(task->params->rx_buf_size);
+        sock->buf = rtos_malloc(task->params->rx_buf_size);
         if (!sock->buf) {
             genavb_socket_rx_close(sock->genavb_rx);
             ERR("error allocating rx_buff\n");
@@ -642,7 +642,7 @@ static int tsn_task_net_init(struct tsn_task *task)
             goto close_sock_tx;
         }
 
-        sock->buf = pvPortMalloc(task->params->tx_buf_size);
+        sock->buf = rtos_malloc(task->params->tx_buf_size);
         if (!sock->buf) {
             genavb_socket_tx_close(sock->genavb_tx);
             ERR("error allocating tx_buff\n");
@@ -666,7 +666,7 @@ close_sock_tx:
 #ifdef SRP_RESERVATION
         tsn_net_tx_srp_deregister(&task->params->tx_params[k]);
 #endif
-        vPortFree(sock->buf);
+        rtos_free(sock->buf);
         genavb_socket_tx_close(sock->genavb_tx);
     }
 
@@ -676,7 +676,7 @@ close_sock_rx:
 #ifdef SRP_RESERVATION
         tsn_net_rx_srp_deregister(&task->params->rx_params[k]);
 #endif
-        vPortFree(sock->buf);
+        rtos_free(sock->buf);
         genavb_socket_rx_close(sock->genavb_rx);
     }
 
@@ -693,7 +693,7 @@ static void tsn_task_net_exit(struct tsn_task *task)
 #ifdef SRP_RESERVATION
         tsn_net_rx_srp_deregister(&task->params->rx_params[i]);
 #endif
-        vPortFree(sock->buf);
+        rtos_free(sock->buf);
         genavb_socket_rx_close(sock->genavb_rx);
     }
 
@@ -702,7 +702,7 @@ static void tsn_task_net_exit(struct tsn_task *task)
 #ifdef SRP_RESERVATION
         tsn_net_tx_srp_deregister(&task->params->tx_params[i]);
 #endif
-        vPortFree(sock->buf);
+        rtos_free(sock->buf);
         genavb_socket_tx_close(sock->genavb_tx);
     }
 }
@@ -713,7 +713,7 @@ int tsn_task_register(struct tsn_task **task, struct tsn_task_params *params,
 {
     char task_name[20] = {0, };
 
-    *task = pvPortMalloc(sizeof(struct tsn_task));
+    *task = rtos_malloc(sizeof(struct tsn_task));
     if (!(*task))
         goto err;
 
@@ -769,7 +769,7 @@ net_exit:
     tsn_task_net_exit(*task);
 
 err_free:
-    vPortFree(*task);
+    rtos_free(*task);
 
 err:
     return -1;
@@ -789,5 +789,5 @@ void tsn_task_unregister(struct tsn_task **task)
     tsn_task_net_exit(*task);
 
     /* err_free */
-    vPortFree(*task);
+    rtos_free(*task);
 }
