@@ -307,10 +307,13 @@ void *play_pipeline_init_avb(void *parameters)
 	ctx = play_pipeline_init(parameters);
 
 	if (ctx) {
-		rc = avb_setup(ctx);
-		if (rc) {
-			play_pipeline_exit(ctx);
-			ctx = NULL;
+		/* Only setup AVB once for first pipeline init */
+		if (ctx->id == 0) {
+			rc = avb_setup(ctx);
+			if (rc) {
+				play_pipeline_exit(ctx);
+				ctx = NULL;
+			}
 		}
 	}
 
@@ -321,7 +324,8 @@ void play_pipeline_exit_avb(void *handle)
 {
 	struct pipeline_ctx *ctx = handle;
 
-	avb_close(ctx);
+	if (ctx->id == 0)
+		avb_close(ctx);
 
 	play_pipeline_exit(handle);
 }
