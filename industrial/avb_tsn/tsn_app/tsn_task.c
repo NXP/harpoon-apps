@@ -781,8 +781,7 @@ void tsn_task_unregister(struct tsn_task **task)
         genavb_timer_destroy((*task)->timer);
 
     /* task_delete */
-    if (&(*task)->thread)
-        rtos_thread_abort(&(*task)->thread);
+    rtos_thread_abort(&(*task)->thread);
 
     /* net_exit */
     tsn_task_net_exit(*task);
