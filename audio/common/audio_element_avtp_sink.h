@@ -13,6 +13,8 @@
 #define AVTP_TX_STREAM_N		2
 #define AVTP_TX_CHANNEL_N		2
 
+#define AUDIO_ELEMENT_AVTP_SINK_MAX	1
+
 struct avtp_sink_element_config {
 	unsigned int stream_n;			/* number of streams */
 

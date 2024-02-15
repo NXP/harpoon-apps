@@ -218,12 +218,32 @@ static unsigned int audio_pipeline_count_buffers(struct audio_pipeline_config *c
 	return count;
 }
 
+static unsigned int audio_pipeline_count_element(struct audio_pipeline_config *config, unsigned int element_type)
+{
+	struct audio_pipeline_stage_config *stage_config;
+	struct audio_element_config *element_config;
+	unsigned int count = 0;
+	int i, j;
+
+	for (i = 0; i < config->stages; i++) {
+		stage_config = &config->stage[i];
+
+		for (j = 0; j < stage_config->elements; j++) {
+			element_config = &stage_config->element[j];
+			if (element_config->type == element_type)
+				count++;
+		}
+	}
+
+	return count;
+}
+
 static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 {
 	struct audio_pipeline_stage_config *stage_config;
 	struct audio_element_config *element_config;
 	unsigned int input, output;
-	unsigned int buffer;
+	unsigned int buffer, count;
 	int i, j, k;
 
 	/* Sanity check pipeline configuration */
@@ -316,6 +336,21 @@ static int audio_pipeline_config_check(struct audio_pipeline_config *config)
 		if (buffer > 1)
 			log_warn("storage(%u) referenced by %u buffers\n", i, buffer);
 	}
+
+#if CONFIG_GENAVB_ENABLE
+	/* Check maximum number of AVTP elements */
+	count = audio_pipeline_count_element(config, AUDIO_ELEMENT_AVTP_SOURCE);
+	if (count > AUDIO_ELEMENT_AVTP_SOURCE_MAX) {
+		log_err("AUDIO_ELEMENT_AVTP_SOURCE count: %u, while max supported %u\n", count, AUDIO_ELEMENT_AVTP_SOURCE_MAX);
+		goto err;
+	}
+
+	count = audio_pipeline_count_element(config, AUDIO_ELEMENT_AVTP_SINK);
+	if (count > AUDIO_ELEMENT_AVTP_SINK_MAX) {
+		log_err("AUDIO_ELEMENT_AVTP_SINK count: %u, while max supported %u\n", count, AUDIO_ELEMENT_AVTP_SINK_MAX);
+		goto err;
+	}
+#endif
 
 	/* Check the configuration of all elements */
 	for (i = 0; i < config->stages; i++) {
