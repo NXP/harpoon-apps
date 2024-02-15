@@ -108,6 +108,7 @@ int play_pipeline_run(void *handle, struct event *e)
 static void listener_disconnect(unsigned int stream_index)
 {
 	struct hrpn_cmd_audio_element_avtp_disconnect disconnect;
+	int i;
 
 	/* need to disconnect streams in AVTP audio element */
 	disconnect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_DISCONNECT;
@@ -116,12 +117,16 @@ static void listener_disconnect(unsigned int stream_index)
 	disconnect.element.id = 0;
 	disconnect.stream_index = stream_index;
 
-	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&disconnect, sizeof(disconnect), NULL);
+	for (i = 0; i < MAX_PIPELINES; i++) {
+		disconnect.pipeline.id = i;
+		audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&disconnect, sizeof(disconnect), NULL);
+	}
 }
 
 static void listener_connect(struct genavb_msg_media_stack_connect *media_stack_connect)
 {
 	struct hrpn_cmd_audio_element_avtp_connect connect;
+	int i;
 
 	/* need to connect streams in AVTP audio element */
 	connect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_CONNECT;
@@ -131,12 +136,16 @@ static void listener_connect(struct genavb_msg_media_stack_connect *media_stack_
 	connect.stream_index = media_stack_connect->stream_index;
 	connect.stream_params = media_stack_connect->stream_params;
 
-	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&connect, sizeof(connect), NULL);
+	for (i = 0; i < MAX_PIPELINES; i++) {
+		connect.pipeline.id = i;
+		audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&connect, sizeof(connect), NULL);
+	}
 }
 
 static void talker_disconnect(unsigned int stream_index)
 {
 	struct hrpn_cmd_audio_element_avtp_disconnect disconnect;
+	int i;
 
 	/* need to disconnect streams in AVTP audio element */
 	disconnect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_DISCONNECT;
@@ -145,12 +154,16 @@ static void talker_disconnect(unsigned int stream_index)
 	disconnect.element.id = 0;
 	disconnect.stream_index = stream_index;
 
-	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&disconnect, sizeof(disconnect), NULL);
+	for (i = 0; i < MAX_PIPELINES; i++) {
+		disconnect.pipeline.id = i;
+		audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&disconnect, sizeof(disconnect), NULL);
+	}
 }
 
 static void talker_connect(struct genavb_msg_media_stack_connect *media_stack_connect)
 {
 	struct hrpn_cmd_audio_element_avtp_connect connect;
+	int i;
 
 	/* need to connect streams in AVTP audio element */
 	connect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_CONNECT;
@@ -160,7 +173,10 @@ static void talker_connect(struct genavb_msg_media_stack_connect *media_stack_co
 	connect.stream_index = media_stack_connect->stream_index;
 	connect.stream_params = media_stack_connect->stream_params;
 
-	audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&connect, sizeof(connect), NULL);
+	for (i = 0; i < MAX_PIPELINES; i++) {
+		connect.pipeline.id = i;
+		audio_pipeline_ctrl((struct hrpn_cmd_audio_pipeline *)&connect, sizeof(connect), NULL);
+	}
 }
 
 static void handle_avdecc_event(struct pipeline_ctx *ctx, struct genavb_control_handle *ctrl_h)
