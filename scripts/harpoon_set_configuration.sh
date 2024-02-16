@@ -71,10 +71,15 @@ elif [ "$2" == "audio_smp" ]; then
 	INMATE_NAME=${RTOS}
 	EOF
 elif [ "$2" == "avb" ]; then
+	if [ "$RTOS" == "zephyr" ]; then
+		INMATE_BIN="/usr/share/harpoon/inmates/${RTOS}/audio_smp.bin"
+	else
+		INMATE_BIN="/usr/share/harpoon/inmates/${RTOS}/audio.bin"
+	fi
 	cat <<-EOF > "$CONF_FILE"
 	ROOT_CELL=/usr/share/jailhouse/cells/${SOC}.cell
 	INMATE_CELL=/usr/share/jailhouse/cells/${SOC}-harpoon-${RTOS}-avb.cell
-	INMATE_BIN=/usr/share/harpoon/inmates/${RTOS}/audio.bin
+	INMATE_BIN=${INMATE_BIN}
 	INMATE_ENTRY_ADDRESS=$ENTRY
 	INMATE_NAME=${RTOS}
 	EOF
