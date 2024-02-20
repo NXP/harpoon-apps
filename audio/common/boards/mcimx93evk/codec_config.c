@@ -39,7 +39,7 @@ static cs42448_config_t cs42448Config = {
 		.sampleRate	= 48000U,
 		.bitWidth	= 24U
 	},
-	.bus			= kCS42448_BusI2S,
+	.bus			= kCS42448_BusTDM,
 	.slaveAddress	= CS42448_I2C_ADDR,
 };
 
@@ -113,7 +113,9 @@ static int32_t codec_cs42448_setup()
 		goto end;
 	}
 
-	err = CODEC_SetVolume(&cs42448_codec_handle, (kCODEC_VolumeLeft0 | kCODEC_VolumeRight0), 100);
+	err = CODEC_SetVolume(&cs42448_codec_handle, (kCODEC_VolumeLeft0 | kCODEC_VolumeRight0 |
+						      kCODEC_VolumeLeft1 | kCODEC_VolumeRight1 |
+						      kCODEC_VolumeLeft2 | kCODEC_VolumeRight2), 100);
 	if (err != kStatus_Success) {
 		log_err("CS42448 set volume failed (err %d)\n", err);
 		goto end;

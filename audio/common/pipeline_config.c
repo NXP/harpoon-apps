@@ -1268,3 +1268,10 @@ const struct audio_pipeline_config pipeline_mcr_avb_thread_1_config = {
 };
 
 #endif /* #if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1) */
+
+const struct audio_pipeline_config pipeline_dtmf_aud_hat_config;
+const struct audio_pipeline_config pipeline_sine_aud_hat_config;
+const struct audio_pipeline_config pipeline_loopback_aud_hat_config;
+const struct audio_pipeline_config pipeline_full_aud_hat_config;
+const struct audio_pipeline_config pipeline_full_avb_aud_hat_config;
+const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config;

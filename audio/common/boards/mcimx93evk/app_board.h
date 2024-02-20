@@ -39,9 +39,10 @@
 #define SAI3_WM8962_RX_SYNC_MODE	(kSAI_ModeSync)
 #define SAI3_CS42448_RX_SYNC_MODE	(kSAI_ModeAsync)
 
-#define DEMO_SAI_CHANNEL		(0)
-
 #define DEMO_AUDIO_DATA_CHANNEL	(2U)
 #define DEMO_AUDIO_BIT_WIDTH	kSAI_WordWidth32bits
+
+#define DEMO_MX93AUDHAT_AUDIO_DATA_CHANNEL	(8U)
+#define DEMO_MX93AUDHAT_AUDIO_BIT_WIDTH	kSAI_WordWidth32bits
 
 #endif /* _APP_BOARD_H_ */

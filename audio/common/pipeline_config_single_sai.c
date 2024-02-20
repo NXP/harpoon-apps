@@ -81,6 +81,157 @@ const struct audio_pipeline_config pipeline_dtmf_config = {
 	.buffer_storage = 2,
 };
 
+const struct audio_pipeline_config pipeline_dtmf_aud_hat_config = {
+
+	.name = "MX93AUD-HAT DTMF pipeline",
+
+	.stages = 2,
+
+	.stage[0] = {
+
+		.elements = 8,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_DTMF_SOURCE,
+			.u.dtmf = {
+				.us = 120000,
+				.pause_us = 100000,
+				.sequence_pause_us = 500000,
+				.amplitude = 0.5,
+				.sequence = "1123ABCD0123456789*#",
+			},
+
+			.outputs = 1,
+			.output = {0},
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_DTMF_SOURCE,
+			.u.dtmf = {
+				.us = 120000,
+				.pause_us = 100000,
+				.sequence_pause_us = 500000,
+				.amplitude = 0.5,
+				.sequence = "#*9876543210DCBA3211",
+			},
+
+			.outputs = 1,
+			.output = {1},
+		},
+
+		.element[2] = {
+			.type = AUDIO_ELEMENT_DTMF_SOURCE,
+			.u.dtmf = {
+				.us = 120000,
+				.pause_us = 100000,
+				.sequence_pause_us = 1000000,
+				.amplitude = 0.5,
+				.sequence = "1123ABCD0123456789*#",
+			},
+
+			.outputs = 1,
+			.output = {2},
+		},
+
+		.element[3] = {
+			.type = AUDIO_ELEMENT_DTMF_SOURCE,
+			.u.dtmf = {
+				.us = 120000,
+				.pause_us = 100000,
+				.sequence_pause_us = 1000000,
+				.amplitude = 0.5,
+				.sequence = "#*9876543210DCBA3211",
+			},
+
+			.outputs = 1,
+			.output = {3},
+		},
+
+		.element[4] = {
+			.type = AUDIO_ELEMENT_DTMF_SOURCE,
+			.u.dtmf = {
+				.us = 120000,
+				.pause_us = 100000,
+				.sequence_pause_us = 1500000,
+				.amplitude = 0.5,
+				.sequence = "1123ABCD0123456789*#",
+			},
+
+			.outputs = 1,
+			.output = {4},
+		},
+
+		.element[5] = {
+			.type = AUDIO_ELEMENT_DTMF_SOURCE,
+			.u.dtmf = {
+				.us = 120000,
+				.pause_us = 100000,
+				.sequence_pause_us = 1500000,
+				.amplitude = 0.5,
+				.sequence = "#*9876543210DCBA3211",
+			},
+			.outputs = 1,
+			.output = {5},
+		},
+
+		.element[6] = {
+			.type = AUDIO_ELEMENT_DTMF_SOURCE,
+			.u.dtmf = {
+				.us = 120000,
+				.pause_us = 100000,
+				.sequence_pause_us = 2000000,
+				.amplitude = 0.5,
+				.sequence = "1123ABCD0123456789*#",
+			},
+
+			.outputs = 1,
+			.output = {6},
+		},
+
+		.element[7] = {
+			.type = AUDIO_ELEMENT_DTMF_SOURCE,
+			.u.dtmf = {
+				.us = 120000,
+				.pause_us = 100000,
+				.sequence_pause_us = 2000000,
+				.amplitude = 0.5,
+				.sequence = "#*9876543210DCBA3211",
+			},
+
+			.outputs = 1,
+			.output = {7},
+		},
+	},
+
+	.stage[1] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SINK,
+			.u.sai_sink = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 8,
+							},
+						},
+					},
+				},
+			},
+
+			.inputs = 8,
+			.input = {0, }, /* 0 - 7*/
+		},
+	},
+
+	.buffers = 8,
+	.buffer_storage = 8,
+};
 
 const struct audio_pipeline_config pipeline_loopback_config = {
 
@@ -140,10 +291,69 @@ const struct audio_pipeline_config pipeline_loopback_config = {
 	},
 
 	.buffers = 2,
-
 	.buffer_storage = 2,
 };
 
+const struct audio_pipeline_config pipeline_loopback_aud_hat_config = {
+
+	.name = "MX93AUD-HAT Loopback pipeline",
+
+	.stages = 2,
+
+	.stage[0] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SOURCE,
+			.u.sai_source = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 8,
+							},
+						},
+					},
+				},
+			},
+			.outputs = 8,
+			.output = {0, },	/* 0 - 7 */
+		},
+	},
+
+	.stage[1] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SINK,
+			.u.sai_sink = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 8,
+							},
+						},
+					},
+				},
+			},
+
+			.inputs = 8,
+			.input = {0, }, /* 0 - 7 */
+		},
+	},
+
+	.buffers = 8,
+	.buffer_storage = 8,
+};
 
 const struct audio_pipeline_config pipeline_sine_config = {
 
@@ -205,6 +415,134 @@ const struct audio_pipeline_config pipeline_sine_config = {
 	.buffers = 2,
 
 	.buffer_storage = 2,
+};
+
+const struct audio_pipeline_config pipeline_sine_aud_hat_config = {
+
+	.name = "MX93AUD-HAT Sinewave pipeline",
+
+	.stages = 2,
+
+	.stage[0] = {
+
+		.elements = 8,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 440, /* la */
+				.amplitude = 0.5,
+			},
+
+			.outputs = 1,
+			.output = {0},
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 440,
+				.amplitude = 0.5,
+			},
+
+			.outputs = 1,
+			.output = {1},
+		},
+
+		.element[2] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 493, /* si */
+				.amplitude = 0.5,
+			},
+
+			.outputs = 1,
+			.output = {2},
+		},
+
+		.element[3] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 493,
+				.amplitude = 0.5,
+			},
+			.outputs = 1,
+			.output = {3},
+		},
+
+		.element[4] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 523, /* do */
+				.amplitude = 0.5,
+			},
+
+			.outputs = 1,
+			.output = {4},
+		},
+
+		.element[5] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 523,
+				.amplitude = 0.5,
+			},
+
+			.outputs = 1,
+			.output = {5},
+		},
+
+		.element[6] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 587, /* re */
+				.amplitude = 0.5,
+			},
+
+			.outputs = 1,
+			.output = {6},
+		},
+
+		.element[7] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 587,
+				.amplitude = 0.5,
+			},
+
+			.outputs = 1,
+			.output = {7},
+		},
+	},
+
+	.stage[1] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SINK,
+			.u.sai_sink = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 8,
+							},
+						},
+					},
+				},
+			},
+
+			.inputs = 8,
+			.input = {0, }, /* 0 - 7 */
+		},
+	},
+
+	.buffers = 8,
+	.buffer_storage = 8,
 };
 
 const struct audio_pipeline_config pipeline_full_config = {
@@ -335,6 +673,133 @@ const struct audio_pipeline_config pipeline_full_config = {
 	.buffer_storage = 8,
 };
 
+const struct audio_pipeline_config pipeline_full_aud_hat_config = {
+
+	.name = "MX93AUD-HAT Full audio pipeline",
+
+	.stages = 3,
+
+	.stage[0] = {
+
+		.elements = 5,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_DTMF_SOURCE,
+			.u.dtmf = {
+				.us = 120000,
+				.pause_us = 100000,
+				.sequence_pause_us = 500000,
+				.amplitude = 0.5,
+				.sequence = "1123ABCD0123456789*#",
+			},
+
+			.outputs = 1,
+			.output = {0},
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_DTMF_SOURCE,
+			.u.dtmf = {
+				.us = 120000,
+				.pause_us = 100000,
+				.sequence_pause_us = 500000,
+				.amplitude = 0.5,
+				.sequence = "#*9876543210DCBA3211",
+			},
+
+			.outputs = 1,
+			.output = {1},
+		},
+
+		.element[2] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 440,
+				.amplitude = 0.5,
+			},
+			.outputs = 1,
+			.output = {2},
+		},
+
+		.element[3] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 880,
+				.amplitude = 0.5,
+			},
+			.outputs = 1,
+			.output = {3},
+		},
+
+		.element[4] = {
+			.type = AUDIO_ELEMENT_SAI_SOURCE,
+			.u.sai_source = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 8,
+							},
+						},
+					},
+				},
+			},
+			.outputs = 8,
+			.output = {4, },	/* 4 - 11 */
+		},
+	},
+
+	.stage[1] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_ROUTING,
+			.u.routing = {
+
+			},
+
+			.inputs = 12,
+			.input = {0, }, 	/* 0 - 11 */
+
+			.outputs = 8,
+			.output = {12, },	/* 12 - 19 */
+		},
+	},
+
+	.stage[2] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SINK,
+			.u.sai_sink = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 8,
+							},
+						},
+					},
+				},
+			},
+
+			.inputs = 8,
+			.input = {12, },	/* 12 - 19 */
+		},
+	},
+
+	.buffers = 20,
+	.buffer_storage = 20,
+};
+
 #if (CONFIG_GENAVB_ENABLE == 1)
 const struct audio_pipeline_config pipeline_full_avb_config = {
 
@@ -450,6 +915,121 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 		[4] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
 		[5] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
 		[6] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+	},
+};
+
+const struct audio_pipeline_config pipeline_full_avb_aud_hat_config = {
+
+	.name = "MX93AUD-HAT AVB audio pipeline",
+
+	.stages = 3,
+
+	.stage[0] = {
+
+		.elements = 3,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 440,
+				.amplitude = 0.5,
+			},
+			.outputs = 1,
+			.output = {0},
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_SAI_SOURCE,
+			.u.sai_source = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 8,
+							},
+						},
+					},
+				},
+			},
+			.outputs = 8,
+			.output = {1, },	/* 1 - 8 */
+		},
+
+		.element[2] = {
+			.type = AUDIO_ELEMENT_AVTP_SOURCE,
+			.u.avtp_source = {
+				.stream_n = 2,
+			},
+			.outputs = 4,
+			.output = {9, },	/* 9 - 12 */
+		},
+	},
+
+	.stage[1] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_ROUTING,
+			.u.routing = {
+
+			},
+
+			.inputs = 13,
+			.input = {0, }, 	/* 0 - 12 */
+
+			.outputs = 12,
+			.output = {13, },	/* 13 - 24 */
+		},
+	},
+
+	.stage[2] = {
+
+		.elements = 2,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SINK,
+			.u.sai_sink = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 8,
+							},
+						},
+					},
+				},
+			},
+
+			.inputs = 8,
+			.input = {13, },	/* 13 - 20 */
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_AVTP_SINK,
+			.u.avtp_sink = {
+				.stream_n = 2,
+			},
+
+			.inputs = 4,
+			.input = {21, },	/* 21 - 24 */
+		},
+	},
+
+	.buffers = 25,
+
+	.buffer_storage = 25,
+	.storage = {
+		[9] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[10] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[11] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[12] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
 	},
 };
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
@@ -726,6 +1306,123 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 		[4] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
 		[5] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
 		[6] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+	},
+};
+
+const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config = {
+
+	.name = "MX93AUD-HAT AVB audio pipeline (with MCR support)",
+
+	.stages = 3,
+
+	.stage[0] = {
+
+		.elements = 3,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 440,
+				.amplitude = 0.5,
+			},
+			.outputs = 1,
+			.output = {0},
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_SAI_SOURCE,
+			.u.sai_source = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 8,
+							},
+						},
+					},
+				},
+			},
+			.outputs = 8,
+			.output = {1, },	/* 1 - 8 */
+		},
+
+		.element[2] = {
+			.type = AUDIO_ELEMENT_AVTP_SOURCE,
+			.u.avtp_source = {
+				.stream_n = 2,
+				.stream[0].flags = GENAVB_STREAM_FLAGS_MCR,
+				.stream[1].flags = GENAVB_STREAM_FLAGS_MCR,
+			},
+			.outputs = 4,
+			.output = {9, },	/* 9 - 12 */
+		},
+	},
+
+	.stage[1] = {
+
+		.elements = 1,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_ROUTING,
+			.u.routing = {
+
+			},
+
+			.inputs = 13,
+			.input = {0, }, 	/* 0 - 12 */
+
+			.outputs = 12,
+			.output = {13, },	/* 13 - 24 */
+		},
+	},
+
+	.stage[2] = {
+
+		.elements = 2,
+
+		.element[0] = {
+			.type = AUDIO_ELEMENT_SAI_SINK,
+			.u.sai_sink = {
+				.sai_n = 1,
+				.sai = {
+					[0] = {
+						.id = 3,
+						.line_n = 1,
+						.line = {
+							[0] = {
+								.channel_n = 8,
+							},
+						},
+					},
+				},
+			},
+
+			.inputs = 8,
+			.input = {13, },	/* 13 - 20 */
+		},
+
+		.element[1] = {
+			.type = AUDIO_ELEMENT_AVTP_SINK,
+			.u.avtp_sink = {
+				.stream_n = 2,
+			},
+
+			.inputs = 4,
+			.input = {21, },	/* 21 - 24 */
+		},
+	},
+
+	.buffers = 25,
+
+	.buffer_storage = 25,
+	.storage = {
+		[9] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[10] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[11] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[12] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
 	},
 };
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */

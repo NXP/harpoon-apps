@@ -38,7 +38,6 @@ struct mode_handler {
 	void (*stats)(void *);
 	void (*ctrl)(void *);
 	int (*run)(void *, struct event *e);
-	void *data;
 };
 
 #define DEFAULT_PERIOD		8
@@ -58,9 +57,7 @@ struct data_ctx {
 	/* SAI data for hardware setup */
 	struct sai_device dev[SAI_TX_MAX_INSTANCE];
 	uint32_t sai_dev_irq_source;
-	sai_word_width_t bit_width;
 	sai_sample_rate_t sample_rate;
-	uint32_t chan_numbers;
 	uint8_t period;
 	bool use_audio_hat;
 
@@ -86,9 +83,21 @@ static struct play_pipeline_config play_pipeline_dtmf_config = {
 	}
 };
 
+static struct play_pipeline_config play_pipeline_dtmf_aud_hat_config = {
+	.cfg = {
+		&pipeline_dtmf_aud_hat_config,
+	}
+};
+
 static struct play_pipeline_config play_pipeline_loopback_config = {
 	.cfg = {
 		&pipeline_loopback_config,
+	}
+};
+
+static struct play_pipeline_config play_pipeline_loopback_aud_hat_config = {
+	.cfg = {
+		&pipeline_loopback_aud_hat_config,
 	}
 };
 
@@ -98,9 +107,21 @@ static struct play_pipeline_config play_pipeline_sine_config = {
 	}
 };
 
+static struct play_pipeline_config play_pipeline_sine_aud_hat_config = {
+	.cfg = {
+		&pipeline_sine_aud_hat_config,
+	}
+};
+
 static struct play_pipeline_config play_pipeline_full_config = {
 	.cfg = {
 		&pipeline_full_config,
+	}
+};
+
+static struct play_pipeline_config play_pipeline_full_aud_hat_config = {
+	.cfg = {
+		&pipeline_full_aud_hat_config,
 	}
 };
 
@@ -119,9 +140,22 @@ static struct play_pipeline_config play_pipeline_full_avb_config = {
 		&pipeline_full_avb_config,
 	}
 };
+
+static struct play_pipeline_config play_pipeline_full_avb_aud_hat_config = {
+	.cfg = {
+		&pipeline_full_avb_aud_hat_config,
+	}
+};
+
 static struct play_pipeline_config play_pipeline_mcr_avb_config = {
 	.cfg = {
 		&pipeline_mcr_avb_config,
+	}
+};
+
+static struct play_pipeline_config play_pipeline_mcr_avb_aud_hat_config = {
+	.cfg = {
+		&pipeline_mcr_avb_aud_hat_config,
 	}
 };
 #endif
@@ -148,28 +182,24 @@ const static struct mode_handler g_handler[] =
 		.exit = play_pipeline_exit,
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
-		.data = &play_pipeline_dtmf_config,
 	},
 	[1] = {
 		.init = play_pipeline_init,
 		.exit = play_pipeline_exit,
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
-		.data = &play_pipeline_sine_config,
 	},
 	[2] = {
 		.init = play_pipeline_init,
 		.exit = play_pipeline_exit,
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
-		.data = &play_pipeline_loopback_config,
 	},
 	[3] = {
 		.init = play_pipeline_init,
 		.exit = play_pipeline_exit,
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
-		.data = &play_pipeline_full_config,
 	},
 #if (CONFIG_GENAVB_ENABLE == 1)
 	[4] = {
@@ -178,7 +208,6 @@ const static struct mode_handler g_handler[] =
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
 		.ctrl = play_pipeline_ctrl_avb,
-		.data = &play_pipeline_full_avb_config,
 	},
 #endif
 #if defined(CONFIG_SMP)
@@ -187,7 +216,6 @@ const static struct mode_handler g_handler[] =
 		.exit = play_pipeline_exit,
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
-		.data = &play_pipeline_smp_config,
 	},
 #endif
 #if (CONFIG_GENAVB_ENABLE == 1)
@@ -197,7 +225,6 @@ const static struct mode_handler g_handler[] =
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
 		.ctrl = play_pipeline_ctrl_avb,
-		.data = &play_pipeline_mcr_avb_config,
 	},
 #endif
 #if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
@@ -207,7 +234,6 @@ const static struct mode_handler g_handler[] =
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
 		.ctrl = play_pipeline_ctrl_avb,
-		.data = &play_pipeline_avb_smp_config,
 	},
 	[8] = {
 		.init = play_pipeline_init_avb,
@@ -215,10 +241,49 @@ const static struct mode_handler g_handler[] =
 		.run = play_pipeline_run,
 		.stats = play_pipeline_stats,
 		.ctrl = play_pipeline_ctrl_avb,
-		.data = &play_pipeline_mcr_smp_config,
 	},
 #endif
 };
+
+static const struct play_pipeline_config *g_play_config[] = {
+	[0] = &play_pipeline_dtmf_config,
+	[1] = &play_pipeline_sine_config,
+	[2] = &play_pipeline_loopback_config,
+	[3] = &play_pipeline_full_config,
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[4] = &play_pipeline_full_avb_config,
+#endif
+#if defined(CONFIG_SMP)
+	[5]  = &play_pipeline_smp_config,
+#endif
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[6] = &play_pipeline_mcr_avb_config,
+#endif
+#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
+	[7] = &play_pipeline_avb_smp_config,
+	[8] = &play_pipeline_mcr_smp_config,
+#endif
+};
+
+static const struct play_pipeline_config *g_play_aud_hat_config[] = {
+	[0] = &play_pipeline_dtmf_aud_hat_config,
+	[1] = &play_pipeline_sine_aud_hat_config,
+	[2] = &play_pipeline_loopback_aud_hat_config,
+	[3] = &play_pipeline_full_aud_hat_config,
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[4] = &play_pipeline_full_avb_aud_hat_config,
+#endif
+#if defined(CONFIG_SMP)
+	[5]  = &play_pipeline_smp_config,
+#endif
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[6] = &play_pipeline_mcr_avb_aud_hat_config,
+#endif
+#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
+	[7] = &play_pipeline_avb_smp_config,
+	[8] = &play_pipeline_mcr_smp_config,
+#endif
+ };
 
 static void audio_check_params(struct audio_config *cfg, int run_id)
 {
@@ -314,6 +379,8 @@ static void sai_setup(struct data_ctx *ctx)
 
 	log_info("enter\n");
 
+	sai_clock_setup();
+
 	/* Always use last SAI device as IRQ source. */
 	ctx->sai_dev_irq_source = sai_active_list_nelems - 1;
 
@@ -325,9 +392,9 @@ static void sai_setup(struct data_ctx *ctx)
 		int32_t ret;
 
 		sai_config.sai_base = sai_active_list[i].sai_base;
-		sai_config.bit_width = ctx->bit_width;
+		sai_config.bit_width = sai_active_list[i].slot_size;
+		sai_config.chan_numbers = sai_active_list[i].slot_count;
 		sai_config.sample_rate = ctx->sample_rate;
-		sai_config.chan_numbers = ctx->chan_numbers;
 
 		sai_id = get_sai_id(sai_active_list[i].sai_base);
 		os_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
@@ -349,9 +416,6 @@ static void sai_setup(struct data_ctx *ctx)
 			sai_config.working_mode = SAI_POLLING_MODE;
 		}
 
-		if (ctx->use_audio_hat)
-			log_info("MX93AUD-HAT selected\n");
-
 		/* Configure attached codec */
 		cid = sai_active_list[i].cid;
 		ret = codec_setup(cid);
@@ -363,7 +427,7 @@ static void sai_setup(struct data_ctx *ctx)
 				sai_active_list[i].masterSlave = kSAI_Master;
 			}
 		} else {
-			codec_set_format(cid, sai_config.source_clock_hz, sai_config.sample_rate, ctx->bit_width);
+			codec_set_format(cid, sai_config.source_clock_hz, sai_config.sample_rate, sai_config.bit_width);
 		}
 
 		sai_config.masterSlave = sai_active_list[i].masterSlave;
@@ -373,9 +437,9 @@ static void sai_setup(struct data_ctx *ctx)
 
 		/* Set FIFO water mark to be period size of all channels*/
 #if USE_TX_IRQ
-		sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers - 1;
+		sai_config.fifo_water_mark = ctx->period * sai_config.chan_numbers - 1;
 #else
-		sai_config.fifo_water_mark = ctx->period * ctx->chan_numbers;
+		sai_config.fifo_water_mark = ctx->period * sai_config.chan_numbers;
 #endif
 
 		sai_drv_setup(&ctx->dev[i], &sai_config);
@@ -506,7 +570,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 {
 	int rc = HRPN_RESP_STATUS_ERROR;
 	struct audio_config cfg;
-	struct play_pipeline_config *play_cfg;
+	const struct play_pipeline_config *play_cfg;
 	struct event e;
 	uint8_t pipeline_count = 0;
 	size_t period = DEFAULT_PERIOD;
@@ -519,7 +583,11 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	if (run->id >= ARRAY_SIZE(g_handler) || !g_handler[run->id].init)
 		goto exit;
 
-	play_cfg = g_handler[run->id].data;
+	if (run->use_audio_hat)
+		play_cfg = g_play_aud_hat_config[run->id];
+	else
+		play_cfg = g_play_config[run->id];
+
 	/* Check the count of pipeline */
 	for (i = 0; i < ctx->thread_count; i++) {
 		if (play_cfg->cfg[i] == NULL)
@@ -552,8 +620,6 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 
 	ctx->callback = 0;
 	ctx->sample_rate = rate;
-	ctx->chan_numbers = DEMO_AUDIO_DATA_CHANNEL;
-	ctx->bit_width = DEMO_AUDIO_BIT_WIDTH;
 	ctx->period = period;
 	ctx->use_audio_hat = run->use_audio_hat;
 	cfg.rate = rate;
@@ -562,7 +628,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	audio_check_params(&cfg, run->id);
 
 	pin_mux_dynamic_config(ctx->use_audio_hat);
-	sai_set_audio_hat_codec(ctx->use_audio_hat);
+	sai_set_audio_hat_codec(ctx->use_audio_hat, ctx->sample_rate);
 
 	for (i = 0; i < pipeline_count; i++) {
 		cfg.data = (void *)play_cfg->cfg[i];

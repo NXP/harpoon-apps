@@ -22,6 +22,8 @@ struct sai_active_config sai_active_list[] = {
 		.rx_sync_mode = SAI5_RX_SYNC_MODE,
 		.msel = kSAI_BclkSourceMclkDiv,		/* MCLK1 */
 		.cid = CODEC_ID_HIFIBERRY,
+		.slot_count = DEMO_AUDIO_DATA_CHANNEL,
+		.slot_size = DEMO_AUDIO_BIT_WIDTH,
 	},
 	{
 		.sai_base = SAI3_SAI,
@@ -33,11 +35,14 @@ struct sai_active_config sai_active_list[] = {
 		.rx_sync_mode = SAI3_RX_SYNC_MODE,
 		.msel = kSAI_BclkSourceMclkDiv,		/* MCLK1 */
 		.cid = CODEC_ID_WM8960,
+		.slot_count = DEMO_AUDIO_DATA_CHANNEL,
+		.slot_size = DEMO_AUDIO_BIT_WIDTH,
 	},
 };
 
 int32_t sai_active_list_nelems = ARRAY_SIZE(sai_active_list);
 
-void sai_set_audio_hat_codec(bool use_audio_hat) {
+void sai_set_audio_hat_codec(bool use_audio_hat, unsigned int rate)
+{
 	return;
 }
