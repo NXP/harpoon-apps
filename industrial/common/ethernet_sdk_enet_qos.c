@@ -629,7 +629,7 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
     ENET_QOS_BuildFrame(ctx);
 
     /* Delay some time before executing send and receive operation. */
-    SDK_DelayAtLeastUs(3000000ULL, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+    SDK_DelayAtLeastUs(1000000ULL, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     log_info("\r\n%d frames ----> will be sent in %d queues, and frames will be received in %d queues.\r\n",
            ENET_QOS_TRANSMIT_DATA_NUM, ENET_QOS_TXQUEUE_USE, ENET_QOS_RXQUEUE_USE);
 
