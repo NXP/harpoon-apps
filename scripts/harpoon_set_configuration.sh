@@ -71,7 +71,7 @@ elif [ "$2" == "audio_smp" ]; then
 	INMATE_NAME=${RTOS}
 	EOF
 elif [ "$2" == "avb" ]; then
-	if [ "$RTOS" == "zephyr" ]; then
+	if [[ "$RTOS" == "zephyr" && "$SOC" != "imx93" ]]; then
 		INMATE_BIN="/usr/share/harpoon/inmates/${RTOS}/audio_smp.bin"
 	else
 		INMATE_BIN="/usr/share/harpoon/inmates/${RTOS}/audio.bin"
