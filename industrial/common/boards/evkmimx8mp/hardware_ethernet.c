@@ -28,9 +28,9 @@ void hardware_ethernet_init(void)
     /* For a complete PHY reset of RTL8211FDI-CG, this pin must be asserted low for at least 10ms. And
     * wait for a further 30ms(for internal circuits settling time) before accessing the PHY register */
     GPIO_WritePinOutput(GPIO4, 22, 0);
-    SDK_DelayAtLeastUs(10000, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY * 2);
+    SDK_DelayAtLeastUs(10000, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     GPIO_WritePinOutput(GPIO4, 22, 1);
-    SDK_DelayAtLeastUs(30000, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY * 2);
+    SDK_DelayAtLeastUs(30000, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
 
     /* Set this bit to enable ENET_QOS RGMII TX clock output on TX_CLK pad. */
     IOMUXC_GPR->GPR1 |= IOMUXC_GPR_GPR1_IOMUXC_GPR_ENET_QOS_RGMII_EN(1);
