@@ -66,6 +66,43 @@ uint32_t dev_get_enet_core_freq(void *base)
 }
 
 /*
+ * Enet QOS module update clocks (RGMII TX_CLK) on link speed update.
+ */
+void BOARD_enet_qos_clock_fix(void *base, enet_qos_mii_speed_t miiSpeed)
+{
+
+	if (base != ENET_QOS)
+		return;
+
+	switch (miiSpeed) {
+	case kENET_QOS_MiiSpeed1000M:
+		/* Generate 125M root clock for 1000Mbps. */
+		CLOCK_SetRootDivider(kCLOCK_RootEnetQos, 1U, 1U);
+		CLOCK_SetRootMux(kCLOCK_RootEnetQos,
+		kCLOCK_EnetQosRootmuxSysPll2Div8); /* SYSTEM PLL2 divided by 8: 125Mhz */
+		break;
+	case kENET_QOS_MiiSpeed100M:
+		/* Generate 25M root clock for 100Mbps. */
+		CLOCK_SetRootDivider(kCLOCK_RootEnetQos, 1U, 2U);
+		CLOCK_SetRootMux(kCLOCK_RootEnetQos,
+		kCLOCK_EnetQosRootmuxSysPll2Div20); /* SYSTEM PLL2 divided by 20: 50Mhz */
+		break;
+	case kENET_QOS_MiiSpeed10M:
+		/* Generate 2.5M root clock for 10Mbps. */
+		CLOCK_SetRootDivider(kCLOCK_RootEnetQos, 4U, 5U);
+		CLOCK_SetRootMux(kCLOCK_RootEnetQos,
+		kCLOCK_EnetQosRootmuxSysPll2Div20); /* SYSTEM PLL2 divided by 20: 50Mhz */
+		break;
+	default:
+		/* Generate 125M root clock. */
+		CLOCK_SetRootDivider(kCLOCK_RootEnetQos, 1U, 1U);
+		CLOCK_SetRootMux(kCLOCK_RootEnetQos,
+		kCLOCK_EnetQosRootmuxSysPll2Div8); /* SYSTEM PLL2 divided by 8: 125Mhz */
+		break;
+	}
+}
+
+/*
  * Enet 1588 timer frequency (ipg_clk_time)
  */
 uint32_t dev_get_enet_1588_freq(void *base)

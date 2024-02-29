@@ -64,6 +64,8 @@
 #define BOARD_GENAVB_TIMER_0_IRQ                 BOARD_GPT_0_IRQ
 #define BOARD_GENAVB_TIMER_0_IRQ_HANDLER         BOARD_GPT_0_IRQ_HANDLER
 
+#define BOARD_ENET_QOS0_CLOCK_FIX                BOARD_enet_qos_clock_fix
+
 unsigned int BOARD_GPT_clk_src(void *base);
 unsigned int BOARD_GPT_clk_freq(void *base);
 int BOARD_NetPort_Get_MAC(unsigned int port, uint8_t *mac);
@@ -76,6 +78,7 @@ uint32_t dev_read_audio_pll_post_div(void);
 uint32_t dev_get_enet_core_freq(void *base);
 uint32_t dev_get_enet_1588_freq(void *base);
 uint32_t dev_get_gpt_ipg_freq(void *base);
+void BOARD_enet_qos_clock_fix(void *base, enet_qos_mii_speed_t miiSpeed);
 
 int sdk_printf(const char *fmt_s, ...);
 int sdk_vprintf(const char *fmt_s, va_list ap);
