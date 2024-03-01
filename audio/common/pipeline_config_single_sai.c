@@ -394,7 +394,7 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 			},
 
 			.inputs = 7,
-			.input = {0, }, 	/* 0 - 7 */
+			.input = {0, }, 	/* 0 - 6 */
 
 			.outputs = 6,
 			.output = {7, },	/* 7 - 12 */
@@ -423,7 +423,7 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 			},
 
 			.inputs = 2,
-			.input = {8, },	/* 8 - 9 */
+			.input = {7, },	/* 7 - 8 */
 		},
 
 		.element[1] = {
@@ -433,13 +433,13 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 			},
 
 			.inputs = 4,
-			.input = {10, },	/* 10 - 13 */
+			.input = {9, },	/* 9 - 12 */
 		},
 	},
 
-	.buffers = 14,
+	.buffers = 13,
 
-	.buffer_storage = 14,
+	.buffer_storage = 13,
 	.storage = {
 		[3] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
 		[4] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
