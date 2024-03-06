@@ -1,14 +1,14 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #ifndef _VERSION_H_
 #define _VERSION_H_
 
-#define VERSION_MAJOR 2 /* eg API breaking */
-#define VERSION_MDIUM 5 /* Feature  update */
-#define VERSION_MINOR 0 /* Bugfix /  Hotfix */
+#define VERSION_MAJOR 3 /* eg API breaking */
+#define VERSION_MDIUM 0 /* Feature  update */
+#define VERSION_MINOR 0 /* Bufix /  Hotfix */
 
 
 #define _STRINGIFY(x) #x
