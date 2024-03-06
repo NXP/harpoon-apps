@@ -60,7 +60,7 @@ sudo apt install python3-pyelftools
 
 Execute below commands to replicate the whole Harpoon delivery at revision ```${revision}``` and place it in a west workspace named ```hww```.
 ```bash
-export revision=harpoon_2.5.0
+export revision=harpoon_3.0.0
 west init -m https://github.com/NXP/harpoon-apps --mr ${revision} hww
 cd hww
 west update
