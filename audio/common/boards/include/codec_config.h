@@ -20,7 +20,7 @@ int32_t codec_set_format(enum codec_id cid, uint32_t mclk, uint32_t sample_rate,
 int32_t codec_close(enum codec_id cid);
 bool codec_is_rate_supported(uint32_t rate, bool use_audio_hat);
 
-static inline bool is_value_in_array(int value, uint32_t array[], size_t size)
+static inline bool is_value_in_array(uint32_t value, uint32_t array[], size_t size)
 {
 	for (int i = 0; i < size; i++) {
 		if (array[i] == value)
