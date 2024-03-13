@@ -123,7 +123,7 @@ static bool check_all_io_devices_connected(struct controller_ctx *ctx)
 
 static bool button_press_event_check(struct controller_ctx *ctx)
 {
-    enum event evt;
+    enum event_motor evt;
     bool ret = false;
 
     // Handle events coming from user button
@@ -255,7 +255,7 @@ static void controller_loop(void *data, int timer_status)
     unsigned int i = 0;
     struct controller_ctx *ctx = data;
     unsigned int num_sched_stats = CONTROLLER_STAT_PERIOD_SEC *
-                                   (NSECS_PER_SEC_F / ctx->c_task->task->params->task_period_ns);
+                                   (NSECS_PER_SEC / ctx->c_task->task->params->task_period_ns);
     unsigned int num_sched_monitoring = MONITORING_STAT_PERIOD_MS *
                                         (NSECS_PER_MSEC / ctx->c_task->task->params->task_period_ns);
 
@@ -339,7 +339,7 @@ int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool
     }
 
     /* Initialize queue that handles button events */
-    ctx->event_queue = xQueueCreate(1, sizeof(enum event));
+    ctx->event_queue = xQueueCreate(1, sizeof(enum event_motor));
     if (!ctx->event_queue) {
         ERR("Unable to create queue\n");
         goto err;

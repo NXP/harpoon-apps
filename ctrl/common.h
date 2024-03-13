@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,6 +9,10 @@
 #define COMMAND_TIMEOUT	5000	/* 5 sec */
 #define MAC_ADDRESS_DEFAULT	{0x00, 0xBB, 0xCC, 0xDD, 0xEE, 0x14}
 #define DEFAULT_PERIOD 100000
+#define DEFAULT_NUM_IO_DEV 1
+#define DEFAULT_CONTROL_STRATEGY 0
+#define DEFAULT_ROLE 0
+#define DEFAULT_MODE 2
 
 struct cmd_handler {
 	const char *name;

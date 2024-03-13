@@ -102,6 +102,9 @@ static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run 
 	cfg.role = on->role;
 	cfg.period = on->period;
 	cfg.protocol = on->protocol;
+	cfg.num_io_devices = on->num_io_devices;
+	cfg.control_strategy = on->control_strategy;
+	cfg.app_mode = on->app_mode;
 
 	industrial_set_hw_addr(&cfg, on->addr);
 

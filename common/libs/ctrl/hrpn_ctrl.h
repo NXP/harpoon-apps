@@ -99,6 +99,9 @@ struct hrpn_cmd_industrial_run {
 	uint32_t role;
 	uint32_t protocol;
 	uint32_t period;
+	uint32_t num_io_devices;
+	uint32_t control_strategy;
+	uint32_t app_mode;
 	uint8_t addr[6];
 };
 

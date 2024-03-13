@@ -35,7 +35,7 @@ static inline void io_device_status_clear_error_fault(uint16_t *status)
     *status &= ~IO_DEVICE_STATUS_ERR_FAULT;
 }
 
-enum event {
+enum event_motor {
     BUTTON_PRESSED,
 };
 

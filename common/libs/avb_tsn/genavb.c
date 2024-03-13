@@ -136,7 +136,7 @@ int gavb_stack_init(void)
 
     genavb_get_default_config(genavb_config);
 
-    if (storage_cd("/fgptp") == 0) {
+    if (storage_cd("/fgptp", true) == 0) {
 
         /* Read general parameters */
         storage_read_uint("force_2011", &genavb_config->fgptp_config.force_2011);
@@ -162,7 +162,7 @@ int gavb_stack_init(void)
         }
     }
 
-    if (storage_cd("/avdecc") == 0) {
+    if (storage_cd("/avdecc", true) == 0) {
         int btb_mode = 0;
         uint64_t talker_entity_id = 0;
 
@@ -183,7 +183,7 @@ int gavb_stack_init(void)
             genavb_config->avdecc_config.entity_cfg[0].listener_unique_id_n = 1;
         }
     }
-    storage_cd("/");
+    storage_cd("/", true);
 
     genavb_set_config(genavb_config);
 

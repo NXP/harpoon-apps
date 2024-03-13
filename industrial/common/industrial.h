@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,6 +20,10 @@ struct industrial_config {
 
 	void (*event_send)(void *, uint8_t, uint8_t);
 	void *event_data;
+
+	unsigned int num_io_devices;
+	unsigned int control_strategy;
+	unsigned int app_mode;
 };
 
 enum industrial_event {

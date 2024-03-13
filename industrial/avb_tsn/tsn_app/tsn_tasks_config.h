@@ -30,6 +30,9 @@
 #define APP_PERIOD_MAX                  1000000000
 #define NET_DELAY_OFFSET_DEFAULT        (APP_PERIOD_DEFAULT / 2)
 
+#define NUM_IO_DEVICES_MIN 1
+#define NUM_IO_DEVICES_MAX 2
+
 #define APP_PERIOD_SERIAL_DEFAULT       2000000
 #define NET_DELAY_OFFSET_SERIAL_DEFAULT (APP_PERIOD_SERIAL_DEFAULT / 2)
 
@@ -48,9 +51,9 @@ enum task_type {
 };
 
 // Supported APP_MODEs
-#define MOTOR_NETWORK 0
-#define MOTOR_LOCAL   1
-#define NETWORK_ONLY  2
+#define MOTOR_NETWORK 0 /* Enables the controller to control 1 or 2 motors remotely */
+#define MOTOR_LOCAL   1 /* Enables the controller to control 1 motor locally */
+#define NETWORK_ONLY  2 /* Enables to observe time-sensitive traffic between controller and 1 or 2 IO devices */
 #define SERIAL        3
 
 typedef enum control_strategies {

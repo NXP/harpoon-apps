@@ -9,9 +9,11 @@
 
 #include <stddef.h>     /* for offsetof() */
 
-#define NSECS_PER_SEC  (1000000000ULL)
-#define NSECS_PER_MSEC (1000000)
-#define NSECS_PER_USEC (1000)
+#define NSECS_PER_SEC   (1000000000ULL)
+#define NSECS_PER_SEC_F (1000000000.0)
+#define NSECS_PER_MSEC  (1000000)
+#define NSECS_PER_USEC  (1000)
+#define SECS_PER_MIN    (60.0)
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))

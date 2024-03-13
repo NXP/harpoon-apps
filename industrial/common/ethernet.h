@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -18,6 +18,11 @@ struct ethernet_ctx {
 	uint32_t period;
 	uint32_t role;
 	bool loopback;
+
+	uint32_t num_io_devices;
+	uint32_t control_strategy;
+
+	uint32_t app_mode;
 };
 
 #endif /* _INDUSTRIAL_ETHERNET_H_ */

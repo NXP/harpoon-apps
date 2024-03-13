@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -24,7 +24,29 @@
 #include "system_config.h"
 #include "tsn_tasks_config.h"
 
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+#if BUILD_MOTOR_CONTROLLER == 1
+#include "controller.h"
+#endif
+
+#if BUILD_MOTOR_IO_DEVICE == 1
+#include "io_device.h"
+#include "local_network.h"
+#endif
+
 #define STATS_PERIOD_MS 2000
+
+#if BUILD_MOTOR_CONTROLLER == 1
+static struct controller_ctx ctrl1;
+static struct controller_ctx *ctrl_h = NULL;
+#endif
+
+#if BUILD_MOTOR_IO_DEVICE == 1
+static struct io_device_ctx io_device1;
+static struct io_device_ctx *io_device_h = NULL;
+#endif
 
 extern void BOARD_NET_PORT0_DRV_IRQ0_HND(void);
 
@@ -39,13 +61,6 @@ extern void BOARD_NET_PORT0_DRV_IRQ3_HND(void);
 #endif
 
 extern void BOARD_GENAVB_TIMER_0_IRQ_HANDLER(void);
-
-#if BUILD_MOTOR == 1
-static struct controller_ctx ctrl1;
-static struct io_device_ctx io_device1;
-static struct controller_ctx *ctrl_h = NULL;
-static struct io_device_ctx *io_device_h = NULL;
-#endif
 
 #if SERIAL_MODE == 1
 static struct serial_iodevice_ctx serial_iodev;
@@ -85,9 +100,11 @@ static struct tsn_app_config *system_config_get_tsn_app(struct ethernet_ctx *ctx
 		storage_cd("/");
 	}
 #else
+	config->mode = ctx->app_mode;
 	config->role = ctx->role;
-
 	config->period_ns = ctx->period;
+	config->num_io_devices = ctx->num_io_devices;
+	config->control_strategy = ctx->control_strategy;
 
 #endif /* (ENABLE_STORAGE == 1) */
 
@@ -147,10 +164,23 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 	log_info("control_strategy : %u\n", config->control_strategy);
 	log_info("app period       : %u\n", config->period_ns);
 
-#if BUILD_MOTOR == 1
-	if ((config->mode == MOTOR_LOCAL || config->mode == MOTOR_NETWORK) &&
+#if ((BUILD_MOTOR_CONTROLLER == 0) && (BUILD_MOTOR_IO_DEVICE == 0))
+	log_info("BUILD_MOTOR disabled, MOTOR_NETWORK and MOTOR_LOCAL modes cannot be used\n");
+#endif
+
+#if ((BUILD_MOTOR_CONTROLLER == 1) || (BUILD_MOTOR_IO_DEVICE == 1))
+	if (config->mode == MOTOR_NETWORK) {
+		if ((config->period_ns != 100000) && (config->period_ns != 250000)) {
+			log_err("invalid application period, only 100000 ns and 250000 ns are supported\n");
+			goto exit;
+		}
+	}
+#endif
+
+#if ((BUILD_MOTOR_CONTROLLER == 1) && (BUILD_MOTOR_IO_DEVICE == 1))
+	if ((config->mode == MOTOR_LOCAL) &&
 		(config->period_ns != 100000) && (config->period_ns != 250000)) {
-		log_err("invalid application period, only 100000 us and 250000 us are supported\n");
+		log_err("invalid application period, only 100000 ns and 250000 ns are supported\n");
 		goto exit;
 	}
 
@@ -189,8 +219,6 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 		local_bind_controller_io_device(&ctrl1, &io_device1);
 
 	} else
-#else
-	log_info("BUILD_MOTOR disabled, MOTOR_NETWORK and MOTOR_LOCAL modes cannot be used\n");
 #endif /* BUILD_MOTOR */
 	{
 		avb_tsn_ctx->c_task = tsn_conf_get_cyclic_task(config->role);
@@ -213,8 +241,9 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 	avb_tsn_ctx->c_task->params.use_st = config->use_st;
 	avb_tsn_ctx->c_task->params.use_fp = config->use_fp;
 
-#if BUILD_MOTOR == 1
+#if (BUILD_MOTOR_CONTROLLER == 1) || (BUILD_MOTOR_IO_DEVICE == 1)
 	if (config->mode == MOTOR_NETWORK || config->mode == MOTOR_LOCAL) {
+#if BUILD_MOTOR_CONTROLLER == 1
 		if (avb_tsn_ctx->c_task->type == CYCLIC_CONTROLLER) {
 			if (controller_init(&ctrl1, avb_tsn_ctx->c_task, config->mode == MOTOR_LOCAL,
 					(control_strategies_t)config->control_strategy, (bool)config->cmd_client) < 0) {
@@ -222,19 +251,24 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 				goto exit;
 			}
 			ctrl_h = &ctrl1;
-		} else if (avb_tsn_ctx->c_task->type == CYCLIC_IO_DEVICE) {
+		}
+#endif
+#if BUILD_MOTOR_IO_DEVICE == 1
+		if (avb_tsn_ctx->c_task->type == CYCLIC_IO_DEVICE) {
 			if (io_device_init(&io_device1, avb_tsn_ctx->c_task, 1, false) < 0) {
 				log_err("io_device initialization failed\n");
 				goto exit;
 			}
 			io_device_h = &io_device1;
 			io_device_set_motor_offset(io_device_h, 0, config->motor_offset);
-		} else {
+		} 
+#endif 
+		if (avb_tsn_ctx->c_task->type != CYCLIC_CONTROLLER && avb_tsn_ctx->c_task->type != CYCLIC_IO_DEVICE) {
 			log_err("Unknown cyclic task type\n");
 			goto exit;
 		}
 	} else
-#endif /* BUILD_MOTOR */
+#endif /* (BUILD_MOTOR_CONTROLLER == 1) || (BUILD_MOTOR_IO_DEVICE == 1) */
 	{
 #if SERIAL_MODE == 1
 		if (config->mode == SERIAL) {
@@ -319,14 +353,6 @@ void *ethernet_avb_tsn_init(void *parameters)
 	struct industrial_config *cfg = parameters;
 	struct ethernet_avb_tsn_ctx *avb_tsn_ctx;
 	struct ethernet_ctx *ctx = NULL;
-	uint32_t role = cfg->role;
-
-	/* sanity check */
-	if (role >= MAX_TASKS_ID) {
-		log_err("Invalid role: %d\n", role);
-
-		goto exit;
-	}
 
 	/* validate user defined task period: check range and if it is an integer that can divide 1 second */
 	if (cfg->period < APP_PERIOD_MIN || cfg->period > APP_PERIOD_MAX || ((NSECS_PER_SEC / cfg->period) * cfg->period != NSECS_PER_SEC)) {
@@ -334,10 +360,39 @@ void *ethernet_avb_tsn_init(void *parameters)
 		goto exit;
 	}
 
+	if (cfg->num_io_devices < NUM_IO_DEVICES_MIN || cfg->num_io_devices > NUM_IO_DEVICES_MAX) {
+		log_err("Unsupported number of iodevices (%u)\n", cfg->num_io_devices);
+		goto exit;
+	}
+
+	if (cfg->control_strategy > IDENTIFY) {
+		log_err("Unsupported control strategy (%u)\n", cfg->control_strategy);
+		goto exit;
+	}
+	
+	if (cfg->app_mode == NETWORK_ONLY) {
+		/* sanity check */
+		if (cfg->role >= MAX_TASKS_ID) {
+			log_err("Invalid role: %d\n", cfg->role);
+			goto exit;
+		}
+	}
+#if BUILD_MOTOR_CONTROLLER == 1
+	else if (cfg->app_mode == MOTOR_NETWORK) {
+		if ((cfg->role == IO_DEVICE_0 || cfg->role == IO_DEVICE_1 || cfg->role >= MAX_TASKS_ID)) {
+			log_err("Unsupported role (%u), motor control is supported in CONTROLLER role only\n", cfg->role);
+			goto exit; 
+		}
+	}
+#endif
+	else {
+		log_err("Unsupported TSN app mode (%u)\n", cfg->app_mode);
+		goto exit;
+	}
+
 	ctx = os_malloc(sizeof(*ctx) + sizeof(*avb_tsn_ctx));
 	if (!ctx) {
 		log_err("Memory allocation error\n");
-
 		goto exit;
 	}
 
@@ -347,7 +402,11 @@ void *ethernet_avb_tsn_init(void *parameters)
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;
 	ctx->period = cfg->period;
-	ctx->role = role;
+	ctx->role = cfg->role;
+	ctx->num_io_devices = cfg->num_io_devices;
+	ctx->control_strategy = cfg->control_strategy;
+	ctx->app_mode = cfg->app_mode;
+
 	memcpy(ctx->mac_addr, cfg->address, sizeof(ctx->mac_addr));
 
 	log_info("%s\n", __func__);
