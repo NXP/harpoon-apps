@@ -463,7 +463,7 @@ int can_run(void *priv, struct event *e)
 {
 	struct can_ctx *ctx = priv;
 	uint8_t status = -1;
-	uint32_t flag = 0;
+	uint64_t flag = 0;
 
 	if (!ctx) {
 		log_err("Context not found\n");
@@ -494,7 +494,7 @@ int can_run(void *priv, struct event *e)
 
 		for (int i = 0; i < ctx->mb_number; i++) {
 			/* Mailbox (index = N) is defined in mb[N-1] */
-			if (flag & (1 << (i + 1))) {
+			if (flag & (1ULL << (i + 1))) {
 				if (ctx->mb[i].conf.tx)
 					mb_tx_process(&ctx->mb[i], ctx->base, ctx->use_canfd, e);
 				else
