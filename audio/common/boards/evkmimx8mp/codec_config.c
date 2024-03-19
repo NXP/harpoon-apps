@@ -9,6 +9,7 @@
 #include "fsl_codec_common.h"
 #include "fsl_pcm186x.h"
 #include "fsl_pcm512x.h"
+#include "fsl_sai.h"
 
 #include "codec_config.h"
 
@@ -143,6 +144,15 @@ int32_t codec_setup(enum codec_id cid)
 		CLOCK_SetRootMux(kCLOCK_RootI2c3, kCLOCK_I2cRootmuxSysPll1Div5); /* Set I2C source to SysPLL1 Div5 160MHZ */
 		CLOCK_SetRootDivider(kCLOCK_RootI2c3, 1U, 10U);                  /* Set root clock to 160MHZ / 10 = 16MHZ */
 		CLOCK_EnableClock(kCLOCK_I2c3);
+
+		/* select MCLK direction(Enable MCLK clock):
+		 * volume will not be setup at first boot if the Master Clock is not configured beforehand.
+		*/
+		sai_master_clock_t saiMasterCfg;
+
+		saiMasterCfg.mclkSourceClkHz = SAI3_CLK_FREQ;            /* setup source clock for MCLK */
+		saiMasterCfg.mclkHz          = saiMasterCfg.mclkSourceClkHz; /* setup target clock of MCLK */
+		SAI_SetMasterClockConfig(SAI3_SAI, &saiMasterCfg);
 
 		/* Use default setting to init codec */
 		err = CODEC_Init(&wm8960_codec_handle, &wm8960_codec_config);
