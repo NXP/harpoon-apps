@@ -32,7 +32,7 @@
 #define IDENTIFICATION_MAX_MOTOR             2
 #define IDENTIFICATION_MAX_STEPS             6
 
-char *strategy_names[] = {"SYNCHRONIZED", "FOLLOW", "HOLD_INDEX", "INTERLACED", "STOP", "IDENTIFICATION"};
+char *strategy_names[] = {"SYNCHRONIZED", "FOLLOW", "HOLD_INDEX", "INTERLACED", "STOP", "IDENTIFY"};
 char *strategy_states_names[] = {"PREPARE", "STARTUP", "INIT", "STRATEGY", "RESET"};
 
 typedef enum control_strategy_state {
@@ -1381,11 +1381,11 @@ int control_strategy_context_init(struct control_strategy_ctx **ctx, control_str
     control_strategy_h->ops[STOP].init = strategy_stop_init;
     control_strategy_h->ops[STOP].loop = strategy_stop_loop;
     control_strategy_h->ops[STOP].reset = strategy_stop_reset;
-    control_strategy_h->ops[IDENTIFICATION].prepare = strategy_interlaced_prepare;
-    control_strategy_h->ops[IDENTIFICATION].startup = strategy_interlaced_startup;
-    control_strategy_h->ops[IDENTIFICATION].init = strategy_identification_init;
-    control_strategy_h->ops[IDENTIFICATION].loop = strategy_identification_loop;
-    control_strategy_h->ops[IDENTIFICATION].reset = strategy_interlaced_reset;
+    control_strategy_h->ops[IDENTIFY].prepare = strategy_interlaced_prepare;
+    control_strategy_h->ops[IDENTIFY].startup = strategy_interlaced_startup;
+    control_strategy_h->ops[IDENTIFY].init = strategy_identification_init;
+    control_strategy_h->ops[IDENTIFY].loop = strategy_identification_loop;
+    control_strategy_h->ops[IDENTIFY].reset = strategy_interlaced_reset;
     control_strategy_h->state = RESET;
 
     if (network_stats_open(&control_strategy_h->net_stats_ctx) < 0) {

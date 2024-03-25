@@ -59,6 +59,7 @@ typedef enum control_strategies {
     HOLD_INDEX,
     INTERLACED,
     STOP,
+    IDENTIFY
 } control_strategies_t;
 
 struct tsn_stream {
