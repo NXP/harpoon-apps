@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,6 +8,7 @@
 #define _AUDIO_ELEMENT_AVTP_SOURCE_H_
 
 #include "audio_buffer.h"
+#include "genavb/control_clock_domain.h"
 #include "hrpn_ctrl_audio_pipeline.h"
 
 #define AVTP_RX_STREAM_N		2
@@ -21,6 +22,8 @@ struct avtp_source_element_config {
 	struct avtp_source_stream_config {
 		unsigned int flags;
 	} stream [AVTP_RX_STREAM_N];
+
+	genavb_clock_domain_t clock_domain;
 };
 
 struct audio_element_config;

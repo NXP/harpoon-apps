@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,8 +9,12 @@
 #include "audio_element.h"
 #include "audio_format.h"
 #include "audio_pipeline.h"
+#include "avb_tsn/clock_domain.h"
+#include "avb_tsn/crf_stream.h"
 #include "avb_tsn/genavb.h"
+#include "avb_tsn/media_clock.h"
 #include "genavb/clock.h"
+#include "genavb/control_clock_domain.h"
 #include "genavb/genavb.h"
 #include "rpmsg.h"
 #include "genavb/sr_class.h"
@@ -28,6 +32,12 @@
 
 struct avtp_output {
 	struct audio_buffer *buf;
+};
+
+struct crf_stream {
+	aar_crf_stream_t stream;
+	unsigned int connected;
+	int index;
 };
 
 struct avtp_stream {
@@ -65,8 +75,11 @@ struct avtp_stream {
 struct avtp_source_element {
 	unsigned int stream_n;
 	struct avtp_stream stream[AVTP_RX_STREAM_N];
+	struct crf_stream crf_stream;
 	unsigned int out_n;
 	struct avtp_output out[AVTP_RX_STREAM_N * AVTP_RX_CHANNEL_N];
+
+	genavb_clock_domain_t clock_domain;
 
 	/* used in the control path to protect all streams' ->connected states */
 	os_sem_t semaphore;
@@ -83,6 +96,45 @@ static unsigned int avtp_source_channel_n(void)
 static unsigned int avtp_source_out_n(void)
 {
 	return AVTP_RX_STREAM_N * AVTP_RX_CHANNEL_N;
+}
+
+static void crf_listener_disconnect(struct avtp_source_element *avtp)
+{
+	struct crf_stream *crf_stream = &avtp->crf_stream;
+
+	if (!crf_stream->connected)
+		goto exit;
+
+	crf_disconnect(&crf_stream->stream);
+	crf_stream->connected = 0;
+	crf_stream->index = -1;
+
+	log_info("disconnected\n");
+
+exit:
+	return;
+}
+
+static void crf_listener_connect(struct avtp_source_element *avtp, unsigned int stream_index, struct genavb_stream_params *params, struct audio_element *element)
+{
+	struct crf_stream *crf_stream = &avtp->crf_stream;
+
+	if (crf_stream->connected) {
+		log_warn("stream already connected, exit.\n");
+
+		goto exit;
+	}
+
+	if (!crf_connect(&crf_stream->stream, MEDIA_CLOCK_SLAVE, avtp->clock_domain, params)) {
+		avtp->crf_stream.index = stream_index;
+		crf_stream->connected = 1;
+		log_info("connected, clock domain: %d\n", avtp->clock_domain);
+	} else {
+		log_err("connection failed\n");
+	}
+
+exit:
+	return;
 }
 
 static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int stream_index, struct genavb_stream_params *params, struct audio_element *element)
@@ -155,6 +207,16 @@ static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int s
 
 	params->flags = stream->connection_flags;
 	stream->sr_class = params->stream_class;
+
+	if (avtp->clock_domain != GENAVB_CLOCK_DOMAIN_DEFAULT) {
+		params->clock_domain = avtp->clock_domain;
+
+		/* Before connecting any AVTP stream, check if we need to set the clock domain source for AVB_CLOCK_DOMAIN_0 */
+		if (init_media_clock_source(&avtp->crf_stream.stream, params->clock_domain, params) < 0) {
+			log_err("init_media_clock_source() failed for domain %d, can not connect stream input (%u)\n", avtp->clock_domain, stream_index);
+			return;
+		}
+	}
 
 	/* Create new AVTP stream, update stream_handle */
 	if ((avb_result = genavb_stream_create(handle, &stream->handle, params, &cur_batch_size, 0)) != GENAVB_SUCCESS) {
@@ -229,10 +291,16 @@ int avtp_source_element_ctrl(struct audio_element *element, struct hrpn_cmd_audi
 		if ((len != sizeof(struct hrpn_cmd_audio_element_avtp_connect)))
 			goto err;
 
-		if (cmd->u.connect.stream_index >= avtp->stream_n)
+		if (cmd->u.connect.stream_index >= avtp->stream_n + 1)
 			goto err;
 
-		avtp_source_connect(avtp, cmd->u.connect.stream_index, &cmd->u.connect.stream_params, element);
+		/* FIXME fix mapping, as stream_index is for both CRF and AVTP streams, and that it is not mapped
+		 * with the avtp_stream array
+		 */
+		if (avdecc_format_is_crf(&cmd->u.connect.stream_params.format))
+			crf_listener_connect(avtp, cmd->u.connect.stream_index, &cmd->u.connect.stream_params, element);
+		else
+			avtp_source_connect(avtp, cmd->u.connect.stream_index, &cmd->u.connect.stream_params, element);
 
 		break;
 
@@ -241,10 +309,13 @@ int avtp_source_element_ctrl(struct audio_element *element, struct hrpn_cmd_audi
 		if ((len != sizeof(struct hrpn_cmd_audio_element_avtp_disconnect)))
 			goto err;
 
-		if (cmd->u.disconnect.stream_index >= avtp->stream_n)
+		if (cmd->u.disconnect.stream_index >= avtp->stream_n + 1)
 			goto err;
 
-		avtp_source_disconnect(avtp, cmd->u.disconnect.stream_index);
+		if ((int)cmd->u.disconnect.stream_index == avtp->crf_stream.index)
+			crf_listener_disconnect(avtp);
+		else
+			avtp_source_disconnect(avtp, cmd->u.disconnect.stream_index);
 
 		break;
 
@@ -453,6 +524,8 @@ static void avtp_source_element_exit(struct audio_element *element)
 	struct avtp_source_element *avtp = element->data;
 	int i;
 
+	crf_listener_disconnect(avtp);
+
 	for (i = 0; i < avtp->stream_n; i++)
 		avtp_source_disconnect(avtp, i);
 }
@@ -492,6 +565,7 @@ static void avtp_source_element_stats(struct audio_element *element)
 			avtp->stream[i].sync_err, avtp->stream[i].start_underflow, avtp->stream[i].clock_err,
 		    avtp->stream[i].ts_err, avtp->stream[i].event_err);
 	}
+	log_info("crf rx connected: %u\n", avtp->crf_stream.connected);
 }
 
 int avtp_source_element_check_config(struct audio_element_config *config)
@@ -537,6 +611,8 @@ int avtp_source_element_init(struct audio_element *element, struct audio_element
 	element->dump = avtp_source_element_dump;
 	element->stats = avtp_source_element_stats;
 
+	avtp->clock_domain = config->u.avtp_source.clock_domain;
+
 	avtp->stream_n = config->u.avtp_source.stream_n;
 	avtp->out_n = avtp_source_out_n();
 
@@ -552,6 +628,9 @@ int avtp_source_element_init(struct audio_element *element, struct audio_element
 			avtp->stream[i].channel_buf[j]->input_id = k;
 		}
 	}
+
+	avtp->crf_stream.connected = 0;
+	avtp->crf_stream.index = -1;
 
 	for (i = 0; i < avtp->out_n; i++)
 		avtp->out[i].buf = &buffer[config->output[i]];

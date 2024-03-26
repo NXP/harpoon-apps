@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -17,6 +17,7 @@
 
 #if (CONFIG_GENAVB_ENABLE == 1)
 #include "avb_hardware.h"
+#include "avb_tsn/clock_domain.h"
 #include "avb_tsn/genavb.h"
 #include "avb_tsn/stats_task.h"
 #include "genavb/genavb.h"
@@ -269,6 +270,14 @@ static int avb_setup(struct pipeline_ctx *ctx)
 	rc = gavb_stack_init();
 	if (rc) {
 		log_err("gavb_stack_init() failed\n");
+		goto exit;
+	}
+
+	genavb_result = genavb_clock_domain_init(get_genavb_handle());
+	if (genavb_result != GENAVB_SUCCESS) {
+		log_err("clock_domain_init() failed\n");
+
+		rc = -1;
 		goto exit;
 	}
 

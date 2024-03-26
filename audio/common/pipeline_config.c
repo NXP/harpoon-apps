@@ -1,11 +1,14 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "fsl_clock.h"
 #include "audio_pipeline.h"
+#if (CONFIG_GENAVB_ENABLE == 1)
+#include "genavb/control_clock_domain.h"
+#endif
 
 const struct audio_pipeline_config pipeline_dtmf_config = {
 
@@ -523,6 +526,7 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 			.type = AUDIO_ELEMENT_AVTP_SOURCE,
 			.u.avtp_source = {
 				.stream_n = 2,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_DEFAULT,
 			},
 			.outputs = 4,
 			.output = {5, },	/* 5 - 8 */
@@ -585,6 +589,7 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 			.type = AUDIO_ELEMENT_AVTP_SINK,
 			.u.avtp_sink = {
 				.stream_n = 2,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_DEFAULT,
 			},
 
 			.inputs = 4,
@@ -668,6 +673,7 @@ const struct audio_pipeline_config pipeline_full_avb_thread_0_config = {
 			.type = AUDIO_ELEMENT_AVTP_SOURCE,
 			.u.avtp_source = {
 				.stream_n = 2,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_DEFAULT,
 			},
 			.outputs = 4,
 			.output = {5, },	/* 5 - 8 */
@@ -762,6 +768,7 @@ const struct audio_pipeline_config pipeline_full_avb_thread_1_config = {
 			.type = AUDIO_ELEMENT_AVTP_SINK,
 			.u.avtp_sink = {
 				.stream_n = 2,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_DEFAULT,
 			},
 
 			.inputs = 4,
@@ -1033,6 +1040,7 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 				.stream_n = 2,
 				.stream[0].flags = GENAVB_STREAM_FLAGS_MCR,
 				.stream[1].flags = GENAVB_STREAM_FLAGS_MCR,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_0,
 			},
 			.outputs = 4,
 			.output = {3, },	/* 3 - 6 */
@@ -1086,6 +1094,7 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 			.type = AUDIO_ELEMENT_AVTP_SINK,
 			.u.avtp_sink = {
 				.stream_n = 2,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_0,
 			},
 
 			.inputs = 4,
@@ -1153,6 +1162,7 @@ const struct audio_pipeline_config pipeline_mcr_avb_thread_0_config = {
 				.stream_n = 2,
 				.stream[0].flags = GENAVB_STREAM_FLAGS_MCR,
 				.stream[1].flags = GENAVB_STREAM_FLAGS_MCR,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_0,
 			},
 			.outputs = 4,
 			.output = {3, },	/* 3 - 6 */
@@ -1234,6 +1244,7 @@ const struct audio_pipeline_config pipeline_mcr_avb_thread_1_config = {
 			.type = AUDIO_ELEMENT_AVTP_SINK,
 			.u.avtp_sink = {
 				.stream_n = 2,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_0,
 			},
 
 			.inputs = 4,
