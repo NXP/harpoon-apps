@@ -324,6 +324,19 @@ void controller_net_receive(void *data, int msg_id, int src_id, void *buf, int l
         ctx->stats.err_msg_id++;
 }
 
+int controller_exit(struct controller_ctx *ctx)
+{
+    vQueueDelete(ctx->event_queue);
+    control_strategy_context_exit();
+    // Delete io_devices
+    for (int i = 0; i < ctx->num_io_device; i++) {
+        for (int j = 0; j < ctx->io_devices[i].num_motors; j++) {
+            control_strategy_unregister_motor(ctx->strategy, ctx->io_devices[i].motors[j]);
+        }
+    }
+    return 0;
+}
+
 int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool motor_local,
                     control_strategies_t first_strategy, bool cmd_client)
 {

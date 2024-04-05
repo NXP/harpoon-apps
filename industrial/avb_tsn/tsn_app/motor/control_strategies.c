@@ -1340,6 +1340,11 @@ static void control_strategy_reset(struct control_strategy_ctx *ctx)
 
 /* -----  API  ----- */
 
+int control_strategy_context_exit(){
+    control_strategy_h = NULL;
+    return 0;
+}
+
 int control_strategy_context_init(struct control_strategy_ctx **ctx, control_strategies_t first_strategy,
                                   unsigned int app_period_ns)
 {
@@ -1443,6 +1448,14 @@ void control_strategy_stats_dump(struct control_strategy_ctx *ctx)
     }
 }
 
+int control_strategy_unregister_motor(struct control_strategy_ctx *ctx, struct controlled_motor_ctx *ctrl_ctx)
+{
+    slist_del(&ctx->motor_list, &ctrl_ctx->node);
+    ctx->num_motors--;
+    vPortFree(ctrl_ctx);
+    return 0;
+}
+
 struct controlled_motor_ctx *control_strategy_register_motor(struct control_strategy_ctx *ctx, uint16_t io_device_id, uint16_t motor_id, uint64_t time)
 {
     struct controlled_motor_ctx *new_motor = pvPortMalloc(sizeof(struct controlled_motor_ctx));
@@ -1470,7 +1483,7 @@ struct controlled_motor_ctx *control_strategy_register_motor(struct control_stra
 
     slist_add_head(&ctx->motor_list, &new_motor->node);
     ctx->num_motors++;
-
+    
     INF("Registered motor with : \n");
     INF("    IO device ID : %hu\n", io_device_id);
     INF("    Motor ID     : %hu\n", motor_id);

@@ -323,6 +323,12 @@ void ethernet_avb_tsn_exit(void *priv)
 		cyclic_task_exit(avb_tsn_ctx->c_task);
 	}
 
+#if BUILD_MOTOR_CONTROLLER == 1
+	if (ctx->app_mode == MOTOR_LOCAL || ctx->app_mode == MOTOR_NETWORK) {
+		if (controller_exit(&ctrl1))
+			log_err("controller_exit() failed\n");
+	}
+#endif
 	gavb_pps_exit(&avb_tsn_ctx->pps);
 	gavb_port_stats_exit(0);
 

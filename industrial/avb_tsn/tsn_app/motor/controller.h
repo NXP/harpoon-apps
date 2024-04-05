@@ -71,6 +71,7 @@ struct controller_ctx {
 
 int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool motor_local,
                     control_strategies_t first_strategy, bool cmd_client);
+int controller_exit(struct controller_ctx *ctx);
 void controller_net_receive(void *data, int msg_id, int src_id, void *buf, int len);
 
 #endif /* _CONTROLLER_H_ */
