@@ -102,7 +102,7 @@ static int32_t codec_cs42448_setup()
 	RGPIO_PinInit(CS42448_RESET_GPIO, CS42448_RESET_GPIO_PIN, &reset_pin_config);
 
 	CLOCK_SetRootClock(kCLOCK_Root_Lpi2c4, &lpi2cClkCfg);
-	CLOCK_EnableClock(kCLOCK_Root_Lpi2c4);
+	CLOCK_EnableClock(kCLOCK_Lpi2c4);
 
 	cs42448Config.i2cConfig.codecI2CInstance = CS42448_I2C_INSTANCE;
 	cs42448Config.i2cConfig.codecI2CSourceClock = CS42448_I2C_CLOCK_FREQ;
