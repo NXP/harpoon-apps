@@ -296,7 +296,11 @@ void controller_net_receive(void *data, int msg_id, int src_id, void *buf, int l
     if (msg_id == MSG_FEEDBACK) {
         // Check size of data received
         if (len != sizeof(struct msg_feedback)) {
-            ctx->stats.err_invalid_len_received++;
+            if (ctx->stats.err_invalid_len_received == INT32_MAX){
+                ERR("Overflow on ctx->stats.err_invalid_len_received var!\n");
+                return;
+            } else
+                ctx->stats.err_invalid_len_received++;
             return;
         }
 
@@ -383,8 +387,13 @@ int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool
         ctx->io_devices[i].connected = 0;
         ctx->io_devices[i].num_motors = 1;
         for (j = 0; j < ctx->io_devices[i].num_motors; j++) {
-            genavb_clock_gettime64(c_task->params.clk_id, &now);
-            ctx->io_devices[i].motors[j] = control_strategy_register_motor(ctx->strategy, ctx->io_devices[i].id, j, now);
+            if (genavb_clock_gettime64(c_task->params.clk_id, &now) == GENAVB_SUCCESS) {
+                ctx->io_devices[i].motors[j] = control_strategy_register_motor(ctx->strategy, ctx->io_devices[i].id, j, now);
+            } else {
+                ERR("Get genavb clock failed!\n");
+                goto err;
+            }
+
         }
     }
 

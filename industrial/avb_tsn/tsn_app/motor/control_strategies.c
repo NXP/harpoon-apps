@@ -667,7 +667,6 @@ static ctrl_strategy_return_codes_t strategy_interlaced_startup(struct control_s
                                           motor_static->pos_target,
                                           0.0,
                                           0.0);
-
     motor_static->demo_count++;
 
     // If the static motor is at the notch and the delay has passed, we start aligning the dynamic motor
@@ -1246,7 +1245,7 @@ static void motor_stats_send(struct control_strategy_ctx *ctx)
 
         motor->net_stats.id = motor->id;
         motor->net_stats.seqid = motor->seqid_stats++;
-        motor->net_stats.demo_count = motor->absolute_time_beginning + motor->demo_count * 250;
+        motor->net_stats.demo_count = motor->absolute_time_beginning + (uint64_t)motor->demo_count * 250;
         motor->net_stats.pos_real = motor->fb.pos - motor->startup_offset;
         motor->net_stats.pos_target = motor->pos_target;
         motor->net_stats.speed_real = motor->fb.speed;
@@ -1451,7 +1450,9 @@ void control_strategy_stats_dump(struct control_strategy_ctx *ctx)
 int control_strategy_unregister_motor(struct control_strategy_ctx *ctx, struct controlled_motor_ctx *ctrl_ctx)
 {
     slist_del(&ctx->motor_list, &ctrl_ctx->node);
-    ctx->num_motors--;
+    if (ctx->num_motors > 0)
+        ctx->num_motors--;
+
     rtos_free(ctrl_ctx);
     return 0;
 }
