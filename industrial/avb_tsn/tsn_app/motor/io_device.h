@@ -9,9 +9,8 @@
 
 #include "motor_control_api.h"
 #include "motor_control.h"
-#include "FreeRTOS.h"
-#include "queue.h"
 #include "monitoring_stats.h"
+#include "rtos_abstraction_layer.h"
 
 typedef enum {
     WAIT_FOR_INPUT,
@@ -60,7 +59,7 @@ struct io_device_ctx {
     uint16_t status;
     struct stats_io_device stats;
     struct stats_io_device stats_snap;
-    QueueHandle_t event_queue;
+    rtos_mqueue_t *event_queue;
     uint32_t stay_index_delay;
     bool offset_reached;
     uint16_t control_action;

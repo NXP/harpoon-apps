@@ -7,7 +7,7 @@
 
 #include "traj_planner.h"
 #include "math.h"
-#include "fsl_debug_console.h"
+#include "hlog.h"
 #include "motor_params.h"
 #include "types.h"
 
@@ -17,8 +17,8 @@ void check_trap_traj(struct traj_trapez *traj)
     float t_v = traj->cycles_constant_vel / traj->loop_freq;
 
     float dX = (MAX_ACCEL_RPM_P_S / SECS_PER_MIN) * t_a * t_a + t_v * (traj->speed_max / SECS_PER_MIN);
-    PRINTF("dX : %f\n", dX);
-    PRINTF("Target : %f\n", traj->pos_target - traj->pos_init);
+    log_info("dX : %f\n", dX);
+    log_info("Target : %f\n", traj->pos_target - traj->pos_init);
 }
 
 /** Compute trapezoidal trajectory to reach a given position target

@@ -8,7 +8,7 @@
 
 #include "log.h"
 #include "m1_pmsm_appconfig.h"
-#include "math.h"
+#include "os/math.h"
 #include "motor_params.h"
 #include "storage.h"
 

@@ -14,6 +14,7 @@
 #include "local_network.h"
 #include "stats_task.h"
 #include "user_button.h"
+#include "rtos_abstraction_layer.h"
 
 #define STRATEGY_CHANGE_DELAY      5000
 #define CONTROLLER_STAT_PERIOD_SEC 2
@@ -48,7 +49,7 @@ static void controller_stats_dump(struct controller_ctx *ctx)
     ctx->stats_snap.pending = true;
 
     // Print controller data
-    if (STATS_Async(controller_stats_print, &ctx->stats_snap) != pdTRUE)
+    if (STATS_Async(controller_stats_print, &ctx->stats_snap) != true)
         ctx->stats_snap.pending = false;
 }
 
@@ -93,7 +94,7 @@ static void controller_monitoring_send(struct controller_ctx *ctx)
     cyclic_task_get_monitoring(ctx->c_task, &ctx->msg.cyclic_task_stats, MONITOR_MAX_SOCKET);
     ctx->msg_pending = true;
 
-    if (STATS_Async(__controller_monitoring_send, ctx) != pdTRUE)
+    if (STATS_Async(__controller_monitoring_send, ctx) != true)
         ctx->msg_pending = false;
 }
 
@@ -127,7 +128,7 @@ static bool button_press_event_check(struct controller_ctx *ctx)
     bool ret = false;
 
     // Handle events coming from user button
-    while (xQueueReceive(ctx->event_queue, &evt, 0) == pdTRUE) {
+    while (rtos_mqueue_receive(ctx->event_queue, &evt, RTOS_NO_WAIT) == true) {
         if (evt == BUTTON_PRESSED)
             ret = true;
     }
@@ -326,7 +327,7 @@ void controller_net_receive(void *data, int msg_id, int src_id, void *buf, int l
 
 int controller_exit(struct controller_ctx *ctx)
 {
-    vQueueDelete(ctx->event_queue);
+    rtos_mqueue_destroy(ctx->event_queue);
     control_strategy_context_exit();
     // Delete io_devices
     for (int i = 0; i < ctx->num_io_device; i++) {
@@ -352,7 +353,7 @@ int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool
     }
 
     /* Initialize queue that handles button events */
-    ctx->event_queue = xQueueCreate(1, sizeof(enum event_motor));
+    ctx->event_queue = rtos_mqueue_alloc_init(1, sizeof(enum event_motor));
     if (!ctx->event_queue) {
         ERR("Unable to create queue\n");
         goto err;
@@ -410,7 +411,7 @@ int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool
     return 0;
 
 err_del_queue:
-    vQueueDelete(ctx->event_queue);
+    rtos_mqueue_destroy(ctx->event_queue);
 err:
     return -1;
 }

@@ -8,8 +8,7 @@
 #define USER_BUTTON_H_
 
 #include <stdbool.h>
-#include "FreeRTOS.h"
-#include "queue.h"
+#include "rtos_abstraction_layer.h"
 
 #if ENABLE_USER_BUTTON == 1
 /*
@@ -20,7 +19,7 @@ int init_gpio_handling_task();
 /*
  * Register an event queue for user button input events
 */
-int user_button_add_event_queue(QueueHandle_t *evt_queue);
+int user_button_add_event_queue(rtos_mqueue_t **evt_queue);
 
 /*
  * Trigger a user button input through software
@@ -33,7 +32,7 @@ static inline int init_gpio_handling_task(void)
     return 0;
 }
 
-static inline int user_button_add_event_queue(QueueHandle_t *evt_queue)
+static inline int user_button_add_event_queue(rtos_mqueue_t **evt_queue)
 {
     return 0;
 }

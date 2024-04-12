@@ -49,12 +49,29 @@ zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MP_EVK_A53 FSL_ETH_ENABLE_CAC
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX93_EVK_A55 FSL_ETH_ENABLE_CACHE_CONTROL)
 zephyr_compile_definitions(CONFIG_GENAVB_ENABLE)
 
+if(CONFIG_BOARD_MIMX8MM_EVK_A53 OR CONFIG_BOARD_MIMX8MN_EVK_A53)
+  set(build_motor_controller 0) # motor_control build disabled
+elseif(CONFIG_BOARD_MIMX8MP_EVK_A53 OR CONFIG_BOARD_MIMX93_EVK_A55)
+  set(build_motor_controller 1) # motor_control build enabled
+else()
+  message(FATAL_ERROR "unsupported board")
+endif()
+
+# Overwrite unsupported configurations
+zephyr_compile_definitions(SERIAL_MODE=0)
+zephyr_compile_definitions(BUILD_IO_DEVICE=0) # io_device unsupported
+zephyr_compile_definitions(BUILD_MOTOR_CONTROLLER=${build_motor_controller})
+
 add_library(avb-core-lib STATIC IMPORTED)
 set_target_properties(avb-core-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPath}/libstack-core.a)
 add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-rtos)
 
 include(lib_avb_tsn)
 include(lib_stats)
+
+if(build_motor_controller)
+  include(${CMAKE_CURRENT_LIST_DIR}/motor_controller.cmake)
+endif()
 
 target_sources(app PRIVATE
   ${AppPath}/avb_tsn/tsn_app/alarm_task.c

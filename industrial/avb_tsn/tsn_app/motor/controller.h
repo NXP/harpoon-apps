@@ -12,7 +12,6 @@
 #include "traj_planner.h"
 #include "cyclic_task.h"
 #include "current_control.h"
-#include "queue.h"
 #include "control_strategies.h"
 #include "monitoring_stats.h"
 #include "command_client.h"
@@ -58,7 +57,7 @@ struct controller_ctx {
     bool motor_local;
     struct controller_stats stats;
     struct controller_stats stats_snap;
-    QueueHandle_t event_queue;
+    rtos_mqueue_t *event_queue;
     int restart_delay;
     struct monitoring_stats_ctx *monitoring_stats_ctx;
     struct monitoring_msg msg;

@@ -1261,7 +1261,7 @@ static void motor_stats_send(struct control_strategy_ctx *ctx)
 
     ctx->net_stats_pending = true;
 
-    if (STATS_Async(__motor_stats_send, ctx) != pdTRUE)
+    if (STATS_Async(__motor_stats_send, ctx) != true)
         ctx->net_stats_pending = false;
 }
 
@@ -1421,7 +1421,7 @@ void control_strategy_stats_dump(struct control_strategy_ctx *ctx)
         memcpy(&ctx->stats_snap, &ctx->stats, sizeof(struct stats_control_strategy));
         ctx->stats_snap.pending = true;
 
-        if (STATS_Async(control_strategy_stats_print, &ctx->stats_snap) != pdTRUE)
+        if (STATS_Async(control_strategy_stats_print, &ctx->stats_snap) != true)
             ctx->stats_snap.pending = false;
     }
 
@@ -1443,7 +1443,7 @@ void control_strategy_stats_dump(struct control_strategy_ctx *ctx)
         stats_reset(&motor->stats.pos_err_deg);
 
         // Print motor data on serial interface
-        if (STATS_Async(control_strategy_motor_stats_print, &motor->stats_snap) != pdTRUE)
+        if (STATS_Async(control_strategy_motor_stats_print, &motor->stats_snap) != true)
             motor->stats_snap.pending = false;
     }
 }
@@ -1452,13 +1452,13 @@ int control_strategy_unregister_motor(struct control_strategy_ctx *ctx, struct c
 {
     slist_del(&ctx->motor_list, &ctrl_ctx->node);
     ctx->num_motors--;
-    vPortFree(ctrl_ctx);
+    rtos_free(ctrl_ctx);
     return 0;
 }
 
 struct controlled_motor_ctx *control_strategy_register_motor(struct control_strategy_ctx *ctx, uint16_t io_device_id, uint16_t motor_id, uint64_t time)
 {
-    struct controlled_motor_ctx *new_motor = pvPortMalloc(sizeof(struct controlled_motor_ctx));
+    struct controlled_motor_ctx *new_motor = rtos_malloc(sizeof(struct controlled_motor_ctx));
     if (!new_motor) {
         ERR("Unable to allocate controlled motor context\n");
         goto err;
