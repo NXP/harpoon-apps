@@ -12,9 +12,12 @@ set(CONFIG "endpoint_tsn")
 
 add_subdirectory(${GenAVBPath} "${GenAVBBuildPath}")
 
+set(build_motor_controller 0) # motor_control built by default
+
 # Overwrite unsupported configurations
 add_compile_definitions(SERIAL_MODE=0)
-add_compile_definitions(BUILD_MOTOR=0)
+add_compile_definitions(BUILD_IO_DEVICE=0) # io_device unsupported
+add_compile_definitions(BUILD_MOTOR_CONTROLLER=${build_motor_controller})
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}/avb_tsn/tsn_app/alarm_task.c
