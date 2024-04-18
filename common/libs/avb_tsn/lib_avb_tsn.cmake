@@ -2,6 +2,11 @@
 include_guard(GLOBAL)
 message("lib_avb_tsn component is included.")
 
+if(${CONFIG} STREQUAL "endpoint_avb")
+    include(${CMAKE_CURRENT_LIST_DIR}/aem-manager.cmake)
+    add_definitions(-DCONFIG_GENAVB_USE_AVDECC=1)
+endif()
+
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/clock_domain.c
     ${CMAKE_CURRENT_LIST_DIR}/crf_stream.c

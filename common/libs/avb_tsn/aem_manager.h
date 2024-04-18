@@ -1,5 +1,6 @@
 /*
  * Copyright 2014-2016 Freescale Semiconductor, Inc.
+ * Copyright 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,16 +8,15 @@
 #ifndef _AEM_MANAGER_H_
 #define _AEM_MANAGER_H_
 
-#include "genavb/aem_helpers.h"
-#include "genavb/types.h"
-#include "genavb/net_types.h"
+typedef enum {
+	AEM_ENTITY_MIN_ID = 0,
+	AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID = AEM_ENTITY_MIN_ID,
+	AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID,
+	AEM_ENTITY_MAX_ID
+} aem_entity_id_t;
 
+#define AEM_ID_VALID(id) ((id) >= AEM_ENTITY_MIN_ID && (id) < AEM_ENTITY_MAX_ID)
 
-struct aem_desc_handler {
-	void (*print)(struct aem_desc_hdr *aem_desc, int level, int min, int max);
-	void (*fixup)(struct aem_desc_hdr *aem_desc);
-	int (*check)(struct aem_desc_hdr *aem_desc);
-	void (*update_name)(struct aem_desc_hdr *aem_desc, char *name);
-};
+int aem_manager_create_entities(void);
 
 #endif /* _AEM_MANAGER_H_ */

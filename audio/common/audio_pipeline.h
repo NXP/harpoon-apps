@@ -42,6 +42,10 @@ struct audio_pipeline_config {
 
 	unsigned int buffer_storage;
 	struct audio_buffer_storage_config storage[AUDIO_PIPELINE_MAX_BUFFERS];
+
+#if CONFIG_GENAVB_ENABLE
+	unsigned int aem_id;
+#endif
 };
 
 /* Run Time */

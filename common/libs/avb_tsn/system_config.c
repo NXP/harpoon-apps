@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2023 NXP
+ * Copyright 2019, 2023-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -56,3 +56,23 @@ struct avb_app_config *system_config_get_avb_app(void)
 
 	return config;
 }
+
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+void system_config_set_avdecc(aem_entity_id_t id)
+{
+	system_cfg.avdecc.aem_id = id;
+}
+
+struct avb_avdecc_config *system_config_get_avdecc(void)
+{
+	struct avb_avdecc_config *config = &system_cfg.avdecc;
+
+	if (storage_cd("/avdecc", true) == 0) {
+		storage_read_uint("aem_id", &config->aem_id);
+
+		storage_cd("/", true);
+	}
+
+	return config;
+}
+#endif

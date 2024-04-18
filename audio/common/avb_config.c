@@ -24,4 +24,9 @@ struct system_config system_cfg = {
             .mclock_role = MEDIA_CLOCK_SLAVE,
         },
     },
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+    .avdecc = {
+        .aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID,
+    },
+#endif
 };

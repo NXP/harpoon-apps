@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 NXP
+ * Copyright 2018-2021, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -14,7 +14,20 @@
 #include "genavb/stats.h"
 #include "genavb/timer.h"
 
-static struct genavb_handle *s_genavb_handle = NULL;
+#include "system_config.h"
+
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+#include "aem_manager.h"
+#include "aem_manager_rtos.h"
+
+#include "genavb/aem_helpers.h"
+
+static struct aem_desc_hdr *aem_entity;
+
+extern struct aem_desc_hdr aem_desc_list[AEM_ENTITY_MAX_ID][AEM_NUM_DESC_TYPES];
+#endif
+
+static struct genavb_handle *s_genavb_handle;
 static struct port_stats port_stats[CFG_EP_DEFAULT_NUM_PORTS];
 
 struct genavb_handle *get_genavb_handle(void)
@@ -119,19 +132,17 @@ int gavb_stack_init(void)
 {
     struct genavb_config *genavb_config;
     char buf[128];
+    int rc;
     int i;
-    int rc = 0;
+
+    if (s_genavb_handle) {
+        goto exit;
+    }
 
     genavb_config = rtos_malloc(sizeof(struct genavb_config));
 
     if (!genavb_config) {
-        rc = -1;
-        goto exit;
-    }
-
-    if (s_genavb_handle) {
-        rc = 0;
-        goto exit;
+        goto err;
     }
 
     genavb_get_default_config(genavb_config);
@@ -181,6 +192,30 @@ int gavb_stack_init(void)
             genavb_config->avdecc_config.entity_cfg[0].talker_unique_id_n = 1;
             genavb_config->avdecc_config.entity_cfg[0].listener_unique_id[0] = 0;
             genavb_config->avdecc_config.entity_cfg[0].listener_unique_id_n = 1;
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+            struct avb_avdecc_config *avdecc_cfg;
+            avdecc_cfg = system_config_get_avdecc();
+            if (!avdecc_cfg) {
+                ERR("system_config_get_avdecc() failed\n");
+                goto err;
+            }
+
+            if (aem_manager_create_entities() < 0) {
+                goto err_aem;
+            }
+
+            if (AEM_ID_VALID(avdecc_cfg->aem_id)) {
+                aem_entity = aem_entity_load_from_reference_entity(aem_desc_list[avdecc_cfg->aem_id]);
+                if (!aem_entity) {
+                    ERR("Failed to load aem(%d)\n", avdecc_cfg->aem_id);
+                    goto err_aem;
+                }
+                genavb_config->avdecc_config.entity_cfg[0].aem = aem_entity;
+            } else {
+                ERR("Invalid aem id: %d\n", avdecc_cfg->aem_id);
+                goto err_aem;
+            }
+#endif
         }
     }
     storage_cd("/", true);
@@ -190,20 +225,32 @@ int gavb_stack_init(void)
     if ((rc = genavb_init(&s_genavb_handle, 0)) != GENAVB_SUCCESS) {
         s_genavb_handle = NULL;
         ERR("genavb_init() failed: %s\n", genavb_strerror(rc));
-        rc = -1;
-        goto exit;
+        goto err_genavb_init;
     }
 
-exit:
-    if (genavb_config)
-        rtos_free(genavb_config);
+    rtos_free(genavb_config);
 
-    return rc;
+exit:
+    return 0;
+
+err_genavb_init:
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+    aem_entity_free(aem_entity);
+
+err_aem:
+#endif
+    rtos_free(genavb_config);
+
+err:
+    return -1;
 }
 
 int gavb_stack_exit(void)
 {
     genavb_exit(s_genavb_handle);
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+    aem_entity_free(aem_entity);
+#endif
 
     s_genavb_handle = NULL;
 

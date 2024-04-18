@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2022-2023 NXP
+ * Copyright 2019, 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -10,6 +10,9 @@
 #ifndef _SYSTEM_CONFIG_H_
 #define _SYSTEM_CONFIG_H_
 
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+#include "aem_manager.h"
+#endif
 #include "board.h"
 
 struct net_config {
@@ -42,11 +45,24 @@ struct app_config {
     };
 };
 
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+struct avb_avdecc_config {
+    aem_entity_id_t aem_id;
+};
+#endif
+
 struct system_config {
     struct app_config app;
     struct net_config net[BOARD_NUM_PORTS];
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+    struct avb_avdecc_config avdecc;
+#endif
 };
 
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+void system_config_set_avdecc(aem_entity_id_t id);
+struct avb_avdecc_config *system_config_get_avdecc(void);
+#endif
 int system_config_set_net(unsigned int port_id, uint8_t *hw_addr);
 struct net_config *system_config_get_net(unsigned int port_id);
 struct app_config *system_config_get_app(void);

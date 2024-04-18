@@ -10,6 +10,9 @@
 #include "audio_pipeline.h"
 #if (CONFIG_GENAVB_ENABLE == 1)
 #include "genavb/control_clock_domain.h"
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+#include "aem_manager.h"
+#endif
 #endif
 
 const struct audio_pipeline_config pipeline_dtmf_config = {
@@ -831,6 +834,10 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 
 	.name = "AVB audio pipeline",
 
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+	.aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID,
+#endif
+
 	.stages = 3,
 
 	.stage[0] = {
@@ -1219,6 +1226,10 @@ const struct audio_pipeline_config pipeline_full_thread_1_config = {
 const struct audio_pipeline_config pipeline_mcr_avb_config = {
 
 	.name = "AVB audio pipeline (with MCR support)",
+
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+	.aem_id = AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID,
+#endif
 
 	.stages = 3,
 
