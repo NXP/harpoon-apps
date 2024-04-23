@@ -145,25 +145,24 @@ int32_t codec_setup(enum codec_id cid)
 		CLOCK_SetRootDivider(kCLOCK_RootI2c3, 1U, 10U);                  /* Set root clock to 160MHZ / 10 = 16MHZ */
 		CLOCK_EnableClock(kCLOCK_I2c3);
 
-		/* select MCLK direction(Enable MCLK clock):
-		 * volume will not be setup at first boot if the Master Clock is not configured beforehand.
-		*/
-		sai_master_clock_t saiMasterCfg;
-
-		saiMasterCfg.mclkSourceClkHz = SAI3_CLK_FREQ;            /* setup source clock for MCLK */
-		saiMasterCfg.mclkHz          = saiMasterCfg.mclkSourceClkHz; /* setup target clock of MCLK */
-		SAI_SetMasterClockConfig(SAI3_SAI, &saiMasterCfg);
-
 		/* Use default setting to init codec */
 		err = CODEC_Init(&wm8960_codec_handle, &wm8960_codec_config);
 		if ((err != kStatus_Success) && (err != kStatus_CODEC_NotSupport)) {
 			log_err("WM8960 initialisation failed (err %d)\n", err);
 			goto end;
 		}
-		/* Set volume on both channels */
-		err = CODEC_SetVolume(&wm8960_codec_handle, (kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight), 75);
+
+		/* At first boot DAC Volume cannot be set and is at 100, let's match it for all the runs */
+		err = CODEC_SetVolume(&wm8960_codec_handle, (kCODEC_VolumeDAC), 100);
 		if (err != kStatus_Success) {
-			log_err("WM8960 set volume failed (err %d)\n", err);
+			log_err("WM8960 set DAC volume failed (err %d)\n", err);
+			goto end;
+		}
+
+		/* Set volume on both channels */
+		err = CODEC_SetVolume(&wm8960_codec_handle, (kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight), 85);
+		if (err != kStatus_Success) {
+			log_err("WM8960 set Headphone volume failed (err %d)\n", err);
 			goto end;
 		}
 		/* Setup ADC Data Output Select */
