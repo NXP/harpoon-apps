@@ -1,14 +1,11 @@
 /*
-<<<<<<< HEAD
  * Copyright 2022-2024 NXP
-=======
- * Copyright 2022, 2024 NXP
->>>>>>> b0156cf ([GENAVB-2643] audio/industrial: common: convert all binary semaphore to mutexes)
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <math.h>
+#include "audio_app.h"
 #include "audio_element_avtp_source.h"
 #include "audio_element.h"
 #include "audio_format.h"
@@ -20,7 +17,6 @@
 #include "genavb/clock.h"
 #include "genavb/control_clock_domain.h"
 #include "genavb/genavb.h"
-#include "rpmsg.h"
 #include "genavb/sr_class.h"
 #include "hlog.h"
 #include "hrpn_ctrl.h"
@@ -266,18 +262,18 @@ exit:
 	return;
 }
 
-static void avtp_source_element_response(struct rpmsg_ept *ept, uint32_t status)
+static void avtp_source_element_response(void *ctrl_handle, uint32_t status)
 {
 	struct hrpn_resp_audio_element resp;
 
-	if (ept) {
+	if (ctrl_handle) {
 		resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT_AVTP;
 		resp.status = status;
-		rpmsg_send(ept, &resp, sizeof(resp));
+		audio_app_ctrl_send(ctrl_handle, &resp, sizeof(resp));
 	}
 }
 
-int avtp_source_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_avtp *cmd, unsigned int len, struct rpmsg_ept *ept)
+int avtp_source_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_avtp *cmd, unsigned int len, void *ctrl_handle)
 {
 	struct avtp_source_element *avtp;
 
@@ -328,12 +324,12 @@ int avtp_source_element_ctrl(struct audio_element *element, struct hrpn_cmd_audi
 		break;
 	}
 
-	avtp_source_element_response(ept, HRPN_RESP_STATUS_SUCCESS);
+	avtp_source_element_response(ctrl_handle, HRPN_RESP_STATUS_SUCCESS);
 
 	return 0;
 
 err:
-	avtp_source_element_response(ept, HRPN_RESP_STATUS_ERROR);
+	avtp_source_element_response(ctrl_handle, HRPN_RESP_STATUS_ERROR);
 
 	return -1;
 }

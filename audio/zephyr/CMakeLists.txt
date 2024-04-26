@@ -119,6 +119,7 @@ endif()
 target_sources(app PRIVATE
 	       main.c
 	       ${AppPath}/common/audio.c
+		   ${AppPath}/common/audio_app.c
 	       ${AppPath}/common/audio_buffer.c
 	       ${AppPath}/common/audio_element.c
 	       ${AppPath}/common/audio_element_dtmf.c

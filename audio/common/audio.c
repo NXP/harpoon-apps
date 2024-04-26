@@ -12,7 +12,7 @@
 #include "os/unistd.h"
 #include "os/cpu_load.h"
 
-#include "rpmsg.h"
+#include "audio_app.h"
 #include "hrpn_ctrl.h"
 #include "rtos_abstraction_layer.h"
 
@@ -27,8 +27,6 @@
 #include "sai_config.h"
 
 #include "audio_pipeline.h"
-
-#define EPT_ADDR	(30)
 
 #if (CONFIG_GENAVB_ENABLE == 1)
 #include "system_config.h"
@@ -50,7 +48,7 @@ struct mode_handler {
 static const int supported_period[] = {2, 4, 8, 16, 32};
 
 struct ctrl_ctx {
-	struct rpmsg_ept *ept;
+	void *ctrl_handle;
 };
 
 struct data_ctx {
@@ -495,13 +493,13 @@ static void audio_stats(struct data_ctx *ctx)
 	}
 }
 
-static void response(struct rpmsg_ept *ept, uint32_t status)
+static void response(void *ctrl_handle, uint32_t status)
 {
 	struct hrpn_resp_audio resp;
 
 	resp.type = HRPN_RESP_TYPE_AUDIO;
 	resp.status = status;
-	rpmsg_send(ept, &resp, sizeof(resp));
+	audio_app_ctrl_send(ctrl_handle, &resp, sizeof(resp));
 }
 
 static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
@@ -630,37 +628,37 @@ exit:
 
 static void audio_command_handler(struct data_ctx *ctx)
 {
+	void *ctrl_handle = ctx->ctrl.ctrl_handle;
 	struct hrpn_command cmd;
-	struct rpmsg_ept *ept= ctx->ctrl.ept;
 	unsigned int len;
 	int rc = 0;
 
 	len = sizeof(cmd);
-	if (rpmsg_recv(ept, &cmd, &len) < 0)
+	if (audio_app_ctrl_recv(ctrl_handle, &cmd, &len) < 0)
 		return;
 
 	switch (cmd.u.cmd.type) {
 	case HRPN_CMD_TYPE_AUDIO_RUN:
 		if (len != sizeof(struct hrpn_cmd_audio_run)) {
-			response(ept, HRPN_RESP_STATUS_ERROR);
+			response(ctrl_handle, HRPN_RESP_STATUS_ERROR);
 			break;
 		}
 
 		rc = audio_run(ctx, &cmd.u.audio_run);
 
-		response(ept, rc);
+		response(ctrl_handle, rc);
 
 		break;
 
 	case HRPN_CMD_TYPE_AUDIO_STOP:
 		if (len != sizeof(struct hrpn_cmd_audio_stop)) {
-			response(ept, HRPN_RESP_STATUS_ERROR);
+			response(ctrl_handle, HRPN_RESP_STATUS_ERROR);
 			break;
 		}
 
 		rc = audio_stop(ctx);
 
-		response(ept, rc);
+		response(ctrl_handle, rc);
 
 		break;
 
@@ -668,12 +666,12 @@ static void audio_command_handler(struct data_ctx *ctx)
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_DUMP:
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_CONNECT:
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_DISCONNECT:
-		audio_pipeline_ctrl(&cmd.u.audio_pipeline, len, ept);
+		audio_pipeline_ctrl(&cmd.u.audio_pipeline, len, ctrl_handle);
 
 		break;
 
 	default:
-		response(ept, HRPN_RESP_STATUS_ERROR);
+		response(ctrl_handle, HRPN_RESP_STATUS_ERROR);
 		break;
 	}
 }
@@ -729,8 +727,8 @@ void *audio_control_init(uint8_t thread_count)
 
 	audio_ctx->thread_count = thread_count;
 
-	audio_ctx->ctrl.ept = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw");
-	os_assert(audio_ctx->ctrl.ept, "rpmsg transport initialization failed!");
+	audio_ctx->ctrl.ctrl_handle = audio_app_ctrl_init();
+	os_assert(audio_ctx->ctrl.ctrl_handle, "audio_app_ctrl transport initialization failed!");
 
 	for (i = 0; i < thread_count; i++) {
 		err = rtos_mutex_init(&audio_ctx->thread_data_ctx[i].mutex);

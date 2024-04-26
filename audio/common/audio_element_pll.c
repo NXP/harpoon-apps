@@ -6,11 +6,11 @@
 
 #include "rtos_abstraction_layer.h"
 
+#include "audio_app.h"
 #include "audio_element_pll.h"
 #include "audio_element.h"
 #include "hlog.h"
 #include "hrpn_ctrl.h"
-#include "rpmsg.h"
 #include "libs/stats/stats.h"
 
 #include "sai_drv.h"
@@ -69,18 +69,18 @@ __WEAK void pll_adjust(int id, int64_t ppb)
 
 }
 
-static void pll_element_response(struct rpmsg_ept *ept, uint32_t status)
+static void pll_element_response(void *ctrl_handle, uint32_t status)
 {
 	struct hrpn_resp_audio_element resp;
 
-	if (ept) {
+	if (ctrl_handle) {
 		resp.type = HRPN_RESP_TYPE_AUDIO_ELEMENT_PLL;
 		resp.status = status;
-		rpmsg_send(ept, &resp, sizeof(resp));
+		audio_app_ctrl_send(ctrl_handle, &resp, sizeof(resp));
 	}
 }
 
-int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_pll *cmd, unsigned int len, struct rpmsg_ept *ept)
+int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_pll *cmd, unsigned int len, void *ctrl_handle)
 {
 	struct pll_element *pll;
 
@@ -128,12 +128,12 @@ int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_elemen
 		break;
 	}
 
-	pll_element_response(ept, HRPN_RESP_STATUS_SUCCESS);
+	pll_element_response(ctrl_handle, HRPN_RESP_STATUS_SUCCESS);
 
 	return 0;
 
 err:
-	pll_element_response(ept, HRPN_RESP_STATUS_ERROR);
+	pll_element_response(ctrl_handle, HRPN_RESP_STATUS_ERROR);
 	return -1;
 }
 

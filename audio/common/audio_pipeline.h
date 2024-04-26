@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -78,7 +78,7 @@ struct audio_pipeline {
 	struct audio_buffer *buffer;
 };
 
-int audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, struct rpmsg_ept *ept);
+int audio_pipeline_ctrl(struct hrpn_cmd_audio_pipeline *cmd, unsigned int len, void *ctrl_handle);
 struct audio_pipeline *audio_pipeline_init(struct audio_pipeline_config *config);
 int audio_pipeline_run(struct audio_pipeline *pipeline);
 void audio_pipeline_exit(struct audio_pipeline *pipeline);

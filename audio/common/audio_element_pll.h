@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,9 +20,7 @@ struct pll_element_config {
 struct audio_element_config;
 struct audio_element;
 
-struct rpmsg_ept;
-
-int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_pll *cmd, unsigned int len, struct rpmsg_ept *ept);
+int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element_pll *cmd, unsigned int len, void *ctrl_handle);
 int pll_element_check_config(struct audio_element_config *config);
 unsigned int pll_element_size(struct audio_element_config *config);
 int pll_element_init(struct audio_element *element, struct audio_element_config *config, struct audio_buffer *buffer);

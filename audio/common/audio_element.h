@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -82,9 +82,7 @@ struct audio_element {
 	void(*stats)(struct audio_element *element);
 };
 
-struct rpmsg_ept;
-
-int audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element *cmd, unsigned int len, struct rpmsg_ept *ept);
+int audio_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_element *cmd, unsigned int len, void *ctrl_handle);
 void audio_element_exit(struct audio_element *element);
 void audio_element_dump(struct audio_element *element);
 void audio_element_stats(struct audio_element *element);

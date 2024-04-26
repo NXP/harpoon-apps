@@ -77,6 +77,7 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     "${AppPath}/common/boards/${BoardName}/sai_clock_config.c"
     "${AppPath}/common/boards/${BoardName}/codec_config.c"
     "${AppPath}/common/audio.c"
+    "${AppPath}/common/audio_app.c"
     "${AppPath}/common/audio_buffer.c"
     "${AppPath}/common/audio_element.c"
     "${AppPath}/common/audio_element_dtmf.c"
