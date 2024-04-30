@@ -1,10 +1,11 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "app_board.h"
+#include "hlog.h"
 #include "os/irq.h"
 #include "os/assert.h"
 #include "sai_drv.h"
@@ -264,6 +265,11 @@ uint32_t get_sai_id(I2S_Type *base)
 	return i;
 }
 
+static inline bool sai_is_valid_watermark(void* sai_base, uint32_t watermark)
+{
+	return watermark && !(watermark > (uint32_t)FSL_FEATURE_SAI_FIFO_COUNTn(sai_base));
+}
+
 int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 {
 	sai_transceiver_t config;
@@ -271,6 +277,7 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 	I2S_Type *sai = (I2S_Type *)sai_config->sai_base;
 	uint32_t sai_id;
 	int ret;
+	int rc = 0;
 
 	sai_id = get_sai_id(sai);
 
@@ -285,17 +292,35 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 			sai_config->chan_numbers, kSAI_Channel0Mask);
 	}
 
-	config.syncMode            = sai_config->tx_sync_mode;
-	config.masterSlave         = sai_config->masterSlave;
-	config.bitClock.bclkSource = sai_config->msel;
+	config.syncMode                  = sai_config->tx_sync_mode;
+	config.masterSlave               = sai_config->masterSlave;
+	config.bitClock.bclkSource       = sai_config->msel;
+	config.serialData.dataMaskedWord = sai_config->tx_mask;
 
 #if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
-	if (sai_config->fifo_water_mark)
-		config.fifo.fifoWatermark = sai_config->fifo_water_mark;
+	if (!sai_is_valid_watermark(sai_config->sai_base, sai_config->tx_fifo_water_mark)) {
+		log_err("SAI%d: Invalid TX FIFO Watermark: %d\n", sai_id, sai_config->tx_fifo_water_mark);
+		rc = -1;
+		goto out;
+	}
+
+	config.fifo.fifoWatermark = sai_config->tx_fifo_water_mark;
 #endif
 
 	SAI_TransferTxSetConfig(sai, &dev->sai_tx_handle, &config);
-	config.syncMode = sai_config->rx_sync_mode;
+
+	config.syncMode                  = sai_config->rx_sync_mode;
+	config.serialData.dataMaskedWord = sai_config->rx_mask;
+#if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
+	if (!sai_is_valid_watermark(sai_config->sai_base, sai_config->rx_fifo_water_mark)) {
+		log_err("SAI%d: Invalid RX FIFO Watermark: %d\n", sai_id, sai_config->rx_fifo_water_mark);
+		rc = -1;
+		goto out;
+	}
+
+	config.fifo.fifoWatermark = sai_config->rx_fifo_water_mark;
+#endif
+
 	SAI_TransferRxSetConfig(sai, &dev->sai_rx_handle, &config);
 
 	/* Set FIFO to continue from next frame on error */
@@ -347,7 +372,8 @@ int sai_drv_setup(struct sai_device *dev, struct sai_cfg *sai_config)
 			break;
 	}
 
-	return 0;
+out:
+	return rc;
 }
 
 void sai_drv_exit(struct sai_device *dev)

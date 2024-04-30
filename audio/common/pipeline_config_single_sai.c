@@ -304,7 +304,7 @@ const struct audio_pipeline_config pipeline_loopback_aud_hat_config = {
 
 	.stage[0] = {
 
-		.elements = 1,
+		.elements = 3,
 
 		.element[0] = {
 			.type = AUDIO_ELEMENT_SAI_SOURCE,
@@ -316,14 +316,38 @@ const struct audio_pipeline_config pipeline_loopback_aud_hat_config = {
 						.line_n = 1,
 						.line = {
 							[0] = {
-								.channel_n = 8,
+								.channel_n = 6,
 							},
 						},
 					},
 				},
 			},
-			.outputs = 8,
-			.output = {0, },	/* 0 - 7 */
+			.outputs = 6,
+			.output = {0, },	/* 0 - 5 */
+		},
+
+		/* Fill last two buffers with sine to prevent unreferenced buffers */
+		.element[1] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 440, /* la */
+				.amplitude = 0.001, /* muted */
+			},
+
+			.outputs = 1,
+			.output = {6},
+		},
+
+		.element[2] = {
+			.type = AUDIO_ELEMENT_SINE_SOURCE,
+			.u.sine = {
+				.freq = 440, /* la */
+				.amplitude = 0.001, /* muted */
+
+			},
+
+			.outputs = 1,
+			.output = {7},
 		},
 	},
 
@@ -743,14 +767,14 @@ const struct audio_pipeline_config pipeline_full_aud_hat_config = {
 						.line_n = 1,
 						.line = {
 							[0] = {
-								.channel_n = 8,
+								.channel_n = 6,
 							},
 						},
 					},
 				},
 			},
-			.outputs = 8,
-			.output = {4, },	/* 4 - 11 */
+			.outputs = 6,
+			.output = {4, },	/* 4 - 9 */
 		},
 	},
 
@@ -764,11 +788,11 @@ const struct audio_pipeline_config pipeline_full_aud_hat_config = {
 
 			},
 
-			.inputs = 12,
-			.input = {0, }, 	/* 0 - 11 */
+			.inputs = 10,
+			.input = {0, }, 	/* 0 - 9 */
 
 			.outputs = 8,
-			.output = {12, },	/* 12 - 19 */
+			.output = {10, },	/* 10 - 17 */
 		},
 	},
 
@@ -794,12 +818,12 @@ const struct audio_pipeline_config pipeline_full_aud_hat_config = {
 			},
 
 			.inputs = 8,
-			.input = {12, },	/* 12 - 19 */
+			.input = {10, },	/* 10 - 17 */
 		},
 	},
 
-	.buffers = 20,
-	.buffer_storage = 20,
+	.buffers = 18,
+	.buffer_storage = 18,
 };
 
 #if (CONFIG_GENAVB_ENABLE == 1)
@@ -950,14 +974,14 @@ const struct audio_pipeline_config pipeline_full_avb_aud_hat_config = {
 						.line_n = 1,
 						.line = {
 							[0] = {
-								.channel_n = 8,
+								.channel_n = 6,
 							},
 						},
 					},
 				},
 			},
-			.outputs = 8,
-			.output = {1, },	/* 1 - 8 */
+			.outputs = 6,
+			.output = {1, },	/* 1 - 6 */
 		},
 
 		.element[2] = {
@@ -966,7 +990,7 @@ const struct audio_pipeline_config pipeline_full_avb_aud_hat_config = {
 				.stream_n = 2,
 			},
 			.outputs = 4,
-			.output = {9, },	/* 9 - 12 */
+			.output = {7, },	/* 7 - 10 */
 		},
 	},
 
@@ -980,11 +1004,11 @@ const struct audio_pipeline_config pipeline_full_avb_aud_hat_config = {
 
 			},
 
-			.inputs = 13,
-			.input = {0, }, 	/* 0 - 12 */
+			.inputs = 11,
+			.input = {0, }, 	/* 0 - 10 */
 
 			.outputs = 12,
-			.output = {13, },	/* 13 - 24 */
+			.output = {11, },	/* 11 - 22 */
 		},
 	},
 
@@ -1010,7 +1034,7 @@ const struct audio_pipeline_config pipeline_full_avb_aud_hat_config = {
 			},
 
 			.inputs = 8,
-			.input = {13, },	/* 13 - 20 */
+			.input = {11, },	/* 11 - 18 */
 		},
 
 		.element[1] = {
@@ -1020,18 +1044,18 @@ const struct audio_pipeline_config pipeline_full_avb_aud_hat_config = {
 			},
 
 			.inputs = 4,
-			.input = {21, },	/* 21 - 24 */
+			.input = {19, },	/* 19 - 22 */
 		},
 	},
 
-	.buffers = 25,
+	.buffers = 23,
 
-	.buffer_storage = 25,
+	.buffer_storage = 23,
 	.storage = {
+		[7] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
+		[8] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
 		[9] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
 		[10] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
-		[11] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
-		[12] = {.periods = AUDIO_PIPELINE_AVB_MAX_BUFFER_SIZE},
 	},
 };
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
@@ -1347,8 +1371,8 @@ const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config = {
 					},
 				},
 			},
-			.outputs = 8,
-			.output = {1, },	/* 1 - 8 */
+			.outputs = 6,
+			.output = {1, },	/* 1 - 6 */
 		},
 
 		.element[2] = {
@@ -1359,7 +1383,7 @@ const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config = {
 				.stream[1].flags = GENAVB_STREAM_FLAGS_MCR,
 			},
 			.outputs = 4,
-			.output = {9, },	/* 9 - 12 */
+			.output = {7, },	/* 7 - 10 */
 		},
 	},
 
@@ -1373,8 +1397,8 @@ const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config = {
 
 			},
 
-			.inputs = 13,
-			.input = {0, }, 	/* 0 - 12 */
+			.inputs = 11,
+			.input = {0, }, 	/* 0 - 10 */
 
 			.outputs = 12,
 			.output = {13, },	/* 13 - 24 */

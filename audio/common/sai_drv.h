@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -38,13 +38,16 @@ struct sai_cfg {
 	sai_callback_t tx_callback;
 	void *rx_user_data;
 	void *tx_user_data;
+	uint32_t rx_mask;
+	uint32_t tx_mask;
 	sai_word_width_t bit_width;
 	sai_sample_rate_t sample_rate;
 	uint32_t chan_numbers;
 	uint32_t source_clock_hz;
 	sai_sync_mode_t rx_sync_mode;
 	sai_sync_mode_t tx_sync_mode;
-	uint8_t fifo_water_mark;
+	uint32_t rx_fifo_water_mark;
+	uint32_t tx_fifo_water_mark;
 	enum sai_mode working_mode;
 	uint32_t masterSlave;
 	uint32_t msel;

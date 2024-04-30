@@ -236,6 +236,21 @@ static void pll_adjust_set_pll_id(struct data_ctx *ctx, uint32_t pll_id)
 	}
 }
 
+static inline uint8_t sai_get_effective_channels_count(uint32_t mask, uint32_t channels_num)
+{
+	uint8_t num_unmasked = 0;
+	uint32_t max_count;
+	unsigned int i;
+
+	max_count = (channels_num < sizeof(mask) * 8) ? channels_num : sizeof(mask) * 8;
+	for (i = 0; i < max_count; i++){
+		if ((1U << i) & ~mask)
+			num_unmasked++;
+	}
+
+	return num_unmasked;
+}
+
 static int sai_setup(struct data_ctx *ctx)
 {
 	struct sai_cfg sai_config;
@@ -252,7 +267,7 @@ static int sai_setup(struct data_ctx *ctx)
 
 	/* Configure each active SAI */
 	for (i = 0; i < sai_active_list_nelems; i++) {
-		uint32_t pll_id, fifo_water_mark;
+		uint32_t pll_id;
 		int sai_id;
 		enum codec_id cid;
 		int32_t ret;
@@ -260,6 +275,8 @@ static int sai_setup(struct data_ctx *ctx)
 		sai_config.sai_base = sai_active_list[i].sai_base;
 		sai_config.bit_width = sai_active_list[i].slot_size;
 		sai_config.chan_numbers = sai_active_list[i].slot_count;
+		sai_config.rx_mask = sai_active_list[i].rx_mask;
+		sai_config.tx_mask = sai_active_list[i].tx_mask;
 		sai_config.sample_rate = ctx->sample_rate;
 
 		sai_id = get_sai_id(sai_active_list[i].sai_base);
@@ -303,26 +320,18 @@ static int sai_setup(struct data_ctx *ctx)
 
 		/* Set FIFO water mark to be period size of all channels*/
 #if USE_TX_IRQ
-		fifo_water_mark = ctx->period * sai_config.chan_numbers - 1;
-		if (fifo_water_mark > (uint32_t)FSL_FEATURE_SAI_FIFO_COUNTn(sai_config.sai_base)) {
-			log_err("SAI%d: Invalid FIFO Watermark: %d\n", i, fifo_water_mark);
-			rc = -1;
-			goto out;
-		}
-
-		sai_config.fifo_water_mark = fifo_water_mark;
+		sai_config.rx_fifo_water_mark = ctx->period * sai_get_effective_channels_count(sai_config.rx_mask, sai_config.chan_numbers) - 1;
+		sai_config.tx_fifo_water_mark = ctx->period * sai_get_effective_channels_count(sai_config.tx_mask, sai_config.chan_numbers) - 1;
 #else
-		fifo_water_mark = ctx->period * sai_config.chan_numbers;
-		if (fifo_water_mark > (uint32_t)FSL_FEATURE_SAI_FIFO_COUNTn(sai_config.sai_base)) {
-			log_err("SAI%d: Invalid FIFO Watermark: %d\n", i, fifo_water_mark);
-			rc = -1;
-			goto out;
-		}
-
-		sai_config.fifo_water_mark = fifo_water_mark;
+		sai_config.rx_fifo_water_mark = ctx->period * sai_get_effective_channels_count(sai_config.rx_mask, sai_config.chan_numbers);
+		sai_config.tx_fifo_water_mark = ctx->period * sai_get_effective_channels_count(sai_config.tx_mask, sai_config.chan_numbers);
 #endif
 
-		sai_drv_setup(&ctx->dev[i], &sai_config);
+		if (sai_drv_setup(&ctx->dev[i], &sai_config) < 0) {
+			log_err("sai_drv_setup() failed\n");
+			rc = -1;
+			goto out;
+		}
 
 		pll_id = sai_select_audio_pll_mux(sai_id, sai_config.sample_rate);
 		pll_adjust_set_pll_id(ctx, pll_id);

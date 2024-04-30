@@ -6,6 +6,8 @@
 #ifndef _SAI_CONFIG_H_
 #define _SAI_CONFIG_H_
 
+#define SAI_DATA_MASK_NONE 0
+
 struct sai_active_config {
 	void *sai_base;
 	uint32_t masterSlave;
@@ -15,6 +17,8 @@ struct sai_active_config {
 	uint32_t audio_pll_div;
 	uint32_t slot_count; /* Number of words in audio frame: channels count */
 	sai_word_width_t slot_size; /* Word size in bits */
+	uint32_t rx_mask;
+	uint32_t tx_mask;
 	sai_sync_mode_t rx_sync_mode;
 	sai_sync_mode_t tx_sync_mode;
 	enum codec_id cid;

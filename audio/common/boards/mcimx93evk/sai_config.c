@@ -25,6 +25,8 @@ struct sai_active_config sai_active_list[] = {
 		.cid = CODEC_ID_CS42448,
 		.slot_count = DEMO_AUDIO_DATA_CHANNEL,
 		.slot_size = DEMO_AUDIO_BIT_WIDTH,
+		.rx_mask = SAI_DATA_MASK_NONE,
+		.tx_mask = SAI_DATA_MASK_NONE,
 	},
 };
 
@@ -38,6 +40,8 @@ void sai_set_audio_hat_codec(bool use_audio_hat, unsigned int rate)
 		sai_active_list[0].rx_sync_mode = SAI3_CS42448_RX_SYNC_MODE;
 		sai_active_list[0].slot_count = DEMO_MX93AUDHAT_AUDIO_DATA_CHANNEL;
 		sai_active_list[0].slot_size = DEMO_MX93AUDHAT_AUDIO_BIT_WIDTH;
+		sai_active_list[0].rx_mask = 0xFFFFFFC0U; /* MX93AUD-HAT has 6 input channels */
+		sai_active_list[0].tx_mask = SAI_DATA_MASK_NONE;
 
 		switch (rate) {
 		case 48000:
@@ -59,5 +63,7 @@ void sai_set_audio_hat_codec(bool use_audio_hat, unsigned int rate)
 		sai_active_list[0].rx_sync_mode = SAI3_WM8962_RX_SYNC_MODE;
 		sai_active_list[0].slot_count = DEMO_AUDIO_DATA_CHANNEL;
 		sai_active_list[0].slot_size = DEMO_AUDIO_BIT_WIDTH;
+		sai_active_list[0].rx_mask = SAI_DATA_MASK_NONE;
+		sai_active_list[0].tx_mask = SAI_DATA_MASK_NONE;
 	}
 }

@@ -24,6 +24,8 @@ struct sai_active_config sai_active_list[] = {
 		.cid = CODEC_ID_HIFIBERRY,
 		.slot_count = DEMO_AUDIO_DATA_CHANNEL,
 		.slot_size = DEMO_AUDIO_BIT_WIDTH,
+		.rx_mask = SAI_DATA_MASK_NONE,
+		.tx_mask = SAI_DATA_MASK_NONE,
 	},
 	{
 		.sai_base = SAI3_SAI,
@@ -37,6 +39,8 @@ struct sai_active_config sai_active_list[] = {
 		.cid = CODEC_ID_WM8524,
 		.slot_count = DEMO_AUDIO_DATA_CHANNEL,
 		.slot_size = DEMO_AUDIO_BIT_WIDTH,
+		.rx_mask = SAI_DATA_MASK_NONE,
+		.tx_mask = SAI_DATA_MASK_NONE,
 	},
 };
 
