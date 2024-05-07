@@ -1,10 +1,10 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/semaphore.h"
+#include "rtos_abstraction_layer.h"
 
 #include "audio_element_routing.h"
 #include "audio_element.h"
@@ -23,7 +23,7 @@ struct routing_element {
 	unsigned int outputs;
 	struct audio_buffer **in;
 	struct routing_output *out;
-	os_sem_t semaphore;
+	rtos_mutex_t mutex;
 	struct audio_buffer silence; /* internal buffer with silence, used for "disconnected" outputs */
 };
 
@@ -84,11 +84,11 @@ int routing_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_el
 		break;
 	}
 
-	os_sem_take(&routing->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_mutex_lock(&routing->mutex, RTOS_WAIT_FOREVER);
 
 	routing->out[output].input = input;
 
-	os_sem_give(&routing->semaphore, 0);
+	rtos_mutex_unlock(&routing->mutex);
 
 	routing_element_response(ept, HRPN_RESP_STATUS_SUCCESS);
 
@@ -106,7 +106,7 @@ static int routing_element_run(struct audio_element *element)
 	struct audio_buffer *in, *out;
 	int i;
 
-	os_sem_take(&routing->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_mutex_lock(&routing->mutex, RTOS_WAIT_FOREVER);
 
 	/* Copy data from inputs to outputs */
 	for (i = 0; i < routing->outputs; i++) {
@@ -118,7 +118,7 @@ static int routing_element_run(struct audio_element *element)
 		audio_buf_write_update(out, element->period);
 	}
 
-	os_sem_give(&routing->semaphore, 0);
+	rtos_mutex_unlock(&routing->mutex);
 
 	/* Update all read pointers from inputs */
 	for (i = 0; i < routing->inputs; i++) {
@@ -141,9 +141,7 @@ static void routing_element_reset(struct audio_element *element)
 
 static void routing_element_exit(struct audio_element *element)
 {
-	struct routing_element *routing = element->data;
 
-	os_sem_destroy(&routing->semaphore);
 }
 
 static void routing_element_dump(struct audio_element *element)
@@ -202,7 +200,7 @@ int routing_element_init(struct audio_element *element, struct audio_element_con
 	audio_sample_t *silence_storage;
 	int i;
 
-	if (os_sem_init(&routing->semaphore, 1))
+	if (rtos_mutex_init(&routing->mutex))
 		goto err;
 
 	element->run = routing_element_run;

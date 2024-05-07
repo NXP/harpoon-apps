@@ -1,10 +1,10 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/semaphore.h"
+#include "rtos_abstraction_layer.h"
 
 #include "audio_element_pll.h"
 #include "audio_element.h"
@@ -36,7 +36,7 @@ struct pll_element {
 	int state;
 	unsigned int sample_count;
 
-	os_sem_t semaphore;
+	rtos_mutex_t mutex;
 	bool enabled;
 
 	uint32_t src_bcr;
@@ -94,32 +94,32 @@ int pll_element_ctrl(struct audio_element *element, struct hrpn_cmd_audio_elemen
 
 	switch (cmd->u.common.type) {
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ENABLE:
-		os_sem_take(&pll->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		rtos_mutex_lock(&pll->mutex, RTOS_WAIT_FOREVER);
 
 		pll_element_reset(element);
 		pll->enabled = true;
 
-		os_sem_give(&pll->semaphore, 0);
+		rtos_mutex_unlock(&pll->mutex);
 
 		break;
 
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_DISABLE:
-		os_sem_take(&pll->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		rtos_mutex_lock(&pll->mutex, RTOS_WAIT_FOREVER);
 
 		pll->enabled = false;
 
-		os_sem_give(&pll->semaphore, 0);
+		rtos_mutex_unlock(&pll->mutex);
 
 		break;
 
 	case HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ID:
-		os_sem_take(&pll->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		rtos_mutex_lock(&pll->mutex, RTOS_WAIT_FOREVER);
 
 		pll->pll_id = cmd->pll_id;
 
 		pll_element_reset(element);
 
-		os_sem_give(&pll->semaphore, 0);
+		rtos_mutex_unlock(&pll->mutex);
 
 		break;
 
@@ -143,7 +143,7 @@ static int pll_element_run(struct audio_element *element)
 	uint32_t src_bcr, dst_bcr, mask;
 	int64_t bclk_err, dt_bclk, bclk_ppb, err;
 
-	os_sem_take(&pll->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_mutex_lock(&pll->mutex, RTOS_WAIT_FOREVER);
 
 	if (!pll->enabled)
 		goto out;
@@ -233,7 +233,7 @@ exit:
 	pll->count = 0;
 
 out:
-	os_sem_give(&pll->semaphore, 0);
+	rtos_mutex_unlock(&pll->mutex);
 
 	return 0;
 }
@@ -298,7 +298,7 @@ int pll_element_init(struct audio_element *element, struct audio_element_config 
 	struct pll_element *pll = element->data;
 	struct pll_element_config *pll_config = &config->u.pll;
 
-	if (os_sem_init(&pll->semaphore, 1))
+	if (rtos_mutex_init(&pll->mutex))
 		goto err;
 
 	element->run = pll_element_run;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -11,7 +11,7 @@
 #include "industrial_os.h"
 
 #include "os/mqueue.h"
-#include "os/semaphore.h"
+#include "rtos_abstraction_layer.h"
 
 enum industrial_use_case_id {
 	INDUSTRIAL_USE_CASE_CAN = 0,
@@ -36,7 +36,7 @@ struct data_ctx {
 
 	unsigned int id;
 
-	os_sem_t semaphore;
+	rtos_mutex_t mutex;
 	os_mqd_t mqueue;
 
 	const struct mode_operations *ops;

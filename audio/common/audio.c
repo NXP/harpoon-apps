@@ -14,6 +14,7 @@
 
 #include "rpmsg.h"
 #include "hrpn_ctrl.h"
+#include "rtos_abstraction_layer.h"
 
 #include "audio.h"
 #include "audio_entry.h"
@@ -69,7 +70,7 @@ struct data_ctx {
 
 	/* The first thread is used for parent pipeline, others are for child pipeline */
 	struct thread_data_ctx_t {
-		os_sem_t semaphore;
+		rtos_mutex_t mutex;
 		os_sem_t async_sem;
 		os_mqd_t mqueue;
 		/* pipeline_ctx handle for current thread */
@@ -78,7 +79,7 @@ struct data_ctx {
 
 	struct ctrl_ctx ctrl;
 	const struct mode_handler *handler;
-	os_sem_t reset_sem;
+	rtos_mutex_t reset_mut;
 };
 
 static struct play_pipeline_config play_pipeline_dtmf_config = {
@@ -408,7 +409,7 @@ static void audio_reset(struct data_ctx *ctx, unsigned int id)
 	 *  If reset process has already been raised by another pipeline, return immediately
 	 *  because reset process will cover all pipeline.
 	 */
-	ret = os_sem_take(&ctx->reset_sem, 0, 0);
+	ret = rtos_mutex_lock(&ctx->reset_mut, RTOS_NO_WAIT);
 	if (ret)
 		return;
 
@@ -452,7 +453,7 @@ static void audio_reset(struct data_ctx *ctx, unsigned int id)
 
 		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, 0, 0);
 	}
-	os_sem_give(&ctx->reset_sem, 0);
+	rtos_mutex_unlock(&ctx->reset_mut);
 }
 
 void audio_process_data(void *context, uint8_t thread_id)
@@ -462,7 +463,7 @@ void audio_process_data(void *context, uint8_t thread_id)
 
 	if (!os_mq_receive(&ctx->thread_data_ctx[thread_id].mqueue, &e, 0, OS_QUEUE_EVENT_TIMEOUT_MAX)) {
 
-		os_sem_take(&ctx->thread_data_ctx[thread_id].semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		rtos_mutex_lock(&ctx->thread_data_ctx[thread_id].mutex, RTOS_WAIT_FOREVER);
 
 		if (ctx->handler) {
 			if (ctx->handler->run(ctx->thread_data_ctx[thread_id].handle, &e) != 0) {
@@ -478,7 +479,7 @@ void audio_process_data(void *context, uint8_t thread_id)
 			}
 
 		}
-		os_sem_give(&ctx->thread_data_ctx[thread_id].semaphore, 0);
+		rtos_mutex_unlock(&ctx->thread_data_ctx[thread_id].mutex);
 	}
 }
 
@@ -577,12 +578,12 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	sai_setup(ctx);
 
 	for (i = 0; i < pipeline_count; i++) {
-		os_sem_take(&ctx->thread_data_ctx[i].semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		rtos_mutex_lock(&ctx->thread_data_ctx[i].mutex, RTOS_WAIT_FOREVER);
 	}
 	ctx->handler = &g_handler[run->id];
 	ctx->pipeline_count = pipeline_count;
 	for (i = 0; i < pipeline_count; i++) {
-		os_sem_give(&ctx->thread_data_ctx[i].semaphore, 0);
+		rtos_mutex_unlock(&ctx->thread_data_ctx[i].mutex);
 	}
 
 	/* Send an event to trigger data thread processing */
@@ -606,12 +607,12 @@ static int audio_stop(struct data_ctx *ctx)
 		goto exit;
 
 	for (i = 0; i < ctx->pipeline_count; i++) {
-		os_sem_take(&ctx->thread_data_ctx[i].semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		rtos_mutex_lock(&ctx->thread_data_ctx[i].mutex, RTOS_WAIT_FOREVER);
 	}
 	handler = ctx->handler;
 	ctx->handler = NULL;
 	for (i = 0; i < ctx->pipeline_count; i++) {
-		os_sem_give(&ctx->thread_data_ctx[i].semaphore, 0);
+		rtos_mutex_unlock(&ctx->thread_data_ctx[i].mutex);
 	}
 
 	for (i = 0; i < ctx->pipeline_count; i++) {
@@ -732,14 +733,14 @@ void *audio_control_init(uint8_t thread_count)
 	os_assert(audio_ctx->ctrl.ept, "rpmsg transport initialization failed!");
 
 	for (i = 0; i < thread_count; i++) {
-		err = os_sem_init(&audio_ctx->thread_data_ctx[i].semaphore, 1);
-		os_assert(!err, "semaphore initialization failed!");
+		err = rtos_mutex_init(&audio_ctx->thread_data_ctx[i].mutex);
+		os_assert(!err, "mutex initialization failed!");
 
 		err = os_sem_init(&audio_ctx->thread_data_ctx[i].async_sem, 0);
-		os_assert(!err, "asynchronous semaphone initialization failed!");
+		os_assert(!err, "asynchronous semaphore initialization failed!");
 
-		err = os_sem_init(&audio_ctx->reset_sem, 1);
-		os_assert(!err, "reset semaphore initialization failed!");
+		err = rtos_mutex_init(&audio_ctx->reset_mut);
+		os_assert(!err, "reset mutex initialization failed!");
 
 		err = os_mq_open(&audio_ctx->thread_data_ctx[i].mqueue, "audio_mqueue", 10, sizeof(struct event));
 		os_assert(!err, "message queue initialization failed!");

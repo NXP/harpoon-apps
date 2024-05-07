@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
  * Copyright 2022-2024 NXP
+=======
+ * Copyright 2022, 2024 NXP
+>>>>>>> b0156cf ([GENAVB-2643] audio/industrial: common: convert all binary semaphore to mutexes)
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,7 +25,7 @@
 #include "hlog.h"
 #include "hrpn_ctrl.h"
 
-#include "os/semaphore.h"
+#include "rtos_abstraction_layer.h"
 #include "types.h"
 
 /*
@@ -82,7 +86,7 @@ struct avtp_source_element {
 	genavb_clock_domain_t clock_domain;
 
 	/* used in the control path to protect all streams' ->connected states */
-	os_sem_t semaphore;
+	rtos_mutex_t mutex;
 };
 
 static unsigned int avtp_source_stream_n()
@@ -230,9 +234,9 @@ static void avtp_source_connect(struct avtp_source_element *avtp, unsigned int s
 
 	stream->first_start = true;
 
-	os_sem_take(&avtp->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_mutex_lock(&avtp->mutex, RTOS_WAIT_FOREVER);
 	stream->connected = 1;
-	os_sem_give(&avtp->semaphore, 0);
+	rtos_mutex_unlock(&avtp->mutex);
 
 exit:
 	return;
@@ -247,9 +251,9 @@ static void avtp_source_disconnect(struct avtp_source_element *avtp, unsigned in
 		goto exit;
 	}
 
-	os_sem_take(&avtp->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_mutex_lock(&avtp->mutex, RTOS_WAIT_FOREVER);
 	stream->connected = 0;
-	os_sem_give(&avtp->semaphore, 0);
+	rtos_mutex_unlock(&avtp->mutex);
 
 	avb_result = genavb_stream_destroy(stream->handle);
 	if (avb_result != GENAVB_SUCCESS) {
@@ -474,7 +478,7 @@ static int avtp_source_element_run(struct audio_element *element)
 	int i, j;
 	int ret;
 
-	os_sem_take(&avtp->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_mutex_lock(&avtp->mutex, RTOS_WAIT_FOREVER);
 
 	for (i = 0; i < avtp->stream_n; i++) {
 		stream = &avtp->stream[i];
@@ -493,7 +497,7 @@ static int avtp_source_element_run(struct audio_element *element)
 		}
 	}
 
-	os_sem_give(&avtp->semaphore, 0);
+	rtos_mutex_unlock(&avtp->mutex);
 
 	return 0;
 }
@@ -602,7 +606,7 @@ int avtp_source_element_init(struct audio_element *element, struct audio_element
 	struct avtp_source_element *avtp = element->data;
 	int i, j, k;
 
-	if (os_sem_init(&avtp->semaphore, 1))
+	if (rtos_mutex_init(&avtp->mutex))
 		goto err;
 
 	element->run = avtp_source_element_run;

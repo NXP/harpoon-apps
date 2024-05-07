@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,7 +7,6 @@
 #include "hlog.h"
 #include "os/assert.h"
 #include "os/mqueue.h"
-#include "os/semaphore.h"
 #include "os/stdlib.h"
 #include "os/string.h"
 #include "os/unistd.h"
@@ -45,12 +44,12 @@ static void industrial_process_data(void *context)
 
 	if (!os_mq_receive(&data->mqueue, &e, 0, OS_QUEUE_EVENT_TIMEOUT_MAX)) {
 
-		os_sem_take(&data->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+		rtos_mutex_lock(&data->mutex, RTOS_WAIT_FOREVER);
 
 		if (data->ops)
 			data->ops->run(data->priv, &e);
 
-		os_sem_give(&data->semaphore, 0);
+		rtos_mutex_unlock(&data->mutex);
 	}
 }
 
@@ -110,9 +109,9 @@ static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run 
 	if (!data->priv)
 		goto exit;
 
-	os_sem_take(&data->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_mutex_lock(&data->mutex, RTOS_WAIT_FOREVER);
 	data->ops = &uc->ops[on->mode];
-	os_sem_give(&data->semaphore, 0);
+	rtos_mutex_unlock(&data->mutex);
 
 	/* Send an event to trigger data thread processing */
 	e.type = EVENT_TYPE_START;
@@ -133,10 +132,10 @@ static int industrial_stop(struct data_ctx *data)
 
 	data->ops->stats(data->priv);
 
-	os_sem_take(&data->semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_mutex_lock(&data->mutex, RTOS_WAIT_FOREVER);
 	ops = data->ops;
 	data->ops = NULL;
-	os_sem_give(&data->semaphore, 0);
+	rtos_mutex_unlock(&data->mutex);
 
 	ops->exit(data->priv);
 
@@ -225,8 +224,8 @@ static int data_ctx_init(struct data_ctx *data)
 {
 	int err;
 
-	err = os_sem_init(&data->semaphore, 1);
-	os_assert(!err, "semaphore initialization failed!");
+	err = rtos_mutex_init(&data->mutex);
+	os_assert(!err, "mutex initialization failed!");
 
 	err = os_mq_open(&data->mqueue, "industrial_mqueue", 10, sizeof(struct event));
 	os_assert(!err, "message queue initialization failed!");
