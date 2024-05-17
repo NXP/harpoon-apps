@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, 2024 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -10,7 +10,6 @@
 #include "rpmsg.h"
 #include "industrial_os.h"
 
-#include "os/mqueue.h"
 #include "rtos_abstraction_layer.h"
 
 enum industrial_use_case_id {
@@ -37,7 +36,7 @@ struct data_ctx {
 	unsigned int id;
 
 	rtos_mutex_t mutex;
-	os_mqd_t mqueue;
+	rtos_mqueue_t *mqueue_h;
 
 	const struct mode_operations *ops;
 

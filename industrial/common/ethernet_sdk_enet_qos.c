@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -11,6 +11,7 @@
 #include "industrial.h"
 #include "hardware_ethernet.h"
 
+#include "os/assert.h"
 #include "os/cache.h"
 #include "os/irq.h"
 #include "os/stdlib.h"

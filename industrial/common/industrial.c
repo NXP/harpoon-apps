@@ -6,7 +6,6 @@
 
 #include "hlog.h"
 #include "os/assert.h"
-#include "os/mqueue.h"
 #include "os/stdlib.h"
 #include "os/string.h"
 #include "os/unistd.h"
@@ -28,13 +27,15 @@ void *industrial_get_data_ctx(struct industrial_ctx *ctx, int use_case_id)
 
 static void data_send_event(void *userData, uint8_t type, uint8_t data)
 {
-	os_mqd_t *mqueue = userData;
+	rtos_mqueue_t *mqueue = userData;
+	bool yield = false;
 	struct event e;
 
 	e.type = type;
 	e.data = data;
 
-	os_mq_send(mqueue, &e, OS_MQUEUE_FLAGS_ISR_CONTEXT, 0);
+	rtos_mqueue_send_from_isr(mqueue, &e, RTOS_NO_WAIT, &yield);
+	rtos_yield_from_isr(yield);
 }
 
 static void industrial_process_data(void *context)
@@ -42,7 +43,7 @@ static void industrial_process_data(void *context)
 	struct data_ctx *data = context;
 	struct event e;
 
-	if (!os_mq_receive(&data->mqueue, &e, 0, OS_QUEUE_EVENT_TIMEOUT_MAX)) {
+	if (rtos_mqueue_receive(data->mqueue_h, &e, RTOS_WAIT_FOREVER)) {
 
 		rtos_mutex_lock(&data->mutex, RTOS_WAIT_FOREVER);
 
@@ -98,7 +99,7 @@ static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run 
 		goto exit;
 
 	cfg.event_send = data_send_event;
-	cfg.event_data = &data->mqueue;
+	cfg.event_data = &data->mqueue_h;
 	cfg.role = on->role;
 	cfg.period = on->period;
 	cfg.protocol = on->protocol;
@@ -118,7 +119,7 @@ static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run 
 
 	/* Send an event to trigger data thread processing */
 	e.type = EVENT_TYPE_START;
-	os_mq_send(&data->mqueue, &e, 0, 0);
+	rtos_mqueue_send(data->mqueue_h, &e, RTOS_NO_WAIT);
 
 	rc = HRPN_RESP_STATUS_SUCCESS;
 
@@ -230,8 +231,8 @@ static int data_ctx_init(struct data_ctx *data)
 	err = rtos_mutex_init(&data->mutex);
 	os_assert(!err, "mutex initialization failed!");
 
-	err = os_mq_open(&data->mqueue, "industrial_mqueue", 10, sizeof(struct event));
-	os_assert(!err, "message queue initialization failed!");
+	data->mqueue_h = rtos_mqueue_alloc_init(10, sizeof(struct event));
+	os_assert(data->mqueue_h, "message allocation industrial_mqueue initialization failed!");
 
 	data->process_data = industrial_process_data;
 

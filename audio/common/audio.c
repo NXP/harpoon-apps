@@ -6,7 +6,6 @@
 
 #include "hlog.h"
 #include "os/assert.h"
-#include "os/mqueue.h"
 #include "os/semaphore.h"
 #include "os/stdlib.h"
 #include "os/unistd.h"
@@ -67,7 +66,7 @@ struct data_ctx {
 	struct thread_data_ctx_t {
 		rtos_mutex_t mutex;
 		os_sem_t async_sem;
-		os_mqd_t mqueue;
+		rtos_mqueue_t *mqueue_h;
 		/* pipeline_ctx handle for current thread */
 		void *handle;
 	} thread_data_ctx[MAX_AUDIO_DATA_THREADS];
@@ -178,6 +177,7 @@ static void audio_set_hw_addr(struct audio_config *cfg, uint8_t *hw_addr)
 
 static void data_send_event(struct data_ctx *ctx, uint8_t status)
 {
+	bool yield = false;
 	struct event e;
 	int i;
 
@@ -185,7 +185,9 @@ static void data_send_event(struct data_ctx *ctx, uint8_t status)
 	e.data = status;
 
 	for (i = 0; i < ctx->pipeline_count; i++)
-		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, OS_MQUEUE_FLAGS_ISR_CONTEXT, 0);
+		rtos_mqueue_send_from_isr(ctx->thread_data_ctx[i].mqueue_h, &e, RTOS_NO_WAIT, &yield);
+
+	rtos_yield_from_isr(yield);
 }
 
 static void rx_callback(uint8_t status, void *user_data)
@@ -377,7 +379,7 @@ static void audio_reset(struct data_ctx *ctx, unsigned int id)
 		if (i == id)
 			continue;
 
-		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, 0, 0);
+		rtos_mqueue_send(ctx->thread_data_ctx[i].mqueue_h, &e, RTOS_NO_WAIT);
 	}
 
 	/* wait for asynchronous reset execution */
@@ -405,7 +407,7 @@ static void audio_reset(struct data_ctx *ctx, unsigned int id)
 		if (i == id)
 			continue;
 
-		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, 0, 0);
+		rtos_mqueue_send(ctx->thread_data_ctx[i].mqueue_h, &e, RTOS_NO_WAIT);
 	}
 	rtos_mutex_unlock(&ctx->reset_mut);
 }
@@ -415,7 +417,7 @@ void audio_process_data(void *context, uint8_t thread_id)
 	struct data_ctx *ctx = context;
 	struct event e;
 
-	if (!os_mq_receive(&ctx->thread_data_ctx[thread_id].mqueue, &e, 0, OS_QUEUE_EVENT_TIMEOUT_MAX)) {
+	if (!rtos_mqueue_receive(ctx->thread_data_ctx[thread_id].mqueue_h, &e, RTOS_WAIT_FOREVER)) {
 
 		rtos_mutex_lock(&ctx->thread_data_ctx[thread_id].mutex, RTOS_WAIT_FOREVER);
 
@@ -551,7 +553,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 	/* Send an event to trigger data thread processing */
 	e.type = EVENT_TYPE_DATA;
 	for (i = 0; i < pipeline_count; i++) {
-		os_mq_send(&ctx->thread_data_ctx[i].mqueue, &e, 0, 0);
+		rtos_mqueue_send(ctx->thread_data_ctx[i].mqueue_h, &e, RTOS_NO_WAIT);
 	}
 
 	rc = HRPN_RESP_STATUS_SUCCESS;
@@ -704,8 +706,8 @@ void *audio_control_init(uint8_t thread_count)
 		err = rtos_mutex_init(&audio_ctx->reset_mut);
 		os_assert(!err, "reset mutex initialization failed!");
 
-		err = os_mq_open(&audio_ctx->thread_data_ctx[i].mqueue, "audio_mqueue", 10, sizeof(struct event));
-		os_assert(!err, "message queue initialization failed!");
+		audio_ctx->thread_data_ctx[i].mqueue_h = rtos_mqueue_alloc_init(10, sizeof(struct event));
+		os_assert(audio_ctx->thread_data_ctx[i].mqueue_h, "message queue initialization failed!");
 	}
 
 	return audio_ctx;
