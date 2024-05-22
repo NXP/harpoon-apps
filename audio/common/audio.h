@@ -45,25 +45,6 @@ void *play_pipeline_init_avb(void *parameters);
 void play_pipeline_ctrl_avb(void *handle);
 void play_pipeline_exit_avb(void *handle);
 
-extern const struct audio_pipeline_config pipeline_dtmf_config;
-extern const struct audio_pipeline_config pipeline_dtmf_aud_hat_config;
-extern const struct audio_pipeline_config pipeline_sine_config;
-extern const struct audio_pipeline_config pipeline_sine_aud_hat_config;
-extern const struct audio_pipeline_config pipeline_loopback_config;
-extern const struct audio_pipeline_config pipeline_loopback_aud_hat_config;
-extern const struct audio_pipeline_config pipeline_full_config;
-extern const struct audio_pipeline_config pipeline_full_aud_hat_config;
-extern const struct audio_pipeline_config pipeline_full_avb_config;
-extern const struct audio_pipeline_config pipeline_full_avb_aud_hat_config;
-extern const struct audio_pipeline_config pipeline_full_thread_0_config;
-extern const struct audio_pipeline_config pipeline_full_thread_1_config;
-extern const struct audio_pipeline_config pipeline_mcr_avb_config;
-extern const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config;
-extern const struct audio_pipeline_config pipeline_full_avb_thread_0_config;
-extern const struct audio_pipeline_config pipeline_full_avb_thread_1_config;
-extern const struct audio_pipeline_config pipeline_mcr_avb_thread_0_config;
-extern const struct audio_pipeline_config pipeline_mcr_avb_thread_1_config;
-
 /* assign_nonzero_valid_val(): Validate and assign nonzero value.
  * "value" == 0: "var" use default value, return 0;
  * "value" != 0: if "value" is in array "supported_list", "var" = "value",

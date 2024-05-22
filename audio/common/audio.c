@@ -77,104 +77,6 @@ struct data_ctx {
 	rtos_mutex_t reset_mut;
 };
 
-static struct play_pipeline_config play_pipeline_dtmf_config = {
-	.cfg = {
-		&pipeline_dtmf_config,
-	}
-};
-
-static struct play_pipeline_config play_pipeline_dtmf_aud_hat_config = {
-	.cfg = {
-		&pipeline_dtmf_aud_hat_config,
-	}
-};
-
-static struct play_pipeline_config play_pipeline_loopback_config = {
-	.cfg = {
-		&pipeline_loopback_config,
-	}
-};
-
-static struct play_pipeline_config play_pipeline_loopback_aud_hat_config = {
-	.cfg = {
-		&pipeline_loopback_aud_hat_config,
-	}
-};
-
-static struct play_pipeline_config play_pipeline_sine_config = {
-	.cfg = {
-		&pipeline_sine_config,
-	}
-};
-
-static struct play_pipeline_config play_pipeline_sine_aud_hat_config = {
-	.cfg = {
-		&pipeline_sine_aud_hat_config,
-	}
-};
-
-static struct play_pipeline_config play_pipeline_full_config = {
-	.cfg = {
-		&pipeline_full_config,
-	}
-};
-
-static struct play_pipeline_config play_pipeline_full_aud_hat_config = {
-	.cfg = {
-		&pipeline_full_aud_hat_config,
-	}
-};
-
-#if defined(CONFIG_SMP)
-static struct play_pipeline_config play_pipeline_smp_config = {
-	.cfg = {
-		&pipeline_full_thread_0_config,
-		&pipeline_full_thread_1_config,
-	}
-};
-#endif
-
-#if (CONFIG_GENAVB_ENABLE == 1)
-static struct play_pipeline_config play_pipeline_full_avb_config = {
-	.cfg = {
-		&pipeline_full_avb_config,
-	}
-};
-
-static struct play_pipeline_config play_pipeline_full_avb_aud_hat_config = {
-	.cfg = {
-		&pipeline_full_avb_aud_hat_config,
-	}
-};
-
-static struct play_pipeline_config play_pipeline_mcr_avb_config = {
-	.cfg = {
-		&pipeline_mcr_avb_config,
-	}
-};
-
-static struct play_pipeline_config play_pipeline_mcr_avb_aud_hat_config = {
-	.cfg = {
-		&pipeline_mcr_avb_aud_hat_config,
-	}
-};
-#endif
-
-#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
-static struct play_pipeline_config play_pipeline_avb_smp_config = {
-	.cfg = {
-		&pipeline_full_avb_thread_0_config,
-		&pipeline_full_avb_thread_1_config,
-	}
-};
-static struct play_pipeline_config play_pipeline_mcr_smp_config = {
-	.cfg = {
-		&pipeline_mcr_avb_thread_0_config,
-		&pipeline_mcr_avb_thread_1_config,
-	}
-};
-#endif
-
 const static struct mode_handler g_handler[] =
 {
 	[0] = {
@@ -245,45 +147,8 @@ const static struct mode_handler g_handler[] =
 #endif
 };
 
-static const struct play_pipeline_config *g_play_config[] = {
-	[0] = &play_pipeline_dtmf_config,
-	[1] = &play_pipeline_sine_config,
-	[2] = &play_pipeline_loopback_config,
-	[3] = &play_pipeline_full_config,
-#if (CONFIG_GENAVB_ENABLE == 1)
-	[4] = &play_pipeline_full_avb_config,
-#endif
-#if defined(CONFIG_SMP)
-	[5]  = &play_pipeline_smp_config,
-#endif
-#if (CONFIG_GENAVB_ENABLE == 1)
-	[6] = &play_pipeline_mcr_avb_config,
-#endif
-#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
-	[7] = &play_pipeline_avb_smp_config,
-	[8] = &play_pipeline_mcr_smp_config,
-#endif
-};
-
-static const struct play_pipeline_config *g_play_aud_hat_config[] = {
-	[0] = &play_pipeline_dtmf_aud_hat_config,
-	[1] = &play_pipeline_sine_aud_hat_config,
-	[2] = &play_pipeline_loopback_aud_hat_config,
-	[3] = &play_pipeline_full_aud_hat_config,
-#if (CONFIG_GENAVB_ENABLE == 1)
-	[4] = &play_pipeline_full_avb_aud_hat_config,
-#endif
-#if defined(CONFIG_SMP)
-	[5]  = &play_pipeline_smp_config,
-#endif
-#if (CONFIG_GENAVB_ENABLE == 1)
-	[6] = &play_pipeline_mcr_avb_aud_hat_config,
-#endif
-#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
-	[7] = &play_pipeline_avb_smp_config,
-	[8] = &play_pipeline_mcr_smp_config,
-#endif
- };
+extern const struct play_pipeline_config *g_play_config[];
+extern const struct play_pipeline_config *g_play_aud_hat_config[];
 
 static void audio_check_params(struct audio_config *cfg, int run_id)
 {
@@ -613,7 +478,10 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 		else
 			pipeline_count++;
 	}
-	os_assert(pipeline_count > 0, "At lease one pipeline should be provided.");
+	if (pipeline_count == 0) {
+		log_err("Unsupported configuration: use_audio_hat %d pipeline id %d\n", run->use_audio_hat, run->id);
+		goto exit;
+	}
 
 	audio_set_hw_addr(&cfg, run->addr);
 

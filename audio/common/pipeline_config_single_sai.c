@@ -5,6 +5,8 @@
  */
 
 #include "fsl_clock.h"
+
+#include "audio.h"
 #include "audio_pipeline.h"
 #if (CONFIG_GENAVB_ENABLE == 1)
 #include "genavb/control_clock_domain.h"
@@ -1426,3 +1428,142 @@ const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config = {
 	},
 };
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
+
+struct play_pipeline_config play_pipeline_dtmf_config = {
+	.cfg = {
+		&pipeline_dtmf_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_dtmf_aud_hat_config = {
+	.cfg = {
+		&pipeline_dtmf_aud_hat_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_loopback_config = {
+	.cfg = {
+		&pipeline_loopback_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_loopback_aud_hat_config = {
+	.cfg = {
+		&pipeline_loopback_aud_hat_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_sine_config = {
+	.cfg = {
+		&pipeline_sine_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_sine_aud_hat_config = {
+	.cfg = {
+		&pipeline_sine_aud_hat_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_full_config = {
+	.cfg = {
+		&pipeline_full_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_full_aud_hat_config = {
+	.cfg = {
+		&pipeline_full_aud_hat_config,
+	}
+};
+
+#if defined(CONFIG_SMP)
+struct play_pipeline_config play_pipeline_smp_config = {
+	.cfg = {
+		&pipeline_full_thread_0_config,
+		&pipeline_full_thread_1_config,
+	}
+};
+#endif
+
+#if (CONFIG_GENAVB_ENABLE == 1)
+struct play_pipeline_config play_pipeline_full_avb_config = {
+	.cfg = {
+		&pipeline_full_avb_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_full_avb_aud_hat_config = {
+	.cfg = {
+		&pipeline_full_avb_aud_hat_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_mcr_avb_config = {
+	.cfg = {
+		&pipeline_mcr_avb_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_mcr_avb_aud_hat_config = {
+	.cfg = {
+		&pipeline_mcr_avb_aud_hat_config,
+	}
+};
+#endif
+
+#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
+struct play_pipeline_config play_pipeline_avb_smp_config = {
+	.cfg = {
+		&pipeline_full_avb_thread_0_config,
+		&pipeline_full_avb_thread_1_config,
+	}
+};
+
+struct play_pipeline_config play_pipeline_mcr_smp_config = {
+	.cfg = {
+		&pipeline_mcr_avb_thread_0_config,
+		&pipeline_mcr_avb_thread_1_config,
+	}
+};
+#endif
+
+const struct play_pipeline_config *g_play_config[] = {
+	[0] = &play_pipeline_dtmf_config,
+	[1] = &play_pipeline_sine_config,
+	[2] = &play_pipeline_loopback_config,
+	[3] = &play_pipeline_full_config,
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[4] = &play_pipeline_full_avb_config,
+#endif
+#if defined(CONFIG_SMP)
+	[5]  = &play_pipeline_smp_config,
+#endif
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[6] = &play_pipeline_mcr_avb_config,
+#endif
+#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
+	[7] = &play_pipeline_avb_smp_config,
+	[8] = &play_pipeline_mcr_smp_config,
+#endif
+};
+
+const struct play_pipeline_config *g_play_aud_hat_config[] = {
+	[0] = &play_pipeline_dtmf_aud_hat_config,
+	[1] = &play_pipeline_sine_aud_hat_config,
+	[2] = &play_pipeline_loopback_aud_hat_config,
+	[3] = &play_pipeline_full_aud_hat_config,
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[4] = &play_pipeline_full_avb_aud_hat_config,
+#endif
+#if defined(CONFIG_SMP)
+	[5]  = &play_pipeline_smp_config,
+#endif
+#if (CONFIG_GENAVB_ENABLE == 1)
+	[6] = &play_pipeline_mcr_avb_aud_hat_config,
+#endif
+#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
+	[7] = &play_pipeline_avb_smp_config,
+	[8] = &play_pipeline_mcr_smp_config,
+#endif
+ };
