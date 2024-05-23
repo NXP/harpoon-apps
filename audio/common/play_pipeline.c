@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/semaphore.h"
-
 #include "app_board.h"
 
 #include "audio_pipeline.h"
@@ -49,7 +47,7 @@ struct avtp_avb_ctx {
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
 
 struct pipeline_ctx {
-	os_sem_t *async_sem;
+	rtos_sem_t *async_sem;
 	struct audio_pipeline *pipeline;
 
 	struct {
@@ -97,7 +95,7 @@ int play_pipeline_run(void *handle, struct event *e)
 
 	case EVENT_TYPE_RESET_ASYNC:
 		audio_pipeline_reset(ctx->pipeline);
-		os_sem_give(ctx->async_sem, 0);
+		rtos_sem_give(ctx->async_sem);
 		break;
 
 	default:

@@ -7,10 +7,10 @@
 #ifndef _RT_LATENCY_H_
 #define _RT_LATENCY_H_
 
-#include "os/semaphore.h"
 #include "os/counter.h"
 #include "stats.h"
 #include "rpmsg.h"
+#include "rtos_abstraction_layer.h"
 
 /* Time period between two statistics polling logs (seconds) */
 #define STATS_PERIOD_SEC					   (1)
@@ -113,9 +113,9 @@ struct rt_latency_ctx {
 
 	int tc_load; /* bitmask of the above RT_LATENCY_WITH_xxx test case load conditions */
 
-	os_sem_t semaphore; /* used to wake the thread up from IRQ callback */
-	os_sem_t cpu_load_sem; /* used to increase CPU load through semaphore take/give */
-	os_sem_t irq_load_sem; /* used to wake the thread up from IRQ load handler */
+	rtos_sem_t semaphore; /* used to wake the thread up from IRQ callback */
+	rtos_sem_t cpu_load_sem; /* used to increase CPU load through semaphore take/give */
+	rtos_sem_t irq_load_sem; /* used to wake the thread up from IRQ load handler */
 
 	uint64_t time_irq;
 	uint32_t time_prog;

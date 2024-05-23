@@ -5,7 +5,6 @@
  */
 
 #include "hlog.h"
-#include "os/semaphore.h"
 #include "os/unistd.h"
 #include "os/cpu_load.h"
 
@@ -64,7 +63,7 @@ struct data_ctx {
 	/* The first thread is used for parent pipeline, others are for child pipeline */
 	struct thread_data_ctx_t {
 		rtos_mutex_t mutex;
-		os_sem_t async_sem;
+		rtos_sem_t async_sem;
 		rtos_mqueue_t *mqueue_h;
 		/* pipeline_ctx handle for current thread */
 		void *handle;
@@ -387,7 +386,7 @@ static void audio_reset(struct data_ctx *ctx, unsigned int id)
 		if (i == id)
 			continue;
 
-		os_sem_take(&ctx->thread_data_ctx[i].async_sem, 0, OS_SEM_TIMEOUT_MAX);
+		rtos_sem_take(&ctx->thread_data_ctx[i].async_sem, RTOS_WAIT_FOREVER);
 	}
 
 	e.type = EVENT_TYPE_DATA;
@@ -701,7 +700,7 @@ void *audio_control_init(uint8_t thread_count)
 		err = rtos_mutex_init(&audio_ctx->thread_data_ctx[i].mutex);
 		rtos_assert(!err, "mutex initialization failed!");
 
-		err = os_sem_init(&audio_ctx->thread_data_ctx[i].async_sem, 0);
+		err = rtos_sem_init(&audio_ctx->thread_data_ctx[i].async_sem, 0);
 		rtos_assert(!err, "asynchronous semaphore initialization failed!");
 
 		err = rtos_mutex_init(&audio_ctx->reset_mut);

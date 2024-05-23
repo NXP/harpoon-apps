@@ -6,7 +6,6 @@
 
 #include "os/counter.h"
 #include "os/cache.h"
-#include "os/semaphore.h"
 #include "os/unistd.h"
 
 #include "hlog.h"
@@ -58,10 +57,15 @@ static void latency_alarm_handler(os_counter_t *dev, uint8_t chan_id,
 			  void *user_data)
 {
 	struct rt_latency_ctx *ctx = user_data;
+	bool yield = false;
+	int err;
 
 	ctx->time_irq = irq_counter;
 
-	os_sem_give(&ctx->semaphore, OS_SEM_FLAGS_ISR_CONTEXT);
+	err = rtos_sem_give_from_isr(&ctx->semaphore, &yield);
+	rtos_assert(!err, "Failed to give semaphore from isr (err: %d)", err);
+
+	rtos_yield_from_isr(yield);
 }
 
 #define IRQ_LOAD_ISR_DURATION_US	10
@@ -70,8 +74,10 @@ static void load_alarm_handler(os_counter_t *dev, uint8_t chan_id,
 			  uint32_t irq_counter,
 			  void *user_data)
 {
-	uint32_t start, cur;
 	struct rt_latency_ctx *ctx = user_data;
+	uint32_t start, cur;
+	bool yield = false;
+	int err;
 
 	os_counter_get_value(dev, &start);
 
@@ -80,7 +86,11 @@ static void load_alarm_handler(os_counter_t *dev, uint8_t chan_id,
 	} while (calc_diff_ns(dev, start, cur) < IRQ_LOAD_ISR_DURATION_US * 1000);
 
 	os_counter_stop(dev);
-	os_sem_give(&ctx->irq_load_sem, OS_SEM_FLAGS_ISR_CONTEXT);
+
+	err = rtos_sem_give_from_isr(&ctx->irq_load_sem, &yield);
+	rtos_assert(!err, "Failed to give semaphore from isr (err: %d)", err);
+
+	rtos_yield_from_isr(yield);
 }
 
 static void rt_latency_stats_dump(struct rt_latency_ctx *ctx)
@@ -138,7 +148,7 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 
 		err = os_counter_set_channel_alarm(ctx->irq_load_dev, 0, &load_alarm_cfg);
 		rtos_assert(!err, "Counter set alarm failed (err: %d)", err);
-		err = os_sem_init(&ctx->irq_load_sem, 0);
+		err = rtos_sem_init(&ctx->irq_load_sem, 0);
 		rtos_assert(!err, "semaphore init failed!");
 	}
 
@@ -156,7 +166,7 @@ retry:
 	rtos_assert(!err, "Counter set alarm failed (err: %d)", err);
 
 	/* Sync current thread with alarm callback function thanks to a semaphore */
-	err = os_sem_take(&ctx->semaphore, 0, COUNTER_IRQ_TIMEOUT_MS);
+	err = rtos_sem_take(&ctx->semaphore, RTOS_MS_TO_TICKS(COUNTER_IRQ_TIMEOUT_MS));
 	if (err < 0) {
 		/* waiting period timed out: probably late alarm scheduling and waiting for counter wrap. */
 		os_counter_cancel_channel_alarm(dev, 0);
@@ -187,7 +197,7 @@ retry:
 
 	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
 		/* Waiting irq load ISR exits and then go to next loop */
-		err = os_sem_take(&ctx->irq_load_sem, 0, OS_SEM_TIMEOUT_MAX);
+		err = rtos_sem_take(&ctx->irq_load_sem, RTOS_WAIT_FOREVER);
 		rtos_assert(!err, "Can't take the semaphore (err: %d)", err);
 	}
 
@@ -199,10 +209,10 @@ void cpu_load(struct rt_latency_ctx *ctx)
 	int err;
 
 	if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM) {
-		err = os_sem_take(&ctx->cpu_load_sem, 0, OS_SEM_TIMEOUT_MAX);
+		err = rtos_sem_take(&ctx->cpu_load_sem, RTOS_WAIT_FOREVER);
 		rtos_assert(!err, "Failed to take semaphore");
 
-		err = os_sem_give(&ctx->cpu_load_sem, 0);
+		err = rtos_sem_give(&ctx->cpu_load_sem);
 		rtos_assert(!err, "Failed to give semaphore");
 	}
 }
@@ -238,8 +248,7 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx)
 	os_counter_t *dev = ctx->dev;
 
 	if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD) {
-		err = os_sem_destroy(&ctx->cpu_load_sem);
-		rtos_assert(!err, "semaphore init failed!");
+		rtos_sem_destroy(&ctx->cpu_load_sem);
 	}
 
 	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
@@ -249,8 +258,7 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx)
 		err = os_counter_cancel_channel_alarm(ctx->irq_load_dev, 0);
 		rtos_assert(!err, "Failed to cancel counter alarm!");
 
-		err = os_sem_destroy(&ctx->irq_load_sem);
-		rtos_assert(!err, "Failed to destroy semaphore!");
+		rtos_sem_destroy(&ctx->irq_load_sem);
 	}
 
 	err = os_counter_stop(dev);
@@ -259,8 +267,7 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx)
 	err = os_counter_cancel_channel_alarm(dev, 0);
 	rtos_assert(!err, "Failed to cancel counter alarm!");
 
-	err = os_sem_destroy(&ctx->semaphore);
-	rtos_assert(!err, "Failed to destroy semaphore!");
+	rtos_sem_destroy(&ctx->semaphore);
 
 	/* dump and print current stats before reseting them all */
 	rt_latency_stats_dump(ctx);
@@ -296,11 +303,11 @@ int rt_latency_init(os_counter_t *dev,
 
 	ctx->stats.late_alarm_sched = 0;
 
-	err = os_sem_init(&ctx->semaphore, 0);
+	err = rtos_sem_init(&ctx->semaphore, 0);
 	rtos_assert(!err, "semaphore creation failed!");
 
 	if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD) {
-		err = os_sem_init(&ctx->cpu_load_sem, 0);
+		err = rtos_sem_init(&ctx->cpu_load_sem, 0);
 		rtos_assert(!err, "semaphore init failed!");
 	}
 

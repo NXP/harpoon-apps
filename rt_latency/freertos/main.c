@@ -16,7 +16,6 @@
 
 /* Harpoon-apps includes. */
 #include "os/counter.h"
-#include "os/semaphore.h"
 
 #include "stats.h"
 #include "hlog.h"
