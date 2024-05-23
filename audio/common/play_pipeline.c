@@ -150,7 +150,7 @@ static void talker_disconnect(unsigned int stream_index)
 	/* need to disconnect streams in AVTP audio element */
 	disconnect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_DISCONNECT;
 	disconnect.pipeline.id = 0;
-	disconnect.element.type = AUDIO_ELEMENT_AVTP_SOURCE;
+	disconnect.element.type = AUDIO_ELEMENT_AVTP_SINK;
 	disconnect.element.id = 0;
 	disconnect.stream_index = stream_index;
 
