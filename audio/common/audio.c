@@ -371,10 +371,11 @@ static void pll_adjust_set_pll_id(struct data_ctx *ctx, uint32_t pll_id)
 	}
 }
 
-static void sai_setup(struct data_ctx *ctx)
+static int sai_setup(struct data_ctx *ctx)
 {
 	struct sai_cfg sai_config;
 	bool pll_disable = true;
+	int rc = 0;
 	int i;
 
 	log_info("enter\n");
@@ -386,7 +387,7 @@ static void sai_setup(struct data_ctx *ctx)
 
 	/* Configure each active SAI */
 	for (i = 0; i < sai_active_list_nelems; i++) {
-		uint32_t pll_id;
+		uint32_t pll_id, fifo_water_mark;
 		int sai_id;
 		enum codec_id cid;
 		int32_t ret;
@@ -437,9 +438,23 @@ static void sai_setup(struct data_ctx *ctx)
 
 		/* Set FIFO water mark to be period size of all channels*/
 #if USE_TX_IRQ
-		sai_config.fifo_water_mark = ctx->period * sai_config.chan_numbers - 1;
+		fifo_water_mark = ctx->period * sai_config.chan_numbers - 1;
+		if (fifo_water_mark > (uint32_t)FSL_FEATURE_SAI_FIFO_COUNTn(sai_config.sai_base)) {
+			log_err("SAI%d: Invalid FIFO Watermark: %d\n", i, fifo_water_mark);
+			rc = -1;
+			goto out;
+		}
+
+		sai_config.fifo_water_mark = fifo_water_mark;
 #else
-		sai_config.fifo_water_mark = ctx->period * sai_config.chan_numbers;
+		fifo_water_mark = ctx->period * sai_config.chan_numbers;
+		if (fifo_water_mark > (uint32_t)FSL_FEATURE_SAI_FIFO_COUNTn(sai_config.sai_base)) {
+			log_err("SAI%d: Invalid FIFO Watermark: %d\n", i, fifo_water_mark);
+			rc = -1;
+			goto out;
+		}
+
+		sai_config.fifo_water_mark = fifo_water_mark;
 #endif
 
 		sai_drv_setup(&ctx->dev[i], &sai_config);
@@ -450,6 +465,9 @@ static void sai_setup(struct data_ctx *ctx)
 
 	if (pll_disable)
 		pll_adjust_disable(ctx);
+
+out:
+	return rc;
 }
 
 static void sai_close(struct data_ctx *ctx)
@@ -639,7 +657,10 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 			goto exit;
 	}
 
-	sai_setup(ctx);
+	if (sai_setup(ctx) < 0) {
+		log_err("sai_setup() failed\n");
+		goto exit;
+	}
 
 	for (i = 0; i < pipeline_count; i++) {
 		rtos_mutex_lock(&ctx->thread_data_ctx[i].mutex, RTOS_WAIT_FOREVER);
