@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.13.1)
 set(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
 set(CommonPath "${ProjDirPath}/../../common")
 set(AppPath "${ProjDirPath}/..")
+set(RtosAbstractionLayerPath "${ProjDirPath}/../../../rtos-abstraction-layer/zephyr")
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(hello_world)
@@ -20,7 +21,11 @@ set(MCUX_SDK_PROJECT_NAME app)
 
 set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/hlog
+	${RtosAbstractionLayerPath}
 )
+
+set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(rtos_abstraction_layer)
 
 zephyr_compile_definitions(OS_ZEPHYR)
 

@@ -37,6 +37,7 @@ SET(VirtioMailboxPath "${HtMulticorePath}/virtio/mailbox")
 SET(VirtioPlatPortsPath "${HtMulticorePath}/virtio/plat_ports")
 SET(VirtioIncludePath "${HtMulticorePath}/include")
 SET(VirtioDevPath "${HtMulticorePath}/virtio/devices")
+SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/freertos")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -78,9 +79,13 @@ set(CMAKE_MODULE_PATH
     ${VirtioNetPath}
     ${VirtioDevPath}
     ${VirtioPlatPortsPath}
+    ${RtosAbstractionLayerPath}
 )
 
 # include entry for cmake components
+
+set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(rtos_abstraction_layer)
 
 include(all_devices)
 

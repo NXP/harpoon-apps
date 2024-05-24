@@ -25,6 +25,7 @@ SET(BoardPath "${ProjDirPath}/../../../../../common/freertos/boards/evkmimx8mp")
 SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/evkmimx8mp")
+SET(RtosAbstractionLayerPath "${ProjDirPath}/../../../../../../rtos-abstraction-layer/freertos")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -61,9 +62,13 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/hlog
     ${RtosPath}
     ${SdkDirPath}
+    ${RtosAbstractionLayerPath}
 )
 
 # include entry for cmake components
+
+set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(rtos_abstraction_layer)
 
 include(all_devices)
 

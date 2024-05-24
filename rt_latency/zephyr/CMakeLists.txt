@@ -21,6 +21,7 @@ set(MulticorePath "${ProjDirPath}/../../../middleware/multicore")
 
 SET(ProjRootPath "${ProjDirPath}/../../")
 SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
+SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/zephyr")
 
 # config to select component, the format is CONFIG_USE_${component}
 set(CONFIG_USE_middleware_zephyr-kernel true)
@@ -49,7 +50,11 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/rpmsg
     ${HtMulticorePath}/libs/gen_sw_mbox
     ${MulticorePath}
+    ${RtosAbstractionLayerPath}
 )
+
+set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(rtos_abstraction_layer)
 
 zephyr_compile_definitions(OS_ZEPHYR)
 
@@ -58,6 +63,8 @@ zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MM_EVK_A53 SDK_DEVICE_MAXIMUM
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MN_EVK_A53 SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1600000000UL)
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MP_EVK_A53 SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1800000000UL)
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX93_EVK_A55 SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1700000000UL)
+
+# include modules
 
 include(lib_stats)
 include(lib_jailhouse)
