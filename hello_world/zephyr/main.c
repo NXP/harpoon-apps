@@ -1,13 +1,11 @@
 /*
- * Copyright 2023 NXP.
+ * Copyright 2023-2024 NXP.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <zephyr/device.h>
 #include <zephyr/kernel.h>
-
-#include "os/assert.h"
 
 #include "hlog.h"
 

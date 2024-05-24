@@ -5,7 +5,6 @@
  */
 
 #include "hlog.h"
-#include "os/assert.h"
 #include "os/stdlib.h"
 #include "os/string.h"
 #include "os/unistd.h"
@@ -15,6 +14,7 @@
 
 #include "industrial.h"
 #include "rpmsg.h"
+#include "rtos_abstraction_layer.h"
 
 #define EPT_ADDR	(30)
 
@@ -229,10 +229,10 @@ static int data_ctx_init(struct data_ctx *data)
 	int err;
 
 	err = rtos_mutex_init(&data->mutex);
-	os_assert(!err, "mutex initialization failed!");
+	rtos_assert(!err, "mutex initialization failed!");
 
 	data->mqueue_h = rtos_mqueue_alloc_init(10, sizeof(struct event));
-	os_assert(data->mqueue_h, "message allocation industrial_mqueue initialization failed!");
+	rtos_assert(data->mqueue_h, "message queue initialization failed!");
 
 	data->process_data = industrial_process_data;
 
@@ -245,18 +245,18 @@ void *industrial_control_init(int nb_use_cases)
 	int i, err = 0;
 
 	ctx = os_malloc(sizeof(*ctx));
-	os_assert((ctx != NULL), "memory allocation error");
+	rtos_assert((ctx != NULL), "memory allocation error");
 
 	memset(ctx, 0, sizeof(*ctx));
 
 	ctx->ctrl.ept = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw");
-	os_assert(ctx->ctrl.ept, "rpmsg transport initialization failed!");
+	rtos_assert(ctx->ctrl.ept, "rpmsg transport initialization failed!");
 
 	for (i = 0; i < nb_use_cases; i++) {
 		struct data_ctx *data = &ctx->data[i];
 
 		err = data_ctx_init(data);
-		os_assert(!err, "industrial data context %d failed!", i);
+		rtos_assert(!err, "industrial data context %d failed!", i);
 
 		data->id = i;
 	}

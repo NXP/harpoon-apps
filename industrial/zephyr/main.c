@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,7 +8,6 @@
 #include <zephyr/kernel.h>
 
 #include "hlog.h"
-#include "os/assert.h"
 #include "os/stdlib.h"
 #include "os/counter.h"
 
@@ -17,6 +16,7 @@
 
 #include "industrial_entry.h"
 #include "industrial_os.h"
+#include "rtos_abstraction_layer.h"
 
 #define STACK_SIZE 4096
 
@@ -121,7 +121,7 @@ void main_task(void)
 		const struct thread_cfg *t = &use_cases[i].thread;
 
 		data_thread = os_malloc(sizeof(struct k_thread));
-		os_assert((data_thread != NULL), "thread handle memory allocation error");
+		rtos_assert((data_thread != NULL), "thread handle memory allocation error");
 
 		log_debug("ctx %p: thread config: %d %d %s\n", data,
 				t->nb_threads, t->priority, t->name);

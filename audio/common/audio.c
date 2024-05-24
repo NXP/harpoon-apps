@@ -5,7 +5,6 @@
  */
 
 #include "hlog.h"
-#include "os/assert.h"
 #include "os/semaphore.h"
 #include "os/stdlib.h"
 #include "os/unistd.h"
@@ -284,7 +283,7 @@ static int sai_setup(struct data_ctx *ctx)
 		sai_config.sample_rate = ctx->sample_rate;
 
 		sai_id = get_sai_id(sai_active_list[i].sai_base);
-		os_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
+		rtos_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
 
 		sai_config.source_clock_hz = get_sai_clock_freq(i);
 
@@ -394,7 +393,7 @@ static void audio_reset(struct data_ctx *ctx, unsigned int id)
 
 	e.type = EVENT_TYPE_DATA;
 	if (ctx->handler->run(ctx->thread_data_ctx[id].handle, &e) < 0)
-		os_assert(false, "handler couldn't restart");
+		rtos_assert(false, "handler couldn't restart");
 
 	if (id == 0) {
 #if USE_TX_IRQ
@@ -691,26 +690,26 @@ void *audio_control_init(uint8_t thread_count)
 	int err = 0;
 
 	audio_ctx = os_malloc(sizeof(*audio_ctx));
-	os_assert(audio_ctx, "Audio context failed with memory allocation error");
+	rtos_assert(audio_ctx, "Audio context failed with memory allocation error");
 	memset(audio_ctx, 0, sizeof(*audio_ctx));
 
 	audio_ctx->thread_count = thread_count;
 
 	audio_ctx->ctrl.ctrl_handle = audio_app_ctrl_init();
-	os_assert(audio_ctx->ctrl.ctrl_handle, "audio_app_ctrl transport initialization failed!");
+	rtos_assert(audio_ctx->ctrl.ctrl_handle, "audio_app_ctrl transport initialization failed!");
 
 	for (i = 0; i < thread_count; i++) {
 		err = rtos_mutex_init(&audio_ctx->thread_data_ctx[i].mutex);
-		os_assert(!err, "mutex initialization failed!");
+		rtos_assert(!err, "mutex initialization failed!");
 
 		err = os_sem_init(&audio_ctx->thread_data_ctx[i].async_sem, 0);
-		os_assert(!err, "asynchronous semaphore initialization failed!");
+		rtos_assert(!err, "asynchronous semaphore initialization failed!");
 
 		err = rtos_mutex_init(&audio_ctx->reset_mut);
-		os_assert(!err, "reset mutex initialization failed!");
+		rtos_assert(!err, "reset mutex initialization failed!");
 
 		audio_ctx->thread_data_ctx[i].mqueue_h = rtos_mqueue_alloc_init(10, sizeof(struct event));
-		os_assert(audio_ctx->thread_data_ctx[i].mqueue_h, "message queue initialization failed!");
+		rtos_assert(audio_ctx->thread_data_ctx[i].mqueue_h, "message queue initialization failed!");
 	}
 
 	return audio_ctx;

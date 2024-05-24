@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -15,13 +15,13 @@
 #include "fsl_debug_console.h"
 
 /* Harpoon-apps includes. */
-#include "os/assert.h"
 #include "os/counter.h"
 #include "os/semaphore.h"
 
 #include "stats.h"
 #include "hlog.h"
 #include "version.h"
+#include "rtos_abstraction_layer.h"
 
 #include "rt_latency.h"
 #if __has_include("clock_config.h")
@@ -249,7 +249,7 @@ void main_task(void *pvParameters)
 	ctx->started = false;
 
 	rc = ctrl_ctx_init(&ctx->ctrl);
-	os_assert(!rc, "ctrl context failed!");
+	rtos_assert(!rc, "ctrl context failed!");
 
 	do {
 		command_handler(ctx, ctx->ctrl.ept);

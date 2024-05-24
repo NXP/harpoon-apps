@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,9 +7,9 @@
 #ifndef _ZEPHYR_MQUEUE_H_
 #define _ZEPHYR_MQUEUE_H_
 
-#include "os/assert.h"
-
 #include <zephyr/kernel.h>
+
+#include "rtos_abstraction_layer.h"
 
 typedef struct k_msgq os_mqd_t;
 
@@ -19,7 +19,7 @@ static inline int os_mq_open(os_mqd_t *mq, const char *name,
 	int err;
 
 	err = k_msgq_alloc_init((struct k_msgq *)mq, item_size, nb_items);
-	os_assert(!err, "Failed to create %s", name);
+	rtos_assert(!err, "Failed to create %s", name);
 
 	return err;
 }

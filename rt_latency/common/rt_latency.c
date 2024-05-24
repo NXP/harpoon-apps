@@ -1,10 +1,9 @@
 /*
- * Copyright 2021-2023 NXP.
+ * Copyright 2021-2024 NXP.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/assert.h"
 #include "os/counter.h"
 #include "os/cache.h"
 #include "os/semaphore.h"
@@ -15,6 +14,7 @@
 
 #include "hrpn_ctrl.h"
 #include "rt_latency.h"
+#include "rtos_abstraction_layer.h"
 
 #define EPT_ADDR (30)
 
@@ -137,9 +137,9 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 		load_alarm_cfg.callback = load_alarm_handler;
 
 		err = os_counter_set_channel_alarm(ctx->irq_load_dev, 0, &load_alarm_cfg);
-		os_assert(!err, "Counter set alarm failed (err: %d)", err);
+		rtos_assert(!err, "Counter set alarm failed (err: %d)", err);
 		err = os_sem_init(&ctx->irq_load_sem, 0);
-		os_assert(!err, "semaphore init failed!");
+		rtos_assert(!err, "semaphore init failed!");
 	}
 
 retry:
@@ -153,7 +153,7 @@ retry:
 	ctx->time_prog = alarm_cfg.ticks;
 
 	err = os_counter_set_channel_alarm(dev, 0, &alarm_cfg);
-	os_assert(!err, "Counter set alarm failed (err: %d)", err);
+	rtos_assert(!err, "Counter set alarm failed (err: %d)", err);
 
 	/* Sync current thread with alarm callback function thanks to a semaphore */
 	err = os_sem_take(&ctx->semaphore, 0, COUNTER_IRQ_TIMEOUT_MS);
@@ -188,7 +188,7 @@ retry:
 	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
 		/* Waiting irq load ISR exits and then go to next loop */
 		err = os_sem_take(&ctx->irq_load_sem, 0, OS_SEM_TIMEOUT_MAX);
-		os_assert(!err, "Can't take the semaphore (err: %d)", err);
+		rtos_assert(!err, "Can't take the semaphore (err: %d)", err);
 	}
 
 	return err;
@@ -200,10 +200,10 @@ void cpu_load(struct rt_latency_ctx *ctx)
 
 	if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD_SEM) {
 		err = os_sem_take(&ctx->cpu_load_sem, 0, OS_SEM_TIMEOUT_MAX);
-		os_assert(!err, "Failed to take semaphore");
+		rtos_assert(!err, "Failed to take semaphore");
 
 		err = os_sem_give(&ctx->cpu_load_sem, 0);
-		os_assert(!err, "Failed to give semaphore");
+		rtos_assert(!err, "Failed to give semaphore");
 	}
 }
 
@@ -239,28 +239,28 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx)
 
 	if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD) {
 		err = os_sem_destroy(&ctx->cpu_load_sem);
-		os_assert(!err, "semaphore init failed!");
+		rtos_assert(!err, "semaphore init failed!");
 	}
 
 	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
 		err = os_counter_stop(ctx->irq_load_dev);
-		os_assert(!err, "Failed to stop counter!");
+		rtos_assert(!err, "Failed to stop counter!");
 
 		err = os_counter_cancel_channel_alarm(ctx->irq_load_dev, 0);
-		os_assert(!err, "Failed to cancel counter alarm!");
+		rtos_assert(!err, "Failed to cancel counter alarm!");
 
 		err = os_sem_destroy(&ctx->irq_load_sem);
-		os_assert(!err, "Failed to destroy semaphore!");
+		rtos_assert(!err, "Failed to destroy semaphore!");
 	}
 
 	err = os_counter_stop(dev);
-	os_assert(!err, "Failed to stop counter!");
+	rtos_assert(!err, "Failed to stop counter!");
 
 	err = os_counter_cancel_channel_alarm(dev, 0);
-	os_assert(!err, "Failed to cancel counter alarm!");
+	rtos_assert(!err, "Failed to cancel counter alarm!");
 
 	err = os_sem_destroy(&ctx->semaphore);
-	os_assert(!err, "Failed to destroy semaphore!");
+	rtos_assert(!err, "Failed to destroy semaphore!");
 
 	/* dump and print current stats before reseting them all */
 	rt_latency_stats_dump(ctx);
@@ -297,11 +297,11 @@ int rt_latency_init(os_counter_t *dev,
 	ctx->stats.late_alarm_sched = 0;
 
 	err = os_sem_init(&ctx->semaphore, 0);
-	os_assert(!err, "semaphore creation failed!");
+	rtos_assert(!err, "semaphore creation failed!");
 
 	if (ctx->tc_load & RT_LATENCY_WITH_CPU_LOAD) {
 		err = os_sem_init(&ctx->cpu_load_sem, 0);
-		os_assert(!err, "semaphore init failed!");
+		rtos_assert(!err, "semaphore init failed!");
 	}
 
 	if (ctx->tc_load & RT_LATENCY_WITH_LINUX_LOAD) {
@@ -377,7 +377,7 @@ int ctrl_ctx_init(struct ctrl_ctx *ctrl)
 	int rc = 0;
 
 	ctrl->ept = rpmsg_transport_init(RL_BOARD_RPMSG_LINK_ID, EPT_ADDR, "rpmsg-raw");
-	os_assert(ctrl->ept, "rpmsg transport initialization failed, cannot proceed\n");
+	rtos_assert(ctrl->ept, "rpmsg transport initialization failed, cannot proceed\n");
 
 	return rc;
 }

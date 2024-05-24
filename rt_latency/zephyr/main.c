@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP.
+ * Copyright 2022-2024 NXP.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,10 +8,9 @@
 #include <zephyr/kernel.h>
 #include <string.h>
 
-#include "os/assert.h"
-
 #include "hlog.h"
 #include "rt_latency.h"
+#include "rtos_abstraction_layer.h"
 
 #define STACK_SIZE 4096
 
@@ -238,7 +237,7 @@ void main(void)
 	ctx->started = false;
 
 	rc = ctrl_ctx_init(&ctx->ctrl);
-	os_assert(!rc, "ctrl context failed!");
+	rtos_assert(!rc, "ctrl context failed!");
 
 	do {
 		command_handler(ctx, ctx->ctrl.ept);

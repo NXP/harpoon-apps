@@ -12,9 +12,9 @@
 
 #include "codec_config.h"
 
-#include "os/assert.h"
 #include "app_board.h"
 #include "hlog.h"
+#include "rtos_abstraction_layer.h"
 
 static codec_handle_t wm8524_codec_handle;
 static codec_handle_t pcm512x_codec_handle;
@@ -98,7 +98,7 @@ int32_t codec_set_format(enum codec_id cid, uint32_t mclk, uint32_t sample_rate,
 	}
 	else {
 		err = -1;
-		os_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%d)", cid);
 	}
 
 end:
@@ -139,7 +139,7 @@ int32_t codec_setup(enum codec_id cid)
 	}
 	else {
 		err = -1;
-		os_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%d)", cid);
 	}
 
 end:
@@ -172,7 +172,7 @@ int32_t codec_close(enum codec_id cid)
 	}
 	else {
 		err = -1;
-		os_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%d)", cid);
 	}
 
 end:

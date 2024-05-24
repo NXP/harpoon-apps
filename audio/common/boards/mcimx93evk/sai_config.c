@@ -9,8 +9,8 @@
 
 #include "app_board.h"
 #include "codec_config.h"
+#include "rtos_abstraction_layer.h"
 #include "sai_config.h"
-#include "os/assert.h"
 
 struct sai_active_config sai_active_list[] = {
 	{
@@ -54,7 +54,7 @@ void sai_set_audio_hat_codec(bool use_audio_hat, unsigned int rate)
 			sai_active_list[0].audio_pll_div = 8; /* MCLK = 49152000 Hz */
 			break;
 		default:
-			os_assert(false, "Unsupported Sample Rate for MX93-AUDHAT\n");
+			rtos_assert(false, "Unsupported Sample Rate for MX93-AUDHAT\n");
 			break;
 		}
 	} else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -11,7 +11,7 @@
 
 #include "board.h"
 #include "irq.h"
-#include "os/assert.h"
+#include "rtos_abstraction_layer.h"
 
 #if (defined(UART_ADAPTER_NON_BLOCKING_MODE) && (UART_ADAPTER_NON_BLOCKING_MODE > 0U))
 #define uart_task_PRIORITY   (1)
@@ -50,7 +50,7 @@ static void uart_irq_init(void)
 			configMINIMAL_STACK_SIZE + 200, NULL,
 			uart_task_PRIORITY, &uart_task_h);
 
-	os_assert(xResult == pdPASS, "uart task creation failed");
+	rtos_assert(xResult == pdPASS, "uart task creation failed");
 
 	EnableIRQ(BOARD_UART_IRQ);
 }

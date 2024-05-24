@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/assert.h"
 #include "os/semaphore.h"
 #include "os/stdlib.h"
 
@@ -14,6 +13,7 @@
 #include "audio.h"
 #include "hlog.h"
 #include "hrpn_ctrl.h"
+#include "rtos_abstraction_layer.h"
 
 #if (CONFIG_GENAVB_ENABLE == 1)
 #include "avb_hardware.h"
@@ -448,7 +448,7 @@ void *play_pipeline_init(void *parameters)
 	struct pipeline_ctx *ctx;
 
 	ctx = os_malloc(sizeof(struct pipeline_ctx) + sizeof(struct audio_pipeline_config));
-	os_assert(ctx, "Audio pipeline failed with memory allocation error");
+	rtos_assert(ctx, "Audio pipeline failed with memory allocation error");
 	memset(ctx, 0, sizeof(struct pipeline_ctx));
 
 	pipeline_cfg = (struct audio_pipeline_config *)(ctx + 1);

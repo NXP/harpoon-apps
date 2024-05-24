@@ -1,14 +1,14 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/assert.h"
 #include "os/counter.h"
 #include "os/irq.h"
 
 #include "hlog.h"
+#include "rtos_abstraction_layer.h"
 
 #include "fsl_device_registers.h"
 #include "fsl_tpm.h"
@@ -23,7 +23,7 @@ static int set_alarm(os_counter_t *dev, uint8_t chan_id,
 {
 	struct os_counter_alarm_cfg *alarm = &dev->alarms[chan_id];
 
-	os_assert(dev->initialized == true, "TPM device %p not initialized!", dev->base);
+	rtos_assert(dev->initialized == true, "TPM device %p not initialized!", dev->base);
 
 	/* Fail if alarm already set for this channel. */
 	if (alarm->callback)
@@ -95,7 +95,7 @@ static void counter_init(os_counter_t *dev)
 	base->MOD = TPM_MAX_COUNTER_VALUE(base);
 
 	ret = os_irq_register(irqn, tpm_irq_handler, (void *)dev, OS_IRQ_PRIO_DEFAULT);
-	os_assert(!ret, "Failed to register counter's IRQ! (%d)", ret);
+	rtos_assert(!ret, "Failed to register counter's IRQ! (%d)", ret);
 	os_irq_enable(irqn);
 
 	dev->initialized = true;

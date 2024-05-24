@@ -9,7 +9,6 @@
 
 #include "board.h"
 #include "hlog.h"
-#include "os/assert.h"
 #include "os/counter.h"
 
 #include "clock_config.h"
@@ -17,6 +16,7 @@
 
 #include "industrial_entry.h"
 #include "industrial_os.h"
+#include "rtos_abstraction_layer.h"
 
 #define main_task_PRIORITY	(configMAX_PRIORITIES - 8)
 
@@ -120,7 +120,7 @@ void main_task(void *pvParameters)
 		void *data = industrial_get_data_ctx(context, i);
 
 		ret = create_task(i, data);
-		os_assert(!ret, "task creation failed for ctx %d", i);
+		rtos_assert(!ret, "task creation failed for ctx %d", i);
 	}
 
 	do {
@@ -137,7 +137,7 @@ int main(void)
 	xResult = xTaskCreate(main_task, "main_task",
 			configMINIMAL_STACK_SIZE + 800, NULL,
 			main_task_PRIORITY, NULL);
-	os_assert(xResult == pdPASS, "main task creation failed");
+	rtos_assert(xResult == pdPASS, "main task creation failed");
 
 	vTaskStartScheduler();
 

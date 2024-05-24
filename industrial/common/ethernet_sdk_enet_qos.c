@@ -11,7 +11,8 @@
 #include "industrial.h"
 #include "hardware_ethernet.h"
 
-#include "os/assert.h"
+#include "rtos_abstraction_layer.h"
+
 #include "os/cache.h"
 #include "os/irq.h"
 #include "os/stdlib.h"
@@ -403,7 +404,7 @@ static int enet_qos_phy_init(phy_handle_t *phyHandle, bool loopback)
         {
             status = PHY_Init(phyHandle, &phyConfig);
         } while ((status != kStatus_Success) && (--count));
-        os_assert(status == kStatus_Success, "PHY initialization failed\r\n");
+        rtos_assert(status == kStatus_Success, "PHY initialization failed\r\n");
         /* Enable loopback mode */
         PHY_EnableLoopback(phyHandle, kPHY_LocalLoop, kPHY_Speed1000M, true);
         goto init_done;

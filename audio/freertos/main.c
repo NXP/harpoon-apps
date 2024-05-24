@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -10,7 +10,7 @@
 #include "board.h"
 #include "clock_config.h"
 #include "hlog.h"
-#include "os/assert.h"
+#include "rtos_abstraction_layer.h"
 
 #include "pin_mux.h"
 
@@ -50,12 +50,12 @@ void main_task(void *pvParameters)
 	log_info("Audio application started!\n");
 
 	context = audio_control_init(DATA_THREADS);
-	os_assert(context, "control initialization failed!");
+	rtos_assert(context, "control initialization failed!");
 
 	xResult = xTaskCreate(data_task, "data_task",
 						configMINIMAL_STACK_SIZE + 200, context,
 						data_task_PRIORITY, NULL);
-	os_assert(xResult == pdPASS, "data task creation failed");
+	rtos_assert(xResult == pdPASS, "data task creation failed");
 
 	/* forever loop */
 	audio_control_loop(context);
@@ -70,7 +70,7 @@ int main(void)
 	xResult = xTaskCreate(main_task, "main_task",
 			configMINIMAL_STACK_SIZE + 800, NULL,
 			main_task_PRIORITY, NULL);
-	os_assert(xResult == pdPASS, "main task creation failed");
+	rtos_assert(xResult == pdPASS, "main task creation failed");
 
 	vTaskStartScheduler();
 

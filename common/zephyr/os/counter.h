@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,8 +9,9 @@
 
 #include <zephyr/drivers/counter.h>
 
-#include "os/assert.h"
 #include "os/counter.h"
+
+#include "rtos_abstraction_layer.h"
 
 struct os_counter {
 	struct device dev;
@@ -48,7 +49,7 @@ static inline int os_counter_set_channel_alarm(os_counter_t *dev, uint8_t chan_i
 {
 	struct counter_alarm_cfg a;
 
-	os_assert(alarm_cfg != NULL, "Null pointer!");
+	rtos_assert(alarm_cfg != NULL, "Null pointer!");
 
 	a.callback = (void (*)(const struct device *, uint8_t, uint32_t, void *)) alarm_cfg->callback;
 	a.ticks = alarm_cfg->ticks;

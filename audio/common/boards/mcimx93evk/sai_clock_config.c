@@ -5,8 +5,8 @@
  */
 
 #include "fsl_common.h"
-#include "os/assert.h"
 #include "codec_config.h"
+#include "rtos_abstraction_layer.h"
 #include "sai_drv.h"
 #include "sai_config.h"
 
@@ -21,14 +21,14 @@ void sai_clock_setup(void)
 	int i;
 
 	if (sai_active_list_nelems == 0)
-		os_assert(false, "No SAI enabled!");
+		rtos_assert(false, "No SAI enabled!");
 
 	/* Enable SAI clocks */
 	for (i = 0; i < sai_active_list_nelems; i++) {
 		int sai_id;
 
 		sai_id = get_sai_id(sai_active_list[i].sai_base);
-		os_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
+		rtos_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
 
 		const clock_root_config_t saiClkCfg = {
 			.clockOff = false,
@@ -56,10 +56,10 @@ uint32_t get_sai_clock_freq(unsigned int sai_active_index)
 	uint32_t sai_clock_root;
 	int sai_id;
 
-	os_assert(sai_active_index < sai_active_list_nelems, "%u not a valid active index", sai_active_index);
+	rtos_assert(sai_active_index < sai_active_list_nelems, "%u not a valid active index", sai_active_index);
 
 	sai_id = get_sai_id(sai_active_list[sai_active_index].sai_base);
-	os_assert(sai_id, "SAI%d enabled but not supported in this platform!", sai_active_index);
+	rtos_assert(sai_id, "SAI%d enabled but not supported in this platform!", sai_active_index);
 
 	sai_clock_root = get_sai_clock_root(sai_id - 1);
 

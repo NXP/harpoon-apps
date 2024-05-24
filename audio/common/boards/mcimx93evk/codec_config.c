@@ -8,11 +8,10 @@
 #include "fsl_cs42448.h"
 #include "fsl_rgpio.h"
 
-#include "os/assert.h"
-
 #include "app_board.h"
 #include "codec_config.h"
 #include "hlog.h"
+#include "rtos_abstraction_layer.h"
 
 #define WM8962_THREED1					0x10CU
 #define WM8962_THREED1_ADCMONOMIX_MASK	0x40U
@@ -200,7 +199,7 @@ int32_t codec_set_format(enum codec_id cid,uint32_t mclk, uint32_t sample_rate, 
 		}
 	} else {
 		err = -1;
-		os_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%d)", cid);
 		goto end;
 	}
 
@@ -218,7 +217,7 @@ int32_t codec_setup(enum codec_id cid)
 		err = codec_cs42448_setup();
 	} else {
 		err = -1;
-		os_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%d)", cid);
 		goto end;
 	}
 
@@ -244,7 +243,7 @@ int32_t codec_close(enum codec_id cid)
 		}
 	} else {
 		err = -1;
-		os_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%d)", cid);
 		goto end;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,7 +8,7 @@
 #include <zephyr/kernel.h>
 
 #include "hlog.h"
-#include "os/assert.h"
+#include "rtos_abstraction_layer.h"
 
 #include "pin_mux.h"
 #include "clock_config.h"
@@ -62,23 +62,23 @@ void main(void)
 	hardware_setup();
 
 	context = audio_control_init(DATA_THREADS);
-	os_assert(context, "control initialization failed!");
+	rtos_assert(context, "control initialization failed!");
 
 	for (i = 0; i < DATA_THREADS; i++) {
 		thread_ret = k_thread_create(&data_thread[i], data_stack[i], STACK_SIZE,
 				data_task, context, (void *)(uintptr_t)i, NULL,
 				K_HIGHEST_THREAD_PRIO, 0, K_FOREVER);
-		os_assert(thread_ret != NULL, "k_thread_create() failed");
+		rtos_assert(thread_ret != NULL, "k_thread_create() failed");
 		ret = k_thread_cpu_pin(&data_thread[i], i);
-		os_assert(ret == 0, "k_thread_cpu_pin() failed");
+		rtos_assert(ret == 0, "k_thread_cpu_pin() failed");
 	}
 
 	thread_ret = k_thread_create(&ctrl_thread, ctrl_stack, STACK_SIZE,
 		ctrl_task, context, NULL, NULL,
 		K_LOWEST_APPLICATION_THREAD_PRIO, 0, K_FOREVER);
-	os_assert(thread_ret != NULL, "k_thread_create() failed");
+	rtos_assert(thread_ret != NULL, "k_thread_create() failed");
 	ret = k_thread_cpu_pin(&ctrl_thread, 0);
-	os_assert(ret == 0, "k_thread_cpu_pin() failed");
+	rtos_assert(ret == 0, "k_thread_cpu_pin() failed");
 
 	k_thread_start(&ctrl_thread);
 	for (i = 0; i < DATA_THREADS; i++)
