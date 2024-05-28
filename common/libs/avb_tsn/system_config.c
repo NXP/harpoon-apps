@@ -58,8 +58,9 @@ struct avb_app_config *system_config_get_avb_app(void)
 }
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
-void system_config_set_avdecc(aem_entity_id_t id)
+void system_config_set_avdecc(aem_entity_id_t id, bool milan_mode)
 {
+	system_cfg.avdecc.milan_mode = milan_mode;
 	system_cfg.avdecc.aem_id = id;
 }
 

@@ -45,6 +45,7 @@ struct audio_pipeline_config {
 
 #if CONFIG_GENAVB_ENABLE
 	unsigned int aem_id;
+	bool milan_mode;
 #endif
 };
 

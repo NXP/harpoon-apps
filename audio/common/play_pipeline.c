@@ -43,6 +43,7 @@ extern void BOARD_GENAVB_TIMER_0_IRQ_HANDLER(void);
 struct avtp_avb_ctx {
 	struct genavb_control_handle *ctrl_h;
 	unsigned int aem_id;
+	bool milan_mode;
 };
 
 #endif /* #if (CONFIG_GENAVB_ENABLE == 1) */
@@ -270,7 +271,7 @@ static int avb_setup(struct pipeline_ctx *ctx)
 	os_irq_register(BOARD_GENAVB_TIMER_0_IRQ, (void (*)(void(*)))BOARD_GENAVB_TIMER_0_IRQ_HANDLER, NULL, OS_IRQ_PRIO_DEFAULT);
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
-	system_config_set_avdecc(ctx->avb.aem_id);
+	system_config_set_avdecc(ctx->avb.aem_id, ctx->avb.milan_mode);
 #endif
 
 	rc = gavb_stack_init();
@@ -340,6 +341,7 @@ void *play_pipeline_init_avb(void *parameters)
 	if (ctx) {
 		/* Only setup AVB once for first pipeline init */
 		ctx->avb.aem_id = ((struct audio_pipeline_config *)((struct audio_config *)parameters)->data)->aem_id;
+		ctx->avb.milan_mode = ((struct audio_pipeline_config *)((struct audio_config *)parameters)->data)->milan_mode;
 		if (ctx->id == 0) {
 			rc = avb_setup(ctx);
 			if (rc) {

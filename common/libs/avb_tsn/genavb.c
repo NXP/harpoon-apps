@@ -200,6 +200,8 @@ int gavb_stack_init(void)
                 goto err;
             }
 
+            genavb_config->avdecc_config.milan_mode = avdecc_cfg->milan_mode;
+
             if (aem_manager_create_entities() < 0) {
                 goto err_aem;
             }

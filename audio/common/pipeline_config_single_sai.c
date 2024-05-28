@@ -836,6 +836,7 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
 	.aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID,
+	.milan_mode = false,
 #endif
 
 	.stages = 3,
@@ -954,6 +955,11 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 const struct audio_pipeline_config pipeline_full_avb_aud_hat_config = {
 
 	.name = "MX93AUD-HAT AVB audio pipeline",
+
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+	.aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID,
+	.milan_mode = false,
+#endif
 
 	.stages = 3,
 
@@ -1225,10 +1231,11 @@ const struct audio_pipeline_config pipeline_full_thread_1_config = {
 #if (CONFIG_GENAVB_ENABLE == 1)
 const struct audio_pipeline_config pipeline_mcr_avb_config = {
 
-	.name = "AVB audio pipeline (with MCR support)",
+	.name = "MILAN AVB audio pipeline (with MCR support)",
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
 	.aem_id = AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID,
+	.milan_mode = true,
 #endif
 
 	.stages = 3,
@@ -1348,7 +1355,12 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 
 const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config = {
 
-	.name = "MX93AUD-HAT AVB audio pipeline (with MCR support)",
+	.name = "MX93AUD-HAT MILAN AVB audio pipeline (with MCR support)",
+
+#if (CONFIG_GENAVB_USE_AVDECC == 1)
+	.aem_id = AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID,
+	.milan_mode = true,
+#endif
 
 	.stages = 3,
 

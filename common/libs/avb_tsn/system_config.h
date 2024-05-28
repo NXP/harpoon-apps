@@ -47,6 +47,7 @@ struct app_config {
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
 struct avb_avdecc_config {
+    bool milan_mode;
     aem_entity_id_t aem_id;
 };
 #endif
@@ -60,7 +61,7 @@ struct system_config {
 };
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
-void system_config_set_avdecc(aem_entity_id_t id);
+void system_config_set_avdecc(aem_entity_id_t id, bool milan_mode);
 struct avb_avdecc_config *system_config_get_avdecc(void);
 #endif
 int system_config_set_net(unsigned int port_id, uint8_t *hw_addr);

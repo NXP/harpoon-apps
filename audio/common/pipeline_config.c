@@ -483,6 +483,7 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
 	.aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID,
+	.milan_mode = false,
 #endif
 
 	.stages = 3,
@@ -634,6 +635,7 @@ const struct audio_pipeline_config pipeline_full_avb_thread_0_config = {
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
 	.aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID,
+	.milan_mode = false,
 #endif
 
 	.stages = 2,
@@ -742,6 +744,7 @@ const struct audio_pipeline_config pipeline_full_avb_thread_1_config = {
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
 	.aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID,
+	.milan_mode = false,
 #endif
 
 	.stages = 1,
@@ -1012,10 +1015,11 @@ const struct audio_pipeline_config pipeline_full_thread_1_config = {
 #if (CONFIG_GENAVB_ENABLE == 1)
 const struct audio_pipeline_config pipeline_mcr_avb_config = {
 
-	.name = "AVB audio pipeline (with MCR support)",
+	.name = "MILAN AVB audio pipeline (with MCR support)",
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
 	.aem_id = AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID,
+	.milan_mode = true,
 #endif
 
 	.stages = 3,
@@ -1138,10 +1142,11 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 
 const struct audio_pipeline_config pipeline_mcr_avb_thread_0_config = {
 
-	.name = "AVB audio pipeline for thread 0",
+	.name = "MILAN AVB audio pipeline (with MCR support) for thread 0",
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
 	.aem_id = AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID,
+	.milan_mode = true,
 #endif
 
 	.stages = 2,
@@ -1235,10 +1240,11 @@ const struct audio_pipeline_config pipeline_mcr_avb_thread_0_config = {
 
 const struct audio_pipeline_config pipeline_mcr_avb_thread_1_config = {
 
-	.name = "AVB audio pipeline for thread 1",
+	.name = "AVB audio pipeline (with MCR support) for thread 1",
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
 	.aem_id = AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID,
+	.milan_mode = true,
 #endif
 
 	.stages = 1,
