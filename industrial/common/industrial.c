@@ -5,7 +5,6 @@
  */
 
 #include "hlog.h"
-#include "os/stdlib.h"
 #include "os/string.h"
 #include "os/unistd.h"
 
@@ -244,7 +243,7 @@ void *industrial_control_init(int nb_use_cases)
 	struct industrial_ctx *ctx;
 	int i, err = 0;
 
-	ctx = os_malloc(sizeof(*ctx));
+	ctx = rtos_malloc(sizeof(*ctx));
 	rtos_assert((ctx != NULL), "memory allocation error");
 
 	memset(ctx, 0, sizeof(*ctx));

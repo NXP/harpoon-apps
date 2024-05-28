@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,13 +7,13 @@
 #include <string.h>
 #include "hlog.h"
 #include "os/mmu.h"
-#include "os/stdlib.h"
 #include "os/stdio.h"
 #include "os/irq.h"
 
 #include "rpmsg.h"
 #include "gen_sw_mbox.h"
 #include "gen_sw_mbox_config.h"
+#include "rtos_abstraction_layer.h"
 
 #define RPMSG_LITE_SHMEM_BASE	(VDEV0_VRING_BASE)
 
@@ -52,7 +52,7 @@ struct rpmsg_ept *rpmsg_create_ept(struct rpmsg_instance *ri, int ept_addr, cons
 	struct rpmsg_ept *ept;
 	int ret;
 
-	ept = os_malloc(sizeof(struct rpmsg_ept));
+	ept = rtos_malloc(sizeof(struct rpmsg_ept));
 	if (!ept)
 		return ept;
 
@@ -88,7 +88,7 @@ err_announce:
 err_create:
 	rpmsg_queue_destroy(ri->rl_inst, ept->ept_q);
 err_create_q:
-	os_free(ept);
+	rtos_free(ept);
 
 	return NULL;
 }
@@ -106,7 +106,7 @@ int rpmsg_destroy_ept(struct rpmsg_ept *ept)
 	if (ret == RL_SUCCESS)
 	{
 		rpmsg_queue_destroy(ept->ri->rl_inst, ept->ept_q);
-		os_free(ept);
+		rtos_free(ept);
 	}
 
 	return ret;
@@ -123,7 +123,7 @@ struct rpmsg_instance *rpmsg_init(int link_id, bool is_coherent)
 {
 	struct rpmsg_instance *ri;
 
-	ri = os_malloc(sizeof(struct rpmsg_instance));
+	ri = rtos_malloc(sizeof(struct rpmsg_instance));
 	if (!ri)
 		return ri;
 
@@ -165,7 +165,7 @@ err_rpmsg_lite_init:
 err_map_vringbuf:
 	os_mmu_unmap((uintptr_t)ri->rpmsg_shmem_va, KB(64));
 err_map_rpmsg:
-	os_free(ri);
+	rtos_free(ri);
 
 	return NULL;
 }
@@ -175,7 +175,7 @@ void rpmsg_deinit(struct rpmsg_instance *ri)
 	rpmsg_lite_deinit(ri->rl_inst);
 	os_mmu_unmap((uintptr_t)ri->rpmsg_buf_va, MB(1));
 	os_mmu_unmap((uintptr_t)ri->rpmsg_shmem_va, KB(64));
-	os_free(ri);
+	rtos_free(ri);
 }
 
 struct rpmsg_ept *rpmsg_transport_init(int link_id, int ept_addr, const char *sn)

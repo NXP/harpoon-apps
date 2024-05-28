@@ -8,7 +8,6 @@
 #include <zephyr/kernel.h>
 
 #include "hlog.h"
-#include "os/stdlib.h"
 #include "os/counter.h"
 
 #include "clock_config.h"
@@ -120,7 +119,7 @@ void main_task(void)
 		void *data = industrial_get_data_ctx(context, i);
 		const struct thread_cfg *t = &use_cases[i].thread;
 
-		data_thread = os_malloc(sizeof(struct k_thread));
+		data_thread = rtos_malloc(sizeof(struct k_thread));
 		rtos_assert((data_thread != NULL), "thread handle memory allocation error");
 
 		log_debug("ctx %p: thread config: %d %d %s\n", data,

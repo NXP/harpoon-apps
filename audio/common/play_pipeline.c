@@ -5,7 +5,6 @@
  */
 
 #include "os/semaphore.h"
-#include "os/stdlib.h"
 
 #include "app_board.h"
 
@@ -447,7 +446,7 @@ void *play_pipeline_init(void *parameters)
 	struct audio_pipeline_config *pipeline_cfg;
 	struct pipeline_ctx *ctx;
 
-	ctx = os_malloc(sizeof(struct pipeline_ctx) + sizeof(struct audio_pipeline_config));
+	ctx = rtos_malloc(sizeof(struct pipeline_ctx) + sizeof(struct audio_pipeline_config));
 	rtos_assert(ctx, "Audio pipeline failed with memory allocation error");
 	memset(ctx, 0, sizeof(struct pipeline_ctx));
 
@@ -473,7 +472,7 @@ void *play_pipeline_init(void *parameters)
 	return ctx;
 
 err_init:
-	os_free(ctx);
+	rtos_free(ctx);
 	return NULL;
 }
 
@@ -483,7 +482,7 @@ void play_pipeline_exit(void *handle)
 
 	audio_pipeline_exit(ctx->pipeline);
 
-	os_free(ctx);
+	rtos_free(ctx);
 
 	log_info("\nEnd.\n");
 }

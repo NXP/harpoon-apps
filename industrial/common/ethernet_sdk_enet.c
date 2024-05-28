@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -10,8 +10,8 @@
 #include "hlog.h"
 #include "hrpn_ctrl.h"
 #include "industrial.h"
+#include "rtos_abstraction_layer.h"
 
-#include "os/stdlib.h"
 #include "os/unistd.h"
 
 #define ENET_PHY_ADDRESS                BOARD_PHY0_ADDRESS
@@ -262,7 +262,7 @@ void *ethernet_sdk_enet_init(void *parameters)
 	struct industrial_config *cfg = parameters;
 	struct ethernet_ctx *ctx;
 
-	ctx = os_malloc(sizeof(struct ethernet_ctx));
+	ctx = rtos_malloc(sizeof(struct ethernet_ctx));
 	if (!ctx) {
 		log_err("Memory allocation error\n");
 
@@ -286,7 +286,7 @@ void ethernet_sdk_enet_exit(void *priv)
 {
 	struct ethernet_ctx *ctx = priv;
 
-	os_free(ctx);
+	rtos_free(ctx);
 
 	log_info("end\n");
 }

@@ -15,7 +15,6 @@
 
 #include "os/cache.h"
 #include "os/irq.h"
-#include "os/stdlib.h"
 
 #define ENET_PHY_MIIMODE        kENET_QOS_RgmiiMode
 
@@ -463,7 +462,7 @@ static int enet_qos_prepare_buffers(enet_qos_buffer_config_t *buffConfig)
                 size += FSL_FEATURE_L1DCACHE_LINESIZE_BYTE - (size % FSL_FEATURE_L1DCACHE_LINESIZE_BYTE);
             }
 
-            buff = os_malloc(size);
+            buff = rtos_malloc(size);
             if (buff)
             {
                 /* Clean the alloc buffer to avoid there's any dirty data. */
@@ -511,7 +510,7 @@ static void enet_qos_free_buffers(void)
         {
             if ( ((void*)(uintptr_t)(rxbuffer[ringId][index])) != NULL)
             {
-                os_free((void*)(uintptr_t)rxbuffer[ringId][index]);
+                rtos_free((void*)(uintptr_t)rxbuffer[ringId][index]);
             }
         }
     }
@@ -728,7 +727,7 @@ static void *enet_qos_init(void *parameters, bool loopback)
     struct industrial_config *cfg = parameters;
     struct ethernet_ctx *ctx;
 
-    ctx = os_malloc(sizeof(struct ethernet_ctx));
+    ctx = rtos_malloc(sizeof(struct ethernet_ctx));
     if (!ctx)
     {
         log_err("Memory allocation error\n");
@@ -761,7 +760,7 @@ void ethernet_sdk_enet_exit(void *priv)
 {
     struct ethernet_ctx *ctx = priv;
 
-    os_free(ctx);
+    rtos_free(ctx);
 
     log_info("end\n");
 }

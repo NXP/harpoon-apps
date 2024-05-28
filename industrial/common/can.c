@@ -9,10 +9,10 @@
 #include "hlog.h"
 #include "industrial.h"
 #include "fsl_flexcan.h"
+#include "rtos_abstraction_layer.h"
 
 #include "os/counter.h"
 #include "os/irq.h"
-#include "os/stdlib.h"
 #include "os/string.h"
 
 /*******************************************************************************
@@ -397,7 +397,7 @@ static void *get_ctx(void *parameters, uint32_t test_type)
 		goto exit;
 	}
 
-	ctx = os_malloc(sizeof(struct can_ctx));
+	ctx = rtos_malloc(sizeof(struct can_ctx));
 	if (!ctx) {
 		log_err("Memory allocation error\n");
 		goto exit;
@@ -454,7 +454,7 @@ void *can_init(void *parameters)
 
 err_config:
 	FLEXCAN_Deinit(ctx->base);
-	os_free(ctx);
+	rtos_free(ctx);
 
 	return NULL;
 }
@@ -550,7 +550,7 @@ void can_exit(void *priv)
 	os_counter_cancel_channel_alarm(os_counter, 0);
 	can_disable_interrupt(ctx);
 	FLEXCAN_Deinit(ctx->base);
-	os_free(ctx);
+	rtos_free(ctx);
 
 	log_info("END\n");
 }

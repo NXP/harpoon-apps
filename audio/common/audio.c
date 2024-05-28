@@ -6,7 +6,6 @@
 
 #include "hlog.h"
 #include "os/semaphore.h"
-#include "os/stdlib.h"
 #include "os/unistd.h"
 #include "os/cpu_load.h"
 
@@ -689,7 +688,7 @@ void *audio_control_init(uint8_t thread_count)
 	int i;
 	int err = 0;
 
-	audio_ctx = os_malloc(sizeof(*audio_ctx));
+	audio_ctx = rtos_malloc(sizeof(*audio_ctx));
 	rtos_assert(audio_ctx, "Audio context failed with memory allocation error");
 	memset(audio_ctx, 0, sizeof(*audio_ctx));
 

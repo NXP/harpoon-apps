@@ -8,6 +8,7 @@
 #include "hlog.h"
 #include "hrpn_ctrl.h"
 #include "industrial.h"
+#include "rtos_abstraction_layer.h"
 
 #include "alarm_task.h"
 #include "avb_tsn/genavb.h"
@@ -19,7 +20,6 @@
 #include "industrial.h"
 
 #include "os/irq.h"
-#include "os/stdlib.h"
 
 #include "system_config.h"
 #include "tsn_tasks_config.h"
@@ -349,7 +349,7 @@ void ethernet_avb_tsn_exit(void *priv)
 	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ3);
 #endif
 
-	os_free(ctx);
+	rtos_free(ctx);
 
 	log_info("end\n");
 }
@@ -396,7 +396,7 @@ void *ethernet_avb_tsn_init(void *parameters)
 		goto exit;
 	}
 
-	ctx = os_malloc(sizeof(*ctx) + sizeof(*avb_tsn_ctx));
+	ctx = rtos_malloc(sizeof(*ctx) + sizeof(*avb_tsn_ctx));
 	if (!ctx) {
 		log_err("Memory allocation error\n");
 		goto exit;

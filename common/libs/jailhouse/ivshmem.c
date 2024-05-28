@@ -5,7 +5,6 @@
  */
 
 #include "os/mmu.h"
-#include "os/stdlib.h"
 
 #include "ivshmem.h"
 #include "memory.h"
@@ -263,7 +262,7 @@ int ivshmem_transport_init(unsigned int bdf, struct ivshmem *mem,
 	int rc;
 
 	if (!mem) {
-		mem = os_malloc(sizeof(*mem));
+		mem = rtos_malloc(sizeof(*mem));
 		rtos_assert(mem, "malloc for ivshmem struct faild, cannot proceed\n");
 	}
 

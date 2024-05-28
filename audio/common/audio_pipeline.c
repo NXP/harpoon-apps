@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/stdlib.h"
-
 #include "audio_app.h"
 #include "audio_element.h"
 #include "audio_pipeline.h"
 #include "hrpn_ctrl.h"
 #include "hlog.h"
+#include "rtos_abstraction_layer.h"
 
 #define STORAGE_DEFAULT_PERIODS 2
 
@@ -504,7 +503,7 @@ static struct audio_pipeline *audio_pipeline_alloc(struct audio_pipeline_config 
 	size += audio_buffer_size(config);
 	size += audio_buffer_storage_size(config);
 
-	pipeline = os_malloc(size);
+	pipeline = rtos_malloc(size);
 	if (!pipeline)
 		goto err;
 
@@ -518,7 +517,7 @@ err:
 
 static void audio_pipeline_free(struct audio_pipeline *pipeline)
 {
-	os_free(pipeline);
+	rtos_free(pipeline);
 }
 
 static void audio_pipeline_buffer_init(struct audio_pipeline *pipeline, struct audio_pipeline_config *config)
