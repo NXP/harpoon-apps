@@ -60,6 +60,7 @@ struct data_ctx {
 	uint8_t period;
 	bool use_audio_hat;
 
+	uint64_t callback_err;
 	uint64_t callback;
 
 	/* The first thread is used for parent pipeline, others are for child pipeline */
@@ -185,7 +186,8 @@ static void data_send_event(struct data_ctx *ctx, uint8_t status)
 	e.data = status;
 
 	for (i = 0; i < ctx->pipeline_count; i++)
-		rtos_mqueue_send_from_isr(ctx->thread_data_ctx[i].mqueue_h, &e, RTOS_NO_WAIT, &yield);
+		if(rtos_mqueue_send_from_isr(ctx->thread_data_ctx[i].mqueue_h, &e, RTOS_NO_WAIT, &yield) < 0)
+			ctx->callback_err++;
 
 	rtos_yield_from_isr(yield);
 }
@@ -447,7 +449,7 @@ static void audio_stats(struct data_ctx *ctx)
 		for (i = 0; i < ctx->pipeline_count; i++)
 			ctx->handler->stats(ctx->thread_data_ctx[i].handle);
 
-		log_info("callback: %llu\n", ctx->callback);
+		log_info("callback: count: %llu, error: %llu\n", ctx->callback, ctx->callback_err);
 	}
 }
 
@@ -515,6 +517,7 @@ static int audio_run(struct data_ctx *ctx, struct hrpn_cmd_audio_run *run)
 		goto exit;
 	}
 
+	ctx->callback_err = 0;
 	ctx->callback = 0;
 	ctx->sample_rate = rate;
 	ctx->period = period;
