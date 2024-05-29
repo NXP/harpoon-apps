@@ -12,8 +12,6 @@
 #include "industrial.h"
 #include "rtos_abstraction_layer.h"
 
-#include "os/unistd.h"
-
 #define ENET_PHY_ADDRESS                BOARD_PHY0_ADDRESS
 #define ENET_PHY_MIIMODE                BOARD_NET_PORT0_MII_MODE
 /* PHY operations. */
@@ -200,7 +198,7 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
 		PHY_GetLinkStatus(&phy_handle, &link);
 		if (autonego && link)
 			break;
-		os_msleep(1);
+		rtos_sleep(RTOS_MS_TO_TICKS(1));
 	} while (--count);
 
 	if (!count) {
@@ -229,7 +227,7 @@ int ethernet_sdk_enet_run(void *priv, struct event *e)
 		if (!ret)
 			tx_pass_cnt++;
 
-		os_msleep(50);
+		rtos_sleep(RTOS_MS_TO_TICKS(50));
 
 		/* Receive frame */
 		ret = enet_receive(&length);

@@ -6,7 +6,6 @@
 
 #include "os/counter.h"
 #include "os/cache.h"
-#include "os/unistd.h"
 
 #include "hlog.h"
 #include "stats.h"
@@ -222,7 +221,7 @@ void cache_inval(void)
 	os_dcache_invd_all();
 	os_icache_invd_all();
 
-	os_msleep(CACHE_INVAL_PERIOD_MS);
+	rtos_sleep(RTOS_MS_TO_TICKS(CACHE_INVAL_PERIOD_MS));
 }
 
 void print_stats(struct rt_latency_ctx *ctx)

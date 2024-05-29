@@ -6,7 +6,6 @@
 
 #include "hlog.h"
 #include "os/string.h"
-#include "os/unistd.h"
 
 #include "os/cpu_load.h"
 #include "hrpn_ctrl.h"
@@ -220,7 +219,7 @@ void industrial_control_loop(void *context)
 		count = STATS_COUNT;
 	}
 
-	os_msleep(CONTROL_POLL_PERIOD);
+	rtos_sleep(RTOS_MS_TO_TICKS(CONTROL_POLL_PERIOD));
 }
 
 static int data_ctx_init(struct data_ctx *data)

@@ -1,12 +1,12 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "app_enet.h"
 #include "os/stdio.h"
-#include "os/unistd.h"
+#include "rtos_abstraction_layer.h"
 
 #define ENET_RXBD_NUM               (4)
 #define ENET_TXBD_NUM               (4)
@@ -182,7 +182,7 @@ void enet_test(void)
         PHY_GetLinkStatus(&phy_handle, &link);
         if (autonego && link)
             break;
-        os_msleep(1);
+        rtos_sleep(RTOS_MS_TO_TICKS(1));
     } while (--count);
 
     if (!count) {
@@ -211,7 +211,7 @@ void enet_test(void)
         if (!ret)
             tx_pass_cnt++;
 
-        os_msleep(50);
+        rtos_sleep(RTOS_MS_TO_TICKS(50));
 
         /* Receive frame */
         ret = enet_receive(&length);

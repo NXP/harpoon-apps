@@ -5,7 +5,6 @@
  */
 
 #include "hlog.h"
-#include "os/unistd.h"
 #include "os/cpu_load.h"
 
 #include "audio_app.h"
@@ -676,7 +675,7 @@ void audio_control_loop(void *context)
 			count = STATS_COUNT;
 		}
 
-		os_msleep(CONTROL_POLL_PERIOD);
+		rtos_sleep(RTOS_MS_TO_TICKS(CONTROL_POLL_PERIOD));
 
 	} while(1);
 }
