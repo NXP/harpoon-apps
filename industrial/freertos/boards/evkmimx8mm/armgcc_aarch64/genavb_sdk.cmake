@@ -1,7 +1,7 @@
 set(GenAVBPath "${ProjDirPath}/../../../../../../gen_avb_sdk")
 
 # RTOS abstraction layer configuration
-set(RTOS_ABSTRACTION_LAYER_DIR "${GenAVBPath}/rtos/freertos")
+set(RTOS_ABSTRACTION_LAYER_DIR "${ProjDirPath}/../../../../../../rtos-abstraction-layer/freertos")
 set(GenAVBBuildPath "${CMAKE_CURRENT_BINARY_DIR}/gen_avb_build")
 
 set(MCUX_SDK ${SdkDirPath})
