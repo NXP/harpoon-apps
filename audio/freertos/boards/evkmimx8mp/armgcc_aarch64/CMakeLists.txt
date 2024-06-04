@@ -44,6 +44,7 @@ SET(MulticorePath "${ProjDirPath}/../../../../../../middleware/multicore")
 
 SET(ProjRootPath "${ProjDirPath}/../../../../../")
 SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
+SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/freertos")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -118,9 +119,13 @@ set(CMAKE_MODULE_PATH
     ${MulticorePath}
     ${RtosPath}
     ${SdkDirPath}
+    ${RtosAbstractionLayerPath}
 )
 
 # include entry for cmake components
+
+set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(rtos_abstraction_layer)
 
 include(all_devices)
 
