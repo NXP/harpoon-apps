@@ -31,6 +31,7 @@ set(MulticorePath "${ProjDirPath}/../../../middleware/multicore")
 
 SET(ProjRootPath "${ProjDirPath}/../../")
 SET(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
+SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/zephyr")
 
 if(CONFIG_USE_GENAVB)
   include(genavb_sdk.cmake)
@@ -65,7 +66,11 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/rpmsg
     ${HtMulticorePath}/libs/gen_sw_mbox
     ${MulticorePath}
+    ${RtosAbstractionLayerPath}
 )
+
+set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(rtos_abstraction_layer)
 
 zephyr_compile_definitions(OS_ZEPHYR)
 zephyr_compile_definitions(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
