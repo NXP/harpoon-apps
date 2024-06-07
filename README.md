@@ -1,6 +1,5 @@
 # Harpoon: Reference Applications
 
-![NXP_logo](docs/nxp_logo_small.png)
 [![Version](https://img.shields.io/github/v/release/NXP/harpoon-apps)](https://github.com/NXP/harpoon-apps/releases/latest)
 [![Contributors](https://img.shields.io/github/contributors/NXP/harpoon-apps)](https://github.com/NXP/harpoon-apps/graphs/contributors)
 
