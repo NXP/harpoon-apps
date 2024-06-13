@@ -43,7 +43,7 @@ static void industrial_process_data(void *context)
 	struct data_ctx *data = context;
 	struct event e;
 
-	if (rtos_mqueue_receive(data->mqueue_h, &e, RTOS_WAIT_FOREVER)) {
+	if (!rtos_mqueue_receive(data->mqueue_h, &e, RTOS_WAIT_FOREVER)) {
 
 		rtos_mutex_lock(&data->mutex, RTOS_WAIT_FOREVER);
 
