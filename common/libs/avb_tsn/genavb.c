@@ -249,6 +249,9 @@ err:
 
 int gavb_stack_exit(void)
 {
+    if (!s_genavb_handle)
+        goto exit;
+
     genavb_exit(s_genavb_handle);
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
     aem_entity_free(aem_entity);
@@ -256,6 +259,7 @@ int gavb_stack_exit(void)
 
     s_genavb_handle = NULL;
 
+exit:
     return 0;
 }
 
