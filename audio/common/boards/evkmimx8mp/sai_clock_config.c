@@ -13,37 +13,6 @@
 #include "sai_drv.h"
 #include "sai_config.h"
 
-/*******************************************************************************
- * Definitions
- ******************************************************************************/
-/* Fractional PLLs: Fout = ((mainDiv+dsm/65536) * refSel) / (preDiv * 2^ postDiv) */
-/* AUDIO PLL1 configuration */
-const ccm_analog_frac_pll_config_t g_audioPll1Config = {
-	.refSel  = kANALOG_PllRefOsc24M, /*!< PLL reference OSC24M */
-	.mainDiv = 262U,
-	.dsm     = 9437U,
-	.preDiv  = 2U,
-	.postDiv = 3U, /*!< AUDIO PLL1 frequency  = 393216000HZ */
-};
-
-/* AUDIO PLL2 configuration */
-const ccm_analog_frac_pll_config_t g_audioPll2Config = {
-	.refSel  = kANALOG_PllRefOsc24M, /*!< PLL reference OSC24M */
-	.mainDiv = 361U,
-	.dsm     = 17511U,
-	.preDiv  = 3U,
-	.postDiv = 3U, /*!< AUDIO PLL2 frequency  = 361267200HZ */
-};
-
-/* AUDIOMIX SAI PLL configuration */
-const ccm_analog_frac_pll_config_t g_saiPLLConfig = {
-	.refSel  = kANALOG_PllRefOsc24M, /*!< PLL reference OSC24M */
-	.mainDiv = 361U,
-	.dsm     = 17511U,
-	.preDiv  = 3U,
-	.postDiv = 3U, /*!< SAI PLL frequency  = 361267200HZ */
-};
-
 static const uintptr_t sai_clock_root[] = {kCLOCK_RootSai1, kCLOCK_RootSai2,
 	kCLOCK_RootSai3, 0, kCLOCK_RootSai5, kCLOCK_RootSai6, kCLOCK_RootSai7};
 
@@ -63,35 +32,6 @@ void sai_clock_setup(void)
 
 	if (sai_active_list_nelems == 0)
 		os_assert(false, "No SAI enabled!");
-
-	/* Init Audio PLLs */
-	CLOCK_InitAudioPll1(&g_audioPll1Config);
-	CLOCK_InitAudioPll2(&g_audioPll2Config);
-
-	CLOCK_EnableRoot(kCLOCK_RootAudioAhb);
-	/* Enable Audio clock to power on the audiomix domain*/
-	CLOCK_EnableClock(kCLOCK_Audio);
-
-	/* Power up the audiomix domain by A53 core.*/
-	/* Map the audiomix domain to A53 */
-	GPC->PGC_CPU_A53_MAPPING |=
-		1U << GPC_PGC_CPU_A53_MAPPING_AUDIOMIX_DOMAIN_SHIFT;
-	/* Software request to trigger power up the domain */
-	GPC->PU_PGC_SW_PUP_REQ |=
-		1U << GPC_PU_PGC_SW_PUP_REQ_AUDIOMIX_SW_PUP_REQ_SHIFT;
-
-
-	/* Waiting the GPC_PU_PGC_SW_PUP_REQ_AUDIOMIX_SW_PUP_REQ bit self-cleared after power up */
-	while(GPC->PU_PGC_SW_PUP_REQ &
-			(1U << GPC_PU_PGC_SW_PUP_REQ_AUDIOMIX_SW_PUP_REQ_SHIFT));
-
-	/* Do the handshake to make sure the NOC bus ready after power up the AUDIOMIX domain. */
-	GPC->PU_PWRHSK |= 1U << GPC_PU_PWRHSK_GPC_AUDIOMIX_NOC_PWRDNREQN_SHIFT;
-	while(!(GPC->PU_PWRHSK &
-			(1U << GPC_PU_PWRHSK_GPC_AUDIOMIX_PWRDNACKN_SHIFT)));
-
-	/* init SAI PLL run at 361267200HZ */
-	AUDIOMIX_InitAudioPll(AUDIOMIX, &g_saiPLLConfig);
 
 	/* Enable SAI clocks */
 	for (i = 0; i < sai_active_list_nelems; i++) {

@@ -10,23 +10,6 @@
 #include "sai_drv.h"
 #include "sai_config.h"
 
-/*******************************************************************************
- * Definitions
- ******************************************************************************/
-/*
- * AUDIOPLL1/AUDIOPLL1OUT
- *
- * VCO = (24MHz / rdiv) * (mfi + (mfn / mfd))  = 3,932,160,000 Hz
- * Output = VCO / odiv = 393.216 MHz
- */
-const fracn_pll_init_t g_audioPllCfg = {
-	.rdiv = 1,
-	.mfi = 163,
-	.mfn = 84,
-	.mfd = 100,
-	.odiv = 10
-};
-
 static const uintptr_t sai_clock_root[] = {kCLOCK_Root_Sai1, kCLOCK_Root_Sai2,
 	kCLOCK_Root_Sai3};
 
@@ -39,9 +22,6 @@ void sai_clock_setup(void)
 
 	if (sai_active_list_nelems == 0)
 		os_assert(false, "No SAI enabled!");
-
-	/* ROM has already initialized PLL */
-	CLOCK_PllInit(AUDIOPLL, &g_audioPllCfg);
 
 	/* Enable SAI clocks */
 	for (i = 0; i < sai_active_list_nelems; i++) {
