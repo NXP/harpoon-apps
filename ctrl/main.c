@@ -46,6 +46,7 @@ static void audio_usage(void)
 		"\t               Will use default frequency 48000Hz if not specified\n"
 		"\t-p <frames>    audio processing period (in frames)\n"
 		"\t               Supporting 2, 4, 8, 16, 32 frames\n"
+		"\t               Supporting 2, 4, 8 frames on MX93AUD-HAT\n"
 		"\t               Will use default period 8 frames if not specified\n"
 		"\t-a <mac_addr>  set hardware MAC address (default 00:bb:cc:dd:ee:14)\n"
 		"\t-r <id>        run audio mode id:\n"
