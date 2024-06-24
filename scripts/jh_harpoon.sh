@@ -56,6 +56,46 @@ function disable_cpu_idle()
     fi
 }
 
+# Check if a list of strings contains an element
+# $1: list to parse
+# $2: item to check
+function listincludes()
+{
+    for word in $1; do
+        [[ $word = $2 ]] && return 0
+    done
+
+    return 1
+}
+
+# Disable run-time CPU frequency changes:
+# - Skip if CPU Freq is disabled
+# - Otherwise, set performance or userspace governor with a fixed frequency
+function set_cpu_freq_policy()
+{
+    if [ ! -d /sys/devices/system/cpu/cpufreq ] || \
+       [ ! -f /sys/devices/system/cpu/cpufreq/policy0/scaling_available_governors ]; then
+        echo "CPU Frequency Scaling is not available, skip configuration"
+        return;
+    fi
+
+    avail_governors=$(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_available_governors)
+
+    if listincludes "$avail_governors" "performance" ; then
+        echo "Setting Performance as CPU frequency scaling governor"
+        echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
+    elif listincludes "$avail_governors" "userspace" ; then
+        avail_frequencies=($(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_available_frequencies))
+        max_freq=${avail_frequencies[-1]}
+        echo "Setting Userspace as CPU frequency scaling governor at $max_freq"
+        echo userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
+        echo "$max_freq" > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed
+    else
+        echo "Error: can not set performance or userspace as CPU frequency scaling governor"
+        exit 1
+    fi
+}
+
 function set_real_time_configuration()
 {
     if [ "$SOC" = "imx93" ]; then
@@ -75,6 +115,8 @@ function set_real_time_configuration()
             echo "${BBNSM_RTC_DEV}" > /sys/bus/platform/drivers/bbnsm_rtc/unbind
         fi
     fi
+
+    set_cpu_freq_policy
 }
 
 function gpio_start ()
