@@ -1,8 +1,9 @@
 /*
- * Copyright 2021, 2023 NXP
+ * Copyright 2021-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #ifndef _FREERTOS_COUNTER_H_
 #define _FREERTOS_COUNTER_H_
 

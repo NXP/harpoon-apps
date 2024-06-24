@@ -1,10 +1,13 @@
 /*
- * Copyright 2021-2022 NXP
- *
- * Abstract:
- * Linker file for the GNU C Compiler
+ * Copyright 2016 Freescale
+ * Copyright 2016-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+/*
+ * Abstract:
+ * Linker file for the GNU C Compiler
  */
 
 /* Entry Point */

@@ -1,8 +1,9 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #ifndef _COMMON_STDIO_H_
 #define _COMMON_STDIO_H_
 

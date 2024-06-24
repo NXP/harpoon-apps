@@ -1,10 +1,13 @@
 /*
- * Copyright 2021 NXP.
- *
- * Abstract:
- * Linker file for the GNU C Compiler
+ * Copyright 2016 Freescale
+ * Copyright 2016-2021 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+/*
+ * Abstract:
+ * Linker file for the GNU C Compiler
  */
 
 /* Entry Point */
@@ -280,4 +283,3 @@ SECTIONS
     __stacks_top__ = .;
   } > ocram_stacks
 }
-

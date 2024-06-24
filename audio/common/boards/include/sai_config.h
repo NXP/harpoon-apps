@@ -1,8 +1,9 @@
 /*
- * Copyright 2022, 2024 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #ifndef _SAI_CONFIG_H_
 #define _SAI_CONFIG_H_
 

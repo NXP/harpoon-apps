@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -61,4 +61,3 @@ int monitoring_stats_send(struct monitoring_stats_ctx *ctx, struct monitoring_ms
 err:
     return -1;
 }
-

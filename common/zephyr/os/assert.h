@@ -1,8 +1,9 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2021-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #ifndef _ZEPHYR_ASSERT_H_
 #define _ZEPHYR_ASSERT_H_
 

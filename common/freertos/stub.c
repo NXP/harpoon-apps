@@ -1,8 +1,7 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
- *
  */
 
 #if defined(__GNUC__)
@@ -82,4 +81,3 @@ ssize_t _write(int fd, const void *buf, size_t count)
 }
 
 #endif /* __GNUC__ */
-

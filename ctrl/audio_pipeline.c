@@ -1,8 +1,9 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

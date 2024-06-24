@@ -1,6 +1,5 @@
 /*
- * Copyright 2019, 2023 NXP
- * All rights reserved.
+ * Copyright 2019, 2023-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -36,4 +36,3 @@ void alarm_task_io_exit(struct alarm_task *a_task);
 int alarm_net_transmit(struct alarm_task *a_task, int msg_id, void *buf, int len);
 
 #endif /* _ALARM_TASK_H_ */
-

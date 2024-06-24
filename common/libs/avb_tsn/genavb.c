@@ -1,8 +1,9 @@
 /*
- * Copyright 2018-2021, 2024 NXP
+ * Copyright 2018-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #include "log.h"
 #include "genavb.h"
 #include "storage.h"
