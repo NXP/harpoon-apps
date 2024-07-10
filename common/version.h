@@ -7,7 +7,7 @@
 #define _VERSION_H_
 
 #define VERSION_MAJOR 3 /* eg API breaking */
-#define VERSION_MDIUM 0 /* Feature  update */
+#define VERSION_MDIUM 1 /* Feature  update */
 #define VERSION_MINOR 0 /* Bufix /  Hotfix */
 
 
