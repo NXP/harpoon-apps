@@ -22,10 +22,10 @@ manifest:
       remote: nxpmcuxpresso
       revision: 9004c905dbb87c44adaeaefc45dde61390ffddb8
     - name: GenAVB_TSN
-      revision: 42b6feb8c93de2a6848e556350a1854363569c12
+      revision: e1f72ad7179fb70b7ce73a5e81bda7981f2b2ff2
       path: gen_avb_sdk
     - name: rtos-abstraction-layer
-      revision: c6952d8688c72c1b0e61c158f77116f202cc95be
+      revision: b43dcbc0d965a525dbe690693fdffdf23a9f29f6
       path: rtos-abstraction-layer
     - name: hal_nxp
       remote: nxpzephyr
@@ -42,7 +42,7 @@ manifest:
       revision: b5916939a8384aac3398e3f4ea97917fa9b030fd
     - name: heterogeneous-multicore
       remote: nxprealtimeedgesw
-      revision: 6518f065ef01ddc6a5752e5885c40607f518ad40
+      revision: 374eeb51c478621da63dee669a3d576596d388ba
     - name: mcux-sdk-middleware-multicore
       remote: nxpmcuxpresso
       revision: 7ae65fe481b70093d71c4ffd7e2f9f1427717035
