@@ -19,6 +19,8 @@ function detect_soc ()
         echo 'imx8mp'
     elif grep -q 'i.MX93' /sys/devices/soc0/soc_id; then
         echo 'imx93'
+    elif grep -q 'i.MX95' /sys/devices/soc0/soc_id; then
+        echo 'imx95'
     else
         echo 'Unknown'
     fi
@@ -35,6 +37,9 @@ function get_rpmsg_dev()
         ;;
     'imx93')
         RPMSG_DEV=fe100000.rpmsg-ca55
+        ;;
+    'imx95')
+        RPMSG_DEV=c0100000.rpmsg-ca55
         ;;
     *)
         echo "Unsupported SoC"

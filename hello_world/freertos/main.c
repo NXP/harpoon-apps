@@ -37,6 +37,7 @@ extern void hello_world_doNothing(void);
  * Code
  ******************************************************************************/
 __WEAK void BOARD_InitClocks(void) {}
+__WEAK void BOARD_InitPlatform(void) {}
 
 /*!
  * @brief Application entry point.
@@ -47,6 +48,7 @@ int main(void)
 
     /* Init board cpu and hardware. */
     BOARD_InitMemory();
+    BOARD_InitPlatform();
     BOARD_InitClocks();
     BOARD_InitDebugConsole();
 

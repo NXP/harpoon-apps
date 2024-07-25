@@ -20,6 +20,9 @@ function detect_machine ()
 	elif grep -q 'i.MX93' /sys/devices/soc0/soc_id; then
 		SOC=imx93
 		ENTRY=0xd0000000
+	elif grep -q 'i.MX95' /sys/devices/soc0/soc_id; then
+		SOC=imx95
+		ENTRY=0xf0000000
 	fi
 }
 
