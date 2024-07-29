@@ -1,13 +1,14 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "os/stdio.h"
 #include "fsl_lpi2c.h"
 #include "i2c_test.h"
 #include "app_i2c.h"
+
+#include "rtos_abstraction_layer.h"
 
 #ifdef I2C_USE_IRQ
 static lpi2c_master_handle_t g_m_handle;
@@ -27,7 +28,7 @@ static void i2c_callback(LPI2C_Type *base, lpi2c_master_handle_t *handle, status
         /* Signal transfer success */
         g_MasterCompletionFlag = true;
         if (status != kStatus_Success)
-            os_printf("%s: received error %d\r\n", __FUNCTION__, status);
+            rtos_printf("%s: received error %d\r\n", __FUNCTION__, status);
     }
 }
 
@@ -73,7 +74,7 @@ uint8_t i2c_driver_read_reg(uint8_t i2c_addr, uint32_t sub_addr)
     while ((!g_MasterCompletionFlag) && (!g_MasterNackFlag)) /* nothing */;
     g_MasterCompletionFlag = false;
     if (g_MasterNackFlag) {
-        os_printf("Master nacked by slave!");
+        rtos_printf("Master nacked by slave!");
         g_MasterNackFlag = false;
     }
 #else

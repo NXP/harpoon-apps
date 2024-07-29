@@ -5,7 +5,7 @@
  */
 
 #include "app_enet.h"
-#include "os/stdio.h"
+
 #include "rtos_abstraction_layer.h"
 
 #define ENET_RXBD_NUM               (4)
@@ -135,7 +135,7 @@ void enet_test(void)
     status_t status;
     int32_t ret;
 
-    os_printf("\r\nENET test start.\r\n");
+    rtos_printf("\r\nENET test start.\r\n");
 
     enet_ipg_freq = CLOCK_GetFreq(kCLOCK_EnetIpgClk);
 
@@ -170,11 +170,11 @@ void enet_test(void)
     /* Initialize PHY */
     status = PHY_Init(&phy_handle, &phy_config);
     if (status != kStatus_Success) {
-        os_printf("ENET: PHY init failed!\r\n");
+        rtos_printf("ENET: PHY init failed!\r\n");
         goto enet_fail;
     }
 
-    os_printf("ENET: Wait for PHY link up...\r\n");
+    rtos_printf("ENET: Wait for PHY link up...\r\n");
     /* Wait for auto-negotiation success and link up */
     count = PHY_AUTONEGO_TIMEOUT_COUNT;
     do {
@@ -186,14 +186,14 @@ void enet_test(void)
     } while (--count);
 
     if (!count) {
-        os_printf("ENET: PHY Auto-negotiation (%s) and link (%s)\r\n",
+        rtos_printf("ENET: PHY Auto-negotiation (%s) and link (%s)\r\n",
                   autonego ? "compeleted" : "failed", link ? "up" : "down");
         goto enet_fail;
     }
 
     /* Get the actual PHY link speed. */
     PHY_GetLinkSpeedDuplex(&phy_handle, &speed, &duplex);
-    os_printf("ENET: PHY link speed %s %s-duplex\r\n",
+    rtos_printf("ENET: PHY link speed %s %s-duplex\r\n",
               speed ? ((speed == 2) ? "1000M" : "100M") : "10MB", duplex ? "full" : "half");
 
     /* Change the MII speed and duplex for actual link status. */
@@ -225,13 +225,13 @@ void enet_test(void)
 	}
     }
 
-    os_printf("\r\nENET test result:\r\n");
-    os_printf("\tTX: total = %d; succ = %d; fail = %d\r\n",
+    rtos_printf("\r\nENET test result:\r\n");
+    rtos_printf("\tTX: total = %d; succ = %d; fail = %d\r\n",
               TEST_LOOP_COUNT, tx_pass_cnt, TEST_LOOP_COUNT - tx_pass_cnt);
-    os_printf("\tRX: total = %d; succ = %d; fail = %d; empty = %d\r\n",
+    rtos_printf("\tRX: total = %d; succ = %d; fail = %d; empty = %d\r\n",
               TEST_LOOP_COUNT, rx_pass_cnt, rx_err_cnt, rx_empty_cnt);
     return;
 
 enet_fail:
-    os_printf("\r\nENET test failed!\r\n");
+    rtos_printf("\r\nENET test failed!\r\n");
 }

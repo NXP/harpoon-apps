@@ -1,12 +1,12 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #ifndef _HLOG_H_
 #define _HLOG_H_
 
-#include "os/stdio.h"
+#include "rtos_abstraction_layer.h"
 
 /** Log levels definition */
 typedef enum {
@@ -33,7 +33,7 @@ extern hlog_level_t hlog_level_config;
 #define log(LEVEL, format, ...) \
   do { \
     if (hlog_level_config >= LOG_ ## LEVEL) \
-         os_printf("%-4.4s: %-22.22s: " format "\r", #LEVEL, __func__, ##__VA_ARGS__); \
+         rtos_printf("%-4.4s: %-22.22s: " format "\r", #LEVEL, __func__, ##__VA_ARGS__); \
   } while (0)
 
 #define log_crit(...)     log(CRIT, __VA_ARGS__)
@@ -45,7 +45,7 @@ extern hlog_level_t hlog_level_config;
 #define log_raw(LEVEL, ...) \
   do { \
     if (hlog_level_config >= LOG_ ## LEVEL) \
-         os_printf(__VA_ARGS__); \
+         rtos_printf(__VA_ARGS__); \
   } while (0)
 
 #define log_raw_info(...) log_raw(INFO, __VA_ARGS__)

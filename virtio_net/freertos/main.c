@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -14,7 +14,8 @@
 #include "virtio_board.h"
 #include "virtio-net.h"
 #include "app_virtio_config.h"
-#include "os/stdio.h"
+
+#include "rtos_abstraction_layer.h"
 
 /*******************************************************************************
  * Definitions
@@ -58,19 +59,19 @@ static void virtio_task(void *pvParameters)
 	int ret;
 	void *switch_dev;
 
-	os_printf("\r\nStarting Virtio networking backend...\r\n");
+	rtos_printf("\r\nStarting Virtio networking backend...\r\n");
 
 	switch_dev = switch_init();
 	if (!switch_dev) {
-		os_printf("Networking switch initialization failed!\r\n");
+		rtos_printf("Networking switch initialization failed!\r\n");
 		goto err;
 	}
 
 	ret = virtio_net_init((void *)VIRTIO_NET_MEM_BASE, switch_dev);
-	os_printf("virtio network device initialization %s!\r\n", ret ? "failed": "succeed");
+	rtos_printf("virtio network device initialization %s!\r\n", ret ? "failed": "succeed");
 
 	ret = enet_port_init(switch_dev);
-	os_printf("Switch enabled with enet remote port %s!\r\n", ret ? "failed": "succeed");
+	rtos_printf("Switch enabled with enet remote port %s!\r\n", ret ? "failed": "succeed");
 
 #ifndef KEEP_SILENT
 	/* dead loop */

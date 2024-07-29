@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,7 +9,6 @@
 
 #include "os/stdint.h"
 #include "os/stdbool.h"
-#include "os/stdio.h"
 
 #include "audio_format.h"
 

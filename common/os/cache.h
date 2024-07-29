@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,7 +7,8 @@
 #define _COMMON_CACHE_H_
 
 #include "fsl_cache.h"
-#include "os/stdio.h"
+
+#include "rtos_abstraction_layer.h"
 
 #if defined(OS_ZEPHYR)
 #define NONCACHEABLE	__nocache
@@ -46,7 +47,7 @@ static inline void os_dcache_invd_all()
 	static int warn_once = 0;
 
 	if (!warn_once++)
-		os_printf("WARNING:  TODO: Flush D-Cache\n\r ");
+		rtos_printf("WARNING:  TODO: Flush D-Cache\n\r ");
 }
 
 static inline void os_icache_invd_all()

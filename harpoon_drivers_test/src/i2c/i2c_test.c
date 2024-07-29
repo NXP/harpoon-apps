@@ -1,12 +1,13 @@
 /*
- * Copyright 2021, 2023 NXP
+ * Copyright 2021, 2023-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "i2c_test.h"
-#include "os/stdio.h"
 #include "app_i2c.h"
+
+#include "rtos_abstraction_layer.h"
 
 /*******************************************************************************
  * Definitions
@@ -29,9 +30,9 @@ void i2c_test(void)
     int i;
 
 #ifdef I2C_USE_IRQ
-    os_printf("I2C in interrupt mode\r\n");
+    rtos_printf("I2C in interrupt mode\r\n");
 #else
-    os_printf("I2C in polling mode\r\n");
+    rtos_printf("I2C in polling mode\r\n");
 #endif
 
     /* Initialise I2C */
@@ -44,11 +45,11 @@ void i2c_test(void)
         i2c_buf[i] = i2c_driver_read_reg(I2C_ADDR, i);
 
     /* Print out all I2C registers */
-    os_printf("I2C registers dump for device at address 0x%x\r\n", I2C_ADDR);
-    os_printf("---------------------------------------------");
+    rtos_printf("I2C registers dump for device at address 0x%x\r\n", I2C_ADDR);
+    rtos_printf("---------------------------------------------");
     for (i = 0; i < sizeof(i2c_buf); i++) {
-        if ((i % 16) == 0) os_printf("\r\n%02X   ", i);
-        os_printf("%02X ", i2c_buf[i]);
+        if ((i % 16) == 0) rtos_printf("\r\n%02X   ", i);
+        rtos_printf("%02X ", i2c_buf[i]);
     }
-    os_printf("\r\n\r\n");
+    rtos_printf("\r\n\r\n");
 }

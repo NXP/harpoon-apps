@@ -1,13 +1,14 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "fsl_i2c.h"
 #include "i2c_test.h"
-#include "os/stdio.h"
 #include "app_i2c.h"
+
+#include "rtos_abstraction_layer.h"
 
 #ifdef I2C_USE_IRQ
 i2c_master_handle_t g_m_handle;
@@ -24,7 +25,7 @@ static void i2c_callback(I2C_Type *base, i2c_master_handle_t *handle, status_t s
     if (status == kStatus_Success)
         g_MasterCompletionFlag = true;
     else
-        os_printf("%s: received error %d\r\n", __FUNCTION__, status);
+        rtos_printf("%s: received error %d\r\n", __FUNCTION__, status);
 }
 
 void i2c_driver_irq_handler(void)

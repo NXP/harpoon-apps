@@ -7,7 +7,6 @@
 #include <string.h>
 #include "hlog.h"
 #include "os/mmu.h"
-#include "os/stdio.h"
 #include "os/irq.h"
 
 #include "rpmsg.h"

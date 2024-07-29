@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -11,7 +11,8 @@
 #include "flexcan_test.h"
 
 #include "os/irq.h"
-#include "os/stdio.h"
+
+#include "rtos_abstraction_layer.h"
 
 /*******************************************************************************
  * Definitions
@@ -447,7 +448,7 @@ void test_flexcan_setup(void)
     }
     else
     {
-        os_printf("No found Improved Timing Configuration. Just used default configuration\r\n\r\n");
+        rtos_printf("No found Improved Timing Configuration. Just used default configuration\r\n\r\n");
     }
 #else
     if (FLEXCAN_CalculateImprovedTimingValues(EXAMPLE_CAN, flexcanConfig.baudRate, EXAMPLE_CAN_CLK_FREQ,
@@ -458,7 +459,7 @@ void test_flexcan_setup(void)
     }
     else
     {
-        os_printf("No found Improved Timing Configuration. Just used default configuration\r\n\r\n");
+        rtos_printf("No found Improved Timing Configuration. Just used default configuration\r\n\r\n");
     }
 #endif
 #endif
@@ -530,12 +531,12 @@ void test_flexcan_setup(void)
 #endif
         if ((node_type == 'A') || (node_type == 'a'))
         {
-            os_printf("Press any key to trigger one-shot transmission\r\n\r\n");
+            rtos_printf("Press any key to trigger one-shot transmission\r\n\r\n");
             frame.dataByte0 = 0;
         }
         else
         {
-            os_printf("Start to Wait data from Node A\r\n\r\n");
+            rtos_printf("Start to Wait data from Node A\r\n\r\n");
         }
     }
     else if (test_type == 3)
@@ -584,7 +585,7 @@ void test_flexcan_setup(void)
 #endif
             os_irq_enable(EXAMPLE_FLEXCAN_IRQn);
 
-            os_printf("Start to Wait data from Node A\r\n\r\n");
+            rtos_printf("Start to Wait data from Node A\r\n\r\n");
         }
     }
 }
@@ -601,44 +602,44 @@ void test_flexcan(void)
     while (test_type == 0)
     {
 
-        os_printf("********* Select FlexCAN test mode (1-3) *********\r\n");
-        os_printf("1 - Loopback\r\n");
-        os_printf("2 - Interrupt transfer\r\n");
-        os_printf("3 - PingPong\r\n");
+        rtos_printf("********* Select FlexCAN test mode (1-3) *********\r\n");
+        rtos_printf("1 - Loopback\r\n");
+        rtos_printf("2 - Interrupt transfer\r\n");
+        rtos_printf("3 - PingPong\r\n");
         SCANF("%d", &test_type);
         if (test_type < 1 || test_type > 3)
         {
             test_type = 0;
         }
-        os_printf("\r\n");
+        rtos_printf("\r\n");
     }
 
     switch (test_type)
     {
         case 1:
-            os_printf("********* FLEXCAN Loopback EXAMPLE *********\r\n");
-            os_printf("    Message format: Standard (11 bit id)\r\n");
-            os_printf("    Loopback Mode: Enabled\r\n");
-            os_printf("*********************************************\r\n\r\n");
+            rtos_printf("********* FLEXCAN Loopback EXAMPLE *********\r\n");
+            rtos_printf("    Message format: Standard (11 bit id)\r\n");
+            rtos_printf("    Loopback Mode: Enabled\r\n");
+            rtos_printf("*********************************************\r\n\r\n");
             break;
 
         case 2:
-            os_printf("********* FLEXCAN Interrupt EXAMPLE *********\r\n");
-            os_printf("    Message format: Standard (11 bit id)\r\n");
-            os_printf("    Message buffer %d used for Rx.\r\n", RX_MESSAGE_BUFFER_NUM);
-            os_printf("    Message buffer %d used for Tx.\r\n", TX_MESSAGE_BUFFER_NUM);
-            os_printf("    Interrupt Mode: Enabled\r\n");
-            os_printf("    Operation Mode: TX and RX --> Normal\r\n");
-            os_printf("*********************************************\r\n\r\n");
+            rtos_printf("********* FLEXCAN Interrupt EXAMPLE *********\r\n");
+            rtos_printf("    Message format: Standard (11 bit id)\r\n");
+            rtos_printf("    Message buffer %d used for Rx.\r\n", RX_MESSAGE_BUFFER_NUM);
+            rtos_printf("    Message buffer %d used for Tx.\r\n", TX_MESSAGE_BUFFER_NUM);
+            rtos_printf("    Interrupt Mode: Enabled\r\n");
+            rtos_printf("    Operation Mode: TX and RX --> Normal\r\n");
+            rtos_printf("*********************************************\r\n\r\n");
             break;
 
         case 3:
-            os_printf("********* FLEXCAN PingPong Buffer Example *********\r\n");
-            os_printf("    Message format: Standard (11 bit id)\r\n");
-            os_printf("    Node B Message buffer %d to %d used as Rx queue 1.\r\n", RX_QUEUE_BUFFER_BASE, RX_QUEUE_BUFFER_END_1);
-            os_printf("    Node B Message buffer %d to %d used as Rx queue 2.\r\n", RX_QUEUE_BUFFER_END_1 + 1U, RX_QUEUE_BUFFER_END_2);
-            os_printf("    Node A Message buffer %d used as Tx.\r\n", TX_MESSAGE_BUFFER_NUM);
-            os_printf("*********************************************\r\n\r\n");
+            rtos_printf("********* FLEXCAN PingPong Buffer Example *********\r\n");
+            rtos_printf("    Message format: Standard (11 bit id)\r\n");
+            rtos_printf("    Node B Message buffer %d to %d used as Rx queue 1.\r\n", RX_QUEUE_BUFFER_BASE, RX_QUEUE_BUFFER_END_1);
+            rtos_printf("    Node B Message buffer %d to %d used as Rx queue 2.\r\n", RX_QUEUE_BUFFER_END_1 + 1U, RX_QUEUE_BUFFER_END_2);
+            rtos_printf("    Node A Message buffer %d used as Tx.\r\n", TX_MESSAGE_BUFFER_NUM);
+            rtos_printf("*********************************************\r\n\r\n");
             break;
 
         default:
@@ -649,12 +650,12 @@ void test_flexcan(void)
     {
         do
         {
-            os_printf("Please select local node as A or B:\r\n");
-            os_printf("Note: Node B should start first.\r\n");
-            os_printf("Node:");
+            rtos_printf("Please select local node as A or B:\r\n");
+            rtos_printf("Note: Node B should start first.\r\n");
+            rtos_printf("Node:");
             node_type = GETCHAR();
-            os_printf("%c", node_type);
-            os_printf("\r\n");
+            rtos_printf("%c", node_type);
+            rtos_printf("\r\n");
         } while ((node_type != 'A') && (node_type != 'B') && (node_type != 'a') && (node_type != 'b'));
     }
 
@@ -695,15 +696,15 @@ void test_flexcan(void)
                               CAN_WORD1_DATA_BYTE_7(0x88);
 #endif
 
-            os_printf("Send message from MB%d to MB%d\r\n", TX_MESSAGE_BUFFER_NUM, RX_MESSAGE_BUFFER_NUM);
+            rtos_printf("Send message from MB%d to MB%d\r\n", TX_MESSAGE_BUFFER_NUM, RX_MESSAGE_BUFFER_NUM);
 #if (defined(USE_CANFD) && USE_CANFD)
             for (i = 0; i < DWORD_IN_MB; i++)
             {
-                os_printf("tx word%d = 0x%x\r\n", i, frame.dataWord[i]);
+                rtos_printf("tx word%d = 0x%x\r\n", i, frame.dataWord[i]);
             }
 #else
-            os_printf("tx word0 = 0x%x\r\n", frame.dataWord0);
-            os_printf("tx word1 = 0x%x\r\n", frame.dataWord1);
+            rtos_printf("tx word0 = 0x%x\r\n", frame.dataWord0);
+            rtos_printf("tx word1 = 0x%x\r\n", frame.dataWord1);
 #endif
 
             /* Send data through Tx Message Buffer using polling function. */
@@ -718,15 +719,15 @@ void test_flexcan(void)
             {
             }
 
-            os_printf("\r\nReceived message from MB%d\r\n", RX_MESSAGE_BUFFER_NUM);
+            rtos_printf("\r\nReceived message from MB%d\r\n", RX_MESSAGE_BUFFER_NUM);
 #if (defined(USE_CANFD) && USE_CANFD)
             for (i = 0; i < DWORD_IN_MB; i++)
             {
-                os_printf("rx word%d = 0x%x\r\n", i, frame.dataWord[i]);
+                rtos_printf("rx word%d = 0x%x\r\n", i, frame.dataWord[i]);
             }
 #else
-            os_printf("rx word0 = 0x%x\r\n", frame.dataWord0);
-            os_printf("rx word1 = 0x%x\r\n", frame.dataWord1);
+            rtos_printf("rx word0 = 0x%x\r\n", frame.dataWord0);
+            rtos_printf("rx word1 = 0x%x\r\n", frame.dataWord1);
 #endif
 
             /* Stop FlexCAN Send & Receive. */
@@ -736,7 +737,7 @@ void test_flexcan(void)
             FLEXCAN_DisableMbInterrupts(EXAMPLE_CAN, (uint32_t)1U << RX_MESSAGE_BUFFER_NUM);
 #endif
 
-            os_printf("\r\n==FlexCAN loopback functional example -- Finish.==\r\n");
+            rtos_printf("\r\n==FlexCAN loopback functional example -- Finish.==\r\n");
 
         } else if (test_type == 2) {
             GETCHAR();
@@ -750,13 +751,13 @@ void test_flexcan(void)
             (void)FLEXCAN_TransferSendNonBlocking(EXAMPLE_CAN, &flexcanHandle, &txXfer);
 #endif
 
-            os_printf("Transmission began\r\n");
+            rtos_printf("Transmission began\r\n");
             while (!txComplete)
             {
             };
             txComplete = false;
 
-            os_printf("Transmission sent\r\n");
+            rtos_printf("Transmission sent\r\n");
             /* Start receive data through Rx Message Buffer. */
             rxXfer.mbIdx = (uint8_t)RX_MESSAGE_BUFFER_NUM;
 #if (defined(USE_CANFD) && USE_CANFD)
@@ -773,16 +774,16 @@ void test_flexcan(void)
             };
             rxComplete = false;
 
-            os_printf("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\r\n", frame.id >> CAN_ID_STD_SHIFT,
+            rtos_printf("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\r\n", frame.id >> CAN_ID_STD_SHIFT,
                      frame.dataByte0, frame.timestamp);
             frame.dataByte0++;
             frame.dataByte1 = 0x55;
 
-            os_printf("\r\n==FlexCAN interrupt functional example -- Finish.==\r\n");
+            rtos_printf("\r\n==FlexCAN interrupt functional example -- Finish.==\r\n");
         } else if (test_type == 3) {
             uint8_t index  = 0;
             uint32_t times = 0;
-            os_printf("Please input the number of CAN/CANFD messages to be send and end with enter.\r\n");
+            rtos_printf("Please input the number of CAN/CANFD messages to be send and end with enter.\r\n");
             while (index != 0x0D)
             {
                 index = GETCHAR();
@@ -792,7 +793,7 @@ void test_flexcan(void)
                     times = times * 10 + (index - 0x30U);
                 }
             }
-            os_printf("\r\n");
+            rtos_printf("\r\n");
 
             for (i = 1; i <= times; i++)
             {
@@ -808,8 +809,8 @@ void test_flexcan(void)
                 frame.dataByte0++;
                 TxCount++;
             }
-            os_printf("Transmission done.\r\n\r\n");
-            os_printf("\r\n==FlexCAN PingPong functional example -- Finish.==\r\n");
+            rtos_printf("Transmission done.\r\n\r\n");
+            rtos_printf("\r\n==FlexCAN PingPong functional example -- Finish.==\r\n");
         }
     }
     else
@@ -825,7 +826,7 @@ void test_flexcan(void)
              * output in the terminal B received is the same second frame N). */
             if (wakenUp)
             {
-                os_printf("B has been waken up!\r\n\r\n");
+                rtos_printf("B has been waken up!\r\n\r\n");
             }
 
             /* Start receive data through Rx Message Buffer. */
@@ -844,7 +845,7 @@ void test_flexcan(void)
             };
             rxComplete = false;
 
-            os_printf("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\r\n", frame.id >> CAN_ID_STD_SHIFT,
+            rtos_printf("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\r\n", frame.id >> CAN_ID_STD_SHIFT,
                  frame.dataByte0, frame.timestamp);
 
             frame.id     = FLEXCAN_ID_STD(txIdentifier);
@@ -863,7 +864,7 @@ void test_flexcan(void)
             };
             txComplete = false;
 
-            os_printf("\r\n==FlexCAN interrupt functional example -- Finish.==\r\n");
+            rtos_printf("\r\n==FlexCAN interrupt functional example -- Finish.==\r\n");
         } else if (test_type == 3) {
             while (true)
             {
@@ -872,10 +873,10 @@ void test_flexcan(void)
                 {
                 };
                 rxQueueNum = 0;
-                os_printf("Read Rx MB from Queue 1.\r\n");
+                rtos_printf("Read Rx MB from Queue 1.\r\n");
                 for (i = 0; i < RX_QUEUE_BUFFER_SIZE; i++)
                 {
-                    os_printf("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\r\n", rxFrame[i].id >> CAN_ID_STD_SHIFT,
+                    rtos_printf("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\r\n", rxFrame[i].id >> CAN_ID_STD_SHIFT,
                              rxFrame[i].dataByte0, rxFrame[i].timestamp);
                 }
                 /* Wait until Rx queue 2 full. */
@@ -883,20 +884,20 @@ void test_flexcan(void)
                 {
                 };
                 rxQueueNum = 0;
-                os_printf("Read Rx MB from Queue 2.\r\n");
+                rtos_printf("Read Rx MB from Queue 2.\r\n");
                 for (; i < (RX_QUEUE_BUFFER_SIZE * 2U); i++)
                 {
-                    os_printf("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\r\n", rxFrame[i].id >> CAN_ID_STD_SHIFT,
+                    rtos_printf("Rx MB ID: 0x%3x, Rx MB data: 0x%x, Time stamp: %d\r\n", rxFrame[i].id >> CAN_ID_STD_SHIFT,
                              rxFrame[i].dataByte0, rxFrame[i].timestamp);
                 }
                 if (rxStatus == kStatus_FLEXCAN_RxOverflow)
                 {
                     rxStatus = 0;
-                    os_printf("The data in the last MB %d in the queue 2 is overwritten\r\n", RX_QUEUE_BUFFER_END_2);
+                    rtos_printf("The data in the last MB %d in the queue 2 is overwritten\r\n", RX_QUEUE_BUFFER_END_2);
                 }
-                os_printf("Wait Node A to trigger the next 8 messages!\r\n\r\n");
+                rtos_printf("Wait Node A to trigger the next 8 messages!\r\n\r\n");
             }
-            os_printf("\r\n==FlexCAN PingPong functional example -- Finish.==\r\n");
+            rtos_printf("\r\n==FlexCAN PingPong functional example -- Finish.==\r\n");
         }
     }
     os_irq_unregister(EXAMPLE_FLEXCAN_IRQn);
