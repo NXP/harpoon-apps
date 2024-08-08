@@ -98,6 +98,14 @@ static const struct ARM_MMU_region mmu_regions[] = {
 			      AON__MUI_A3__MUA_BASE, KB(4),
 			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
 
+	MMU_REGION_FLAT_ENTRY("TPM2",
+			      TPM2_BASE, KB(64),
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
+
+	MMU_REGION_FLAT_ENTRY("TPM4",
+			      TPM4_BASE, KB(64),
+			      MT_DEVICE_nGnRE | MT_P_RW_U_RW | MT_NS),
+
 	MMU_REGION_FLAT_ENTRY("MU3_SRAM",
 			      (AON__MUI_A3__MUA_BASE + 0x1000), KB(4),
 			      MT_NORMAL_NC | MT_P_RW_U_RW | MT_NS),

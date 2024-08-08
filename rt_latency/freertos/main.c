@@ -75,6 +75,7 @@ void cache_inval_task(void *pvParameters);
  * Code
  ******************************************************************************/
 __WEAK void BOARD_InitClocks(void) {}
+__WEAK void BOARD_InitPlatform(void) {}
 
 void cpu_load_task(void *pvParameters)
 {
@@ -270,6 +271,7 @@ int main(void)
 
 	/* Init board cpu and hardware. */
 	BOARD_InitMemory();
+	BOARD_InitPlatform();
 	BOARD_InitClocks();
 	BOARD_InitDebugConsole();
 
