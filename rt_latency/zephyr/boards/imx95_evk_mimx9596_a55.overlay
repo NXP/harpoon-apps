@@ -1,0 +1,76 @@
+/*
+ * Copyright 2024 NXP
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+#define IRQ_HIGHEST_PRIORITY	0
+
+#define SRAM_BASE	f0000000
+#define MU		mu3
+#define MU_SRAM		445d1000
+
+/delete-node/ &sram0;
+/delete-node/ &scmi_shmem0;
+
+/ {
+	sram0: memory@SRAM_BASE {
+		reg = <DT_ADDR(SRAM_BASE) DT_SIZE_M(1)>;
+	};
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		scmi_shmem0: memory@MU_SRAM {
+			compatible = "arm,scmi-shmem";
+			reg = <DT_ADDR(MU_SRAM) 0x80>;
+		};
+	};
+
+	firmware {
+		scmi {
+			mboxes = <&MU 0>;
+			shmem = <&scmi_shmem0>;
+		};
+	};
+
+	chosen {
+		zephyr,console = &lpuart3;
+		zephyr,shell-uart = &lpuart3;
+	};
+
+	aliases {
+		counter0 = &tpm2;
+		counter1 = &tpm4;
+	};
+};
+
+&tpm2 {
+	interrupts = <GIC_SPI 30 IRQ_TYPE_LEVEL
+		IRQ_HIGHEST_PRIORITY>;
+	status = "okay";
+};
+
+&tpm4 {
+	status = "okay";
+};
+
+&lpuart1 {
+	status = "disabled";
+};
+
+&lpuart3 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&lpuart3_default>;
+	pinctrl-names = "default";
+};
+
+&mu2 {
+	status = "disabled";
+};
+
+&MU {
+	status = "okay";
+};

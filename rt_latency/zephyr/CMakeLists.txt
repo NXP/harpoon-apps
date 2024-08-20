@@ -11,6 +11,8 @@ elseif(CONFIG_BOARD_IMX8MP_EVK)
     set(BoardName "evkmimx8mp")
 elseif(CONFIG_BOARD_IMX93_EVK)
     set(BoardName "mcimx93evk")
+elseif(CONFIG_BOARD_IMX95_EVK)
+    set(BoardName "imx95lpd5evk19")
 endif()
 
 set(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
