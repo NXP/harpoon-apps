@@ -54,14 +54,14 @@
 
 static inline int os_mmu_map(const char *name, uint8_t **virt, uintptr_t phys, size_t size, uint32_t attrs)
 {
-	z_phys_map(virt, phys, size, attrs);
+	k_mem_map_phys_bare(virt, phys, size, attrs);
 
 	return 0;
 }
 
 static inline int os_mmu_unmap(uintptr_t virt, size_t size)
 {
-	z_phys_unmap((uint8_t *)virt, size);
+	k_mem_unmap_phys_bare((uint8_t *)virt, size);
 
 	return 0;
 }
