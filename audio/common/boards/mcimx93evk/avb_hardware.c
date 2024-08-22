@@ -120,13 +120,13 @@ static void enet_qos_clock_config(void)
 
 void ENET_QOS_SetSYSControl(enet_qos_mii_mode_t miiMode)
 {
-	BLK_CTRL_WAKEUPMIX1->GPR |= BLK_CTRL_WAKEUPMIX_GPR_MODE(miiMode);
+	BLK_CTRL_WAKEUPMIX->GPR |= BLK_CTRL_WAKEUPMIX_GPR_MODE(miiMode);
 }
 
 void ENET_QOS_EnableClock(bool enable)
 {
-	 BLK_CTRL_WAKEUPMIX1->GPR =
-		(BLK_CTRL_WAKEUPMIX1->GPR & (~BLK_CTRL_WAKEUPMIX_GPR_ENABLE_MASK)) | BLK_CTRL_WAKEUPMIX_GPR_ENABLE(enable);
+	 BLK_CTRL_WAKEUPMIX->GPR =
+		(BLK_CTRL_WAKEUPMIX->GPR & (~BLK_CTRL_WAKEUPMIX_GPR_ENABLE_MASK)) | BLK_CTRL_WAKEUPMIX_GPR_ENABLE(enable);
 }
 
 void avb_hardware_init(void)
