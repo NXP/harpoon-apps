@@ -9,13 +9,13 @@ set(MCUX_SDK "${ProjDirPath}/../../../modules/hal/nxp/mcux/mcux-sdk")
 set(RTOS_DIR "${RTOS_ABSTRACTION_LAYER_DIR}/zephyr")
 set(RTOS_APPS "${ProjDirPath}/../../")
 
-if(CONFIG_BOARD_MIMX8MM_EVK_A53)
+if(CONFIG_BOARD_IMX8MM_EVK)
   set(TARGET "zephyr_imx8mm_ca53")
-elseif(CONFIG_BOARD_MIMX8MN_EVK_A53)
+elseif(CONFIG_BOARD_IMX8MN_EVK)
   set(TARGET "zephyr_imx8mn_ca53")
-elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
+elseif(CONFIG_BOARD_IMX8MP_EVK)
   set(TARGET "zephyr_imx8mp_ca53")
-elseif(CONFIG_BOARD_MIMX93_EVK_A55)
+elseif(CONFIG_BOARD_IMX93_EVK)
   set(TARGET "zephyr_imx93_ca55")
 endif()
 
@@ -41,17 +41,17 @@ list(APPEND CMAKE_MODULE_PATH
   ${CommonPath}/libs/stats
 )
 
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MM_EVK_A53 FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MN_EVK_A53 FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MM_EVK_A53 ENET_ENHANCEDBUFFERDESCRIPTOR_MODE)
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MN_EVK_A53 ENET_ENHANCEDBUFFERDESCRIPTOR_MODE)
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MP_EVK_A53 FSL_ETH_ENABLE_CACHE_CONTROL)
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX93_EVK_A55 FSL_ETH_ENABLE_CACHE_CONTROL)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MM_EVK FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MN_EVK FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MM_EVK ENET_ENHANCEDBUFFERDESCRIPTOR_MODE)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MN_EVK ENET_ENHANCEDBUFFERDESCRIPTOR_MODE)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MP_EVK FSL_ETH_ENABLE_CACHE_CONTROL)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX93_EVK FSL_ETH_ENABLE_CACHE_CONTROL)
 zephyr_compile_definitions(CONFIG_GENAVB_ENABLE)
 
-if(CONFIG_BOARD_MIMX8MM_EVK_A53 OR CONFIG_BOARD_MIMX8MN_EVK_A53)
+if(CONFIG_BOARD_IMX8MM_EVK OR CONFIG_BOARD_IMX8MN_EVK)
   set(build_motor_controller 0) # motor_control build disabled
-elseif(CONFIG_BOARD_MIMX8MP_EVK_A53 OR CONFIG_BOARD_MIMX93_EVK_A55)
+elseif(CONFIG_BOARD_IMX8MP_EVK OR CONFIG_BOARD_IMX93_EVK)
   set(build_motor_controller 1) # motor_control build enabled
 else()
   message(FATAL_ERROR "unsupported board")
