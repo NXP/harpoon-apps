@@ -1,0 +1,5 @@
+#include "gpt.dtsi"
+
+&rdc {
+	status = "disabled";
+};
