@@ -6,16 +6,16 @@ project(audio)
 
 set(MCUX_SDK_PROJECT_NAME app)
 
-if(CONFIG_BOARD_MIMX8MM_EVK_A53)
+if(CONFIG_BOARD_IMX8MM_EVK)
   set(BoardName "evkmimx8mm")
   set(CONFIG_USE_GENAVB ON)
-elseif(CONFIG_BOARD_MIMX8MN_EVK_A53)
+elseif(CONFIG_BOARD_IMX8MN_EVK)
   set(BoardName "evkmimx8mn")
   set(CONFIG_USE_GENAVB ON)
-elseif(CONFIG_BOARD_MIMX8MP_EVK_A53)
+elseif(CONFIG_BOARD_IMX8MP_EVK)
   set(BoardName "evkmimx8mp")
   set(CONFIG_USE_GENAVB ON)
-elseif(CONFIG_BOARD_MIMX93_EVK_A55)
+elseif(CONFIG_BOARD_IMX93_EVK)
   set(BoardName "mcimx93evk")
   set(CONFIG_USE_GENAVB ON)
 else()
@@ -81,10 +81,10 @@ zephyr_compile_definitions_ifdef(CONFIG_CODEC_CS42448 CODEC_CS42448)
 zephyr_compile_definitions_ifdef(CONFIG_CODEC_CS42448 CODEC_CS42448_ENABLE=1)
 
 # Cortex-A55/A53 core maximum clock frequency
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MM_EVK_A53 SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1800000000UL)
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MN_EVK_A53 SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1600000000UL)
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX8MP_EVK_A53 SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1800000000UL)
-zephyr_compile_definitions_ifdef(CONFIG_BOARD_MIMX93_EVK_A55 SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1700000000UL)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MM_EVK SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1800000000UL)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MN_EVK SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1600000000UL)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MP_EVK SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1800000000UL)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX93_EVK SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1700000000UL)
 
 if(NOT CONFIG_USE_GENAVB)
   zephyr_compile_definitions(CONFIG_AUD_DISABLE_ENET)
@@ -118,12 +118,12 @@ target_sources(app PRIVATE
 	       ${AppPath}/common/sai_drv.c
 	       )
 
-if(CONFIG_BOARD_MIMX8MM_EVK_A53 OR CONFIG_BOARD_MIMX8MN_EVK_A53 OR CONFIG_BOARD_MIMX8MP_EVK_A53)
+if(CONFIG_BOARD_IMX8MM_EVK OR CONFIG_BOARD_IMX8MN_EVK OR CONFIG_BOARD_IMX8MP_EVK)
 target_sources(app PRIVATE
 	       ${AppPath}/common/audio_pll14xx.c
 	       ${AppPath}/common/pipeline_config.c
                )
-elseif(CONFIG_BOARD_MIMX93_EVK_A55)
+elseif(CONFIG_BOARD_IMX93_EVK)
 target_sources(app PRIVATE
 	       ${AppPath}/common/pipeline_config_single_sai.c
 	       ${CommonBoardPath}/clock_init.c
