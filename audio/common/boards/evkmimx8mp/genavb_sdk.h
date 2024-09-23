@@ -80,7 +80,4 @@ uint32_t dev_get_enet_1588_freq(void *base);
 uint32_t dev_get_gpt_ipg_freq(void *base);
 void BOARD_enet_qos_clock_fix(void *base, enet_qos_mii_speed_t miiSpeed);
 
-int sdk_printf(const char *fmt_s, ...);
-int sdk_vprintf(const char *fmt_s, va_list ap);
-
 #endif /* _GENAVB_SDK_H_ */
