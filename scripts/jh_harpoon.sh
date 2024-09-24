@@ -96,25 +96,98 @@ function set_cpu_freq_policy()
     fi
 }
 
-function set_real_time_configuration()
+
+# $1: register address in hex
+function get_reg_value()
 {
+    local reg_addr="$1"
+
+    echo "0x$(/unit_tests/memtool "$reg_addr" 1 | grep -i "$reg_addr": | sed "s/$reg_addr: *//gi")"
+}
+
+function set_ddrc_configuration()
+{
+    local value=0, timing_orig=0, mstr=0, pwrctl=0, rfshctl=0, rfshtmg=0, new_timing=0
+
     if [ "$SOC" = "imx93" ]; then
         if [ -e /sys/devices/platform/imx93-lpm/auto_clk_gating ]; then
             echo "Disable auto clock gating"
             echo 0 > /sys/devices/platform/imx93-lpm/auto_clk_gating
         fi
+    elif [ "$SOC" = "imx8mn" ] || [ "$SOC" = "imx8mm" ] || [ "$SOC" = "imx8mp" ]; then
+        echo "Disable DDR Low-Power Mode"
+        # Disable selfref_en and powerdown_en in PWRCTL
+        pwrctl=$(get_reg_value "0x3D400030")
+        value=$(printf '0x%X' $(( pwrctl & ~0x3 )))
+        /unit_tests/memtool 0x3d400030="${value}"
 
+        # Check if we are using LPDDR4
+        mstr=$(get_reg_value "0x3D400000")
+        if [ $(( mstr & 0x20 )) -eq "0" ]; then
+            return;
+        fi
+
+        # If current configuration is using all bank refresh, set the minimum refresh rate to a per bank value
+        # with the assumption of having 8 banks (common SDRAM configuration).
+        rfshctl=$(get_reg_value "0x3D400050")
+        if [ $(( rfshctl & 0x4 )) -eq "0" ]; then
+            echo "DDRC: Enable per-bank LPDDR4 refresh"
+            rfshtmg=$(get_reg_value "0x3D400064")
+            value=$(printf '0x%X' $(( rfshtmg & ~0x3ff )))
+            timing_orig=$(printf '0x%X' $(( rfshtmg & 0x3ff )))
+            new_timing=$(printf '0x%X' $(( timing_orig / 8 )))
+            value=$(printf '0x%X' $(( value | new_timing )))
+            echo "DDRC: Change tRFC(min) from all bank value (${timing_orig}) to per bank value (${new_timing})"
+            /unit_tests/memtool 0x3d400064="${value}"
+            # Now enable per bank refresh
+            rfshctl=$(get_reg_value "0x3D400050")
+            value=$(printf '0x%X' $(( rfshctl | 0x4 )))
+            /unit_tests/memtool 0x3d400050="${value}"
+        fi
+    fi
+}
+
+function disable_cpu_idle_all()
+{
+    if [ "$SOC" = "imx93" ]; then
         # Disable CPU idle for all cores
         disable_cpu_idle 0
         disable_cpu_idle 1
+    elif [ "$SOC" = "imx8mn" ] || [ "$SOC" = "imx8mm" ] || [ "$SOC" = "imx8mp" ]; then
+        # Disable CPU idle for all cores
+        disable_cpu_idle 0
+        disable_cpu_idle 1
+        disable_cpu_idle 2
+        disable_cpu_idle 3
+    fi
+}
 
+function disable_rtc_device()
+{
+    if [ "$SOC" = "imx93" ]; then
         # Unbind the BBNSM RTC device
         BBNSM_RTC_DEV="44440000.bbnsm:rtc"
         if [ -L /sys/bus/platform/drivers/bbnsm_rtc/${BBNSM_RTC_DEV} ]; then
             echo "Unbind RTC device"
             echo "${BBNSM_RTC_DEV}" > /sys/bus/platform/drivers/bbnsm_rtc/unbind
         fi
+    elif [ "$SOC" = "imx8mn" ] || [ "$SOC" = "imx8mm" ] || [ "$SOC" = "imx8mp" ]; then
+        # Unbind the RTC device
+        RTC_DEV="30370000.snvs:snvs-rtc-lp"
+        if [ -L /sys/bus/platform/drivers/snvs_rtc/${RTC_DEV} ]; then
+            echo "Unbind RTC device"
+            echo "${RTC_DEV}" > /sys/bus/platform/drivers/snvs_rtc/unbind
+        fi
     fi
+}
+
+function set_real_time_configuration()
+{
+    set_ddrc_configuration
+
+    disable_cpu_idle_all
+
+    disable_rtc_device
 
     set_cpu_freq_policy
 }
