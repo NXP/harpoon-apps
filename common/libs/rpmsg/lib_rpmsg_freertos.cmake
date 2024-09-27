@@ -13,6 +13,10 @@ set(CONFIG_USE_middleware_multicore_rpmsg_lite_freertos true)
 
 include(lib_rpmsg)
 
+target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    ${HtMulticorePath}/os/freertos/os/stdio.c
+)
+
 include(middleware_multicore_rpmsg_lite_aarch64_freertos)
 include(middleware_multicore_rpmsg_lite_freertos)
 

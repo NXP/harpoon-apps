@@ -131,6 +131,10 @@ include(lib_virtio_net)
 include(generic_software_mailbox)
 include(plat_ports_ca)
 
+target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    ${HtMulticorePath}/os/freertos/os/stdio.c
+)
+
 TARGET_LINK_LIBRARIES(${MCUX_SDK_PROJECT_NAME} PRIVATE -Wl,--start-group)
 
 target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE m)
