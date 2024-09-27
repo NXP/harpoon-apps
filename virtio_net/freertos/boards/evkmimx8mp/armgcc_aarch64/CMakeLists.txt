@@ -129,6 +129,7 @@ include(generic_software_mailbox)
 include(plat_ports_ca)
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    ${HtMulticorePath}/os/freertos/os/mqueue.c
     ${HtMulticorePath}/os/freertos/os/stdio.c
 )
 
