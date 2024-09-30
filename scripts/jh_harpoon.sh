@@ -51,7 +51,7 @@ function get_rpmsg_dev()
 function disable_cpu_idle()
 {
     # Disable CPU idle deep state transitions exceeding 1us
-    if [ -e "/sys/devices/system/cpu/cpu"$1"/power/pm_qos_resume_latency_us" ]; then
+    if [ -e /sys/devices/system/cpu/cpu"$1"/power/pm_qos_resume_latency_us ]; then
         echo "1" > /sys/devices/system/cpu/cpu"$1"/power/pm_qos_resume_latency_us
     fi
 }
@@ -62,7 +62,7 @@ function disable_cpu_idle()
 function listincludes()
 {
     for word in $1; do
-        [[ $word = $2 ]] && return 0
+        [[ $word = "$2" ]] && return 0
     done
 
     return 1
@@ -79,13 +79,13 @@ function set_cpu_freq_policy()
         return;
     fi
 
-    avail_governors=$(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_available_governors)
+    read -r -a avail_governors <  /sys/devices/system/cpu/cpufreq/policy0/scaling_available_governors
 
-    if listincludes "$avail_governors" "performance" ; then
+    if listincludes "${avail_governors[*]}" "performance" ; then
         echo "Setting Performance as CPU frequency scaling governor"
         echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
-    elif listincludes "$avail_governors" "userspace" ; then
-        avail_frequencies=($(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_available_frequencies))
+    elif listincludes "${avail_governors[*]}" "userspace" ; then
+        read -r -a avail_frequencies <  /sys/devices/system/cpu/cpufreq/policy0/scaling_available_frequencies
         max_freq=${avail_frequencies[-1]}
         echo "Setting Userspace as CPU frequency scaling governor at $max_freq"
         echo userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
@@ -154,7 +154,7 @@ function start ()
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         get_rpmsg_dev
 
-        if [[ ! -z "${RPMSG_DEV}" ]] && [[ -L "/sys/bus/platform/drivers/imx-rpmsg/${RPMSG_DEV}" ]]; then
+        if [[ -n "${RPMSG_DEV}" ]] && [[ -L "/sys/bus/platform/drivers/imx-rpmsg/${RPMSG_DEV}" ]]; then
             echo 'unbind the rpmsg-ca53 from imx_rpmsg driver'
             echo "${RPMSG_DEV}" > /sys/bus/platform/drivers/imx-rpmsg/unbind
         fi
@@ -176,7 +176,7 @@ function start ()
     jailhouse cell start "${INMATE_NAME}"
 
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
-        if [[ ! -z "${RPMSG_DEV}" ]]; then
+        if [[ -n "${RPMSG_DEV}" ]]; then
             # delay here to ensure the slave side ready to kick
             sleep 0.5
             echo 're-bind the rpmsg-ca53 to imx_rpmsg driver'
@@ -258,9 +258,9 @@ if [ ! -e "$ROOT_CELL" ] || [ ! -e "$INMATE_CELL" ] || \
     exit 4
 fi
 
-if [ $1 == "start" ]; then
+if [ "$1" == "start" ]; then
     start
-elif [ $1 == "stop" ]; then
+elif [ "$1" == "stop" ]; then
     stop
 else
     usage
