@@ -122,8 +122,10 @@ int rt_latency_test(struct rt_latency_ctx *ctx)
 	uint64_t irq_to_sched;
 	os_counter_t *dev = ctx->dev;
 	static uint32_t ticks = 0;
+#ifndef SILENT_TESTING
 #define LATENCY_STATS_PERIOD (LATENCY_STATS_PERIOD_SEC * 1000000 / COUNTER_PERIOD_US_VAL)
 	static uint64_t stats_cnt = 0;
+#endif
 
 	/* only compute it once for all */
 	if (!ticks) {
@@ -190,9 +192,11 @@ retry:
 	stats_update(&ctx->stats.irq_to_sched, irq_to_sched);
 	hist_update(&ctx->stats.irq_to_sched_hist, irq_to_sched);
 
+#ifndef SILENT_TESTING
 	/* Dump statistics every TIMER_STATS_PERIOD_SEC seconds */
 	if (!(++stats_cnt % LATENCY_STATS_PERIOD))
 		rt_latency_stats_dump(ctx);
+#endif
 
 	if (ctx->tc_load & RT_LATENCY_WITH_IRQ_LOAD) {
 		/* Waiting irq load ISR exits and then go to next loop */
