@@ -97,6 +97,7 @@ void cache_inval_task(void *pvParameters)
 	} while(1);
 }
 
+#ifndef SILENT_TESTING
 void log_task(void *pvParameters)
 {
 	struct rt_latency_ctx *ctx = pvParameters;
@@ -107,6 +108,7 @@ void log_task(void *pvParameters)
 		print_stats(ctx);
 	} while(1);
 }
+#endif
 
 void benchmark_task(void *pvParameters)
 {
@@ -209,6 +211,7 @@ int start_test_case(void *context, int test_case_id)
 		}
 	}
 
+#ifndef SILENT_TESTING
 	/* Print task */
 	xResult = xTaskCreate(log_task, "log_task", STACK_SIZE,
 				&ctx->rt_ctx, LOWEST_TASK_PRIORITY + 1, &ctx->tc_taskHandles[hnd_idx++]);
@@ -216,6 +219,7 @@ int start_test_case(void *context, int test_case_id)
 		log_err("task creation failed!\n");
 		goto err_task;
 	}
+#endif
 
 	ctx->started = true;
 
