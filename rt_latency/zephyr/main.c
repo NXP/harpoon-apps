@@ -20,9 +20,7 @@ K_THREAD_STACK_DEFINE(cpu_load_stack, STACK_SIZE);
 
 K_THREAD_STACK_DEFINE(cache_inval_stack, STACK_SIZE);
 
-#ifndef SILENT_TESTING
 K_THREAD_STACK_DEFINE(print_stack, STACK_SIZE);
-#endif
 
 #define MAX_TC_THREADS	8
 
@@ -89,7 +87,7 @@ static void print_stats_func(void *p1, void *p2, void *p3)
 	} while(1);
 }
 
-int start_test_case(void *context, int test_case_id)
+int start_test_case(void *context, int test_case_id, bool quiet)
 {
 	struct main_ctx *ctx = context;
 	const struct device *counter_dev;
@@ -97,9 +95,7 @@ int start_test_case(void *context, int test_case_id)
 	struct k_thread *benchmark_thread;
 	struct k_thread *cpu_load_thread;
 	struct k_thread *cache_invld_thread;
-#ifndef SILENT_TESTING
 	struct k_thread *print_thread;
-#endif
 	int ret;
 
 	if (ctx->started)
@@ -143,6 +139,7 @@ int start_test_case(void *context, int test_case_id)
 		goto err;
 	}
 
+	ctx->rt_ctx.quiet = quiet;
 	benchmark_thread = &ctx->tc_thread[ctx->threads_running_count++];
 	/* Benchmark task: main "high prio IRQ" task */
 	k_thread_create(benchmark_thread, counter_stack, STACK_SIZE,
@@ -155,18 +152,18 @@ int start_test_case(void *context, int test_case_id)
 	k_thread_cpu_mask_enable(benchmark_thread, GPT_CPU_BINDING);
 #endif
 
-#ifndef SILENT_TESTING
-	/* Print Thread */
-	print_thread = &ctx->tc_thread[ctx->threads_running_count++];
-	k_thread_create(print_thread, print_stack, STACK_SIZE,
-			print_stats_func, &ctx->rt_ctx, NULL, NULL,
-			K_LOWEST_APPLICATION_THREAD_PRIO - 2, 0, K_FOREVER);
+	if (!quiet) {
+		/* Print Thread */
+		print_thread = &ctx->tc_thread[ctx->threads_running_count++];
+		k_thread_create(print_thread, print_stack, STACK_SIZE,
+				print_stats_func, &ctx->rt_ctx, NULL, NULL,
+				K_LOWEST_APPLICATION_THREAD_PRIO - 2, 0, K_FOREVER);
 #ifdef THREAD_CPU_BINDING
-	k_thread_cpu_mask_clear(print_thread);
-	k_thread_cpu_mask_enable(print_thread, PRINT_CPU_BINDING);
+		k_thread_cpu_mask_clear(print_thread);
+		k_thread_cpu_mask_enable(print_thread, PRINT_CPU_BINDING);
 #endif
-	k_thread_start(print_thread);
-#endif
+		k_thread_start(print_thread);
+	}
 
 	/* CPU Load Thread */
 	if (ctx->rt_ctx.tc_load & RT_LATENCY_WITH_CPU_LOAD) {

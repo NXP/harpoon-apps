@@ -97,7 +97,6 @@ void cache_inval_task(void *pvParameters)
 	} while(1);
 }
 
-#ifndef SILENT_TESTING
 void log_task(void *pvParameters)
 {
 	struct rt_latency_ctx *ctx = pvParameters;
@@ -108,7 +107,6 @@ void log_task(void *pvParameters)
 		print_stats(ctx);
 	} while(1);
 }
-#endif
 
 void benchmark_task(void *pvParameters)
 {
@@ -152,7 +150,7 @@ void destroy_test_case(void *context)
 	ctx->started = false;
 }
 
-int start_test_case(void *context, int test_case_id)
+int start_test_case(void *context, int test_case_id, bool quiet)
 {
 	struct main_ctx *ctx = context;
 	os_counter_t *main_counter_dev;
@@ -183,6 +181,7 @@ int start_test_case(void *context, int test_case_id)
 		goto err;
 	}
 
+	ctx->rt_ctx.quiet = quiet;
 	/* Benchmark task: main "high prio IRQ" task */
 	xResult = xTaskCreate(benchmark_task, "benchmark_task", STACK_SIZE,
 			       &ctx->rt_ctx, HIGHEST_TASK_PRIORITY - 1, &ctx->tc_taskHandles[hnd_idx++]);
@@ -211,15 +210,15 @@ int start_test_case(void *context, int test_case_id)
 		}
 	}
 
-#ifndef SILENT_TESTING
-	/* Print task */
-	xResult = xTaskCreate(log_task, "log_task", STACK_SIZE,
-				&ctx->rt_ctx, LOWEST_TASK_PRIORITY + 1, &ctx->tc_taskHandles[hnd_idx++]);
-	if (xResult != pdPASS) {
-		log_err("task creation failed!\n");
-		goto err_task;
+	if (!quiet) {
+		/* Print task */
+		xResult = xTaskCreate(log_task, "log_task", STACK_SIZE,
+					&ctx->rt_ctx, LOWEST_TASK_PRIORITY + 1, &ctx->tc_taskHandles[hnd_idx++]);
+		if (xResult != pdPASS) {
+			log_err("task creation failed!\n");
+			goto err_task;
+		}
 	}
-#endif
 
 	ctx->started = true;
 

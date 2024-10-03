@@ -62,6 +62,7 @@ enum {
 struct hrpn_cmd_latency_run {
 	uint32_t type;
 	uint32_t id;
+	bool quiet;
 };
 
 struct hrpn_cmd_latency_stop {

@@ -188,7 +188,7 @@ out:
 	return rc;
 }
 
-static int latency_run(int fd, unsigned int id)
+static int latency_run(int fd, unsigned int id, bool quiet)
 {
 	struct hrpn_cmd_latency_run run;
 	struct hrpn_response resp;
@@ -196,6 +196,7 @@ static int latency_run(int fd, unsigned int id)
 
 	run.type = HRPN_CMD_TYPE_LATENCY_RUN;
 	run.id = id;
+	run.quiet = quiet;
 
 	len = sizeof(resp);
 
@@ -220,8 +221,9 @@ static int latency_main(int argc, char *argv[], int fd)
 	int option;
 	unsigned int id;
 	int rc = 0;
+	bool is_run_cmd = false, is_quiet = false;
 
-	while ((option = getopt(argc, argv, "r:sv")) != -1) {
+	while ((option = getopt(argc, argv, "r:qsv")) != -1) {
 		/* common options */
 		switch (option) {
 		case 'r':
@@ -231,8 +233,12 @@ static int latency_main(int argc, char *argv[], int fd)
 				goto out;
 			}
 
-			rc = latency_run(fd, id);
+			is_run_cmd = true;
 
+			break;
+
+		case 'q':
+			is_quiet = true;
 			break;
 
 		case 's':
@@ -244,6 +250,9 @@ static int latency_main(int argc, char *argv[], int fd)
 			break;
 		}
 	}
+
+	if (is_run_cmd)
+		rc = latency_run(fd, id, is_quiet);
 
 out:
 	return rc;

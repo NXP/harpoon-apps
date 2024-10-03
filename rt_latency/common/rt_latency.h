@@ -122,6 +122,8 @@ struct rt_latency_ctx {
 
 	rt_latency_stats_t stats;	  /* Current stats tracked by timer task. */
 	rt_latency_stats_t stats_snapshot; /* Stats snapshot dump by timer task and printed by logging task. */
+
+	bool quiet;
 };
 
 struct ctrl_ctx {
@@ -140,7 +142,7 @@ void command_handler(void *ctx, struct rpmsg_ept *ept);
 int ctrl_ctx_init(struct ctrl_ctx *ctrl);
 
 /* OS specific functions */
-int start_test_case(void *context, int test_case_id);
+int start_test_case(void *context, int test_case_id, bool quiet);
 void destroy_test_case(void *context);
 
 #endif /* _RT_LATENCY_H_ */
