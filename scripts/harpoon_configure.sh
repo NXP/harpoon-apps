@@ -58,5 +58,5 @@ fi
 detect_machine
 
 if [ "$1" == "audio" ]; then
-	audio_process $2
+	audio_process "$2"
 fi
