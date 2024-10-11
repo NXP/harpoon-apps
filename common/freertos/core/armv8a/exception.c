@@ -100,6 +100,11 @@ static void dump_registers(uint64_t *regs)
 		else
 			jh_puts(" ");
 	}
+
+	/* Not very useful, but to keep the dump aligned with the context save in startup.S */
+	jh_puts("xzr: ");
+	jh_put_hex(regs[i]);
+	jh_puts("\n");
 }
 
 void exception_handler(uint64_t from, uint64_t type, uint64_t *sp)
