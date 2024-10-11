@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <inttypes.h>
+
 #include "hlog.h"
 #include "stats.h"
 
@@ -22,8 +24,9 @@ void stats_reset(struct stats *s)
  */
 void stats_print(struct stats *s)
 {
-    log(INFO, "stats(%p) %s min %d mean %d max %d rms^2 %llu stddev^2 %llu absmin %d absmax %d\n\r",
-        s, s->name, s->min, s->mean, s->max, s->ms, s->variance, s->abs_min, s->abs_max);
+    log(INFO, "stats(%p) %s min %" PRId32" mean %" PRId32 " max %" PRId32
+              " rms^2 %" PRIu64" stddev^2 %" PRIu64 " absmin %" PRId32 " absmax %" PRId32 "\n\r",
+              s, s->name, s->min, s->mean, s->max, s->ms, s->variance, s->abs_min, s->abs_max);
 }
 
 /** Update stats with a given sample.

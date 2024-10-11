@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <inttypes.h>
+
 #include "hlog.h"
 #include "os/cpu_load.h"
 
@@ -445,7 +447,7 @@ static void audio_stats(struct data_ctx *ctx)
 		for (i = 0; i < ctx->pipeline_count; i++)
 			ctx->handler->stats(ctx->thread_data_ctx[i].handle);
 
-		log_info("callback: count: %llu, error: %llu\n", ctx->callback, ctx->callback_err);
+		log_info("callback: count: %" PRIu64 ", error: %" PRIu64 "\n", ctx->callback, ctx->callback_err);
 	}
 }
 
