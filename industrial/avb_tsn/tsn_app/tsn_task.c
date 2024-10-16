@@ -12,7 +12,8 @@
 
 #include "genavb.h"
 #include "genavb/srp.h"
-#include "genavb/qos.h"
+#include "genavb/frame_preemption.h"
+#include "genavb/scheduled_traffic.h"
 #include "genavb/ether.h"
 
 //#define SRP_RESERVATION
