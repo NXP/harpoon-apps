@@ -164,6 +164,14 @@ function disable_cpu_idle_all()
         disable_cpu_idle 1
         disable_cpu_idle 2
         disable_cpu_idle 3
+    elif [ "$SOC" = "imx95" ]; then
+        # Disable CPU idle for all cores
+        disable_cpu_idle 0
+        disable_cpu_idle 1
+        disable_cpu_idle 2
+        disable_cpu_idle 3
+        disable_cpu_idle 4
+        disable_cpu_idle 5
     fi
 }
 
@@ -182,6 +190,12 @@ function disable_rtc_device()
         if [ -L /sys/bus/platform/drivers/snvs_rtc/${RTC_DEV} ]; then
             echo "Unbind RTC device"
             echo "${RTC_DEV}" > /sys/bus/platform/drivers/snvs_rtc/unbind
+        fi
+    elif [ "$SOC" = "imx95" ]; then
+        # Unbind the SCMI RTC device
+        SCMI_DEV="scmi_dev.11"
+        if [ -L /sys/bus/scmi_protocol/drivers/scmi-imx-bbm/${SCMI_DEV} ]; then
+            echo "${SCMI_DEV}" > /sys/bus/scmi_protocol/drivers/scmi-imx-bbm/unbind
         fi
     fi
 }
