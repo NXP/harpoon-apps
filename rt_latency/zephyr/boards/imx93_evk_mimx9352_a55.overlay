@@ -1,1 +1,13 @@
 #include "tpm.dtsi"
+
+&enet {
+	status = "disabled";
+};
+
+&enet_mac {
+	status = "disabled";
+};
+
+&enet_mdio {
+	status = "disabled";
+};

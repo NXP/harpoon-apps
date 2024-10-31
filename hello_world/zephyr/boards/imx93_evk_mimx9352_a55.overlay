@@ -1,5 +1,3 @@
-#include "tpm.dtsi"
-
 &enet {
 	status = "disabled";
 };
