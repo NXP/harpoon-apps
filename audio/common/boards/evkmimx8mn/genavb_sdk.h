@@ -44,10 +44,11 @@
 #define BOARD_NET_PORT0_DRV_IRQ1                 ENET_1588_IRQn
 #define BOARD_NET_PORT0_DRV_IRQ1_HND             ENET_1588_Timer_DriverIRQHandler
 
-#define BOARD_NET_PORT0_1588_TIMER_CHANNEL_0     kENET_PtpTimerChannel1
-#define BOARD_NET_PORT0_1588_TIMER_CHANNEL_1     kENET_PtpTimerChannel3
-#define BOARD_NET_PORT0_1588_TIMER_CHANNEL_2     kENET_PtpTimerChannel4
 #define BOARD_NET_PORT0_1588_TIMER_EVENT_CHANNEL kENET_PtpTimerChannel2
+
+#define BOARD_ENET0_1588_TIMER_CHANNEL_0     kENET_PtpTimerChannel1
+#define BOARD_ENET0_1588_TIMER_CHANNEL_1     kENET_PtpTimerChannel3
+#define BOARD_ENET0_1588_TIMER_CHANNEL_2     kENET_PtpTimerChannel4
 
 #define BOARD_NET_PORT0_PHY_INDEX                (0)
 
