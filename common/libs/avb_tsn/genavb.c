@@ -156,6 +156,8 @@ int gavb_stack_init(void)
         /* Read per-domain parameters */
         for (i = 0; i < CFG_MAX_GPTP_DOMAINS; i++) {
 
+            genavb_config->fgptp_config.domain_cfg[i].gmCapable = 1;
+
             if (i != 0)
                 storage_read_int(domain_cfg_param_file(i, "domain_number", buf, sizeof(buf)), &genavb_config->fgptp_config.domain_cfg[i].domain_number);
 
