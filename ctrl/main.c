@@ -31,6 +31,7 @@ static void latency_usage(void)
 	printf(
 		"\nLatency options:\n"
 		"\t-r <id>        run latency test case id\n"
+		"\t-q             quiet testing (Do not dump stats regularly, but only once on test case stop)\n"
 		"\t-s             stop running test case\n"
 	);
 }
