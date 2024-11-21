@@ -6,6 +6,10 @@
 
 #include "cmsis_compiler.h"
 
+#define	ESR_EC_MASK	(0x3f)
+#define	ESR_EC_SHIFT	(26)
+#define	ESR_EC_NUM	(ESR_EC_MASK + 1)
+
 __WEAK void jh_putc(int c) {};
 __WEAK void jh_puts(const char *s) {};
 __WEAK void jh_put_hex(uint64_t v) {};
@@ -36,7 +40,7 @@ static void serror_handler(uint32_t iss)
 }
 
 /* ARMv8-A Architecture Reference Manual, Table D1-6 */
-static const struct exception_class_handler ec_handler[0x3f] = {
+static const struct exception_class_handler ec_handler[ESR_EC_NUM] = {
 	[0b000000] = {"Unknown", },
 	[0b000001] = {"Trapped WF*", },
 	[0b000011] = {"Trapped MCR/MRC", },
@@ -120,7 +124,7 @@ void exception_handler(uint64_t from, uint64_t type, uint64_t *sp)
 	__MRS(ESR_EL1, &esr_el1);
 	__MRS(SCTLR_EL1, &sctlr_el1);
 
-	ec = (esr_el1 >> 26) & 0x3f;
+	ec = (esr_el1 >> ESR_EC_SHIFT) & ESR_EC_MASK;
 	iss = esr_el1 & 0x1ffffff;
 
 	jh_puts("\nException: ");
