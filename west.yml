@@ -17,35 +17,35 @@ manifest:
   projects:
     - name: zephyr
       remote: nxpzephyr
-      revision: e0d0f16c74ca97d9e4c25b256c5c91f29233b76f
+      revision: dbc846c798bdec45c2e9ab274f4f139cc3ab003e
     - name: mcux-sdk
       remote: nxpmcuxpresso
-      revision: 9004c905dbb87c44adaeaefc45dde61390ffddb8
+      revision: b4f2684bbbf31f986bdafe6d1540e55709d12831
     - name: GenAVB_TSN
-      revision: e1f72ad7179fb70b7ce73a5e81bda7981f2b2ff2
+      revision: ca90ec3d63113af532ff7b35bfea575df290a9f8
       path: gen_avb_sdk
     - name: rtos-abstraction-layer
-      revision: b43dcbc0d965a525dbe690693fdffdf23a9f29f6
+      revision: ccf7c68248b5ebef682eb4ef96434412087ccf5e
       path: rtos-abstraction-layer
     - name: hal_nxp
       remote: nxpzephyr
-      revision: 996f5fd03b140cd5eef2a3685127c2984f06d403
+      revision: 4f076ac96a02a433265fbc1898a00f51449409a3
       path: modules/hal/nxp
       groups:
         - hal
     - name: FreeRTOS-Kernel
       remote: nxpmcuxpresso
-      revision: d2ca5ca56c79edac658773aa16cf0fd63e566a04
+      revision: c747fc1595cfc914021a6534adba86d6b152aac8
     - name: CMSIS_5
       remote: nxpmcuxpresso
       path: mcux-sdk/CMSIS
       revision: b5916939a8384aac3398e3f4ea97917fa9b030fd
     - name: heterogeneous-multicore
       remote: nxprealtimeedgesw
-      revision: 476e53c256912b037e61d5a943ba43254517d9f7
+      revision: 4655749a7962f3713687d1cdaecadc1742d9427d
     - name: mcux-sdk-middleware-multicore
       remote: nxpmcuxpresso
-      revision: 7ae65fe481b70093d71c4ffd7e2f9f1427717035
+      revision: 5b8772984399c3fa4c1bc3d530db09fef74349c7
       path: middleware/multicore
     - name: rpmsg-lite
       remote: nxpmcuxpresso
