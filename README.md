@@ -3,22 +3,22 @@
 [![Version](https://img.shields.io/github/v/release/NXP/harpoon-apps)](https://github.com/NXP/harpoon-apps/releases/latest)
 [![Contributors](https://img.shields.io/github/contributors/NXP/harpoon-apps)](https://github.com/NXP/harpoon-apps/graphs/contributors)
 
-Harpoon is a Base Enablement SW platform, providing an RTOS and application specific drivers running in Linux and Jailhouse hypervisor environment, on the Cortex-A cores of NXP MPU’s (i.MX 8M Mini, i.MX 8M Nano, i.MX 8M Plus, i.MX 93, ...).
+Harpoon is a software platform providing an RTOS and application specific drivers, running under the Jailhouse hypervisor and side-by-side with a full Linux distribution on the Cortex-A cores of NXP MPU’s (i.MX 8M Mini, i.MX 8M Nano, i.MX 8M Plus, i.MX 93 and i.MX 95).
 
-Harpoon offers customers an environment for developing real-time demanding applications leveraging the higher performance of the Cortex-A cores (ARMv8-A) compared to the Cortex-M cores (ARMv7-M) traditionally used for RTOS based applications.
+Harpoon offers an environment for developing real-time demanding applications, leveraging the higher performance of the Cortex-A cores (ARMv8-A) compared to the Cortex-M cores (ARMv7-M/ARMv8-M) traditionally used for RTOS based applications.
 
-The reference applications embedded in this repository may run on several jailhouse guest RTOS (e.g.: Zephyr, FreeRTOS) leveraging the existing NXP RTOS development environment – MCUXpresso.
+The reference applications embedded in this repository run on several Jailhouse guest RTOS (Zephyr and FreeRTOS) leveraging the existing NXP RTOS development environment – MCUXpresso SDK.
 
-To ease the integration of Zephyr, mcux-sdk and other repositories, we leverage the [Zephyr west tool](https://docs.zephyrproject.org/latest/guides/west/index.html) which helps managing multiple repositories and allows the users to maintain their own ```west.yml``` for their project.
+To ease the integration of Zephyr, mcux-sdk and other repositories, we leverage the [Zephyr west tool](https://docs.zephyrproject.org/latest/guides/west/index.html) which helps managing multiple repositories and allows users to maintain their own ```west.yml``` for their project.
 
 # Overview
 
 This project provides the fundamental support for RTOS applications running in an hypervisor environment:
-* HW resource partitioning using Jailhouse hypervisor, providing an inter-cell IPC communication
-* Arm® CMSIS-CORE startup core drivers and device header files for 64-bit Cortex-A53 core
-* RTOS kernel integration (FreeRTOS, Zephyr)
+* Hardware resource partitioning using Jailhouse hypervisor, providing an inter-cell IPC communication
+* Arm® CMSIS-Core device drivers and header files for 64-bit Cortex-A53/A55 cores
+* RTOS kernel integration (Zephyr and FreeRTOS)
 * Open-source peripheral drivers leveraging the MCUXpresso SDK ( [mcux-sdk project](https://github.com/nxp-mcuxpresso/mcux-sdk) )
-* Integration in Linux Yocto BSP as well as Real-time Edge SW Yocto through the [meta-nxp-harpoon](https://github.com/NXP/meta-nxp-harpoon) layer (integration with systemd)
+* Integration in Linux Yocto BSP as well as Real-time Edge Software Yocto through the [meta-nxp-harpoon](https://github.com/NXP/meta-nxp-harpoon) layer (integration with systemd)
 
 This project is the main repository to build the RTOS application for ARMv8-A cores, it contains the [west.yml](https://github.com/NXP/harpoon-apps/blob/main/west.yml) which keeps the description and revision for other projects in the overall Harpoon delivery. Currently available software components are shown in below figure.
 
@@ -33,7 +33,7 @@ wget https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-
 tar -C /opt/ -xvf arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf.tar.xz     # (sudo permissions might be required)
 ```
 
-You need to have the follow tools to clone and build Harpoon applications:
+You need to have the following tools to clone and build Harpoon applications:
 ```bash
 # Update environment
 sudo apt update
@@ -209,15 +209,15 @@ cd harpoon-apps/rt_latency/zephyr/boards/evkmimx8mp/armgcc_aarch64/
 Please refer to https://docs.zephyrproject.org/latest/develop/west/install.html for more details.
 
 ### Using Build Helper Script
-"build_apps.sh" is a build helper script. It can be used to build all or multiple applications by specifying application name, baord or target OS. The following is script's helper information:
+"build_apps.sh" is a build helper script. It can be used to build one or more applications by specifying application name, board and/or target OS. The following is the script's usage information:
 ```bash
 ./build_apps.sh [clean]                                 - build or clean all applications
 ./build_apps.sh [clean] [os] [board-list] [app-list]    - build or clean specified applications
-                                                        - os: specify freertos or zephyr or both if no specified.
-                                                        - board-list: specify one or some or all boards if no specified: evkmimx8mm evkmimx8mn evkmimx8mp mcimx93evk
-                                                        - app-list: specify one or some or all applications if no specified: audio harpoon_drivers_test hello_world industrial rt_latency virtio_net
+                                                        - os: freertos or zephyr (both if not specified)
+                                                        - board-list: one or more of: evkmimx8mm evkmimx8mn evkmimx8mp mcimx93evk imx95lpd5evk19 (all if not specified)
+                                                        - app-list: one or more of: audio harpoon_drivers_test hello_world industrial rt_latency virtio_net (all if not specified)
 ```
-Before executing the script, as mentioned above, the enviroment variables "ARMGCC_DIR" and "Zephyr_DIR" (if build Zephyr applications) need to be set.
+Before executing the script, as mentioned above, the enviroment variables "ARMGCC_DIR" and "Zephyr_DIR" (if building Zephyr applications) need to be set.
 
 Then execute the script, for example:
 

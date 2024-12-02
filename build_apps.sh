@@ -25,9 +25,9 @@ deploy_dir_name="deploy"
 function print_usage() {
     echo "$0 [clean]					- build or clean all applications"
     echo "$0 [clean] [os] [board-list] [app-list]	- build or clean specified applications"
-    echo "							- os: specify freertos or zephyr or both if no specified."
-    echo "							- board-list: specify one or some or all boards if no specified: ${valid_boards[*]}"
-    echo "							- app-list: specify one or some or all applications if no specified: ${valid_apps[*]}"
+    echo "							- os: freertos or zephyr (both if not specified)"
+    echo "							- board-list: one or more of: ${valid_boards[*]} (all if not specified)"
+    echo "							- app-list: one or more of: ${valid_apps[*]} (all if not specified)"
 }
 
 apps_list=()
