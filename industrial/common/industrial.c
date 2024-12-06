@@ -97,7 +97,7 @@ static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run 
 		goto exit;
 
 	cfg.event_send = data_send_event;
-	cfg.event_data = &data->mqueue_h;
+	cfg.event_data = data->mqueue_h;
 	cfg.role = on->role;
 	cfg.period = on->period;
 	cfg.protocol = on->protocol;
