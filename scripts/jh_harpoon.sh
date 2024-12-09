@@ -216,29 +216,51 @@ function set_real_time_configuration()
 
 function gpio_start ()
 {
-    if [[ "${INMATE_BIN}" =~ .*"industrial.bin" && "$MACHINE" = "imx93evk" ]]; then
-        # Set ADP5585 EXP_SEL GPIO as output low
-        echo 'gpioset -z -c gpiochip5 4=0'
-        gpioset -z -c gpiochip5 4=0
+    if [[ "${INMATE_BIN}" =~ .*"industrial.bin" ]]; then
+        if [ "$MACHINE" = "imx93evk" ]; then
+            # Set ADP5585 EXP_SEL GPIO as output low
+            echo 'gpioset -z -c gpiochip5 4=0'
+            gpioset -z -c gpiochip5 4=0
 
-        # Set ADP5585 CAN_STBY GPIO as output low
-        echo 'gpioset -z -c gpiochip5 5=0'
-        gpioset -z -c gpiochip5 5=0
+            # Set ADP5585 CAN_STBY GPIO as output low
+            echo 'gpioset -z -c gpiochip5 5=0'
+            gpioset -z -c gpiochip5 5=0
+        elif [ "$MACHINE" = "imx95evk" ]; then
+            # Set PCAL6524 CAN2_nSTBY GPIO as output active-high
+            echo 'gpioset -z -c gpiochip5 3=1'
+            gpioset -z -c gpiochip5 3=1
+
+            # Set PCAL6524 CAN2_EN GPIO as output active-high
+            echo 'gpioset -z -c gpiochip5 4=1'
+            gpioset -z -c gpiochip5 4=1
+        fi
     fi
 }
 
 function gpio_stop ()
 {
     # Kill all gpioset commands and restore GPIOs state
-    if [[ "${INMATE_BIN}" =~ .*"industrial.bin" && "$MACHINE" = "imx93evk" ]]; then
-        echo 'killall "gpioset"'
-        killall "gpioset"
+    if [[ "${INMATE_BIN}" =~ .*"industrial.bin" ]]; then
+        if [ "$MACHINE" = "imx93evk" ]; then
+            echo 'killall "gpioset"'
+            killall "gpioset"
 
-        # Restore input direction for ADP5585 EXP_SEL GPIO
-        echo 'gpioget -l -c gpiochip5 4'
-        gpioget -l -c gpiochip5 4
-        echo 'gpioget -l -c gpiochip5 5'
-        gpioget -l -c gpiochip5 5
+            # Restore input direction for ADP5585 EXP_SEL GPIO
+            echo 'gpioget -l -c gpiochip5 4'
+            gpioget -l -c gpiochip5 4
+            echo 'gpioget -l -c gpiochip5 5'
+            gpioget -l -c gpiochip5 5
+        elif [ "$MACHINE" = "imx95evk" ]; then
+            echo 'killall "gpioset"'
+            killall "gpioset"
+
+            # Restore PCAL6524 CAN2_nSTBY GPIO
+            echo 'gpioget -l -c gpiochip5 3'
+            gpioget -l -c gpiochip5 3
+            # Restore PCAL6524 CAN2_EN GPIO
+            echo 'gpioget -l -c gpiochip5 4'
+            gpioget -l -c gpiochip5 4
+        fi
     fi
 }
 

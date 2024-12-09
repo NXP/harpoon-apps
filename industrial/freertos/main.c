@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -19,6 +19,8 @@
 #include "rtos_abstraction_layer.h"
 
 #define main_task_PRIORITY	(configMAX_PRIORITIES - 8)
+
+__WEAK void BOARD_InitPlatform(void) {}
 
 os_counter_t *os_counter = GET_COUNTER_DEVICE_INSTANCE(0);
 
@@ -73,6 +75,8 @@ const struct industrial_use_case use_cases[] =
 static void hardware_setup(void)
 {
 	BOARD_InitMemory();
+
+	BOARD_InitPlatform();
 
 	board_clock_setup();
 
