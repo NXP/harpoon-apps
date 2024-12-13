@@ -93,7 +93,7 @@ static int industrial_run(struct data_ctx *data, struct hrpn_cmd_industrial_run 
 	if (data->ops)
 		goto exit;
 
-	if (on->mode >= ARRAY_SIZE(uc->ops))
+	if (on->mode >= uc->ops_num)
 		goto exit;
 
 	cfg.event_send = data_send_event;

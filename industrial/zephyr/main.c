@@ -49,6 +49,7 @@ const struct industrial_use_case use_cases[] =
 				.stats = can_stats,
 			},
 		},
+		.ops_num = INDUSTRIAL_CAN_USE_CASES_NUM,
 	},
 
 	[INDUSTRIAL_USE_CASE_ETHERNET] = {
@@ -77,6 +78,7 @@ const struct industrial_use_case use_cases[] =
 				.stats = ethernet_sdk_enet_loopback_stats,
 			},
 		},
+		.ops_num = INDUSTRIAL_ETHERNET_USE_CASES_NUM,
 	},
 };
 

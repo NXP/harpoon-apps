@@ -19,6 +19,10 @@ enum industrial_use_case_id {
 	INDUSTRIAL_USE_CASE_MAX,
 };
 
+#define INDUSTRIAL_CAN_USE_CASES_NUM 1
+#define INDUSTRIAL_ETHERNET_USE_CASES_NUM 3
+#define INDUSTRIAL_USE_CASES_MAX 3
+
 struct event {
 	unsigned int type;
 	uintptr_t data;
@@ -57,12 +61,8 @@ struct industrial_ctx {
 struct industrial_use_case {
 	struct thread_cfg thread;
 
-	/*
-	 * Only one mode of operation for now (MCU SDK API, or full stack, ...)
-	 * Possibility to add more in the future if we decide to have more than
-	 * one software path for a given hardware resource.
-	 */
-	struct mode_operations ops[3];
+	struct mode_operations ops[INDUSTRIAL_USE_CASES_MAX];
+	uint32_t ops_num;
 };
 
 void *can_init(void *parameters);
