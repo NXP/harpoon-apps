@@ -19,6 +19,8 @@ detect_machine ()
         echo 'imx8mpevk'
     elif grep -q 'NXP i\.MX93.*EVK.*board' /sys/devices/soc0/machine; then
         echo 'imx93evk'
+    elif grep -q 'NXP i\.MX95 15X15 board' /sys/devices/soc0/machine; then
+        echo 'imx95evk15'
     elif grep -q 'NXP i\.MX95 19X19 board' /sys/devices/soc0/machine; then
         echo 'imx95evk19'
     else
@@ -38,7 +40,7 @@ function get_rpmsg_dev()
     'imx93evk')
         RPMSG_DEV=fe100000.rpmsg-ca55
         ;;
-    'imx95evk19')
+    'imx95evk15'|'imx95evk19')
         RPMSG_DEV=c0100000.rpmsg-ca55
         ;;
     *)
@@ -164,7 +166,7 @@ function disable_cpu_idle_all()
         disable_cpu_idle 1
         disable_cpu_idle 2
         disable_cpu_idle 3
-    elif [ "$MACHINE" = "imx95evk19" ]; then
+    elif [ "$MACHINE" = "imx95evk15" ] || [ "$MACHINE" = "imx95evk19" ]; then
         # Disable CPU idle for all cores
         disable_cpu_idle 0
         disable_cpu_idle 1
@@ -191,7 +193,7 @@ function disable_rtc_device()
             echo "Unbind RTC device"
             echo "${RTC_DEV}" > /sys/bus/platform/drivers/snvs_rtc/unbind
         fi
-    elif [ "$MACHINE" = "imx95evk19" ]; then
+    elif [ "$MACHINE" = "imx95evk15" ] || [ "$MACHINE" = "imx95evk19" ]; then
         # Unbind the SCMI RTC device
         SCMI_DEV="scmi_dev.11"
         if [ -L /sys/bus/scmi_protocol/drivers/scmi-imx-bbm/${SCMI_DEV} ]; then
