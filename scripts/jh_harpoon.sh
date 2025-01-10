@@ -8,19 +8,19 @@ function usage ()
     echo "usage: jh_harpoon.sh <start | stop>"
 }
 
-# Detect the platform we are running on.
-function detect_soc ()
+# Detect the machine we are running on.
+detect_machine ()
 {
-    if grep -q 'i.MX8MM' /sys/devices/soc0/soc_id; then
-        echo 'imx8mm'
-    elif grep -q 'i.MX8MN' /sys/devices/soc0/soc_id; then
-        echo 'imx8mn'
-    elif grep -q 'i.MX8MP' /sys/devices/soc0/soc_id; then
-        echo 'imx8mp'
-    elif grep -q 'i.MX93' /sys/devices/soc0/soc_id; then
-        echo 'imx93'
-    elif grep -q 'i.MX95' /sys/devices/soc0/soc_id; then
-        echo 'imx95'
+    if grep -q 'FSL i\.MX8MM.*EVK.*board' /sys/devices/soc0/machine; then
+        echo 'imx8mmevk'
+    elif grep -q 'NXP i\.MX8MNano EVK board' /sys/devices/soc0/machine; then
+        echo 'imx8mnevk'
+    elif grep -q 'NXP i\.MX8MPlus EVK board' /sys/devices/soc0/machine; then
+        echo 'imx8mpevk'
+    elif grep -q 'NXP i\.MX93.*EVK.*board' /sys/devices/soc0/machine; then
+        echo 'imx93evk'
+    elif grep -q 'NXP i\.MX95 19X19 board' /sys/devices/soc0/machine; then
+        echo 'imx95evk19'
     else
         echo 'Unknown'
     fi
@@ -28,21 +28,21 @@ function detect_soc ()
 
 function get_rpmsg_dev()
 {
-    case $SOC in
-    'imx8mm'|'imx8mn')
+    case $MACHINE in
+    'imx8mmevk'|'imx8mnevk')
         RPMSG_DEV=b8600000.rpmsg-ca53
         ;;
-    'imx8mp')
+    'imx8mpevk')
         RPMSG_DEV=fe100000.rpmsg-ca53
         ;;
-    'imx93')
+    'imx93evk')
         RPMSG_DEV=fe100000.rpmsg-ca55
         ;;
-    'imx95')
+    'imx95evk19')
         RPMSG_DEV=c0100000.rpmsg-ca55
         ;;
     *)
-        echo "Unsupported SoC"
+        echo "Unsupported Machine: ${MACHINE}"
         exit 1
     esac
 
@@ -114,12 +114,12 @@ function set_ddrc_configuration()
 {
     local value=0, timing_orig=0, mstr=0, pwrctl=0, rfshctl=0, rfshtmg=0, new_timing=0
 
-    if [ "$SOC" = "imx93" ]; then
+    if [ "$MACHINE" = "imx93evk" ]; then
         if [ -e /sys/devices/platform/imx93-lpm/auto_clk_gating ]; then
             echo "Disable auto clock gating"
             echo 0 > /sys/devices/platform/imx93-lpm/auto_clk_gating
         fi
-    elif [ "$SOC" = "imx8mn" ] || [ "$SOC" = "imx8mm" ] || [ "$SOC" = "imx8mp" ]; then
+    elif [ "$MACHINE" = "imx8mnevk" ] || [ "$MACHINE" = "imx8mmevk" ] || [ "$MACHINE" = "imx8mpevk" ]; then
         echo "Disable DDR Low-Power Mode"
         # Disable selfref_en and powerdown_en in PWRCTL
         pwrctl=$(get_reg_value "0x3D400030")
@@ -154,17 +154,17 @@ function set_ddrc_configuration()
 
 function disable_cpu_idle_all()
 {
-    if [ "$SOC" = "imx93" ]; then
+    if [ "$MACHINE" = "imx93evk" ]; then
         # Disable CPU idle for all cores
         disable_cpu_idle 0
         disable_cpu_idle 1
-    elif [ "$SOC" = "imx8mn" ] || [ "$SOC" = "imx8mm" ] || [ "$SOC" = "imx8mp" ]; then
+    elif [ "$MACHINE" = "imx8mnevk" ] || [ "$MACHINE" = "imx8mmevk" ] || [ "$MACHINE" = "imx8mpevk" ]; then
         # Disable CPU idle for all cores
         disable_cpu_idle 0
         disable_cpu_idle 1
         disable_cpu_idle 2
         disable_cpu_idle 3
-    elif [ "$SOC" = "imx95" ]; then
+    elif [ "$MACHINE" = "imx95evk19" ]; then
         # Disable CPU idle for all cores
         disable_cpu_idle 0
         disable_cpu_idle 1
@@ -177,24 +177,25 @@ function disable_cpu_idle_all()
 
 function disable_rtc_device()
 {
-    if [ "$SOC" = "imx93" ]; then
+    if [ "$MACHINE" = "imx93evk" ]; then
         # Unbind the BBNSM RTC device
         BBNSM_RTC_DEV="44440000.bbnsm:rtc"
         if [ -L /sys/bus/platform/drivers/bbnsm_rtc/${BBNSM_RTC_DEV} ]; then
             echo "Unbind RTC device"
             echo "${BBNSM_RTC_DEV}" > /sys/bus/platform/drivers/bbnsm_rtc/unbind
         fi
-    elif [ "$SOC" = "imx8mn" ] || [ "$SOC" = "imx8mm" ] || [ "$SOC" = "imx8mp" ]; then
+    elif [ "$MACHINE" = "imx8mnevk" ] || [ "$MACHINE" = "imx8mmevk" ] || [ "$MACHINE" = "imx8mpevk" ]; then
         # Unbind the RTC device
         RTC_DEV="30370000.snvs:snvs-rtc-lp"
         if [ -L /sys/bus/platform/drivers/snvs_rtc/${RTC_DEV} ]; then
             echo "Unbind RTC device"
             echo "${RTC_DEV}" > /sys/bus/platform/drivers/snvs_rtc/unbind
         fi
-    elif [ "$SOC" = "imx95" ]; then
+    elif [ "$MACHINE" = "imx95evk19" ]; then
         # Unbind the SCMI RTC device
         SCMI_DEV="scmi_dev.11"
         if [ -L /sys/bus/scmi_protocol/drivers/scmi-imx-bbm/${SCMI_DEV} ]; then
+            echo "Unbind RTC device"
             echo "${SCMI_DEV}" > /sys/bus/scmi_protocol/drivers/scmi-imx-bbm/unbind
         fi
     fi
@@ -213,7 +214,7 @@ function set_real_time_configuration()
 
 function gpio_start ()
 {
-    if [[ "${INMATE_BIN}" =~ .*"industrial.bin" && "$SOC" = "imx93" ]]; then
+    if [[ "${INMATE_BIN}" =~ .*"industrial.bin" && "$MACHINE" = "imx93evk" ]]; then
         # Set ADP5585 EXP_SEL GPIO as output low
         echo 'gpioset -z -c gpiochip5 4=0'
         gpioset -z -c gpiochip5 4=0
@@ -227,7 +228,7 @@ function gpio_start ()
 function gpio_stop ()
 {
     # Kill all gpioset commands and restore GPIOs state
-    if [[ "${INMATE_BIN}" =~ .*"industrial.bin" && "$SOC" = "imx93" ]]; then
+    if [[ "${INMATE_BIN}" =~ .*"industrial.bin" && "$MACHINE" = "imx93evk" ]]; then
         echo 'killall "gpioset"'
         killall "gpioset"
 
@@ -324,8 +325,8 @@ if [ ! $# -eq 1 ]; then
     exit 1
 fi
 
-# Detect the SoC we're running on.
-SOC=$(detect_soc)
+# Detect the Machine we're running on.
+MACHINE=$(detect_machine)
 
 CONF_FILE=/etc/harpoon/harpoon.conf
 
