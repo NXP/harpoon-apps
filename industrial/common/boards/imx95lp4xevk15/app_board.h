@@ -16,6 +16,5 @@
 #define EXAMPLE_CAN             CAN2
 #define EXAMPLE_FLEXCAN_IRQn    CAN2_IRQn
 #define FLEXCAN_CLOCK_ROOT      (hal_clock_can2)
-#define EXAMPLE_CAN_CLK_FREQ    (HAL_ClockGetIpFreq(FLEXCAN_CLOCK_ROOT))
 
 #endif /* _APP_BOARD_H_ */

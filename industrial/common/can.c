@@ -1,11 +1,12 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "app_board.h"
 #include "hardware_flexcan.h"
+#include "clock_config.h"
 #include "hlog.h"
 #include "industrial.h"
 #include "fsl_flexcan.h"
@@ -406,7 +407,11 @@ static void *get_ctx(void *parameters, uint32_t test_type)
 	memset(ctx, 0, sizeof(struct can_ctx));
 
 	ctx->base = EXAMPLE_CAN;
-	ctx->clk_freq = EXAMPLE_CAN_CLK_FREQ;
+
+	if (board_clock_get_flexcan_rate(&ctx->clk_freq) < 0) {
+		log_err("FlexCan Rate error\n");
+		goto exit;
+	}
 
 	ctx->event_send = cfg->event_send;
 	ctx->event_data = cfg->event_data;

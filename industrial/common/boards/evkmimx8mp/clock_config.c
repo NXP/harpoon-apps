@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -56,4 +56,15 @@ void board_clock_setup(void)
 	clock_setup_enet_qos();
 	clock_setup_flexcan();
 	clock_setup_gpt();
+}
+
+int board_clock_get_flexcan_rate(uint32_t *rate)
+{
+	if (rate) {
+		*rate = (CLOCK_GetPllFreq(kCLOCK_SystemPll1Ctrl) / (CLOCK_GetRootPreDivider(kCLOCK_RootFlexCan1)) / (CLOCK_GetRootPostDivider(kCLOCK_RootFlexCan1)));
+		return 0;
+	} else {
+		return -1;
+	}
+
 }

@@ -8,16 +8,29 @@ set(MCUX_SDK_PROJECT_NAME app)
 
 if(CONFIG_BOARD_IMX8MM_EVK)
   set(BoardName "evkmimx8mm")
+  set(CONFIG_USE_INDUSTRIAL_CAN OFF)
+  set(CONFIG_USE_INDUSTRIAL_ETHERNET ON)
   set(CONFIG_USE_GENAVB ON)
 elseif(CONFIG_BOARD_IMX8MN_EVK)
   set(BoardName "evkmimx8mn")
+  set(CONFIG_USE_INDUSTRIAL_CAN OFF)
+  set(CONFIG_USE_INDUSTRIAL_ETHERNET ON)
   set(CONFIG_USE_GENAVB ON)
 elseif(CONFIG_BOARD_IMX8MP_EVK)
   set(BoardName "evkmimx8mp")
+  set(CONFIG_USE_INDUSTRIAL_CAN ON)
+  set(CONFIG_USE_INDUSTRIAL_ETHERNET ON)
   set(CONFIG_USE_GENAVB ON)
 elseif(CONFIG_BOARD_IMX93_EVK)
   set(BoardName "mcimx93evk")
+  set(CONFIG_USE_INDUSTRIAL_CAN ON)
+  set(CONFIG_USE_INDUSTRIAL_ETHERNET ON)
   set(CONFIG_USE_GENAVB ON)
+elseif(CONFIG_BOARD_IMX95_EVK)
+  set(BoardName "imx95lpd5evk19")
+  set(CONFIG_USE_INDUSTRIAL_CAN ON)
+  set(CONFIG_USE_INDUSTRIAL_ETHERNET OFF)
+  set(CONFIG_USE_GENAVB OFF)
 else()
   message(FATAL_ERROR "unsupported board")
 endif()
@@ -38,6 +51,7 @@ zephyr_include_directories(
 	${AppPath}/common
 	${AppPath}/common/boards/include
 	${AppPath}/common/boards/${BoardName}
+	${AppPath}/zephyr/boards/${BoardName}
 	${AppPath}/zephyr/include
 	${CommonPath}
 	${CommonPath}/zephyr/boards
@@ -80,24 +94,35 @@ include(lib_rpmsg_zephyr)
 target_sources(app PRIVATE
 	       main.c
 	       ${AppPath}/common/boards/${BoardName}/clock_config.c
-	       ${AppPath}/common/boards/${BoardName}/hardware_ethernet.c
 	       ${AppPath}/common/boards/${BoardName}/pin_mux.c
-	       ${AppPath}/common/ethernet.c
 	       ${AppPath}/common/industrial.c
 	       ${AppPath}/zephyr/boards/${BoardName}/stub.c
 	       )
+if(CONFIG_USE_INDUSTRIAL_CAN)
+  target_sources(app PRIVATE
+	        ${AppPath}/common/boards/${BoardName}/hardware_flexcan.c
+	        ${AppPath}/common/can.c
+	      )
+endif()
+if(CONFIG_USE_INDUSTRIAL_ETHERNET)
+  target_sources(app PRIVATE
+	        ${AppPath}/common/boards/${BoardName}/hardware_ethernet.c
+	        ${AppPath}/common/ethernet.c
+	      )
+endif()
 if(CONFIG_BOARD_IMX8MP_EVK)
   target_sources(app PRIVATE
-	       ${AppPath}/common/boards/${BoardName}/hardware_flexcan.c
-	       ${AppPath}/common/can.c
 	       ${AppPath}/common/ethernet_sdk_enet_qos.c
 	      )
 elseif(CONFIG_BOARD_IMX93_EVK)
   target_sources(app PRIVATE
-	       ${AppPath}/common/boards/${BoardName}/hardware_flexcan.c
-	       ${AppPath}/common/can.c
 	       ${AppPath}/common/ethernet_sdk_enet_qos.c
 	       ${CommonBoardPath}/clock_init.c
+	      )
+elseif(CONFIG_BOARD_IMX95_EVK)
+  target_sources(app PRIVATE
+	       ${AppPath}/zephyr/boards/${BoardName}/clock_setup.c
+	       ${AppPath}/zephyr/boards/${BoardName}/pinctrl.c
 	      )
 else()
   target_sources(app PRIVATE
