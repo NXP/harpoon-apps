@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -12,6 +12,7 @@
 /* Define device counter instances */
 #define BOARD_COUNTER_0_BASE    GPT1
 #define BOARD_COUNTER_0_IRQ     GPT1_IRQn
+#define BOARD_COUNTER_0_IRQ_PRIO OS_IRQ_PRIO_DEFAULT
 
 /* Define ENET QOS application dependencies */
 #define EXAMPLE_ENET_QOS_BASE   ENET_QOS

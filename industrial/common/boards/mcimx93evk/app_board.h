@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,6 +20,7 @@
 /* Define device counter instances */
 #define BOARD_COUNTER_0_BASE    TPM2
 #define BOARD_COUNTER_0_IRQ     TPM2_IRQn
+#define BOARD_COUNTER_0_IRQ_PRIO OS_IRQ_PRIO_DEFAULT
 
 /* Define Flexcan application dependencies */
 #define EXAMPLE_CAN             CAN2
