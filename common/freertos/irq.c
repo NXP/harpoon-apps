@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -84,10 +84,8 @@ void vApplicationIRQHandler(uint32_t ulICCIAR)
 	if (cpu_load_work_begin == 0)
 		ARM_TIMER_GetCounterCount(ARM_TIMER_VIRTUAL, &cpu_load_work_begin);
 
-	/*
-	 * TODO: For now interrupt nesting is disabled,
-	 * IRQ stays disabled until the handler returns
-	 */
+	/* Enable Interrupts to allow interrupts nesting */
+	portENABLE_INTERRUPTS();
 
 	nr = ulICCIAR & NR_IRQS;
 

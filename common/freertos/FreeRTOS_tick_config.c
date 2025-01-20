@@ -1,7 +1,7 @@
 /*
  * FreeRTOS V202012.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2022, 2025 NXP
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -51,6 +51,11 @@ uint32_t FreeRTOS_tick_interval;
 static void VirtualTimer_IRQn_Handler(void *data)
 {
 	(void)data;
+	/* Since vApplicationIRQHandler() enables interrupts to allow interrupt
+	 * nesting: Disable Interrupts here as FreeRTOS_Tick_Handler()
+	 * supposes/requires that.
+	 */
+	portDISABLE_INTERRUPTS();
 	FreeRTOS_Tick_Handler();
 }
 
