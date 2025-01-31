@@ -52,6 +52,8 @@ endif()
 include(${BoardPath}/armgcc_aarch64/flags.cmake)
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    "${AppPath}/freertos/boards/${BoardName}/clock_setup.c"
+    "${AppPath}/freertos/boards/${BoardName}/pinctrl.c"
     "${AppPath}/freertos/boards/${BoardName}/stub.c"
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
@@ -69,6 +71,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}/common/boards/${BoardName}
     ${AppPath}/common/boards/include
     ${AppPath}/freertos
+    ${AppPath}/freertos/boards/${BoardName}
     ${CommonPath}
     ${CommonPath}/freertos
     ${CommonPath}/libs

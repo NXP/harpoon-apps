@@ -26,6 +26,11 @@ elseif(CONFIG_BOARD_IMX93_EVK)
   set(CONFIG_USE_INDUSTRIAL_CAN ON)
   set(CONFIG_USE_INDUSTRIAL_ETHERNET ON)
   set(CONFIG_USE_GENAVB ON)
+elseif(CONFIG_BOARD_IMX95_EVK_15X15)
+  set(BoardName "imx95lp4xevk15")
+  set(CONFIG_USE_INDUSTRIAL_CAN ON)
+  set(CONFIG_USE_INDUSTRIAL_ETHERNET OFF)
+  set(CONFIG_USE_GENAVB OFF)
 elseif(CONFIG_BOARD_IMX95_EVK)
   set(BoardName "imx95lpd5evk19")
   set(CONFIG_USE_INDUSTRIAL_CAN ON)
@@ -118,6 +123,11 @@ elseif(CONFIG_BOARD_IMX93_EVK)
   target_sources(app PRIVATE
 	       ${AppPath}/common/ethernet_sdk_enet_qos.c
 	       ${CommonBoardPath}/clock_init.c
+	      )
+elseif(CONFIG_BOARD_IMX95_EVK_15X15)
+  target_sources(app PRIVATE
+	       ${AppPath}/zephyr/boards/${BoardName}/clock_setup.c
+	       ${AppPath}/zephyr/boards/${BoardName}/pinctrl.c
 	      )
 elseif(CONFIG_BOARD_IMX95_EVK)
   target_sources(app PRIVATE
