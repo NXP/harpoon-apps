@@ -7,5 +7,5 @@ CROSS_COMPILE=$(find "$ARMGCC_DIR" -name "*-gcc" | sed -e 's/gcc$//')
 export ZEPHYR_TOOLCHAIN_VARIANT
 export CROSS_COMPILE
 
-cmake -B build_singlecore -GNinja -DZEPHYR_MODULES="$CMSIS_PATH;$HAL_NXP_PATH" -DBOARD='imx95_evk/mimx9596/a55' ../../../
+cmake -B build_singlecore -GNinja -DZEPHYR_MODULES="$CMSIS_PATH;$HAL_NXP_PATH" -DBOARD='imx95_evk_15x15/mimx9596/a55' ../../../
 ninja -C build_singlecore
