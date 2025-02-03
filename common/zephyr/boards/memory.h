@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -27,7 +27,7 @@
 #define	HYPERVISOR_COMM_BASE	0x80000000
 #define	PCI_MMIO_BASE		0xff000000
 
-#elif defined (CONFIG_BOARD_IMX95_EVK)
+#elif defined(CONFIG_BOARD_IMX95_EVK_15X15) || defined(CONFIG_BOARD_IMX95_EVK)
 #define	HYPERVISOR_COMM_BASE	0x80000000
 #define	PCI_MMIO_BASE		0xff000000
 
