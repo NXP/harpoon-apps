@@ -1,8 +1,8 @@
 /*
-* Copyright 2023 NXP
-*
-* SPDX-License-Identifier: BSD-3-Clause
-*/
+ * Copyright 2023-2024 NXP
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 
 #include "avb_hardware.h"
 #include "fsl_enet_qos.h"

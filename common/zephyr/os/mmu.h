@@ -1,8 +1,9 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #ifndef _ZEPHYR_MMU_H_
 #define _ZEPHYR_MMU_H_
 

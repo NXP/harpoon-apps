@@ -1,8 +1,9 @@
 /*
- * Copyright 2022, 2024 NXP
+ * Copyright 2022-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #ifndef _HLOG_H_
 #define _HLOG_H_
 
