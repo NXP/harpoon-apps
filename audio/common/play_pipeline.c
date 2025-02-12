@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -366,7 +366,7 @@ static int avb_setup(struct pipeline_ctx *ctx)
 	*/
 	genavb_result = genavb_control_open(get_genavb_handle(), &ctx->avb.controlled_h, GENAVB_CTRL_AVDECC_CONTROLLED);
 	if (genavb_result != GENAVB_SUCCESS) {
-		log_err("genavb_control_open(GENAVB_CTRL_AVDECC_CONTROLLED) failed: %s\n", genavb_strerror(rc));
+		log_err("genavb_control_open(GENAVB_CTRL_AVDECC_CONTROLLED) failed: %s\n", genavb_strerror(genavb_result));
 		rc = -1;
 
 		goto exit;
