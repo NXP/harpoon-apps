@@ -381,6 +381,7 @@ exit:
 
 static void avb_close(struct pipeline_ctx *ctx)
 {
+	genavb_control_close(ctx->avb.controlled_h);
 	genavb_control_close(ctx->avb.ctrl_h);
 
 	if (gavb_stack_exit()) {
