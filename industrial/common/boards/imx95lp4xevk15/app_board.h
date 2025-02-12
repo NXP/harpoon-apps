@@ -7,6 +7,10 @@
 #ifndef _APP_BOARD_H_
 #define _APP_BOARD_H_
 
+#if defined(CONFIG_USE_GENAVB) && (CONFIG_USE_GENAVB == 1)
+#include "genavb_sdk.h"
+#endif
+
 /* Define device counter instances */
 #define BOARD_COUNTER_0_BASE    TPM2
 #define BOARD_COUNTER_0_IRQ     TPM2_IRQn

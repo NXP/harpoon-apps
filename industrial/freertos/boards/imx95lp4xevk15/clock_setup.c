@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "FreeRTOS.h"
 #include "fsl_clock.h"
 #include "app_board.h"
 #include "clock_setup.h"
@@ -18,6 +19,9 @@ void BOARD_TpmClockSetup(void)
 		.clk_round_opt = hal_clk_round_auto,
 	};
 
+	HAL_ClockSetRootClk(&hal_clk);
+
+	hal_clk.clk_id = hal_clock_tpm4;
 	HAL_ClockSetRootClk(&hal_clk);
 }
 
@@ -41,6 +45,31 @@ int clock_get_flexcan_clock(uint32_t *rate)
 	if (rate && flexcan_rate <= UINT32_MAX) {
 		*rate = flexcan_rate;
 		return 0;
-	} else
+	} else {
 		return -1;
+	}
+}
+
+void clock_setup_enetc(void)
+{
+	/* ENET Clocks should already be initialized by Host OS, ensure that they are ON 
+	 * and at the right rate
+	 */
+	hal_clk_t hal_enetclk = {
+		.clk_id = hal_clock_enet,
+		.enable_clk = true,
+	};
+	hal_clk_t hal_enetrefclk = {
+		.clk_id = hal_clock_enetref,
+		.enable_clk = true,
+	};
+	uint32_t rate;
+
+	HAL_ClockEnableRootClk(&hal_enetclk);
+	rate = HAL_ClockGetIpFreq(hal_clock_enet);
+	configASSERT(rate == 666666666);
+
+	HAL_ClockEnableRootClk(&hal_enetrefclk);
+	rate = HAL_ClockGetIpFreq(hal_clock_enetref);
+	configASSERT(rate == 250000000);
 }

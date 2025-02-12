@@ -18,7 +18,7 @@ ADD_DEFINITIONS(-DFSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1)
 ENABLE_LANGUAGE(ASM)
 
 # ENABLE GEN_AVB
-SET(CONFIG_USE_GENAVB OFF)
+SET(CONFIG_USE_GENAVB ON)
 
 SET(CMAKE_STATIC_LIBRARY_PREFIX)
 SET(CMAKE_STATIC_LIBRARY_SUFFIX)
@@ -46,6 +46,7 @@ SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 add_executable(${MCUX_SDK_PROJECT_NAME})
 
 if(CONFIG_USE_GENAVB)
+  ADD_DEFINITIONS(-DCONFIG_USE_GENAVB=1)
   include(genavb_sdk.cmake)
 endif()
 
@@ -57,16 +58,21 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     "${AppPath}/freertos/boards/${BoardName}/stub.c"
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
+    "${AppPath}/common/boards/${BoardName}/hardware_ethernet.c"
     "${AppPath}/common/boards/${BoardName}/hardware_flexcan.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/can.c"
+    "${AppPath}/common/ethernet.c"
     "${AppPath}/common/industrial.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
+# FIXME: Remove once it is included by the driver's CMake
+    "${SdkDirPath}/drivers/netc/fsl_netc_timer.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}
+    ${AppPath}/avb_tsn/tsn_app
     ${AppPath}/common
     ${AppPath}/common/boards/${BoardName}
     ${AppPath}/common/boards/include
@@ -79,6 +85,10 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${BoardPath}
     ${AppBoardPath}
     ${SdkDirPath}/devices/MIMX9596
+    ${SdkDirPath}/drivers/msgintr
+    ${SdkDirPath}/drivers/netc
+    ${SdkDirPath}/drivers/netc/socs/imx95
+    ${SdkDirPath}/drivers/socs/imx95
 )
 
 set(CMAKE_MODULE_PATH
@@ -89,21 +99,25 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/rpmsg
     ${CommonPath}/libs/stats
+    ${RtosAbstractionLayerPath}
     ${RtosPath}
     ${SdkDirPath}
-    ${RtosAbstractionLayerPath}
+    ${SdkDirPath}/drivers/msgintr
+    ${SdkDirPath}/drivers/netc
+    ${SdkDirPath}/drivers/netc/socs/imx95
+    ${SdkDirPath}/drivers/socs/imx95
 )
 
 # set all mcux-sdk flags
 
-set(CONFIG_USE_common_freertos_core_armv8a true)
 set(CONFIG_USE_common_freertos true)
-set(CONFIG_USE_component_hal_clock_imx95 true)
+set(CONFIG_USE_common_freertos_core_armv8a true)
 set(CONFIG_USE_component_hal_clock true)
-set(CONFIG_USE_component_hal_pinctrl_imx95 true)
+set(CONFIG_USE_component_hal_clock_imx95 true)
 set(CONFIG_USE_component_hal_pinctrl true)
-set(CONFIG_USE_component_hal_power_imx95 true)
+set(CONFIG_USE_component_hal_pinctrl_imx95 true)
 set(CONFIG_USE_component_hal_power true)
+set(CONFIG_USE_component_hal_power_imx95 true)
 set(CONFIG_USE_component_lists true)
 set(CONFIG_USE_component_lpuart_adapter true)
 set(CONFIG_USE_component_serial_manager true)
@@ -124,6 +138,8 @@ set(CONFIG_USE_driver_flexcan true)
 set(CONFIG_USE_driver_iomuxc true)
 set(CONFIG_USE_driver_lpuart true)
 set(CONFIG_USE_driver_mu1 true)
+set(CONFIG_USE_driver_netc true)
+set(CONFIG_USE_driver_netc_soc_imx95 true)
 set(CONFIG_USE_middleware_freertos-kernel_aarch64 true)
 set(CONFIG_USE_middleware_freertos-kernel_extension true)
 set(CONFIG_USE_middleware_freertos-kernel_heap_4 true)
@@ -152,6 +168,11 @@ include(driver_clock)
 include(driver_common)
 include(driver_flexcan)
 include(driver_lpuart)
+include(driver_msgintr)
+include(driver_netc)
+include(driver_netc_soc_imx95)
+include(driver_phy-common)
+include(driver_phy-device-rtl8211f)
 include(driver_tpm)
 
 include(lib_ctrl)

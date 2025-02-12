@@ -226,6 +226,15 @@ function gpio_start ()
             echo 'gpioset -z -c gpiochip5 5=0'
             gpioset -z -c gpiochip5 5=0
         elif [ "$MACHINE" = "imx95evk15" ]; then
+            # For PHY RTL8211F-CG reset this PIN must be asserted low for 10ms,
+            # then we must wait at least 30ms for the internal circuit settling
+            # time.
+            echo 'gpioset -p 10ms -t0 -c gpiochip5 4=0'
+            gpioset -p 10ms -t0 -c gpiochip5 4=0
+            echo 'gpioset -z -c gpiochip5 4=1'
+            gpioset -z -c gpiochip5 4=1
+            sleep 0.03s
+
             # Set PCAL6524 CAN_STBY GPIO
             echo 'gpioset -z -c gpiochip5 14=0'
             gpioset -z -c gpiochip5 14=0
