@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Freescale Semiconductor, Inc.
- * Copyright 2017, 2024 NXP
+ * Copyright 2017, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -26,6 +26,18 @@ int genavb_clock_domain_init(struct genavb_handle *s_avb_handle)
 	}
 
 	return 0;
+}
+
+void genavb_clock_domain_close(void)
+{
+	int rc;
+
+	rc = genavb_control_close(s_clk_handle);
+	if (rc != GENAVB_SUCCESS) {
+		ERR("genavb_control_close(GENAVB_CTRL_CLOCK_DOMAIN)  failed: %s\n", genavb_strerror(rc));
+	}
+
+	s_clk_handle = NULL;
 }
 
 static int clock_domain_set_source(struct genavb_msg_clock_domain_set_source *set_source)
