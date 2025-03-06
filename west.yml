@@ -17,12 +17,12 @@ manifest:
   projects:
     - name: zephyr
       remote: nxpzephyr
-      revision: dbc846c798bdec45c2e9ab274f4f139cc3ab003e
+      revision: a050db46ae3d3322cb0cd61a8ca22cee3ef6d67a
     - name: mcux-sdk
       remote: nxpmcuxpresso
-      revision: b4f2684bbbf31f986bdafe6d1540e55709d12831
+      revision: 0db10da15d9cc6222744d4854b2cb532b646dcd4
     - name: GenAVB_TSN
-      revision: ca90ec3d63113af532ff7b35bfea575df290a9f8
+      revision: 609be86df6fd472c8b32e9eef201ffa2a0b46f78
       path: gen_avb_sdk
     - name: rtos-abstraction-layer
       revision: ccf7c68248b5ebef682eb4ef96434412087ccf5e
@@ -42,7 +42,7 @@ manifest:
       revision: b5916939a8384aac3398e3f4ea97917fa9b030fd
     - name: heterogeneous-multicore
       remote: nxprealtimeedgesw
-      revision: 4655749a7962f3713687d1cdaecadc1742d9427d
+      revision: 8140eb0bb2f28219ed1c00cdcf5564abedf1f338
     - name: mcux-sdk-middleware-multicore
       remote: nxpmcuxpresso
       revision: 5b8772984399c3fa4c1bc3d530db09fef74349c7
