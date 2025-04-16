@@ -9,7 +9,5 @@
 void BOARD_InitPins(void)
 {
 	pin_mux_flexcan();
-#if defined(CONFIG_USE_GENAVB) && (CONFIG_USE_GENAVB == 1)
 	pin_mux_enetc();
-#endif
 }

@@ -17,6 +17,8 @@ elseif(CONFIG_BOARD_IMX8MP_EVK)
   set(TARGET "zephyr_imx8mp_ca53")
 elseif(CONFIG_BOARD_IMX93_EVK)
   set(TARGET "zephyr_imx93_ca55")
+elseif(CONFIG_BOARD_IMX95_EVK_15X15)
+  set(TARGET "zephyr_imx95_15x15_ca55")
 elseif(CONFIG_BOARD_IMX95_EVK)
   set(TARGET "zephyr_imx95_ca55")
 endif()
@@ -49,10 +51,11 @@ zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MM_EVK ENET_ENHANCEDBUFFERDESC
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MN_EVK ENET_ENHANCEDBUFFERDESCRIPTOR_MODE)
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MP_EVK FSL_ETH_ENABLE_CACHE_CONTROL)
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX93_EVK FSL_ETH_ENABLE_CACHE_CONTROL)
+zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX95_EVK_15X15 FSL_ETH_ENABLE_CACHE_CONTROL)
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX95_EVK FSL_ETH_ENABLE_CACHE_CONTROL)
 zephyr_compile_definitions(CONFIG_GENAVB_ENABLE)
 
-if(CONFIG_BOARD_IMX8MM_EVK OR CONFIG_BOARD_IMX8MN_EVK OR CONFIG_BOARD_IMX95_EVK)
+if(CONFIG_BOARD_IMX8MM_EVK OR CONFIG_BOARD_IMX8MN_EVK OR CONFIG_BOARD_IMX95_EVK OR CONFIG_BOARD_IMX95_EVK_15X15)
   set(build_motor_controller 0) # motor_control build disabled
 elseif(CONFIG_BOARD_IMX8MP_EVK OR CONFIG_BOARD_IMX93_EVK)
   set(build_motor_controller 1) # motor_control build enabled

@@ -46,18 +46,5 @@ uint32_t dev_read_audio_pll_post_div(void)
  */
 uint32_t dev_get_tpm_counter_freq(void *base)
 {
-	if (base == TPM1)
-		return HAL_ClockGetIpFreq(hal_clock_busaon);
-	else if (base == TPM2)
-		return HAL_ClockGetIpFreq(hal_clock_tpm2);
-	else if (base == TPM3)
-		return HAL_ClockGetIpFreq(hal_clock_buswakeup);
-	else if (base == TPM4)
-		return HAL_ClockGetIpFreq(hal_clock_tpm4);
-	else if (base == TPM5)
-		return HAL_ClockGetIpFreq(hal_clock_tpm5);
-	else if (base == TPM6)
-		return HAL_ClockGetIpFreq(hal_clock_tpm6);
-	else
-		return 0;
+	return clock_get_tpm_clock(base);
 }

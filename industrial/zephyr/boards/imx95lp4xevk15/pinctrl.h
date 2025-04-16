@@ -8,5 +8,6 @@
 #define _PIN_CTRL_H_
 
 void pin_mux_flexcan(void);
+void pin_mux_enetc(void);
 
 #endif /* _PIN_CTRL_H_ */

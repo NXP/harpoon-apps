@@ -1,12 +1,12 @@
 # Copyright 2025 NXP
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BSD-3-Clause
 
 description: |
-  NXP i.MX FlexCAN controller
+  NXP Generic Device with Clock and PIN Control definition
 
   Example:
     flexcan2: flexcan@425b0000 {
-      compatible = "nxp,imx-flexcan";
+      compatible = "nxp,harpoon-hal-device";
       reg = <0x425b0000 DT_SIZE_K(64)>;
       clocks = <&scmi_clk IMX95_CLK_CAN2>;
       pinctrl-0 = <&flexcan2_default>;
@@ -14,7 +14,7 @@ description: |
       status = "okay";
     };
 
-compatible: "nxp,imx-flexcan"
+compatible: "nxp,harpoon-hal-device"
 
 include: ["base.yaml", "pinctrl-device.yaml"]
 
@@ -23,7 +23,7 @@ properties:
     required: true
 
   pinctrl-0:
-    required: true
+    required: false
 
   clocks:
-    required: true
+    required: false

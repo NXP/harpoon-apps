@@ -44,14 +44,56 @@
 		counter0 = &tpm2;
 		counter1 = &tpm4;
 		candev0 = &flexcan2;
+		ethernet0 = &enetc_psi0;
+		netc0 = &netc;
+		netctimer0 = &netc_timer;
 	};
 
 	flexcan2: flexcan@425b0000 {
-		compatible = "nxp,imx-flexcan";
+		compatible = "nxp,harpoon-hal-device";
 		reg = <0x425b0000 DT_SIZE_K(64)>;
 		clocks = <&scmi_clk IMX95_CLK_CAN2>;
 		pinctrl-0 = <&flexcan2_default>;
 		pinctrl-names = "default";
+	};
+
+	msgintr2: msgintr@446a0000 {
+		reg = <0x446a0000 DT_SIZE_K(64)>;
+	};
+
+	netc: ethernet@4ca00000 {
+		compatible = "nxp,harpoon-hal-device";
+		reg = <0x4ca00000 DT_SIZE_K(64)>;
+		clocks = <&scmi_clk IMX95_CLK_ENETREF>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		enetc_psi0: ethernet@4cc00000 {
+			compatible = "nxp,harpoon-hal-device";
+			reg = <0x4cc00000 0x10000>;
+			pinctrl-0 = <&eth0_default>;
+			pinctrl-names = "default";
+		};
+
+		enetc_pf0: ethernet@4cc10000 {
+			reg = <0x4cc10000 DT_SIZE_K(64)>;
+		};
+	};
+
+	timer_pci: pcie@4cac0000 {
+		reg = <0x4cac0000 DT_SIZE_K(64)>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		netc_timer: timer@4ccc0000 {
+			compatible = "nxp,harpoon-hal-device";
+			reg = <0x4ccc0000 DT_SIZE_K(64)>;
+			clocks = <&scmi_clk IMX95_CLK_ENET>;
+		};
+
+		netc_timer_msix_table: timer@0x4cd00000 {
+			reg = <0x4cd00000 DT_SIZE_K(64)>;
+		};
 	};
 };
 

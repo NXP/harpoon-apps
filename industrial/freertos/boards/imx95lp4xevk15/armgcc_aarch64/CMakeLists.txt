@@ -46,7 +46,6 @@ SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 add_executable(${MCUX_SDK_PROJECT_NAME})
 
 if(CONFIG_USE_GENAVB)
-  ADD_DEFINITIONS(-DCONFIG_USE_GENAVB=1)
   include(genavb_sdk.cmake)
 endif()
 
@@ -55,6 +54,7 @@ include(${BoardPath}/armgcc_aarch64/flags.cmake)
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     "${AppPath}/freertos/boards/${BoardName}/clock_setup.c"
     "${AppPath}/freertos/boards/${BoardName}/pinctrl.c"
+    "${AppPath}/freertos/boards/${BoardName}/ethernet_setup.c"
     "${AppPath}/freertos/boards/${BoardName}/stub.c"
     "${AppPath}/freertos/main.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
