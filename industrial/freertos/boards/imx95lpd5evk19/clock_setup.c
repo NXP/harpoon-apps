@@ -73,3 +73,31 @@ void clock_setup_enetc(void)
 	rate = HAL_ClockGetIpFreq(hal_clock_enetref);
 	configASSERT(rate == 250000000);
 }
+
+uint32_t clock_get_mdio_clock(void)
+{
+	return HAL_ClockGetIpFreq(hal_clock_enet);
+}
+
+uint32_t clock_get_netc_timer_clock(void)
+{
+	return HAL_ClockGetIpFreq(hal_clock_enet);
+}
+
+uint32_t clock_get_tpm_clock(void *base)
+{
+	if (base == TPM1)
+		return HAL_ClockGetIpFreq(hal_clock_busaon);
+	else if (base == TPM2)
+		return HAL_ClockGetIpFreq(hal_clock_tpm2);
+	else if (base == TPM3)
+		return HAL_ClockGetIpFreq(hal_clock_buswakeup);
+	else if (base == TPM4)
+		return HAL_ClockGetIpFreq(hal_clock_tpm4);
+	else if (base == TPM5)
+		return HAL_ClockGetIpFreq(hal_clock_tpm5);
+	else if (base == TPM6)
+		return HAL_ClockGetIpFreq(hal_clock_tpm6);
+	else
+		return 0;
+}

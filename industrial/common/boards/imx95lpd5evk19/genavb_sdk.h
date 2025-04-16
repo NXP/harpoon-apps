@@ -7,6 +7,7 @@
 #ifndef _GENAVB_SDK_H_
 #define _GENAVB_SDK_H_
 
+#include "clock_setup.h"
 #include "fsl_netc.h"
 #include "fsl_netc_soc.h"
 #include "fsl_netc_timer.h"
@@ -40,7 +41,7 @@
 #define BOARD_NETC_HW_CLOCK_0_MSGINTR_CH 0
 #define BOARD_NETC_HW_CLOCK_0_SELECT kNETC_TimerSystemClk
 /* NETC System Clock (ENET) is divided by two at NETC Timer */
-#define BOARD_NETC_HW_CLOCK_0_FREQ (HAL_ClockGetIpFreq(hal_clock_enet)/2)
+#define BOARD_NETC_HW_CLOCK_0_FREQ (clock_get_netc_timer_clock()/2)
 #define BOARD_HW_CLOCK0_NUM_TIMERS    2
 #define BOARD_HW_CLOCK0_TIMER0_ID     1 /* Alarm2 */
 #define BOARD_HW_CLOCK0_TIMER0_ENABLED
@@ -52,7 +53,7 @@
 #define BOARD_NUM_NETC_EMDIO 1
 #define BOARD_NUM_NETC_PORT_EMDIO 1
 #define BOARD_NETC_PORT_EMDIO_PORT0 kNETC_ENETC0EthPort
-#define BOARD_NETC_MDIO_FREQ (HAL_ClockGetIpFreq(hal_clock_enet))
+#define BOARD_NETC_MDIO_FREQ (clock_get_mdio_clock())
 
 #define BOARD_NET_RX_CACHEABLE 1
 #define BOARD_NET_TX_CACHEABLE 1

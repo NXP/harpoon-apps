@@ -34,8 +34,8 @@ elseif(CONFIG_BOARD_IMX95_EVK_15X15)
 elseif(CONFIG_BOARD_IMX95_EVK)
   set(BoardName "imx95lpd5evk19")
   set(CONFIG_USE_INDUSTRIAL_CAN ON)
-  set(CONFIG_USE_INDUSTRIAL_ETHERNET OFF)
-  set(CONFIG_USE_GENAVB OFF)
+  set(CONFIG_USE_INDUSTRIAL_ETHERNET ON)
+  set(CONFIG_USE_GENAVB ON)
 else()
   message(FATAL_ERROR "unsupported board")
 endif()
@@ -173,10 +173,21 @@ elseif(CONFIG_BOARD_IMX95_EVK_15X15 OR CONFIG_BOARD_IMX95_EVK)
     ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
     ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
     ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/tpm
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyrtl8211f
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/tpm
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/msgintr
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/netc
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/netc/socs/imx95
   )
 
   include(driver_flexcan)
   include(driver_tpm)
+  include(driver_msgintr)
+  include(driver_netc)
+  include(driver_netc_soc_imx95)
+  include(driver_phy-device-rtl8211f)
 endif()
 
 target_sources(app PRIVATE
@@ -217,6 +228,7 @@ elseif(CONFIG_BOARD_IMX95_EVK)
   target_sources(app PRIVATE
 	       ${AppPath}/zephyr/boards/${BoardName}/clock_setup.c
 	       ${AppPath}/zephyr/boards/${BoardName}/pinctrl.c
+	       ${AppPath}/zephyr/boards/${BoardName}/ethernet_setup.c
 	      )
 else()
   target_sources(app PRIVATE
