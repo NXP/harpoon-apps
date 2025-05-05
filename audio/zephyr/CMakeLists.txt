@@ -37,7 +37,7 @@ zephyr_include_directories(
 	${AppPath}/common
 	${AppPath}/common/boards/include
 	${AppPath}/common/boards/${BoardName}
-	${AppPath}/zephyr/include
+	${AppPath}/zephyr/boards/${BoardName}
 	${CommonPath}
 	${CommonPath}/libs/ctrl
 	${CommonPath}/libs/hlog
@@ -98,8 +98,9 @@ include(lib_rpmsg_zephyr)
 
 target_sources(app PRIVATE
 	       main.c
+	       boards/${BoardName}/app_mmu.c
 	       ${AppPath}/common/audio.c
-		   ${AppPath}/common/audio_app.c
+	       ${AppPath}/common/audio_app.c
 	       ${AppPath}/common/audio_buffer.c
 	       ${AppPath}/common/audio_element.c
 	       ${AppPath}/common/audio_element_dtmf.c
