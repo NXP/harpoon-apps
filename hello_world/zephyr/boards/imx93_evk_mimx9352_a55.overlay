@@ -15,3 +15,7 @@
 &enet_mdio {
 	status = "disabled";
 };
+
+&lpi2c2 {
+	status = "disabled";
+};
