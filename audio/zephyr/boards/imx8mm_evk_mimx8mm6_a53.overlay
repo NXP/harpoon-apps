@@ -23,3 +23,7 @@
 &i2c3 {
 	status = "disabled";
 };
+
+&gpio1 {
+	status = "disabled";
+};

@@ -19,3 +19,11 @@
 &enet_mdio {
 	status = "disabled";
 };
+
+&i2c3 {
+	status = "disabled";
+};
+
+&gpio1 {
+	status = "disabled";
+};
