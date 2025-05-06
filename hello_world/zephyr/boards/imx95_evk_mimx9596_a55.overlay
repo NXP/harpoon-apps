@@ -8,11 +8,11 @@
 #define MU		mu3
 #define MU_SRAM		445d1000
 
-/delete-node/ &sram0;
+/delete-node/ &dram;
 /delete-node/ &scmi_shmem0;
 
 / {
-	sram0: memory@SRAM_BASE {
+	dram: memory@SRAM_BASE {
 		reg = <DT_ADDR(SRAM_BASE) DT_SIZE_M(1)>;
 	};
 
