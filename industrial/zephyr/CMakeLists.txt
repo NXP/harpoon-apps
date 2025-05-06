@@ -101,6 +101,7 @@ target_sources(app PRIVATE
 	       ${AppPath}/common/boards/${BoardName}/clock_config.c
 	       ${AppPath}/common/boards/${BoardName}/pin_mux.c
 	       ${AppPath}/common/industrial.c
+	       ${AppPath}/zephyr/boards/${BoardName}/app_mmu.c
 	       ${AppPath}/zephyr/boards/${BoardName}/stub.c
 	       )
 if(CONFIG_USE_INDUSTRIAL_CAN)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -10,6 +10,7 @@
 #include "hlog.h"
 #include "os/counter.h"
 
+#include "app_mmu.h"
 #include "clock_config.h"
 #include "pin_mux.h"
 
@@ -84,6 +85,8 @@ const struct industrial_use_case use_cases[] =
 
 static void hardware_setup(void)
 {
+	BOARD_InitMemory();
+
 	BOARD_InitPins();
 
 	board_clock_setup();
