@@ -7,3 +7,19 @@
 &rdc {
 	status = "disabled";
 };
+
+&enet {
+	status = "disabled";
+};
+
+&enet_mac {
+	status = "disabled";
+};
+
+&enet_mdio {
+	status = "disabled";
+};
+
+&i2c3 {
+	status = "disabled";
+};
