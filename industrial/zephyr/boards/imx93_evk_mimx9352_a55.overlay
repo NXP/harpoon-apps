@@ -38,6 +38,10 @@
 	status = "disabled";
 };
 
+&flexcan2 {
+	status = "disabled";
+};
+
 &lpi2c2 {
 	status = "disabled";
 };
