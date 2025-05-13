@@ -46,6 +46,7 @@ set(CommonBoardPath "${ProjDirPath}/../../common/boards/${BoardName}")
 set(AppPath "${ProjDirPath}/..")
 SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(ProjRootPath "${ProjDirPath}/../../")
+SET(HAL_NXP_PATH "${ProjRootPath}/../modules/hal/nxp")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/zephyr")
 
 if(CONFIG_USE_GENAVB)
@@ -95,6 +96,88 @@ include(lib_jailhouse)
 include(lib_hlog)
 include(lib_ctrl)
 include(lib_rpmsg_zephyr)
+
+if(CONFIG_BOARD_IMX8MM_EVK)
+  set(MCUX_DEVICE "MIMX8MM6_ca53")
+  list(APPEND CMAKE_MODULE_PATH
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8MM6/drivers
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyar8031
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
+  )
+
+  include(driver_enet)
+  include(driver_gpt)
+  include(driver_phy-common)
+  include(driver_phy-device-ar8031)
+elseif(CONFIG_BOARD_IMX8MN_EVK)
+  set(MCUX_DEVICE "MIMX8MN6_ca53")
+  list(APPEND CMAKE_MODULE_PATH
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8MN6/drivers
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyar8031
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
+  )
+
+  include(driver_enet)
+  include(driver_gpt)
+  include(driver_phy-common)
+  include(driver_phy-device-ar8031)
+elseif(CONFIG_BOARD_IMX8MP_EVK)
+  set(MCUX_DEVICE "MIMX8ML8_ca53")
+  list(APPEND CMAKE_MODULE_PATH
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8ML8/drivers
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyrtl8211f
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/mdio/enet_qos
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet_qos
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/igpio
+  )
+
+  include(driver_enet_qos)
+  include(driver_flexcan)
+  include(driver_gpt)
+  include(driver_igpio)
+  include(driver_mdio-common)
+  include(driver_mdio-enet-qos)
+  include(driver_phy-common)
+  include(driver_phy-device-rtl8211f)
+elseif(CONFIG_BOARD_IMX93_EVK)
+  set(MCUX_DEVICE "MIMX9352_ca55")
+  list(APPEND CMAKE_MODULE_PATH
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX9352/drivers
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyrtl8211f
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/mdio/enet_qos
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet_qos
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/tpm
+  )
+
+  include(driver_enet_qos)
+  include(driver_flexcan)
+  include(driver_mdio-common)
+  include(driver_mdio-enet-qos)
+  include(driver_phy-device-rtl8211f)
+  include(driver_tpm)
+elseif(CONFIG_BOARD_IMX95_EVK_15X15 OR CONFIG_BOARD_IMX95_EVK)
+  set(MCUX_DEVICE "MIMX9596_ca55")
+  list(APPEND CMAKE_MODULE_PATH
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX9596/drivers
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/tpm
+  )
+
+  include(driver_flexcan)
+  include(driver_tpm)
+endif()
 
 target_sources(app PRIVATE
 	       main.c
