@@ -6,6 +6,7 @@
 #include "fsl_codec_common.h"
 #include "fsl_sai.h"
 #include "fsl_cs42448.h"
+#include "fsl_wm8962.h"
 #include "fsl_rgpio.h"
 
 #include "app_board.h"

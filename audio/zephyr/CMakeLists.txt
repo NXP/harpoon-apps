@@ -27,6 +27,7 @@ set(CommonPath "${ProjDirPath}/../../common")
 set(CommonBoardPath "${ProjDirPath}/../../common/boards/${BoardName}")
 set(AppPath "${ProjDirPath}/..")
 SET(ProjRootPath "${ProjDirPath}/../../")
+SET(HAL_NXP_PATH "${ProjRootPath}/../modules/hal/nxp")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/zephyr")
 
 if(CONFIG_USE_GENAVB)
@@ -65,20 +66,6 @@ zephyr_compile_definitions(OS_ZEPHYR)
 zephyr_compile_definitions(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 # HifiBerry Codec
 zephyr_compile_definitions(CODEC_MULTI_ADAPTERS=1)
-zephyr_compile_definitions_ifdef(CONFIG_CODEC_PCM512X CODEC_PCM512X_ENABLE=1)
-zephyr_compile_definitions_ifdef(CONFIG_CODEC_PCM186X CODEC_PCM186X_ENABLE=1)
-# EVK onboard Codec WM8962
-zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8962 CODEC_WM8962)
-zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8962 CODEC_WM8962_ENABLE=1)
-# EVK onboard Codec WM8960
-zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8960 CODEC_WM8960)
-zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8960 CODEC_WM8960_ENABLE=1)
-# EVK onboard Codec WM8524
-zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8524 CODEC_WM8524)
-zephyr_compile_definitions_ifdef(CONFIG_CODEC_WM8524 CODEC_WM8524_ENABLE=1)
-# MX93AUD-HAT Codec CS42448
-zephyr_compile_definitions_ifdef(CONFIG_CODEC_CS42448 CODEC_CS42448)
-zephyr_compile_definitions_ifdef(CONFIG_CODEC_CS42448 CODEC_CS42448_ENABLE=1)
 
 # Cortex-A55/A53 core maximum clock frequency
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MM_EVK SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1800000000UL)
@@ -95,6 +82,187 @@ include(lib_hlog)
 include(lib_jailhouse)
 include(lib_stats)
 include(lib_rpmsg_zephyr)
+
+if(CONFIG_BOARD_IMX8MM_EVK)
+  set(MCUX_DEVICE "MIMX8MM6_ca53")
+  list(APPEND CMAKE_MODULE_PATH
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8MM6/drivers
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/i2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm186x
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm512x
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/wm8524
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/i2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyar8031
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/igpio
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/ii2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/sai
+  )
+
+  include(driver_enet)
+  include(driver_gpt)
+  include(driver_igpio)
+  include(driver_ii2c)
+  include(driver_phy-common)
+  include(driver_phy-device-ar8031)
+  include(driver_sai)
+
+  include(driver_codec)
+
+  include(component_codec_adapters)
+  include(component_pcm186x_adapter)
+  include(component_pcm512x_adapter)
+  include(component_wm8524_adapter)
+  include(driver_pcm186x)
+  include(driver_pcm512x)
+  include(driver_wm8524)
+
+  zephyr_compile_definitions(CODEC_PCM512X_ENABLE=1)
+  zephyr_compile_definitions(CODEC_PCM186X_ENABLE=1)
+  zephyr_compile_definitions(CODEC_WM8524)
+  zephyr_compile_definitions(CODEC_WM8524_ENABLE=1)
+elseif(CONFIG_BOARD_IMX8MN_EVK)
+  set(MCUX_DEVICE "MIMX8MN6_ca53")
+  list(APPEND CMAKE_MODULE_PATH
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8MN6/drivers
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/i2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm186x
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm512x
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/wm8524
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/i2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyar8031
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/igpio
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/ii2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/sai
+  )
+
+  include(driver_enet)
+  include(driver_gpt)
+  include(driver_igpio)
+  include(driver_phy-common)
+  include(driver_phy-device-ar8031)
+  include(driver_sai)
+
+  include(driver_codec)
+  include(driver_ii2c)
+
+  include(component_codec_adapters)
+  include(component_pcm186x_adapter)
+  include(component_pcm512x_adapter)
+  include(component_wm8524_adapter)
+  include(driver_pcm186x)
+  include(driver_pcm512x)
+  include(driver_wm8524)
+
+  zephyr_compile_definitions(CODEC_PCM512X_ENABLE=1)
+  zephyr_compile_definitions(CODEC_PCM186X_ENABLE=1)
+  zephyr_compile_definitions(CODEC_WM8524)
+  zephyr_compile_definitions(CODEC_WM8524_ENABLE=1)
+elseif(CONFIG_BOARD_IMX8MP_EVK)
+  set(MCUX_DEVICE "MIMX8ML8_ca53")
+  list(APPEND CMAKE_MODULE_PATH
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8ML8/drivers
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/i2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm186x
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm512x
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/wm8960
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/i2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyrtl8211f
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/mdio/enet_qos
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet_qos
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/igpio
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/igpio
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/ii2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/sai
+  )
+
+  include(driver_audiomix)
+  include(driver_enet_qos)
+  include(driver_flexcan)
+  include(driver_gpt)
+  include(driver_igpio)
+  include(driver_igpio)
+  include(driver_mdio-common)
+  include(driver_mdio-enet-qos)
+  include(driver_phy-common)
+  include(driver_phy-device-rtl8211f)
+  include(driver_sai)
+
+  include(driver_codec)
+  include(driver_ii2c)
+
+  include(component_codec_adapters)
+  include(component_pcm186x_adapter)
+  include(component_pcm512x_adapter)
+  include(component_wm8960_adapter)
+  include(driver_pcm186x)
+  include(driver_pcm512x)
+  include(driver_wm8960)
+
+  zephyr_compile_definitions(CODEC_PCM512X_ENABLE=1)
+  zephyr_compile_definitions(CODEC_PCM186X_ENABLE=1)
+  zephyr_compile_definitions(CODEC_WM8960)
+  zephyr_compile_definitions(CODEC_WM8960_ENABLE=1)
+elseif(CONFIG_BOARD_IMX93_EVK)
+  set(MCUX_DEVICE "MIMX9352_ca55")
+  list(APPEND CMAKE_MODULE_PATH
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX9352/drivers
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/cs42448
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/i2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm186x
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm512x
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/wm8962
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/i2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyrtl8211f
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/mdio/enet_qos
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet_qos
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/lpi2c
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/rgpio
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/sai
+    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/tpm
+  )
+
+  include(driver_enet_qos)
+  include(driver_flexcan)
+  include(driver_mdio-common)
+  include(driver_mdio-enet-qos)
+  include(driver_phy-device-rtl8211f)
+  include(driver_rgpio)
+  include(driver_sai)
+  include(driver_tpm)
+
+  include(driver_lpi2c)
+  include(driver_codec)
+
+  include(component_codec_adapters)
+  include(component_cs42448_adapter)
+  include(component_wm8962_adapter)
+  include(driver_cs42448)
+  include(driver_wm8962)
+
+  zephyr_compile_definitions(CODEC_WM8962)
+  zephyr_compile_definitions(CODEC_WM8962_ENABLE=1)
+  zephyr_compile_definitions(CODEC_CS42448)
+  zephyr_compile_definitions(CODEC_CS42448_ENABLE=1)
+endif()
 
 target_sources(app PRIVATE
 	       main.c
