@@ -13,7 +13,6 @@
 #include "fsl_clock.h"
 #include "fsl_enet.h"
 #include "fsl_gpt.h"
-#include "fsl_phyar8031.h"
 
 /* Network Port configuration */
 #define BOARD_NUM_PORTS            1
