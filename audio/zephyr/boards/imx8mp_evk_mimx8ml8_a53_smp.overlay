@@ -4,6 +4,24 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+/ {
+	audio_blk_ctrl: audio-blk-ctrl@30e20000 {
+		reg = <0x30e20000 DT_SIZE_K(64)>;
+	};
+
+	gpc: gpc@303a0000 {
+		reg = <0x303a0000 DT_SIZE_K(64)>;
+	};
+
+	sai3: sai@30c30000 {
+		reg = <0x30c30000 DT_SIZE_K(64)>;
+	};
+
+	sai5: sai@30c50000 {
+		reg = <0x30c50000 DT_SIZE_K(64)>;
+	};
+};
+
 &rdc {
 	status = "disabled";
 };
