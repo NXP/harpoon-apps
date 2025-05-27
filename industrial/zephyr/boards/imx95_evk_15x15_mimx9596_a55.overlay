@@ -45,6 +45,14 @@
 		counter1 = &tpm4;
 		candev0 = &flexcan2;
 	};
+
+	flexcan2: flexcan@425b0000 {
+		compatible = "nxp,imx-flexcan";
+		reg = <0x425b0000 DT_SIZE_K(64)>;
+		clocks = <&scmi_clk IMX95_CLK_CAN2>;
+		pinctrl-0 = <&flexcan2_default>;
+		pinctrl-names = "default";
+	};
 };
 
 &tpm2 {
