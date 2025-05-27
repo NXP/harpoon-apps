@@ -14,6 +14,10 @@
 	enet_qos: enet@428a0000 {
 		reg = <0x428a0000 DT_SIZE_K(64)>;
 	};
+
+	wakeupmix_gpr: wakeupmix_gpr@42420000 {
+		reg = <0x42420000 DT_SIZE_K(64)>;
+	};
 };
 
 &tpm2 {
