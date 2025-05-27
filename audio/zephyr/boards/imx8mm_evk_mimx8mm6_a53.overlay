@@ -4,6 +4,16 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+/ {
+	sai3: sai@30030000 {
+		reg = <0x30030000 DT_SIZE_K(64)>;
+	};
+
+	sai5: sai@30050000 {
+		reg = <0x30050000 DT_SIZE_K(64)>;
+	};
+};
+
 &rdc {
 	status = "disabled";
 };
