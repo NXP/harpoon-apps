@@ -20,6 +20,14 @@
 	sai5: sai@30c50000 {
 		reg = <0x30c50000 DT_SIZE_K(64)>;
 	};
+
+	iomuxc_gpr: iomuxc_gpr@30340000 {
+		reg = <0x30340000 DT_SIZE_K(64)>;
+	};
+
+	enet_qos: enet@30bf0000 {
+		reg = <0x30bf0000 DT_SIZE_K(64)>;
+	};
 };
 
 &rdc {
