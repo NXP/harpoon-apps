@@ -227,7 +227,7 @@ function gpio_start ()
             gpioset -z -c gpiochip5 5=0
         elif [ "$MACHINE" = "imx95evk15" ]; then
             # Set PCAL6524 CAN_STBY GPIO
-            echo 'gpioset -z -c gpiochip4 14=0'
+            echo 'gpioset -z -c gpiochip5 14=0'
             gpioset -z -c gpiochip4 14=0
         elif [ "$MACHINE" = "imx95evk19" ]; then
             # Set PCAL6524 CAN2_nSTBY GPIO as output active-high
@@ -259,8 +259,8 @@ function gpio_stop ()
             killall "gpioset"
 
             # Restore input direction for PCAL6524 CAN_STBY GPIO
-            echo 'gpioget -l -c gpiochip4 14'
-            gpioget -l -c gpiochip4 14
+            echo 'gpioget -l -c gpiochip5 14'
+            gpioget -l -c gpiochip5 14
         elif [ "$MACHINE" = "imx95evk19" ]; then
             echo 'killall "gpioset"'
             killall "gpioset"
