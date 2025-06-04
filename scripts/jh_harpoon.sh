@@ -228,7 +228,7 @@ function gpio_start ()
         elif [ "$MACHINE" = "imx95evk15" ]; then
             # Set PCAL6524 CAN_STBY GPIO
             echo 'gpioset -z -c gpiochip5 14=0'
-            gpioset -z -c gpiochip4 14=0
+            gpioset -z -c gpiochip5 14=0
         elif [ "$MACHINE" = "imx95evk19" ]; then
             # Set PCAL6524 CAN2_nSTBY GPIO as output active-high
             echo 'gpioset -z -c gpiochip5 3=1'
