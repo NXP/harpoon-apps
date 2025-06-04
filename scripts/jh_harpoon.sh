@@ -288,6 +288,8 @@ function start ()
 {
     set_real_time_configuration
 
+    gpio_start
+
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         get_rpmsg_dev
 
@@ -331,14 +333,10 @@ function start ()
         echo 'modprobe virtio_net'
         modprobe virtio_net
     fi
-
-    gpio_start
 }
 
 function stop ()
 {
-    gpio_stop
-
     if [[ ! "${INMATE_BIN}" =~ .*"virtio_net.bin" && ! "${INMATE_BIN}" =~ .*"hello_world.bin" ]]; then
         get_rpmsg_dev
     fi
@@ -361,6 +359,8 @@ function stop ()
 
     echo 'modprobe -r jailhouse'
     modprobe -r jailhouse
+
+    gpio_stop
 }
 
 
