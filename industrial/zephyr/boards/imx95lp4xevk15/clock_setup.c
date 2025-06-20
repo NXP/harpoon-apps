@@ -48,7 +48,17 @@ int clock_get_flexcan_clock(uint32_t *rate)
 	return clock_control_get_rate(can_clk_dev, can_clk_subsys, rate);
 }
 
-void BOARD_TpmClockSetup(void) {}
+void BOARD_TpmClockSetup(void) {
+	if (!device_is_ready(tpm4_clk_dev)) {
+		__ASSERT(false, "%s: clock_dev is not ready", __func__);
+		return;
+	}
+
+	if (clock_control_on(tpm4_clk_dev, tpm4_clk_subsys) < 0) {
+		__ASSERT(false, "%s: could not turn clock_dev on", __func__);
+		return;
+	}
+}
 
 void clock_setup_enetc(void)
 {
