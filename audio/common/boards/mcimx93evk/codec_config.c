@@ -1,8 +1,9 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #include "fsl_codec_common.h"
 #include "fsl_sai.h"
 #include "fsl_cs42448.h"
