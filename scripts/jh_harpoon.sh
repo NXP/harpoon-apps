@@ -179,27 +179,21 @@ function disable_cpu_idle_all()
 
 function disable_rtc_device()
 {
-    if [ "$MACHINE" = "imx93evk" ]; then
-        # Unbind the BBNSM RTC device
-        BBNSM_RTC_DEV="44440000.bbnsm:rtc"
-        if [ -L /sys/bus/platform/drivers/bbnsm_rtc/${BBNSM_RTC_DEV} ]; then
-            echo "Unbind RTC device"
-            echo "${BBNSM_RTC_DEV}" > /sys/bus/platform/drivers/bbnsm_rtc/unbind
-        fi
-    elif [ "$MACHINE" = "imx8mnevk" ] || [ "$MACHINE" = "imx8mmevk" ] || [ "$MACHINE" = "imx8mpevk" ]; then
-        # Unbind the RTC device
-        RTC_DEV="30370000.snvs:snvs-rtc-lp"
-        if [ -L /sys/bus/platform/drivers/snvs_rtc/${RTC_DEV} ]; then
-            echo "Unbind RTC device"
-            echo "${RTC_DEV}" > /sys/bus/platform/drivers/snvs_rtc/unbind
-        fi
-    elif [ "$MACHINE" = "imx95evk15" ] || [ "$MACHINE" = "imx95evk19" ]; then
-        # Unbind the SCMI RTC device
-        SCMI_DEV="scmi_dev.11"
-        if [ -L /sys/bus/scmi_protocol/drivers/scmi-imx-bbm/${SCMI_DEV} ]; then
-            echo "Unbind RTC device"
-            echo "${SCMI_DEV}" > /sys/bus/scmi_protocol/drivers/scmi-imx-bbm/unbind
-        fi
+    RTC="rtc0"
+    DEVICE_PATH=$(realpath "/sys/class/rtc/$RTC/device")
+    DEVICE_NAME=$(basename "$DEVICE_PATH")
+    DRIVER_PATH="$DEVICE_PATH/driver"
+
+    if [ ! -d "/sys/class/rtc/$RTC" ]; then
+        # RTC is already unbound
+        return 0;
+    fi
+
+    if [ -L "$DRIVER_PATH/$DEVICE_NAME" ]; then
+        echo "Unbinding RTC device: $DEVICE_NAME"
+        echo "$DEVICE_NAME" > "$DRIVER_PATH/unbind"
+    else
+        echo "WARNING: Unable to unbind RTC device"
     fi
 }
 
