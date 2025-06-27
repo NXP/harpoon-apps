@@ -180,14 +180,15 @@ function disable_cpu_idle_all()
 function disable_rtc_device()
 {
     RTC="rtc0"
-    DEVICE_PATH=$(realpath "/sys/class/rtc/$RTC/device")
-    DEVICE_NAME=$(basename "$DEVICE_PATH")
-    DRIVER_PATH="$DEVICE_PATH/driver"
 
     if [ ! -d "/sys/class/rtc/$RTC" ]; then
         # RTC is already unbound
         return 0;
     fi
+
+    DEVICE_PATH=$(realpath "/sys/class/rtc/$RTC/device")
+    DEVICE_NAME=$(basename "$DEVICE_PATH")
+    DRIVER_PATH="$DEVICE_PATH/driver"
 
     if [ -L "$DRIVER_PATH/$DEVICE_NAME" ]; then
         echo "Unbinding RTC device: $DEVICE_NAME"
