@@ -59,7 +59,7 @@ sudo apt install python3-pyelftools
 
 Execute below commands to replicate the whole Harpoon delivery at revision ```${revision}``` and place it in a west workspace named ```hww```.
 ```bash
-export revision=harpoon_3.3.0
+export revision=harpoon_3.4.0
 west init -m https://github.com/NXP/harpoon-apps --mr ${revision} hww
 cd hww
 west update
@@ -214,7 +214,7 @@ Please refer to https://docs.zephyrproject.org/latest/develop/west/install.html 
 ./build_apps.sh [clean]                                 - build or clean all applications
 ./build_apps.sh [clean] [os] [board-list] [app-list]    - build or clean specified applications
                                                         - os: freertos or zephyr (both if not specified)
-                                                        - board-list: one or more of: evkmimx8mm evkmimx8mn evkmimx8mp mcimx93evk imx95lpd5evk19 (all if not specified)
+                                                        - board-list: one or more of: evkmimx8mm evkmimx8mn evkmimx8mp mcimx93evk imx95lp4xevk15 imx95lpd5evk19 (all if not specified)
                                                         - app-list: one or more of: audio harpoon_drivers_test hello_world industrial rt_latency virtio_net (all if not specified)
 ```
 Before executing the script, as mentioned above, the enviroment variables "ARMGCC_DIR" and "Zephyr_DIR" (if building Zephyr applications) need to be set.
