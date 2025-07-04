@@ -63,7 +63,7 @@ void clock_setup_enetc(void)
 		.clk_id = hal_clock_enetref,
 		.enable_clk = true,
 	};
-	uint32_t rate;
+	uint64_t rate;
 
 	HAL_ClockEnableRootClk(&hal_enetclk);
 	rate = HAL_ClockGetIpFreq(hal_clock_enet);
@@ -76,28 +76,42 @@ void clock_setup_enetc(void)
 
 uint32_t clock_get_mdio_clock(void)
 {
-	return HAL_ClockGetIpFreq(hal_clock_enet);
+	uint64_t rate = HAL_ClockGetIpFreq(hal_clock_enet);
+
+	configASSERT(rate <= UINT32_MAX)
+
+	return rate;
 }
 
 uint32_t clock_get_netc_timer_clock(void)
 {
-	return HAL_ClockGetIpFreq(hal_clock_enet);
+	uint64_t rate = HAL_ClockGetIpFreq(hal_clock_enet);
+
+	configASSERT(rate <= UINT32_MAX)
+
+	return rate;
 }
 
 uint32_t clock_get_tpm_clock(void *base)
 {
+	uint64_t rate;
+
 	if (base == TPM1)
-		return HAL_ClockGetIpFreq(hal_clock_busaon);
+		rate = HAL_ClockGetIpFreq(hal_clock_busaon);
 	else if (base == TPM2)
-		return HAL_ClockGetIpFreq(hal_clock_tpm2);
+		rate = HAL_ClockGetIpFreq(hal_clock_tpm2);
 	else if (base == TPM3)
-		return HAL_ClockGetIpFreq(hal_clock_buswakeup);
+		rate = HAL_ClockGetIpFreq(hal_clock_buswakeup);
 	else if (base == TPM4)
-		return HAL_ClockGetIpFreq(hal_clock_tpm4);
+		rate = HAL_ClockGetIpFreq(hal_clock_tpm4);
 	else if (base == TPM5)
-		return HAL_ClockGetIpFreq(hal_clock_tpm5);
+		rate = HAL_ClockGetIpFreq(hal_clock_tpm5);
 	else if (base == TPM6)
-		return HAL_ClockGetIpFreq(hal_clock_tpm6);
+		rate = HAL_ClockGetIpFreq(hal_clock_tpm6);
 	else
-		return 0;
+		rate = 0;
+
+	configASSERT(rate <= UINT32_MAX)
+
+	return rate;
 }
