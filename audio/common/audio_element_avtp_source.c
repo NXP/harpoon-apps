@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -407,11 +407,9 @@ static int listener_receive(struct avtp_source_element *avtp, unsigned int strea
 		}
 
 		/* Calculate the delay between the current time and the time when the audio should be played */
-		tmp_float = (float)(event_ts->ts - (uint32_t)now);
+		tmp_float = (float)(event_ts->ts + GENAVB_PROCESSING_TIME - (uint32_t)now);
 		/* take into account event index offset */
 		tmp_float -= ((float)event_ts->index / stream->sample_size) * stream->sample_dt;
-		/* take into account worst case processing time */
-		tmp_float += (float)GENAVB_PROCESSING_TIME;
 		tmp_float = tmp_float / (period * stream->sample_dt);
 		/* ceil to get upper value and take 1 period of processing into account */
 		periods_to_wait = (unsigned int)ceilf(tmp_float);
