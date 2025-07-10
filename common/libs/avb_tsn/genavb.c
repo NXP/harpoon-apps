@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024 NXP
+ * Copyright 2018-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -204,6 +204,11 @@ int gavb_stack_init(void)
             }
 
             genavb_config->avdecc_config.milan_mode = avdecc_cfg->milan_mode;
+
+            if (avdecc_cfg->milan_mode) {
+                /* Make sure to make entity startup wait for avdecc start command in Milan mode. */
+                genavb_config->avdecc_config.entity_cfg[0].channel_waitmask = AVDECC_WAITMASK_MEDIA_STACK | AVDECC_WAITMASK_MEDIA_STACK_START;
+            }
 
             if (aem_manager_create_entities() < 0) {
                 goto err_aem;

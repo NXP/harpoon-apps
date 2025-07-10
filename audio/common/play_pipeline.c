@@ -314,6 +314,9 @@ void play_pipeline_ctrl_avb(void *handle)
 
 static int avb_setup(struct pipeline_ctx *ctx)
 {
+	genavb_msg_type_t msg_type = GENAVB_MSG_MEDIA_STACK_ENTITY_START;
+	struct genavb_msg_media_stack_start media_stack_start;
+	unsigned int msg_len = sizeof(media_stack_start);
 	int genavb_result;
 	int rc;
 
@@ -367,6 +370,18 @@ static int avb_setup(struct pipeline_ctx *ctx)
 	genavb_result = genavb_control_open(get_genavb_handle(), &ctx->avb.controlled_h, GENAVB_CTRL_AVDECC_CONTROLLED);
 	if (genavb_result != GENAVB_SUCCESS) {
 		log_err("genavb_control_open(GENAVB_CTRL_AVDECC_CONTROLLED) failed: %s\n", genavb_strerror(genavb_result));
+		rc = -1;
+
+		goto exit;
+	}
+
+	/*
+	* Start the AVDECC (non-controller) entity
+	*/
+	media_stack_start.entity_id = 0;
+	rc = genavb_control_send(ctx->avb.ctrl_h, msg_type, &media_stack_start, msg_len);
+	if (genavb_result != GENAVB_SUCCESS) {
+		log_err("genavb_control_send(GENAVB_MSG_MEDIA_STACK_ENTITY_START) failed: %s\n", genavb_strerror(genavb_result));
 		rc = -1;
 
 		goto exit;
