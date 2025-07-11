@@ -334,12 +334,15 @@ err:
 	return -1;
 }
 
-#define  GENAVB_PROCESSING_TIME		500000U
+/* 1ms playback offset to cover: the worst case stack max processing time (500us) + worst case delay caused by misalignment
+ * between the application batch and the stack batch.
+ */
+#define  GENAVB_PROCESSING_TIME_NS		1000000U
 static int listener_timestamp_accept(unsigned int ts, unsigned int now, unsigned int period, unsigned int sample_rate, unsigned int sr_class)
 {
 	/* Timestamp + playback offset must be after now (otherwise packet are too late) */
 	/* Timestamp must be before now + transit time + timing uncertainty (otherwise they arrived too early) */
-	if (avtp_after(ts + GENAVB_PROCESSING_TIME, now)
+	if (avtp_after(ts + GENAVB_PROCESSING_TIME_NS, now)
 	&& avtp_before(ts, now + sr_class_max_transit_time(sr_class)
 				+ sr_class_max_timing_uncertainty(sr_class)))
 		return 1;
@@ -407,7 +410,7 @@ static int listener_receive(struct avtp_source_element *avtp, unsigned int strea
 		}
 
 		/* Calculate the delay between the current time and the time when the audio should be played */
-		tmp_float = (float)(event_ts->ts + GENAVB_PROCESSING_TIME - (uint32_t)now);
+		tmp_float = (float)(event_ts->ts + GENAVB_PROCESSING_TIME_NS - (uint32_t)now);
 		/* take into account event index offset */
 		tmp_float -= ((float)event_ts->index / stream->sample_size) * stream->sample_dt;
 		tmp_float = tmp_float / (period * stream->sample_dt);
