@@ -42,7 +42,7 @@ manifest:
       revision: b5916939a8384aac3398e3f4ea97917fa9b030fd
     - name: heterogeneous-multicore
       remote: nxprealtimeedgesw
-      revision: cc83373cf42c98ffd6883d0dfe4b0099681ba517
+      revision: 3ae161522ebe06f90121be09e12f898acf928791
     - name: mcux-sdk-middleware-multicore
       remote: nxpmcuxpresso
       revision: 5b8772984399c3fa4c1bc3d530db09fef74349c7
