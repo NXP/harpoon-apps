@@ -22,7 +22,7 @@ manifest:
       remote: nxpmcuxpresso
       revision: 8b87c88b7bfd4c100f339dbf47ac74788dbc8ba8
     - name: GenAVB_TSN
-      revision: 7af468f895be7dec14efc44ac98edd16975b7019
+      revision: 6b962d6c34b0c3f142295a213dfa70bda193b23d
       path: gen_avb_sdk
     - name: rtos-abstraction-layer
       revision: d0f9ef4adbe2ddcd18932cfd2758753204503fe0
