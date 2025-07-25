@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -15,13 +15,15 @@ extern const ccm_analog_frac_pll_config_t g_audioPll1Config;
 
 
 /*
- * 24MHz XTAL oscillator
- * Primary clock source for all PLLs
+ * 24MHz XTAL oscillator as primary clock source for all PLLs
+ * The imx_pll API from GenAVB/TSN expects pll_ref to match: pll_out = ref x (div + num/denum) [1]
+ * While the i.MX 8MPlus has: pll_out = (parent_rate * (m + k/65536)) / (p * 2^s) [2]
+ * So, align the returned pll_ref to take into account the pre and post dividers
  */
 uint32_t dev_get_pll_ref_freq(void)
 {
-    uint8_t preDiv   = g_audioPll1Config.preDiv;
-    uint8_t postDiv  = g_audioPll1Config.postDiv;
+	uint8_t preDiv   = g_audioPll1Config.preDiv;
+	uint8_t postDiv  = g_audioPll1Config.postDiv;
 	uint32_t parent_clk = CLOCK_GetPllRefClkFreq(kCLOCK_AudioPll1Ctrl);
 
 	return parent_clk / ((uint32_t)preDiv * (1ULL << postDiv));
