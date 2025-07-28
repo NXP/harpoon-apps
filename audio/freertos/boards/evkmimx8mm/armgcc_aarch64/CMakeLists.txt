@@ -20,6 +20,8 @@ ENABLE_LANGUAGE(ASM)
 
 # ENABLE GEN_AVB
 SET(CONFIG_USE_GENAVB ON)
+SET(CONFIG_RTOS_APPS_AUDIO_GENAVB_ENABLE ON)
+SET(CONFIG_RTOS_APPS_AUDIO_PLL_ENABLE ON)
 
 SET(CMAKE_STATIC_LIBRARY_PREFIX)
 SET(CMAKE_STATIC_LIBRARY_SUFFIX)
@@ -51,6 +53,7 @@ add_compile_options(-DCODEC_PCM512X_ENABLE=1)
 add_compile_options(-DCODEC_WM8524)
 add_compile_options(-DCODEC_WM8524_ENABLE=1)
 add_compile_options(-DCONFIG_GENAVB_ENABLE=1)
+add_compile_options(-DCONFIG_HAS_CORTEX_A=1)
 
 add_executable(${MCUX_SDK_PROJECT_NAME})
 
@@ -62,7 +65,6 @@ include(${BoardPath}/armgcc_aarch64/flags.cmake)
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     "${AppPath}/freertos/main.c"
-    "${AppPath}/common/sai_drv.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
     "${AppPath}/common/boards/${BoardName}/clock_config.c"
@@ -70,20 +72,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     "${AppPath}/common/boards/${BoardName}/sai_config.c"
     "${AppPath}/common/boards/${BoardName}/sai_clock_config.c"
     "${AppPath}/common/boards/${BoardName}/codec_config.c"
-    "${AppPath}/common/audio.c"
     "${AppPath}/common/audio_app.c"
-    "${AppPath}/common/audio_buffer.c"
-    "${AppPath}/common/audio_element.c"
-    "${AppPath}/common/audio_element_dtmf.c"
-    "${AppPath}/common/audio_element_pll.c"
-    "${AppPath}/common/audio_element_routing.c"
-    "${AppPath}/common/audio_element_sai_sink.c"
-    "${AppPath}/common/audio_element_sai_source.c"
-    "${AppPath}/common/audio_element_sine.c"
-    "${AppPath}/common/audio_pipeline.c"
-    "${AppPath}/common/audio_pll14xx.c"
     "${AppPath}/common/pipeline_config.c"
-    "${AppPath}/common/play_pipeline.c"
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
@@ -119,6 +109,7 @@ set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(rtos_abstraction_layer)
 
 set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_audio.cmake)
 include(${RtosAppsPath}/rtos_apps_log.cmake)
 include(${RtosAppsPath}/rtos_apps_stats.cmake)
 

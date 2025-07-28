@@ -13,8 +13,6 @@ set(CONFIG "endpoint_avb")
 add_subdirectory(${GenAVBPath} "${GenAVBBuildPath}")
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    "${AppPath}/common/audio_element_avtp_sink.c"
-    "${AppPath}/common/audio_element_avtp_source.c"
     "${AppPath}/common/avb_config.c"
     "${AppPath}/common/boards/${BoardName}/avb_hardware.c"
     "${CommonPath}/boards/${BoardName}/genavb_sdk.c"

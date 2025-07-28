@@ -8,10 +8,10 @@
 #include "fsl_sai.h"
 
 #include "app_board.h"
-#include "codec_config.h"
-#include "sai_config.h"
 
-struct sai_active_config sai_active_list[] = {
+#include "rtos_apps/audio/audio_app.h"
+
+struct sai_active_config audio_app_sai_active_list[] = {
 	{
 		.sai_base = SAI5_SAI,
 		.clk_id = SAI5_CLK_ID,
@@ -48,9 +48,9 @@ struct sai_active_config sai_active_list[] = {
 	},
 };
 
-int32_t sai_active_list_nelems = ARRAY_SIZE(sai_active_list);
+int32_t audio_app_sai_active_list_nelems = ARRAY_SIZE(audio_app_sai_active_list);
 
-void sai_set_audio_hat_codec(bool use_audio_hat, unsigned int rate)
+void audio_app_sai_alternate_config(bool use_audio_hat, unsigned int rate)
 {
 	return;
 }

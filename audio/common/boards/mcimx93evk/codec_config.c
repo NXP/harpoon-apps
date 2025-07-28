@@ -11,9 +11,10 @@
 #include "fsl_rgpio.h"
 
 #include "app_board.h"
-#include "codec_config.h"
 #include "rtos_apps/log.h"
 #include "rtos_abstraction_layer.h"
+
+#include "rtos_apps/audio/audio_app.h"
 
 #define WM8962_THREED1					0x10CU
 #define WM8962_THREED1_ADCMONOMIX_MASK	0x40U
@@ -183,7 +184,17 @@ end:
 	return err;
 }
 
-int32_t codec_set_format(enum codec_id cid,uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
+static inline bool is_value_in_array(uint32_t value, uint32_t array[], size_t size)
+{
+	for (int i = 0; i < size; i++) {
+		if (array[i] == value)
+			return true;
+	}
+
+	return false;
+}
+
+int32_t audio_app_codec_set_format(enum codec_id cid,uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
 {
 	int32_t err = kStatus_Success;
 
@@ -209,7 +220,7 @@ end:
 	return err;
 }
 
-int32_t codec_setup(enum codec_id cid)
+int32_t audio_app_codec_setup(enum codec_id cid)
 {
 	int32_t err;
 
@@ -227,7 +238,7 @@ end:
 	return err;
 }
 
-int32_t codec_close(enum codec_id cid)
+int32_t audio_app_codec_close(enum codec_id cid)
 {
 	int32_t err;
 
@@ -253,7 +264,7 @@ end:
 	return err;
 }
 
-bool codec_is_rate_supported(uint32_t rate, bool use_audio_hat)
+bool audio_app_codec_is_rate_supported(uint32_t rate, bool use_audio_hat)
 {
 	uint32_t supported_rates_cs42448[] = CS42448_SUPPORTED_RATES;
 	uint32_t supported_rates_wm8962[] = WM8962_SUPPORTED_RATES;

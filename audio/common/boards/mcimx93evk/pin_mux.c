@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -62,7 +62,7 @@ void BOARD_InitPins(void)
 						IOMUXC_PAD_OD_MASK);
 }
 
-void pin_mux_dynamic_config(bool use_audio_hat)
+void audio_app_pin_mux_dynamic_config(bool use_audio_hat)
 {
 	/* GPIO IO19 can only be used by the on-board codec or by the MX93AUD-HAT once */
 	if (use_audio_hat) {

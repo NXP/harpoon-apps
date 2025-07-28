@@ -9,9 +9,6 @@
 
 #include "board.h"
 #include "clock_config.h"
-#include "rtos_apps/log.h"
-#include "rtos_abstraction_layer.h"
-
 #include "pin_mux.h"
 
 #include "audio_app.h"

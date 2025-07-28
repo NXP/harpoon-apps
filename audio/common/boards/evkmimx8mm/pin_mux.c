@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -83,6 +83,6 @@ void BOARD_InitPins(void)
 			IOMUXC_SW_PAD_CTL_PAD_HYS(1U));
 }
 
-void pin_mux_dynamic_config(bool use_audio_hat) {
+void audio_app_pin_mux_dynamic_config(bool use_audio_hat) {
 	return;
 }

@@ -74,4 +74,6 @@
 
 #define SUPPORTED_RATES				{44100, 48000, 88200, 96000, 176400, 192000}
 
+#define SAI_DATA_MASK_NONE 0
+
 #endif /* _APP_BOARD_H_ */

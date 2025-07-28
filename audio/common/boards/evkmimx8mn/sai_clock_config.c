@@ -7,24 +7,23 @@
 #include "fsl_clock.h"
 #include "fsl_common.h"
 
-#include "codec_config.h"
 #include "rtos_abstraction_layer.h"
-#include "sai_drv.h"
-#include "sai_config.h"
 
-void sai_clock_setup(void)
+#include "rtos_apps/audio/audio_app.h"
+
+void audio_app_sai_clock_setup(void)
 {
 	int i;
 
-	if (sai_active_list_nelems == 0)
+	if (audio_app_sai_active_list_nelems == 0)
 		rtos_assert(false, "No SAI enabled!");
 
 	/* Enable SAI clocks */
-	for (i = 0; i < sai_active_list_nelems; i++) {
+	for (i = 0; i < audio_app_sai_active_list_nelems; i++) {
 		uint32_t root_mux_apll;
 
 		/* Set SAI source to AUDIO PLL 393216000HZ */
-		switch (sai_active_list[i].audio_pll) {
+		switch (audio_app_sai_active_list[i].audio_pll) {
 			case kCLOCK_AudioPll1Ctrl:
 				root_mux_apll = kCLOCK_SaiRootmuxAudioPll1;
 				break;
@@ -32,16 +31,17 @@ void sai_clock_setup(void)
 				root_mux_apll = kCLOCK_SaiRootmuxAudioPll2;
 				break;
 			default:
-				rtos_assert(false, "Invalid Audio PLL! (%d)", sai_active_list[i].audio_pll);
+				rtos_assert(false, "Invalid Audio PLL! (%d)", audio_app_sai_active_list[i].audio_pll);
 				break;
 		}
-		CLOCK_SetRootMux(sai_active_list[i].root_clk_id, root_mux_apll);
+
+		CLOCK_SetRootMux(audio_app_sai_active_list[i].root_clk_id, root_mux_apll);
 
 		/* Set root clock to 393216000HZ / 16 = 24.576MHz */
-		CLOCK_SetRootDivider(sai_active_list[i].root_clk_id,
-				sai_active_list[i].audio_pll_mul,
-				sai_active_list[i].audio_pll_div);
-		CLOCK_EnableClock(sai_active_list[i].clk_id);
+		CLOCK_SetRootDivider(audio_app_sai_active_list[i].root_clk_id,
+				audio_app_sai_active_list[i].audio_pll_mul,
+				audio_app_sai_active_list[i].audio_pll_div);
+		CLOCK_EnableClock(audio_app_sai_active_list[i].clk_id);
 	}
 }
 
@@ -75,23 +75,23 @@ static uint32_t __get_pll_from_srate(uint32_t srate)
 	return apll;
 }
 
-uint32_t sai_select_audio_pll_mux(int sai_active_index, int srate)
+uint32_t audio_app_sai_select_audio_pll_mux(unsigned int index, int srate)
 {
 	uint32_t root_mux_apll;
 
 	root_mux_apll = __get_pll_rootmux_from_srate(srate);
-	CLOCK_SetRootMux(sai_active_list[sai_active_index].root_clk_id, root_mux_apll);
+	CLOCK_SetRootMux(audio_app_sai_active_list[index].root_clk_id, root_mux_apll);
 
 	return __get_pll_from_srate(srate);
 }
 
-uint32_t get_sai_clock_freq(unsigned int sai_active_index)
+uint32_t audio_app_sai_get_clock_freq(unsigned int index)
 {
 	clock_root_control_t sai_clock_root;
 
-	rtos_assert(sai_active_index < sai_active_list_nelems, "%u not a valid active sai_active_index", sai_active_index);
+	rtos_assert(index < audio_app_sai_active_list_nelems, "%u not a valid active index", index);
 
-	sai_clock_root = sai_active_list[sai_active_index].root_clk_id;
+	sai_clock_root = audio_app_sai_active_list[index].root_clk_id;
 
-	return CLOCK_GetPllFreq(sai_active_list[sai_active_index].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
+	return CLOCK_GetPllFreq(audio_app_sai_active_list[index].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
 }
