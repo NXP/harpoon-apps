@@ -1,12 +1,13 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "fsl_clock.h"
-#include "audio.h"
-#include "audio_pipeline.h"
+
+#include "rtos_apps/audio/audio_app.h"
+#include "rtos_apps/audio/audio_pipeline.h"
 #if (CONFIG_GENAVB_ENABLE == 1)
 #include "genavb/control_clock_domain.h"
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
@@ -1366,7 +1367,7 @@ struct play_pipeline_config play_pipeline_mcr_smp_config = {
 };
 #endif
 
-const struct play_pipeline_config *g_play_config[] = {
+const struct play_pipeline_config *audio_app_play_config[] = {
 	[0] = &play_pipeline_dtmf_config,
 	[1] = &play_pipeline_sine_config,
 	[2] = &play_pipeline_loopback_config,
@@ -1386,4 +1387,4 @@ const struct play_pipeline_config *g_play_config[] = {
 #endif
 };
 
-const struct play_pipeline_config *g_play_aud_hat_config[] = {};
+const struct play_pipeline_config *audio_app_play_alternate_config[] = {};

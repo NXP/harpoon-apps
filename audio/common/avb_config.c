@@ -1,11 +1,10 @@
 /*
- * Copyright 2022, 2024 NXP
+ * Copyright 2022, 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "system_config.h"
-#include "clock_domain.h"
 #include "board.h"
 
 struct system_config system_cfg = {
@@ -18,11 +17,6 @@ struct system_config system_cfg = {
             .hw_addr = {0x00, 0x11, 0x22, 0x22, 0x44, 0x00},
         },
 #endif
-    },
-    .app = {
-        .avb_app_config = {
-            .mclock_role = MEDIA_CLOCK_SLAVE,
-        },
     },
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
     .avdecc = {

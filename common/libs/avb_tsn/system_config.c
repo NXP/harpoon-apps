@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2022-2024 NXP
+ * Copyright 2019, 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -43,19 +43,6 @@ struct net_config *system_config_get_net(unsigned int port_id)
 	}
 
 	return &system_cfg.net[port_id];
-}
-
-struct avb_app_config *system_config_get_avb_app(void)
-{
-	struct avb_app_config *config = &system_cfg.app.avb_app_config;
-
-	if (storage_cd("/avb_app", true) == 0) {
-		storage_read_uint("mclock_role", &config->mclock_role);
-
-		storage_cd("/", true);
-	}
-
-	return config;
 }
 
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
