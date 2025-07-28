@@ -166,6 +166,7 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   └── utilities
 └── middleware                              <-- multicore and rpmsg-lite middleware
 └── rtos-abstraction-layer                  <-- RTOS Abstraction Layer
+└── rtos-apps                               <-- RTOS Application Libraries
 └── zephyr                                  <-- Imported Zephyr module
 ```
 

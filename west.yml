@@ -27,6 +27,8 @@ manifest:
     - name: rtos-abstraction-layer
       revision: d0f9ef4adbe2ddcd18932cfd2758753204503fe0
       path: rtos-abstraction-layer
+    - name: rtos-apps
+      revision: master
     - name: hal_nxp
       remote: nxpzephyr
       revision: 744dcd8da0ccfb7aecba52ba116b4bf362c7541b
