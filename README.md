@@ -107,10 +107,12 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   │   │   └── unistd.h
 │   │   │   └── os.h
 │   │   ├── libs
-│   │   │   └── stats
-│   │   │       ├── lib_stats.cmake
-│   │   │       ├── stats.c
-│   │   │       └── stats.h
+│   │   │   ├── ...
+│   │   │   └── jailhouse
+│   │   │       ├── console.c
+│   │   │       ├── console.h
+│   │   │       ├── ...
+│   │   │       └── lib_jailhouse.cmake
 │   │   ├── os                              <-- includes standard/posix header files os APIs
 │   │   │   ├── assert.h
 │   │   │   ├── cache.h

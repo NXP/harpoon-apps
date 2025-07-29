@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,9 +9,9 @@
 #include "audio_app.h"
 #include "audio_element_pll.h"
 #include "audio_element.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "hrpn_ctrl.h"
-#include "libs/stats/stats.h"
+#include "rtos_apps/stats.h"
 
 #include "sai_drv.h"
 

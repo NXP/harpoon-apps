@@ -1,11 +1,11 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "FreeRTOS.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 
 static uint64_t cpu_idle = 0, cpu_busy = 0;
 uint64_t cpu_load_work_begin;

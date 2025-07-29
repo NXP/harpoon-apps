@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,7 +8,7 @@
 
 #include "ivshmem.h"
 #include "memory.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "rtos_abstraction_layer.h"
 
 /* Jailhouse COMM */

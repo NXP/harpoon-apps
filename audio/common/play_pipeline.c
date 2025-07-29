@@ -10,7 +10,7 @@
 
 #include "audio_pipeline.h"
 #include "audio.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "hrpn_ctrl.h"
 #include "rtos_abstraction_layer.h"
 

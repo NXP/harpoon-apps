@@ -14,7 +14,7 @@
 #include "codec_config.h"
 
 #include "app_board.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "rtos_abstraction_layer.h"
 
 static codec_handle_t wm8524_codec_handle;

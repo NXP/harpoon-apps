@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP.
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,8 +7,8 @@
 #include "os/counter.h"
 #include "os/cache.h"
 
-#include "hlog.h"
-#include "stats.h"
+#include "rtos_apps/log.h"
+#include "rtos_apps/stats.h"
 
 #include "hrpn_ctrl.h"
 #include "rt_latency.h"

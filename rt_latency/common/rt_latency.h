@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,7 +8,7 @@
 #define _RT_LATENCY_H_
 
 #include "os/counter.h"
-#include "stats.h"
+#include "rtos_apps/stats.h"
 #include "rpmsg.h"
 #include "rtos_abstraction_layer.h"
 

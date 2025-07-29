@@ -26,6 +26,7 @@ SET(CommonPath "${ProjDirPath}/../../../../../common")
 SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/evkmimx8mp")
 SET(RtosAbstractionLayerPath "${ProjDirPath}/../../../../../../rtos-abstraction-layer/freertos")
+SET(RtosAppsPath "${ProjDirPath}/../../../../../../rtos-apps")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -59,7 +60,6 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
-    ${CommonPath}/libs/hlog
     ${RtosPath}
     ${SdkDirPath}
     ${RtosAbstractionLayerPath}
@@ -70,6 +70,9 @@ set(CMAKE_MODULE_PATH
 set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(rtos_abstraction_layer)
 
+set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_log.cmake)
+
 include(all_devices)
 
 # include modules
@@ -78,8 +81,6 @@ include(device_system_ca53)
 
 include(common_freertos)
 include(common_freertos_core_armv8a)
-
-include(lib_hlog)
 
 include(component_iuart_adapter)
 include(component_lists)

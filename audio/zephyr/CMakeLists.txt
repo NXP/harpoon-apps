@@ -29,6 +29,7 @@ set(AppPath "${ProjDirPath}/..")
 SET(ProjRootPath "${ProjDirPath}/../../")
 SET(HAL_NXP_PATH "${ProjRootPath}/../modules/hal/nxp")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/zephyr")
+SET(RtosAppsPath "${ProjRootPath}/../rtos-apps")
 
 if(CONFIG_USE_GENAVB)
   include(genavb_sdk.cmake)
@@ -41,10 +42,8 @@ zephyr_include_directories(
 	${AppPath}/zephyr/boards/${BoardName}
 	${CommonPath}
 	${CommonPath}/libs/ctrl
-	${CommonPath}/libs/hlog
 	${CommonPath}/libs/jailhouse
 	${CommonPath}/libs
-	${CommonPath}/libs/stats
 	${CommonPath}/zephyr/boards
 	${CommonBoardPath}
 	${ProjDirPath}
@@ -52,15 +51,17 @@ zephyr_include_directories(
 
 set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/ctrl
-    ${CommonPath}/libs/hlog
     ${CommonPath}/libs/jailhouse
-    ${CommonPath}/libs/stats
     ${CommonPath}/libs/rpmsg
     ${RtosAbstractionLayerPath}
 )
 
 set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(rtos_abstraction_layer)
+
+set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_log.cmake)
+include(${RtosAppsPath}/rtos_apps_stats.cmake)
 
 zephyr_compile_definitions(OS_ZEPHYR)
 zephyr_compile_definitions(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
@@ -78,9 +79,7 @@ if(NOT CONFIG_USE_GENAVB)
 endif()
 
 include(lib_ctrl)
-include(lib_hlog)
 include(lib_jailhouse)
-include(lib_stats)
 include(lib_rpmsg_zephyr)
 
 if(CONFIG_BOARD_IMX8MM_EVK)

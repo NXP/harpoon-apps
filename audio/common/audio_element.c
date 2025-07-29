@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,7 +8,7 @@
 #include "audio_element.h"
 #include "audio_pipeline.h"
 #include "hrpn_ctrl.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 
 const char *element_name[AUDIO_ELEMENT_MAX] = {
 	[AUDIO_ELEMENT_DTMF_SOURCE] = "DTMF_SOURCE",

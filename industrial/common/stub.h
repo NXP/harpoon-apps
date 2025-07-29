@@ -1,10 +1,10 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "hrpn_ctrl.h"
 #include "industrial.h"
 

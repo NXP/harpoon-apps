@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -11,7 +11,7 @@
 #include "audio_element_dtmf.h"
 #include "audio_element.h"
 #include "audio_format.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 
 #define USEC_PER_SEC	1000000
 

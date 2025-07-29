@@ -7,7 +7,7 @@
 #include <zephyr/device.h>
 #include <zephyr/kernel.h>
 
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "rtos_abstraction_layer.h"
 
 #include "pin_mux.h"

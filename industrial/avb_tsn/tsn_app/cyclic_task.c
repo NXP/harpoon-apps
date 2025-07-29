@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2022-2024 NXP
+ * Copyright 2019, 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,7 +7,7 @@
 #include "cyclic_task.h"
 #include "tsn_tasks_config.h"
 
-#include "stats/stats.h"
+#include "rtos_apps/stats.h"
 #include "avb_tsn/stats_task.h"
 #include "avb_tsn/log.h"
 #include "avb_tsn/types.h"

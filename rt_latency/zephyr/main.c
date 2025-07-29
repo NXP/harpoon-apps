@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP.
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,7 +8,7 @@
 #include <zephyr/kernel.h>
 #include <string.h>
 
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "rt_latency.h"
 #include "rtos_abstraction_layer.h"
 

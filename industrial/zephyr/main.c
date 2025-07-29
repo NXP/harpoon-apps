@@ -7,7 +7,7 @@
 #include <zephyr/device.h>
 #include <zephyr/kernel.h>
 
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "os/counter.h"
 
 #include "app_mmu.h"

@@ -42,7 +42,6 @@ zephyr_include_directories(
 
 list(APPEND CMAKE_MODULE_PATH
   ${CommonPath}/libs/avb_tsn
-  ${CommonPath}/libs/stats
 )
 
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MM_EVK FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
@@ -73,7 +72,6 @@ set_target_properties(avb-core-lib PROPERTIES IMPORTED_LOCATION ${GenAVBBuildPat
 add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-rtos)
 
 include(lib_avb_tsn)
-include(lib_stats)
 
 if(build_motor_controller)
   include(${CMAKE_CURRENT_LIST_DIR}/motor_controller.cmake)

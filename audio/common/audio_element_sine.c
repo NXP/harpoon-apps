@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -10,7 +10,7 @@
 #include "audio_element.h"
 #include "audio_buffer.h"
 #include "audio_format.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 
 struct sine_element {
 	struct audio_buffer *out;

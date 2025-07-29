@@ -1,12 +1,12 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "audio_buffer.h"
 #include "audio_element.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 
 /*
  * Audio buffer structure (circular) with single writter/reader.

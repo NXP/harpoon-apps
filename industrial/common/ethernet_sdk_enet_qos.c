@@ -1,12 +1,12 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "ethernet.h"
 #include "app_board.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "hrpn_ctrl.h"
 #include "industrial.h"
 #include "hardware_ethernet.h"

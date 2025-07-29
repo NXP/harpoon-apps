@@ -1,12 +1,12 @@
 /*
- * Copyright 2018, 2022-2024 NXP
+ * Copyright 2018, 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "board.h"
 #include "log.h"
-#include "stats.h"
+#include "rtos_apps/stats.h"
 
 #include "rtos_abstraction_layer.h"
 #include "stats_task.h"

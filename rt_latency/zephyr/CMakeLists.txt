@@ -23,6 +23,7 @@ set(CommonBoardPath "${ProjDirPath}/../../common/boards/${BoardName}")
 set(AppPath "${ProjDirPath}/..")
 set(ProjRootPath "${ProjDirPath}/../../")
 set(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/zephyr")
+set(RtosAppsPath "${ProjRootPath}/../rtos-apps")
 
 zephyr_include_directories(
 	${AppPath}/common
@@ -31,7 +32,6 @@ zephyr_include_directories(
 	${CommonPath}/zephyr/boards
 	${CommonBoardPath}
 	${CommonPath}/libs/jailhouse
-	${CommonPath}/libs/hlog
 	${CommonPath}/libs/ctrl
 	${ProjDirPath}
 	)
@@ -41,14 +41,16 @@ set(MCUX_SDK_PROJECT_NAME app)
 set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/jailhouse
-    ${CommonPath}/libs/hlog
-    ${CommonPath}/libs/stats
     ${CommonPath}/libs/rpmsg
     ${RtosAbstractionLayerPath}
 )
 
 set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(rtos_abstraction_layer)
+
+set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_log.cmake)
+include(${RtosAppsPath}/rtos_apps_stats.cmake)
 
 zephyr_compile_definitions(OS_ZEPHYR)
 
@@ -60,9 +62,7 @@ zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX93_EVK SDK_DEVICE_MAXIMUM_CPU_C
 
 # include modules
 
-include(lib_stats)
 include(lib_jailhouse)
-include(lib_hlog)
 include(lib_ctrl)
 include(lib_rpmsg_zephyr)
 

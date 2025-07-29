@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -16,7 +16,7 @@
 #include "clock_config.h"
 #endif
 
-#include "hlog.h"
+#include "rtos_apps/log.h"
 
 /*******************************************************************************
  * Definitions
@@ -72,7 +72,7 @@ static void hello_func(void *pvParameters)
 {
     for (;;)
     {
-        log_raw(INFO, "\r\n");
+        log_raw_info("\r\n");
         log_info("Hello world.\n");
 
         hello_world_doNothing();
@@ -94,11 +94,11 @@ static void tictac_func(void *pvParameters)
         vTaskDelay(TIME_DELAY_SLEEP);
 
         if (++count % 2)
-            log_raw(INFO, "tic ");
+            log_raw_info("tic ");
         else
-            log_raw(INFO, "tac ");
+            log_raw_info("tac ");
 
         if (!(count % 20))
-            log_raw(INFO, "\r\n");
+            log_raw_info("\r\n");
     }
 }

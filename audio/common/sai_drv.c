@@ -1,11 +1,11 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "app_board.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "os/irq.h"
 #include "sai_drv.h"
 #include "rtos_abstraction_layer.h"

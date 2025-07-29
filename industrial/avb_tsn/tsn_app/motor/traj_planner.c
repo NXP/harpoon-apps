@@ -1,12 +1,12 @@
 /*
- * Copyright 2019, 2024 NXP
+ * Copyright 2019, 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "traj_planner.h"
 #include "math.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "motor_params.h"
 #include "types.h"
 

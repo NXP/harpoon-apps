@@ -32,6 +32,7 @@ SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 
 SET(ProjRootPath "${ProjDirPath}/../../../../../")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/freertos")
+SET(RtosAppsPath "${ProjRootPath}/../rtos-apps")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -59,7 +60,6 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${BoardPath}
     ${CommonPath}
     ${CommonPath}/freertos
-    ${CommonPath}/libs/stats
     ${CommonBoardPath}
     ${BoardPath}
     ${AppBoardPath}
@@ -69,9 +69,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
-    ${CommonPath}/libs/stats
     ${CommonPath}/libs/jailhouse
-    ${CommonPath}/libs/hlog
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/rpmsg
     ${RtosPath}
@@ -117,6 +115,10 @@ set(CONFIG_USE_middleware_freertos-kernel_heap_4 true)
 set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(rtos_abstraction_layer)
 
+set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_log.cmake)
+include(${RtosAppsPath}/rtos_apps_stats.cmake)
+
 include(all_devices)
 
 # include modules
@@ -127,8 +129,6 @@ include(common_freertos)
 include(common_freertos_core_armv8a)
 
 include(driver_counter_tpm)
-
-include(lib_hlog)
 
 include(component_lists)
 include(component_lpuart_adapter)
@@ -142,10 +142,8 @@ include(driver_lpuart)
 include(driver_tpm)
 
 include(lib_ctrl)
-include(lib_hlog)
 include(lib_jailhouse)
 include(lib_rpmsg_freertos)
-include(lib_stats)
 
 include(middleware_freertos-kernel_aarch64)
 include(middleware_freertos-kernel_extension)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -17,8 +17,8 @@
 /* Harpoon-apps includes. */
 #include "os/counter.h"
 
-#include "stats.h"
-#include "hlog.h"
+#include "rtos_apps/stats.h"
+#include "rtos_apps/log.h"
 #include "version.h"
 #include "rtos_abstraction_layer.h"
 
@@ -162,7 +162,7 @@ int start_test_case(void *context, int test_case_id, bool quiet)
 	if (ctx->started)
 		return -1;
 
-	log(INFO, "---\n");
+	log_info("---\n");
 	log_info("Running test case %d:\n", test_case_id);
 
 	main_counter_dev = GET_COUNTER_DEVICE_INSTANCE(0); //GPT1

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2021, 2023-2024 NXP
+ * Copyright 2019, 2021, 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -12,7 +12,7 @@
 #include "network_stats.h"
 #include "math.h"
 #include "motor_params.h"
-#include "stats.h"
+#include "rtos_apps/stats.h"
 #include "traj_planner.h"
 
 /* ----- Definitions ----- */

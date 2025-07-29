@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,7 +7,7 @@
 #include "os/counter.h"
 #include "os/irq.h"
 
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "rtos_abstraction_layer.h"
 
 #include "fsl_device_registers.h"

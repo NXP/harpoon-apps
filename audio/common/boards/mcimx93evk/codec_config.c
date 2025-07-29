@@ -12,7 +12,7 @@
 
 #include "app_board.h"
 #include "codec_config.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "rtos_abstraction_layer.h"
 
 #define WM8962_THREED1					0x10CU

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2022-2024 NXP
+ * Copyright 2019, 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,7 +9,7 @@
 
 #include "rtos_abstraction_layer.h"
 
-#include "libs/stats/stats.h"
+#include "rtos_apps/stats.h"
 #include "genavb/clock.h"
 #include "genavb/timer.h"
 #include "genavb/socket.h"

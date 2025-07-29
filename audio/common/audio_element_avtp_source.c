@@ -18,7 +18,7 @@
 #include "genavb/control_clock_domain.h"
 #include "genavb/genavb.h"
 #include "genavb/sr_class.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "hrpn_ctrl.h"
 
 #include "rtos_abstraction_layer.h"

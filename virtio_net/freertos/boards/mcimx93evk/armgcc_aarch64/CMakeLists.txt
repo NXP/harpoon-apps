@@ -39,6 +39,7 @@ SET(VirtioIncludePath "${HtMulticorePath}/include")
 SET(VirtioDevPath "${HtMulticorePath}/virtio/devices")
 SET(CommonBoardPath "${ProjDirPath}/../../../../../common/boards/${BoardName}")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/freertos")
+SET(RtosAppsPath "${ProjRootPath}/../rtos-apps")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -74,7 +75,6 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
-    ${CommonPath}/libs/hlog
     ${HtMulticorePath}/libs/gen_sw_mbox
     ${RtosPath}
     ${SdkDirPath}
@@ -89,6 +89,10 @@ set(CMAKE_MODULE_PATH
 
 set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(rtos_abstraction_layer)
+
+set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_log.cmake)
+include(${RtosAppsPath}/rtos_apps_stats.cmake)
 
 include(all_devices)
 
@@ -119,8 +123,6 @@ include(middleware_freertos-kernel_aarch64)
 include(utility_assert)
 include(utility_debug_console)
 include(utilities_misc_utilities_aarch64)
-
-include(lib_hlog)
 
 include(lib_net_switch)
 include(lib_port_enet_freertos)

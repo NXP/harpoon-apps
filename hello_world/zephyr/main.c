@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP.
+ * Copyright 2023-2025 NXP.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,7 +7,7 @@
 #include <zephyr/device.h>
 #include <zephyr/kernel.h>
 
-#include "hlog.h"
+#include "rtos_apps/log.h"
 
 #define STACK_SIZE       4096
 #define MAX_TC_THREADS      2
@@ -24,7 +24,7 @@ static void hello_func(void *p1, void *p2, void *p3)
 {
 	struct main_ctx *ctx = p1;
 
-	log_raw(INFO, "\r\n");
+	log_raw_info("\r\n");
 	log_info("Hello world.\n");
 
 	do {
@@ -45,12 +45,12 @@ static void tictac_func(void *p1, void *p2, void *p3)
 		k_msleep(1000);
 
 		if (++count % 2)
-			log_raw(INFO, "tic ");
+			log_raw_info("tic ");
 		else
-			log_raw(INFO, "tac ");
+			log_raw_info("tac ");
 
 		if (!(count % 20))
-			log_raw(INFO, "\r\n");
+			log_raw_info("\r\n");
 
 	} while(1);
 }

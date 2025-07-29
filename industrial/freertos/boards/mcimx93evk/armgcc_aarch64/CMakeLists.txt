@@ -37,6 +37,7 @@ SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(SdkBoardPath "${SdkDirPath}/devices/MIMX9352")
 SET(ProjRootPath "${ProjDirPath}/../../../../../")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/freertos")
+SET(RtosAppsPath "${ProjRootPath}/../rtos-apps")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -85,10 +86,8 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
     ${CommonPath}/libs/ctrl
-    ${CommonPath}/libs/hlog
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/rpmsg
-    ${CommonPath}/libs/stats
     ${RtosPath}
     ${SdkDirPath}
     ${RtosAbstractionLayerPath}
@@ -97,6 +96,10 @@ set(CMAKE_MODULE_PATH
 # include entry for cmake components
 set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(rtos_abstraction_layer)
+
+set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_log.cmake)
+include(${RtosAppsPath}/rtos_apps_stats.cmake)
 
 include(all_devices)
 
@@ -125,9 +128,7 @@ include(driver_phy-device-rtl8211f)
 
 include(lib_ctrl)
 include(lib_jailhouse)
-include(lib_hlog)
 include(lib_rpmsg_freertos)
-include(lib_stats)
 
 include(middleware_freertos-kernel_extension)
 include(middleware_freertos-kernel_heap_4)

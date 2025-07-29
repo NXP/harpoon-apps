@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -11,7 +11,7 @@
 #include "audio_element.h"
 #include "audio_format.h"
 #include "hrpn_ctrl.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 
 struct routing_output {
 	unsigned int input;	/* input mapped to this output */

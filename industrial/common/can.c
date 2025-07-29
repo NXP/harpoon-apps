@@ -7,7 +7,7 @@
 #include "app_board.h"
 #include "hardware_flexcan.h"
 #include "clock_config.h"
-#include "hlog.h"
+#include "rtos_apps/log.h"
 #include "industrial.h"
 #include "fsl_flexcan.h"
 #include "rtos_abstraction_layer.h"

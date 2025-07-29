@@ -30,6 +30,7 @@ SET(AppPath "${ProjDirPath}/../../../..")
 SET(AppBoardPath "${AppPath}/freertos/boards/evkmimx8mn")
 SET(ProjRootPath "${ProjDirPath}/../../../../../")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/freertos")
+SET(RtosAppsPath "${ProjRootPath}/../rtos-apps")
 
 SET(EXECUTABLE_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
 SET(LIBRARY_OUTPUT_PATH ${ProjDirPath}/${CMAKE_BUILD_TYPE})
@@ -54,7 +55,6 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${AppPath}/common/boards/${BoardName}
     ${CommonPath}
     ${CommonPath}/freertos
-    ${CommonPath}/libs/stats
     ${CommonBoardPath}
     ${BoardPath}
     ${AppBoardPath}
@@ -64,9 +64,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
 set(CMAKE_MODULE_PATH
     ${CommonPath}/freertos
     ${CommonPath}/freertos/core/armv8a
-    ${CommonPath}/libs/stats
     ${CommonPath}/libs/jailhouse
-    ${CommonPath}/libs/hlog
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/rpmsg
     ${RtosPath}
@@ -78,6 +76,10 @@ set(CMAKE_MODULE_PATH
 
 set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(rtos_abstraction_layer)
+
+set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_log.cmake)
+include(${RtosAppsPath}/rtos_apps_stats.cmake)
 
 include(all_devices)
 
@@ -101,9 +103,7 @@ include(driver_common)
 include(driver_gpt)
 include(driver_iuart)
 
-include(lib_stats)
 include(lib_jailhouse)
-include(lib_hlog)
 include(lib_ctrl)
 include(lib_rpmsg_freertos)
 
