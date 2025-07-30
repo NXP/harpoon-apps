@@ -5,7 +5,9 @@
  */
 
 #include "audio_app.h"
+#include "aem_manager.h"
 #include "os/irq.h"
+#include "rtos_apps/audio/audio_ctrl.h"
 #include "rtos_apps/audio/audio_entry.h"
 #include "rtos_apps/log.h"
 
@@ -19,6 +21,7 @@
 #include "stats_task.h"
 
 #include "genavb_sdk.h"
+#include "system_config.h"
 
 extern void BOARD_NET_PORT0_DRV_IRQ0_HND(void);
 
@@ -66,11 +69,72 @@ int audio_app_ctrl_send(void *ctrl_handle, void *data, uint32_t len)
 	return rpmsg_send(ept, data, len);
 }
 
-int audio_app_ctrl_recv(void *ctrl_handle, void *data, uint32_t *len)
+struct audio_hw_config {
+	uint8_t address[6];
+};
+
+static void audio_set_hw_addr(struct audio_hw_config *cfg, uint8_t *hw_addr)
+{
+	uint8_t *addr = cfg->address;
+
+	memcpy(addr, hw_addr, sizeof(cfg->address));
+
+	log_info("%02x:%02x:%02x:%02x:%02x:%02x\n", addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+}
+
+static void audio_app_setup(struct audio_cmd_run *run)
+{
+	unsigned int aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID;
+	bool milan_mode = false;
+	struct audio_hw_config cfg;
+
+	audio_set_hw_addr(&cfg, run->addr);
+
+	if (system_config_set_net(0, cfg.address)) {
+		log_warn("system_config_set_net() failed\n");
+	}
+
+	if (run->id == 6 || run->id == 8) {
+		milan_mode = true;
+		/* Use Milan Entity only for AVB Pipelines with MCR Enabled */
+		aem_id = AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID;
+	}
+
+	system_config_set_avdecc(aem_id, milan_mode);
+}
+
+static int rpmsg_receive_audio_command(void *ctrl_handle, void *data, uint32_t *len)
 {
 	struct rpmsg_ept *ept = (struct rpmsg_ept *)ctrl_handle;
 
 	return rpmsg_recv(ept, data, len);
+}
+
+int audio_app_ctrl_recv(void *ctrl_handle, void *data, uint32_t *len)
+{
+	struct audio_command *cmd;
+	int rc;
+
+	rc = rpmsg_receive_audio_command(ctrl_handle, data, len);
+	if (rc < 0)
+		return rc;
+
+	cmd = (struct audio_command*)data;
+
+	switch (cmd->u.cmd.type) {
+	case AUDIO_CMD_TYPE_RUN:
+		if (*len != sizeof(struct audio_cmd_run)) {
+			break;
+		}
+
+		audio_app_setup(&cmd->u.audio_run);
+
+		break;
+	default:
+		break;
+	}
+
+	return rc;
 }
 
 void *audio_app_ctrl_init(void)

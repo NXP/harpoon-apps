@@ -8,12 +8,6 @@
 
 #include "rtos_apps/audio/audio_app.h"
 #include "rtos_apps/audio/audio_pipeline.h"
-#if (CONFIG_GENAVB_ENABLE == 1)
-#include "genavb/control_clock_domain.h"
-#if (CONFIG_GENAVB_USE_AVDECC == 1)
-#include "aem_manager.h"
-#endif
-#endif
 
 const struct audio_pipeline_config pipeline_dtmf_config = {
 
@@ -482,11 +476,6 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 
 	.name = "AVB audio pipeline",
 
-#if (CONFIG_GENAVB_USE_AVDECC == 1)
-	.aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID,
-	.milan_mode = false,
-#endif
-
 	.stages = 3,
 
 	.stage[0] = {
@@ -634,11 +623,6 @@ const struct audio_pipeline_config pipeline_full_avb_thread_0_config = {
 
 	.name = "AVB audio pipeline for thread 0",
 
-#if (CONFIG_GENAVB_USE_AVDECC == 1)
-	.aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID,
-	.milan_mode = false,
-#endif
-
 	.stages = 2,
 
 	.stage[0] = {
@@ -742,11 +726,6 @@ const struct audio_pipeline_config pipeline_full_avb_thread_0_config = {
 const struct audio_pipeline_config pipeline_full_avb_thread_1_config = {
 
 	.name = "AVB audio pipeline for thread 1",
-
-#if (CONFIG_GENAVB_USE_AVDECC == 1)
-	.aem_id = AEM_ENTITY_TALKER_LISTENER_AUDIO_DEFAULT_ID,
-	.milan_mode = false,
-#endif
 
 	.stages = 1,
 
@@ -1018,11 +997,6 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 
 	.name = "MILAN AVB audio pipeline (with MCR support)",
 
-#if (CONFIG_GENAVB_USE_AVDECC == 1)
-	.aem_id = AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID,
-	.milan_mode = true,
-#endif
-
 	.stages = 3,
 
 	.stage[0] = {
@@ -1145,11 +1119,6 @@ const struct audio_pipeline_config pipeline_mcr_avb_thread_0_config = {
 
 	.name = "MILAN AVB audio pipeline (with MCR support) for thread 0",
 
-#if (CONFIG_GENAVB_USE_AVDECC == 1)
-	.aem_id = AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID,
-	.milan_mode = true,
-#endif
-
 	.stages = 2,
 
 	.stage[0] = {
@@ -1242,11 +1211,6 @@ const struct audio_pipeline_config pipeline_mcr_avb_thread_0_config = {
 const struct audio_pipeline_config pipeline_mcr_avb_thread_1_config = {
 
 	.name = "AVB audio pipeline (with MCR support) for thread 1",
-
-#if (CONFIG_GENAVB_USE_AVDECC == 1)
-	.aem_id = AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID,
-	.milan_mode = true,
-#endif
 
 	.stages = 1,
 
