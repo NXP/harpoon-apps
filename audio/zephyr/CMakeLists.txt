@@ -9,15 +9,23 @@ set(MCUX_SDK_PROJECT_NAME app)
 if(CONFIG_BOARD_IMX8MM_EVK)
   set(BoardName "evkmimx8mm")
   set(CONFIG_USE_GENAVB ON)
+  set(CONFIG_RTOS_APPS_AUDIO_GENAVB_ENABLE ON)
+  set(CONFIG_RTOS_APPS_AUDIO_PLL_ENABLE ON)
 elseif(CONFIG_BOARD_IMX8MN_EVK)
   set(BoardName "evkmimx8mn")
   set(CONFIG_USE_GENAVB ON)
+  set(CONFIG_RTOS_APPS_AUDIO_GENAVB_ENABLE ON)
+  set(CONFIG_RTOS_APPS_AUDIO_PLL_ENABLE ON)
 elseif(CONFIG_BOARD_IMX8MP_EVK)
   set(BoardName "evkmimx8mp")
   set(CONFIG_USE_GENAVB ON)
+  set(CONFIG_RTOS_APPS_AUDIO_GENAVB_ENABLE ON)
+  set(CONFIG_RTOS_APPS_AUDIO_PLL_ENABLE ON)
 elseif(CONFIG_BOARD_IMX93_EVK)
   set(BoardName "mcimx93evk")
   set(CONFIG_USE_GENAVB ON)
+  set(CONFIG_RTOS_APPS_AUDIO_GENAVB_ENABLE ON)
+  set(CONFIG_RTOS_APPS_AUDIO_PLL_ENABLE OFF)
 else()
   message(FATAL_ERROR "unsupported board")
 endif()
@@ -60,10 +68,12 @@ set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(rtos_abstraction_layer)
 
 set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_audio.cmake)
 include(${RtosAppsPath}/rtos_apps_log.cmake)
 include(${RtosAppsPath}/rtos_apps_stats.cmake)
 
 zephyr_compile_definitions(OS_ZEPHYR)
+zephyr_compile_definitions(CONFIG_HAS_CORTEX_A)
 zephyr_compile_definitions(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 # HifiBerry Codec
 zephyr_compile_definitions(CODEC_MULTI_ADAPTERS=1)
@@ -266,29 +276,16 @@ endif()
 target_sources(app PRIVATE
 	       main.c
 	       boards/${BoardName}/app_mmu.c
-	       ${AppPath}/common/audio.c
 	       ${AppPath}/common/audio_app.c
-	       ${AppPath}/common/audio_buffer.c
-	       ${AppPath}/common/audio_element.c
-	       ${AppPath}/common/audio_element_dtmf.c
-	       ${AppPath}/common/audio_element_pll.c
-	       ${AppPath}/common/audio_element_routing.c
-	       ${AppPath}/common/audio_element_sai_sink.c
-	       ${AppPath}/common/audio_element_sai_source.c
-	       ${AppPath}/common/audio_element_sine.c
-	       ${AppPath}/common/audio_pipeline.c
 	       ${AppPath}/common/boards/${BoardName}/clock_config.c
 	       ${AppPath}/common/boards/${BoardName}/codec_config.c
 	       ${AppPath}/common/boards/${BoardName}/pin_mux.c
 	       ${AppPath}/common/boards/${BoardName}/sai_clock_config.c
 	       ${AppPath}/common/boards/${BoardName}/sai_config.c
-	       ${AppPath}/common/play_pipeline.c
-	       ${AppPath}/common/sai_drv.c
 	       )
 
 if(CONFIG_BOARD_IMX8MM_EVK OR CONFIG_BOARD_IMX8MN_EVK OR CONFIG_BOARD_IMX8MP_EVK)
 target_sources(app PRIVATE
-	       ${AppPath}/common/audio_pll14xx.c
 	       ${AppPath}/common/pipeline_config.c
                )
 elseif(CONFIG_BOARD_IMX93_EVK)

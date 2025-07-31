@@ -55,8 +55,6 @@ add_dependencies(${MCUX_SDK_PROJECT_NAME} avb-core-lib stack-rtos)
 include(lib_avb_tsn)
 
 target_sources(app PRIVATE
-  ${AppPath}/common/audio_element_avtp_sink.c
-  ${AppPath}/common/audio_element_avtp_source.c
   ${AppPath}/common/avb_config.c
   ${AppPath}/common/boards/${BoardName}/avb_hardware.c
   ${CommonPath}/boards/${BoardName}/genavb_sdk.c

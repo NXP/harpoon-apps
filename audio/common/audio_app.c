@@ -42,15 +42,19 @@ extern void BOARD_GENAVB_TIMER_0_IRQ_HANDLER(void);
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define DATA_TASK_PRIORITY   (configMAX_PRIORITIES - 2)
-#define CTRL_TASK_PRIORITY   (configMAX_PRIORITIES - 8)
-#define MAIN_TASK_PRIORITY   (configMAX_PRIORITIES - 10)
+#define DATA_TASK_PRIORITY   (RTOS_MAX_PRIORITY - 2)
+#define CTRL_TASK_PRIORITY   (RTOS_MAX_PRIORITY - 8)
+#define MAIN_TASK_PRIORITY   (RTOS_MAX_PRIORITY - 10)
 
+#ifdef CONFIG_SMP
+#define DATA_THREADS         2
+#else
 #define DATA_THREADS         1
+#endif
 #define STATS_PERIOD_MS      10000
-#define DATA_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 200)
-#define CTRL_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 800)
-#define MAIN_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 800)
+#define DATA_TASK_STACK_SIZE (RTOS_MINIMAL_STACK_SIZE + 200)
+#define CTRL_TASK_STACK_SIZE (RTOS_MINIMAL_STACK_SIZE + 800)
+#define MAIN_TASK_STACK_SIZE (RTOS_MINIMAL_STACK_SIZE + 800)
 
 const int audio_app_supported_period[] = {2, 4, 8, 16, 32};
 
@@ -191,7 +195,9 @@ static void main_task(void *data)
 	/* nothing else to do, exit */
 
 exit:
+#if (FSL_RTOS_FREE_RTOS)
 	vTaskDelete(NULL);
+#endif
 }
 
 void audio_app_main(void)
