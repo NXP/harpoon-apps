@@ -285,4 +285,4 @@ To be able to visualize the guest OS console, the UART4 tty shall be opened ; e.
 screen /dev/ttyUSB3 115200
 ```
 
-Please refer to the [Harpoon User's Guide](https://www.nxp.com/docs/en/user-guide/Harpoon_USERS_GUIDE.pdf) for more details.
+Please refer to the [Harpoon User's Guide](https://www.nxp.com/docs/en/user-guide/UG10170.pdf) for more details.
