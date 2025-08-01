@@ -15,10 +15,11 @@
 
 #include "rpmsg.h"
 
+#include "stats_task.h"
+
 #if defined(CONFIG_RTOS_APPS_AUDIO_GENAVB_ENABLE)
 #include "avb_hardware.h"
 #include "genavb.h"
-#include "stats_task.h"
 
 #include "genavb_sdk.h"
 #include "system_config.h"
@@ -192,6 +193,9 @@ static void main_task(void *data)
 		goto exit;
 	}
 
+	if (STATS_TaskInit(NULL, NULL, STATS_PERIOD_MS, NULL) < 0)
+		log_err("STATS_TaskInit() failed\n");
+
 	/* nothing else to do, exit */
 
 exit:
@@ -239,9 +243,6 @@ struct genavb_handle *audio_app_avb_init(void)
 		goto err;
 	}
 
-	if (STATS_TaskInit(NULL, NULL, STATS_PERIOD_MS) < 0)
-		log_err("STATS_TaskInit() failed\n");
-
 	return get_genavb_handle();
 
 err:
@@ -267,8 +268,6 @@ void audio_app_avb_exit(void)
 #endif
 
 	os_irq_unregister(BOARD_GENAVB_TIMER_0_IRQ);
-
-	STATS_TaskExit();
 
 	avb_hardware_exit();
 }

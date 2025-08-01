@@ -39,6 +39,8 @@ SET(HAL_NXP_PATH "${ProjRootPath}/../modules/hal/nxp")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/zephyr")
 SET(RtosAppsPath "${ProjRootPath}/../rtos-apps")
 
+include(${CommonPath}/libs/avb_tsn/lib_avb_tsn_stats.cmake)
+
 if(CONFIG_USE_GENAVB)
   include(genavb_sdk.cmake)
 endif()
@@ -68,6 +70,7 @@ set(RTOS_ABSTRACTION_LAYER_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(rtos_abstraction_layer)
 
 set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_async.cmake)
 include(${RtosAppsPath}/rtos_apps_audio.cmake)
 include(${RtosAppsPath}/rtos_apps_log.cmake)
 include(${RtosAppsPath}/rtos_apps_stats.cmake)
