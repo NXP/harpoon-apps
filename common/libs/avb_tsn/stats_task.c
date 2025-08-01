@@ -5,7 +5,9 @@
  */
 
 #include "board.h"
-#include "log.h"
+#include "clock_config.h"
+#include "rtos_apps/async.h"
+#include "rtos_apps/log.h"
 
 #include "rtos_abstraction_layer.h"
 #include "stats_task.h"
@@ -16,6 +18,37 @@
 #define STATS_TASK_NAME       "stats"
 #define STATS_TASK_STACK_SIZE (RTOS_MINIMAL_STACK_SIZE + 185)
 #define STATS_TASK_PRIORITY   5
+
+#define STATS_MAX_TASKS     20
+
+#ifndef CONFIG_STATS_CPU_LOAD
+#define CONFIG_STATS_CPU_LOAD       0
+#endif
+#ifndef CONFIG_STATS_HEAP
+#define CONFIG_STATS_HEAP           0
+#endif
+#ifndef CONFIG_STATS_TOTAL_CPU_LOAD
+#define CONFIG_STATS_TOTAL_CPU_LOAD 0
+#endif
+
+struct TasksCPULoad_Ctx {
+#if CONFIG_STATS_CPU_LOAD
+    TaskStatus_t __TaskStatusArray[2][STATS_MAX_TASKS];
+    TaskStatus_t *TaskStatusArray;
+    TaskStatus_t *LastTaskStatusArray;
+    uint32_t LastTotalTime;
+    BaseType_t LastNbTasks;
+#endif
+};
+
+struct StatsTask_Ctx {
+#if CONFIG_STATS_CPU_LOAD
+    struct TasksCPULoad_Ctx TasksCPULoad;
+#endif
+    void (*PeriodicFn)(void *Data);
+    void *PeriodicData;
+    unsigned int PeriodMs;
+};
 
 /*******************************************************************************
  * Prototypes
@@ -40,11 +73,11 @@ static void STATS_Heap(void)
     FreeHeap = xPortGetFreeHeapSize();
     UsedHeap = configTOTAL_HEAP_SIZE - FreeHeap;
 
-    rtos_printf("Heap used: %u, free: %u, min free: %u\n",
+    log_raw_info("Heap used: %u, free: %u, min free: %u\n",
            UsedHeap, FreeHeap,
            xPortGetMinimumEverFreeHeapSize());
 
-    rtos_printf("Malloc failed counter: %u\n\n", malloc_failed_count);
+    log_raw_info("Malloc failed counter: %u\n\n", malloc_failed_count);
 }
 #endif
 
@@ -89,7 +122,7 @@ static void STATS_TasksCPULoad(struct TasksCPULoad_Ctx *Ctx)
 
     DeltaTotalTime = TotalTime - Ctx->LastTotalTime;
 
-    rtos_printf("Name          Prio   %%CPU    MinStackFree\n");
+    log_raw_info("Name          Prio   %%CPU    MinStackFree\n");
 
     for (i = 0; i < NbTasks; i++) {
         TaskStatus_t *CurrentTaskStatus, *LastTaskStatus;
@@ -105,13 +138,13 @@ static void STATS_TasksCPULoad(struct TasksCPULoad_Ctx *Ctx)
             TotalTaskTime += DeltaTaskTime;
             PercentUsage = (double)(DeltaTaskTime * 100) / (double)DeltaTotalTime;
 
-            rtos_printf("%-13s %d     %5.2f    %u\n",
+            log_raw_info("%-13s %d     %5.2f    %u\n",
                    CurrentTaskStatus->pcTaskName,
                    CurrentTaskStatus->uxCurrentPriority,
                    PercentUsage,
                    CurrentTaskStatus->usStackHighWaterMark);
         } else {
-            rtos_printf("%-13s %d     ---\n",
+            log_raw_info("%-13s %d     ---\n",
                    CurrentTaskStatus->pcTaskName,
                    CurrentTaskStatus->uxCurrentPriority);
         }
@@ -122,63 +155,12 @@ static void STATS_TasksCPULoad(struct TasksCPULoad_Ctx *Ctx)
     else
         PercentUsage = (double)((DeltaTotalTime - TotalTaskTime) * 100) / (double)DeltaTotalTime;
 
-    rtos_printf("%-13s %d     %5.2f\n", "other", 0, PercentUsage);
+    log_raw_info("%-13s %d     %5.2f\n", "other", 0, PercentUsage);
 
     Ctx->LastTaskStatusArray = TaskStatusArray;
     Ctx->TaskStatusArray = LastTaskStatusArray;
     Ctx->LastTotalTime = TotalTime;
     Ctx->LastNbTasks = NbTasks;
-}
-#endif
-
-#if CONFIG_STATS_ASYNC
-static int STATS_AsyncInit(struct Async_Ctx *Ctx)
-{
-    if (rtos_mqueue_init(&Ctx->qObj, ASYNC_NUM_MSG, sizeof(struct Async_Msg),
-                                      Ctx->qBuffer) < 0)
-        goto err;
-
-    return 0;
-
-err:
-    return -1;
-}
-
-int STATS_Async(void (*Func)(void *Data), void *Data)
-{
-    struct Async_Ctx *Ctx = &StatsTask.Async;
-    struct Async_Msg Msg;
-
-    Msg.Func = Func;
-    Msg.Data = Data;
-
-    return rtos_mqueue_send(&Ctx->qObj, &Msg, RTOS_NO_WAIT);
-}
-
-static void STATS_AsyncProcess(struct Async_Ctx *Ctx, unsigned int WaitMs)
-{
-    struct Async_Msg Msg;
-    unsigned int Last, Now;
-    unsigned int Elapsed, Timeout;
-
-    Timeout = RTOS_TICKS_TO_UINT(RTOS_MS_TO_TICKS(WaitMs));
-    Last = rtos_get_current_time();
-
-    while (true) {
-        if (rtos_mqueue_receive(&Ctx->qObj, &Msg, RTOS_UINT_TO_TICKS(Timeout)) == 0) {
-            Msg.Func(Msg.Data);
-
-            Now = rtos_get_current_time();
-            Elapsed = Now - Last;
-
-            if (Elapsed < Timeout) {
-                Timeout -= Elapsed;
-                Last = Now;
-            } else
-                break;
-        } else
-            break;
-    }
 }
 #endif
 
@@ -195,8 +177,10 @@ static void STATS_TotalCPULoad(unsigned int periodMs)
 }
 #endif
 
-static void STATS_TaskPeriodic(struct StatsTask_Ctx *Ctx)
+static void STATS_TaskPeriodic(void *data)
 {
+    struct StatsTask_Ctx *Ctx = data;
+
     if (Ctx->PeriodicFn)
         Ctx->PeriodicFn(Ctx->PeriodicData);
 
@@ -209,28 +193,21 @@ static void STATS_TaskPeriodic(struct StatsTask_Ctx *Ctx)
 #if CONFIG_STATS_TOTAL_CPU_LOAD
     STATS_TotalCPULoad(Ctx->PeriodMs);
 #endif
-#if CONFIG_STATS_LWIP
-    stats_display();
-#endif
 }
 
-static void STATS_Task(void *pvParameters)
-{
-    struct StatsTask_Ctx *Ctx = pvParameters;
-
-    while (true) {
-#if CONFIG_STATS_ASYNC
-        STATS_AsyncProcess(&Ctx->Async, Ctx->PeriodMs);
-#else
-        rtos_sleep(RTOS_MS_TO_TICKS(Ctx->PeriodMs));
-#endif
-        STATS_TaskPeriodic(Ctx);
-    }
-}
-
-int STATS_TaskInit(void (*PeriodicFn)(void *Data), void *Data, unsigned int PeriodMs)
+int STATS_TaskInit(void (*PeriodicFn)(void *Data), void *Data, unsigned int PeriodMs,
+                   struct rtos_apps_async **async)
 {
     struct StatsTask_Ctx *Ctx = &StatsTask;
+    struct rtos_apps_async *_async;
+    struct rtos_apps_async_config config = {
+        .name = STATS_TASK_NAME,
+        .stack_size = STATS_TASK_STACK_SIZE,
+        .priority = STATS_TASK_PRIORITY,
+        .func = &STATS_TaskPeriodic,
+        .data = Ctx,
+        .period_ms = PeriodMs,
+    };
 
     Ctx->PeriodicFn = PeriodicFn;
     Ctx->PeriodicData = Data;
@@ -241,15 +218,12 @@ int STATS_TaskInit(void (*PeriodicFn)(void *Data), void *Data, unsigned int Peri
         log_err("STATS_TasksCPULoadInit failed\n");
 #endif
 
-#if CONFIG_STATS_ASYNC
-    if (STATS_AsyncInit(&Ctx->Async) < 0)
-        log_err("STATS_AsyncInit failed \n");
-#endif
-
-    if (rtos_thread_create(&Ctx->stats_task, STATS_TASK_PRIORITY, 0, STATS_TASK_STACK_SIZE, STATS_TASK_NAME, STATS_Task, Ctx) < 0) {
-        log_err("rtos_thread_create(%s) failed\n", STATS_TASK_NAME);
+    _async = rtos_apps_async_init(&config);
+    if (!_async)
         goto exit;
-    }
+
+    if (async)
+        *async = _async;
 
     return 0;
 
@@ -257,9 +231,7 @@ exit:
     return -1;
 }
 
-void STATS_TaskExit()
+void STATS_TaskExit(struct rtos_apps_async *async)
 {
-    struct StatsTask_Ctx *Ctx = &StatsTask;
-
-    rtos_thread_abort(&Ctx->stats_task);
+    rtos_apps_async_exit(async);
 }
