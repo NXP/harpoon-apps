@@ -828,6 +828,8 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 
 	.name = "AVB audio pipeline",
 
+	.avb = true,
+
 	.stages = 3,
 
 	.stage[0] = {
@@ -944,6 +946,8 @@ const struct audio_pipeline_config pipeline_full_avb_config = {
 const struct audio_pipeline_config pipeline_full_avb_aud_hat_config = {
 
 	.name = "MX93AUD-HAT AVB audio pipeline",
+
+	.avb = true,
 
 	.stages = 3,
 
@@ -1217,6 +1221,8 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 
 	.name = "MILAN AVB audio pipeline (with MCR support)",
 
+	.avb = true,
+
 	.stages = 3,
 
 	.stage[0] = {
@@ -1335,6 +1341,8 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config = {
 
 	.name = "MX93AUD-HAT MILAN AVB audio pipeline (with MCR support)",
+
+	.avb = true,
 
 	.stages = 3,
 
