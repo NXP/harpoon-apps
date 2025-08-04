@@ -10,6 +10,7 @@
 #ifndef _SYSTEM_CONFIG_H_
 #define _SYSTEM_CONFIG_H_
 
+#include "rtos_apps/tsn/tsn_entry.h"
 #if (CONFIG_GENAVB_USE_AVDECC == 1)
 #include "aem_manager.h"
 #endif
@@ -22,21 +23,9 @@ struct net_config {
     uint8_t gw_addr[4];
 };
 
-struct tsn_app_config {
-    unsigned int mode;
-    unsigned int role;
-    unsigned int num_io_devices;
-    float motor_offset;
-    unsigned int control_strategy;
-    unsigned int use_st;
-    unsigned int use_fp;
-    unsigned int cmd_client;
-    unsigned int period_ns;
-};
-
 struct app_config {
     union {
-        struct tsn_app_config tsn_app_config;
+        struct rtos_apps_tsn_config tsn_app_config;
     };
 };
 

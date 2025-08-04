@@ -1,13 +1,19 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+#include "genavb/qos.h"
+
+#include "rtos_apps/tsn/tsn_tasks_config.h"
+
 #include "system_config.h"
-#include "tsn_tasks_config.h"
 #include "board.h"
 
+#ifndef CONTROLLER_NUM_IO_DEVICES
 #define CONTROLLER_NUM_IO_DEVICES 1
+#endif
 
 struct system_config system_cfg = {
     .net = {
@@ -30,12 +36,14 @@ struct system_config system_cfg = {
         .tsn_app_config = {
             .mode = NETWORK_ONLY,
             .role = CONTROLLER_0,
-            .num_io_devices = CONTROLLER_NUM_IO_DEVICES,
-            .control_strategy = SYNCHRONIZED,
-            .use_st = 1,
-            .use_fp = 0,
             .cmd_client = 0,
+            .control_strategy = CTRL_STRAT_SYNCHRONIZED,
+            .num_io_devices = CONTROLLER_NUM_IO_DEVICES,
             .period_ns = APP_PERIOD_DEFAULT,
+            .priority = ISOCHRONOUS_DEFAULT_PRIORITY,
+            .packets = 1,
+            .zero_copy = 1,
+            .rx_tc_mask = 0,
         },
     },
 };

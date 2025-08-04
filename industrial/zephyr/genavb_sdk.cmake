@@ -78,11 +78,7 @@ if(build_motor_controller)
 endif()
 
 target_sources(app PRIVATE
-  ${AppPath}/avb_tsn/tsn_app/alarm_task.c
   ${AppPath}/avb_tsn/tsn_app/configs.c
-  ${AppPath}/avb_tsn/tsn_app/cyclic_task.c
-  ${AppPath}/avb_tsn/tsn_app/tsn_task.c
-  ${AppPath}/avb_tsn/tsn_app/tsn_tasks_config.c
   ${AppPath}/common/ethernet_avb_tsn.c
   ${CommonPath}/boards/${BoardName}/genavb_sdk.c
 )

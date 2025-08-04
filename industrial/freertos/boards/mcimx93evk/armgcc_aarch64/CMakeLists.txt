@@ -17,6 +17,7 @@ ENABLE_LANGUAGE(ASM)
 
 # ENABLE GEN_AVB
 SET(CONFIG_USE_GENAVB ON)
+SET(CONFIG_APP_MOTOR_CONTROLLER ON)
 
 SET(CMAKE_STATIC_LIBRARY_PREFIX)
 SET(CMAKE_STATIC_LIBRARY_SUFFIX)
@@ -101,6 +102,7 @@ set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(${RtosAppsPath}/rtos_apps_async.cmake)
 include(${RtosAppsPath}/rtos_apps_log.cmake)
 include(${RtosAppsPath}/rtos_apps_stats.cmake)
+include(${RtosAppsPath}/rtos_apps_tsn.cmake)
 
 include(all_devices)
 

@@ -5,51 +5,45 @@
  */
 
 #include "app_board.h"
+#include "genavb/sr_class.h"
 #include "rtos_apps/async.h"
 #include "rtos_apps/log.h"
 #include "hrpn_ctrl.h"
 #include "industrial.h"
 #include "rtos_abstraction_layer.h"
 
-#include "alarm_task.h"
-#include "avb_tsn/genavb.h"
-#include "avb_tsn/stats_task.h"
+#include "log.h"
+#include "genavb.h"
+#include "stats_task.h"
 #include "rtos_apps/types.h"
-#include "cyclic_task.h"
 #include "ethernet.h"
 #include "hardware_ethernet.h"
 #include "industrial.h"
+#include <stdio.h>
 
 #include "os/irq.h"
 
 #include "system_config.h"
-#include "tsn_tasks_config.h"
+
+#include "rtos_apps/tsn/tsn_tasks_config.h"
+#include "rtos_apps/tsn/tsn_entry.h"
+
+#include "genavb/frame_preemption.h"
+#include "genavb/scheduled_traffic.h"
+#include "genavb/ether.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-struct rtos_apps_async *async;
+#define CONFIG_USE_FP 0
+#define CONFIG_USE_ST 1
 
-#if BUILD_MOTOR_CONTROLLER == 1
-#include "controller.h"
-#endif
+#define NUM_IO_DEVICES_MIN 1
+#define NUM_IO_DEVICES_MAX 2
 
-#if BUILD_MOTOR_IO_DEVICE == 1
-#include "io_device.h"
-#include "local_network.h"
-#endif
+#define APP_PERIOD_MAX 1000000000
 
 #define STATS_PERIOD_MS 2000
-
-#if BUILD_MOTOR_CONTROLLER == 1
-static struct controller_ctx ctrl1;
-static struct controller_ctx *ctrl_h = NULL;
-#endif
-
-#if BUILD_MOTOR_IO_DEVICE == 1
-static struct io_device_ctx io_device1;
-static struct io_device_ctx *io_device_h = NULL;
-#endif
 
 extern void BOARD_NET_PORT0_DRV_IRQ0_HND(void);
 
@@ -71,54 +65,165 @@ static struct serial_iodevice_ctx serial_iodev;
 
 struct ethernet_avb_tsn_ctx {
 	struct gavb_pps pps;
-	struct cyclic_task *c_task;
-	struct cyclic_task *opt_io_device_task;
-	struct alarm_task *a_task;
+	struct rtos_apps_async *async;
+	struct tsn_app_ctx *tsn_ctx;
 };
-
-static char *app_mode_names[] = {"MOTOR_NETWORK", "MOTOR_LOCAL", "NETWORK_ONLY", "SERIAL"};
 
 extern struct system_config system_cfg;
 
-static struct tsn_app_config *system_config_get_tsn_app(struct ethernet_ctx *ctx)
+#define ST_TX_TIME_MARGIN 1000 /* Additional margin to account for drift between MAC and gPTP clocks */
+#define ST_TX_TIME_FACTOR 2 /* Factor applied to critical time interval, to avoid frames getting stuck */
+#define ST_LIST_LEN       2
+
+/*
+ * Returns the complete transmit time including MAC framing and physical
+ * layer overhead (802.3).
+ * \return transmit time in nanoseconds
+ * \param frame_size frame size without any framing
+ * \param speed_mbps link speed in Mbps
+ */
+static unsigned int frame_tx_time_ns(unsigned int frame_size, int speed_mbps)
 {
-	struct tsn_app_config *config = &system_cfg.app.tsn_app_config;
+    unsigned int eth_size;
 
-#if (ENABLE_STORAGE == 1)
-	if (storage_cd("/tsn_app") == 0) {
-		storage_read_uint("mode", &config->mode);
-		storage_read_uint("role", &config->role);
-		storage_read_uint("num_io_devices", &config->num_io_devices);
-		storage_read_float("motor_offset", &config->motor_offset);
-		storage_read_uint("control_strategy", &config->control_strategy);
-		storage_read_uint("use_st", &config->use_st);
-		storage_read_uint("use_fp", &config->use_fp);
-		storage_read_uint("cmd_client", &config->cmd_client);
+    eth_size = sizeof(struct eth_hdr) + frame_size + ETHER_FCS;
 
-		if (config->mode == SERIAL)
-			config->period_ns = APP_PERIOD_SERIAL_DEFAULT;
+    if (eth_size < ETHER_MIN_FRAME_SIZE)
+        eth_size = ETHER_MIN_FRAME_SIZE;
 
-		storage_read_uint("period_ns", &config->period_ns);
+    eth_size += ETHER_IFG + ETHER_PREAMBLE;
 
-		storage_cd("/");
-	}
-#else
+    return (((1000 / speed_mbps) * eth_size * 8) + ST_TX_TIME_MARGIN);
+}
+
+#if CONFIG_USE_ST
+#define SCHED_TRAFFIC_OFFSET 40000
+static void tsn_net_st_config_enable(struct tsn_task_params *params, bool use_fp, bool use_st)
+{
+    struct genavb_st_config config;
+    struct genavb_st_gate_control_entry gate_list[ST_LIST_LEN];
+    struct net_address *addr = &params->tx_params[0].addr;
+    unsigned int cycle_time = params->task_period_ns;
+    uint8_t iso_traffic_prio = addr->priority;
+    const uint8_t *map;
+    uint8_t tclass;
+    unsigned int iso_tx_time = frame_tx_time_ns(params->tx_buf_size, 1000) * ST_TX_TIME_FACTOR;
+    int i;
+
+    map = priority_to_traffic_class_map(CFG_TRAFFIC_CLASS_MAX, CFG_SR_CLASS_MAX);
+    if (!map) {
+        log_err("priority_to_traffic_class_map() error\n");
+        return;
+    } else {
+        tclass = map[iso_traffic_prio];
+    }
+
+    gate_list[0].gate_states = 1 << tclass;
+
+    if (use_fp) {
+        gate_list[0].operation = GENAVB_ST_SET_AND_HOLD_MAC;
+
+        /*
+         * Keep preemptable queues always open.
+         * Match configuration done in tsn_net_fp_config_enable().
+         */
+        for (i = 0; i < tclass; i++)
+            gate_list[0].gate_states |= 1 << i;
+    } else {
+        gate_list[0].operation = GENAVB_ST_SET_GATE_STATES;
+    }
+
+    gate_list[0].time_interval = iso_tx_time;
+
+    if (use_fp)
+        gate_list[1].operation = GENAVB_ST_SET_AND_RELEASE_MAC;
+    else
+        gate_list[1].operation = GENAVB_ST_SET_GATE_STATES;
+
+    gate_list[1].gate_states = ~(1 << tclass);
+    gate_list[1].time_interval = cycle_time - iso_tx_time;
+
+    /* Scheduled traffic will start when (base_time + N * cycle_time) > now */
+    config.enable = 1;
+    config.base_time = params->task_period_offset_ns + SCHED_TRAFFIC_OFFSET;
+    config.cycle_time_p = cycle_time;
+    config.cycle_time_q = NSECS_PER_SEC;
+    config.cycle_time_ext = 0;
+    config.list_length = ST_LIST_LEN;
+    config.control_list = gate_list;
+
+    if (genavb_st_set_admin_config(addr->port, params->clk_id, &config) < 0)
+        log_err("genavb_st_set_admin_config() error\n");
+    else
+        log_info("scheduled traffic config enabled\n");
+}
+
+static void tsn_net_st_config_disable(struct tsn_task_params *params)
+{
+    struct genavb_st_config config;
+    struct net_address *addr = &params->tx_params[0].addr;
+
+    config.enable = 0;
+
+    if (genavb_st_set_admin_config(addr->port, params->clk_id, &config) < 0)
+        log_err("genavb_st_set_admin_config() error\n");
+    else
+        log_info("scheduled traffic config disabled\n");
+}
+#endif
+
+#if CONFIG_USE_FP
+static void tsn_net_fp_config_enable(struct tsn_task_params *params)
+{
+    struct genavb_fp_config config;
+    struct net_address *addr = &params->tx_params[0].addr;
+    const uint8_t *map;
+    uint8_t tclass;
+    int i;
+
+    map = priority_to_traffic_class_map(CFG_TRAFFIC_CLASS_MAX, CFG_SR_CLASS_MAX);
+    if (!map) {
+        log_err("priority_to_traffic_class_map() error\n");
+        return;
+    } else {
+        tclass = map[addr->priority];
+    }
+
+    for (i = 0; i < QOS_PRIORITY_MAX; i++) {
+        if (map[i] >= tclass)
+            config.u.cfg_802_1Q.admin_status[i] = GENAVB_FP_ADMIN_STATUS_EXPRESS;
+        else
+            config.u.cfg_802_1Q.admin_status[i] = GENAVB_FP_ADMIN_STATUS_PREEMPTABLE;
+    }
+
+    if (genavb_fp_set(addr->port, GENAVB_FP_CONFIG_802_1Q, &config) < 0) {
+        log_err("genavb_fp_set(802.1Q) error\n");
+        return;
+    }
+
+    config.u.cfg_802_3.enable_tx = 1;
+    config.u.cfg_802_3.verify_disable_tx = 0;
+    config.u.cfg_802_3.verify_time = 100;
+    config.u.cfg_802_3.add_frag_size = 0;
+
+    if (genavb_fp_set(addr->port, GENAVB_FP_CONFIG_802_3, &config) < 0) {
+        log_err("genavb_fp_set(802.3) error\n");
+        return;
+    }
+}
+#endif
+
+static struct rtos_apps_tsn_config *system_config_get_tsn_app(struct ethernet_ctx *ctx)
+{
+	struct rtos_apps_tsn_config *config = &system_cfg.app.tsn_app_config;
+
 	config->mode = ctx->app_mode;
 	config->role = ctx->role;
 	config->period_ns = ctx->period;
 	config->num_io_devices = ctx->num_io_devices;
 	config->control_strategy = ctx->control_strategy;
 
-#endif /* (ENABLE_STORAGE == 1) */
-
 	return config;
-}
-
-static void null_loop(void *data, int timer_status)
-{
-	struct cyclic_task *c_task = data;
-
-	cyclic_net_transmit(c_task, 0, NULL, 0);
 }
 
 void ethernet_avb_tsn_stats(void *priv)
@@ -132,8 +237,18 @@ void ethernet_avb_tsn_stats(void *priv)
 int ethernet_avb_tsn_run(void *priv, struct event *e)
 {
 	struct ethernet_ctx *ctx = priv;
-	const struct tsn_app_config *config;
+	struct cyclic_task_config *c_cfg;
+	struct rtos_apps_tsn_config *config;
 	struct ethernet_avb_tsn_ctx *avb_tsn_ctx;
+
+#if BUILD_SERIAL == 1
+	struct rtos_apps_tsn_serial_iodevice_config serial_cfg = {
+		.baseaddr = BOARD_IODEV_UART_BASEADDR,
+		.baudrate = BOARD_IODEV_UART_BAUDRATE,
+		.clk_freq = BOARD_IODEV_UART_CLK_FREQ,
+		.irq_mask = BOARD_IODEV_UART_INTERRUPT_MASK,
+	};
+#endif
 
 	avb_tsn_ctx = (struct ethernet_avb_tsn_ctx *)(ctx + 1);
 
@@ -150,155 +265,43 @@ int ethernet_avb_tsn_run(void *priv, struct event *e)
 
 	if (gavb_port_stats_init(0)) {
 		log_err("gavb_port_stats_init() failed\n");
-		goto exit;
+		goto err_stats;
 	}
 
-	avb_tsn_ctx->a_task = tsn_conf_get_alarm_task(config->role);
-	if (!avb_tsn_ctx->a_task) {
-		log_err("tsn_conf_get_alarm_task() failed\n");
-		goto exit;
-	}
-
-	log_info("tsn_app config\n");
-	log_info("mode             : %s\n", app_mode_names[config->mode]);
-	log_info("role             : %u\n", config->role);
-	log_info("num_io_devices   : %u\n", config->num_io_devices);
-	log_info("motor_offset     : %f\n", config->motor_offset);
-	log_info("control_strategy : %u\n", config->control_strategy);
-	log_info("app period       : %u\n", config->period_ns);
-
-#if ((BUILD_MOTOR_CONTROLLER == 0) && (BUILD_MOTOR_IO_DEVICE == 0))
-	log_info("BUILD_MOTOR disabled, MOTOR_NETWORK and MOTOR_LOCAL modes cannot be used\n");
+#if BUILD_SERIAL == 1
+	config->serial_cfg = &serial_cfg;
 #endif
 
-#if ((BUILD_MOTOR_CONTROLLER == 1) || (BUILD_MOTOR_IO_DEVICE == 1))
-	if (config->mode == MOTOR_NETWORK) {
-		if ((config->period_ns != 100000) && (config->period_ns != 250000)) {
-			log_err("invalid application period, only 100000 ns and 250000 ns are supported\n");
-			goto exit;
-		}
+	config->log_update_time = app_log_update_time;
+	config->async = avb_tsn_ctx->async;
+
+	c_cfg = tsn_conf_get_cyclic_task(config->role);
+	if (!c_cfg) {
+		log_err("tsn_conf_get_cyclic_task() failed\n");
+		goto err_init;
 	}
+
+	if (gavb_pps_init(&avb_tsn_ctx->pps, c_cfg->params.clk_id) < 0)
+		log_err("gavb_pps_init() failed: pps timer could not be started\n");
+
+#if CONFIG_USE_FP
+	tsn_net_fp_config_enable(&c_cfg->params);
 #endif
 
-#if ((BUILD_MOTOR_CONTROLLER == 1) && (BUILD_MOTOR_IO_DEVICE == 1))
-	if ((config->mode == MOTOR_LOCAL) &&
-		(config->period_ns != 100000) && (config->period_ns != 250000)) {
-		log_err("invalid application period, only 100000 ns and 250000 ns are supported\n");
-		goto exit;
-	}
-
-	if (init_gpio_handling_task() < 0) {
-		log_err("init_gpio_handling_task() failed\n");
-		goto exit;
-	}
-
-	if (config->mode == MOTOR_LOCAL) {
-		avb_tsn_ctx->c_task = tsn_conf_get_cyclic_task(0);
-		if (!avb_tsn_ctx->c_task) {
-			log_err("tsn_conf_get_cyclic_task() failed\n");
-			goto exit;
-		}
-
-		cyclic_task_set_period(avb_tsn_ctx->c_task, config->period_ns);
-
-		avb_tsn_ctx->c_task->num_peers = 0;
-		avb_tsn_ctx->c_task->params.clk_id = GENAVB_CLOCK_MONOTONIC;
-
-		avb_tsn_ctx->opt_io_device_task = tsn_conf_get_cyclic_task(1);
-		if (!avb_tsn_ctx->opt_io_device_task) {
-			log_err("tsn_conf_get_cyclic_task() failed\n");
-			goto exit;
-		}
-		avb_tsn_ctx->opt_io_device_task->num_peers = 0;
-		avb_tsn_ctx->opt_io_device_task->params.clk_id = GENAVB_CLOCK_MONOTONIC;
-
-		cyclic_task_set_period(avb_tsn_ctx->opt_io_device_task, config->period_ns);
-
-		if (io_device_init(&io_device1, avb_tsn_ctx->opt_io_device_task, 1, true) < 0) {
-			log_err("Local io_device initialization failed\n");
-			goto exit;
-		}
-
-		local_bind_controller_io_device(&ctrl1, &io_device1);
-
-	} else
-#endif /* BUILD_MOTOR */
-	{
-		avb_tsn_ctx->c_task = tsn_conf_get_cyclic_task(config->role);
-		if (!avb_tsn_ctx->c_task) {
-			log_err("tsn_conf_get_cyclic_task() failed\n");
-			goto exit;
-		}
-
-		cyclic_task_set_period(avb_tsn_ctx->c_task, config->period_ns);
-	}
-
-	if (gavb_pps_init(&avb_tsn_ctx->pps, avb_tsn_ctx->c_task->params.clk_id) < 0)
-		log_err("gavb_pps_init() error,pps timer could not be started\n");
-
-	if (avb_tsn_ctx->c_task->type == CYCLIC_CONTROLLER) {
-		avb_tsn_ctx->c_task->num_peers = config->num_io_devices;
-		avb_tsn_ctx->a_task->num_peers = config->num_io_devices;
-	}
-
-	avb_tsn_ctx->c_task->params.use_st = config->use_st;
-	avb_tsn_ctx->c_task->params.use_fp = config->use_fp;
-
-#if (BUILD_MOTOR_CONTROLLER == 1) || (BUILD_MOTOR_IO_DEVICE == 1)
-	if (config->mode == MOTOR_NETWORK || config->mode == MOTOR_LOCAL) {
-#if BUILD_MOTOR_CONTROLLER == 1
-		if (avb_tsn_ctx->c_task->type == CYCLIC_CONTROLLER) {
-			if (controller_init(&ctrl1, avb_tsn_ctx->c_task, config->mode == MOTOR_LOCAL,
-					(control_strategies_t)config->control_strategy, (bool)config->cmd_client) < 0) {
-				log_err("Controller initialization failed\n");
-				goto exit;
-			}
-			ctrl_h = &ctrl1;
-		}
+#if CONFIG_USE_ST
+	tsn_net_st_config_enable(&c_cfg->params, CONFIG_USE_FP, CONFIG_USE_ST);
 #endif
-#if BUILD_MOTOR_IO_DEVICE == 1
-		if (avb_tsn_ctx->c_task->type == CYCLIC_IO_DEVICE) {
-			if (io_device_init(&io_device1, avb_tsn_ctx->c_task, 1, false) < 0) {
-				log_err("io_device initialization failed\n");
-				goto exit;
-			}
-			io_device_h = &io_device1;
-			io_device_set_motor_offset(io_device_h, 0, config->motor_offset);
-		} 
-#endif 
-		if (avb_tsn_ctx->c_task->type != CYCLIC_CONTROLLER && avb_tsn_ctx->c_task->type != CYCLIC_IO_DEVICE) {
-			log_err("Unknown cyclic task type\n");
-			goto exit;
-		}
-	} else
-#endif /* (BUILD_MOTOR_CONTROLLER == 1) || (BUILD_MOTOR_IO_DEVICE == 1) */
-	{
-#if SERIAL_MODE == 1
-		if (config->mode == SERIAL) {
-			avb_tsn_ctx->c_task->params.task_period_ns = APP_PERIOD_SERIAL_DEFAULT;
-			avb_tsn_ctx->c_task->params.task_period_offset_ns = NET_DELAY_OFFSET_SERIAL_DEFAULT;
-			avb_tsn_ctx->c_task->params.transfer_time_ns = NET_DELAY_OFFSET_SERIAL_DEFAULT;
 
-			if (serial_iodevice_init(&serial_iodev, avb_tsn_ctx->c_task) < 0) {
-				log_err("serial_iodevice_init() failed\n");
-				goto exit;
-			}
-		} else
-#endif
-			cyclic_task_init(avb_tsn_ctx->c_task, NULL, null_loop, avb_tsn_ctx->c_task);
-	}
-
-	cyclic_task_start(avb_tsn_ctx->c_task);
-
-	if (avb_tsn_ctx->opt_io_device_task)
-		cyclic_task_start(avb_tsn_ctx->opt_io_device_task);
-
-	if (avb_tsn_ctx->a_task->type == ALARM_MONITOR)
-		alarm_task_monitor_init(avb_tsn_ctx->a_task, NULL, NULL);
-	else if (avb_tsn_ctx->a_task->type == ALARM_IO_DEVICE)
-		alarm_task_io_init(avb_tsn_ctx->a_task);
+	if (rtos_apps_tsn_init(config, &avb_tsn_ctx->tsn_ctx) < 0)
+		goto err_init;
 
 	return 0;
+
+err_init:
+	gavb_port_stats_exit(0);
+
+err_stats:
+	gavb_stack_exit();
 
 exit:
 	return -1;
@@ -308,30 +311,13 @@ void ethernet_avb_tsn_exit(void *priv)
 {
 	struct ethernet_ctx *ctx = priv;
 	struct ethernet_avb_tsn_ctx *avb_tsn_ctx;
+	struct rtos_apps_tsn_config *config;
+	struct cyclic_task_config *c_cfg;
 
 	avb_tsn_ctx = (struct ethernet_avb_tsn_ctx *)(ctx + 1);
 
-	if (avb_tsn_ctx->a_task) {
-		if (avb_tsn_ctx->a_task->type == ALARM_MONITOR)
-			alarm_task_monitor_exit(avb_tsn_ctx->a_task);
-		else if (avb_tsn_ctx->a_task->type == ALARM_IO_DEVICE)
-			alarm_task_io_exit(avb_tsn_ctx->a_task);
-	}
+	rtos_apps_tsn_exit(avb_tsn_ctx->tsn_ctx);
 
-	if (avb_tsn_ctx->opt_io_device_task)
-		cyclic_task_stop(avb_tsn_ctx->opt_io_device_task);
-
-	if (avb_tsn_ctx->c_task) {
-		cyclic_task_stop(avb_tsn_ctx->c_task);
-		cyclic_task_exit(avb_tsn_ctx->c_task);
-	}
-
-#if BUILD_MOTOR_CONTROLLER == 1
-	if (ctx->app_mode == MOTOR_LOCAL || ctx->app_mode == MOTOR_NETWORK) {
-		if (controller_exit(&ctrl1))
-			log_err("controller_exit() failed\n");
-	}
-#endif
 	gavb_pps_exit(&avb_tsn_ctx->pps);
 	gavb_port_stats_exit(0);
 
@@ -350,6 +336,22 @@ void ethernet_avb_tsn_exit(void *priv)
 #endif
 #ifdef BOARD_NET_PORT0_DRV_IRQ3_HND
 	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ3);
+#endif
+
+	config = system_config_get_tsn_app(ctx);
+	if (!config) {
+		log_err("system_config_get_tsn_app() failed\n");
+		return;
+	}
+
+	c_cfg = tsn_conf_get_cyclic_task(config->role);
+	if (!c_cfg) {
+		log_err("tsn_conf_get_cyclic_task() failed\n");
+		return;
+	}
+
+#if CONFIG_USE_ST
+	tsn_net_st_config_disable(&c_cfg->params);
 #endif
 
 	rtos_free(ctx);
@@ -374,7 +376,7 @@ void *ethernet_avb_tsn_init(void *parameters)
 		goto exit;
 	}
 
-	if (cfg->control_strategy > IDENTIFY) {
+	if (cfg->control_strategy > CTRL_STRAT_IDENTIFICATION) {
 		log_err("Unsupported control strategy (%u)\n", cfg->control_strategy);
 		goto exit;
 	}
@@ -440,7 +442,7 @@ void *ethernet_avb_tsn_init(void *parameters)
 
 	os_irq_register(BOARD_GENAVB_TIMER_0_IRQ, (void (*)(void(*)))BOARD_GENAVB_TIMER_0_IRQ_HANDLER, NULL, OS_IRQ_PRIO_DEFAULT);
 
-	if (STATS_TaskInit(NULL, NULL, STATS_PERIOD_MS, &async) < 0)
+	if (STATS_TaskInit(NULL, NULL, STATS_PERIOD_MS, &avb_tsn_ctx->async) < 0)
 		log_err("STATS_TaskInit() failed\n");
 
 exit:

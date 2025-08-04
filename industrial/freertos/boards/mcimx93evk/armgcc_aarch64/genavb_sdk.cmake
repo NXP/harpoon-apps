@@ -21,11 +21,7 @@ add_compile_definitions(BUILD_MOTOR_CONTROLLER=${build_motor_controller})
 
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    ${AppPath}/avb_tsn/tsn_app/alarm_task.c
     ${AppPath}/avb_tsn/tsn_app/configs.c
-    ${AppPath}/avb_tsn/tsn_app/cyclic_task.c
-    ${AppPath}/avb_tsn/tsn_app/tsn_task.c
-    ${AppPath}/avb_tsn/tsn_app/tsn_tasks_config.c
     ${AppPath}/common/ethernet_avb_tsn.c
     ${CommonPath}/boards/${BoardName}/genavb_sdk.c
 )

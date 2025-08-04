@@ -103,6 +103,7 @@ set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
 include(${RtosAppsPath}/rtos_apps_async.cmake)
 include(${RtosAppsPath}/rtos_apps_log.cmake)
 include(${RtosAppsPath}/rtos_apps_stats.cmake)
+include(${RtosAppsPath}/rtos_apps_tsn.cmake)
 
 include(all_devices)
 
