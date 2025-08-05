@@ -5,6 +5,7 @@
  */
 
 #include "app_board.h"
+#include "rtos_apps/async.h"
 #include "rtos_apps/log.h"
 #include "hrpn_ctrl.h"
 #include "industrial.h"
@@ -27,6 +28,8 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+struct rtos_apps_async *async;
+
 #if BUILD_MOTOR_CONTROLLER == 1
 #include "controller.h"
 #endif
@@ -437,7 +440,7 @@ void *ethernet_avb_tsn_init(void *parameters)
 
 	os_irq_register(BOARD_GENAVB_TIMER_0_IRQ, (void (*)(void(*)))BOARD_GENAVB_TIMER_0_IRQ_HANDLER, NULL, OS_IRQ_PRIO_DEFAULT);
 
-	if (STATS_TaskInit(NULL, NULL, STATS_PERIOD_MS) < 0)
+	if (STATS_TaskInit(NULL, NULL, STATS_PERIOD_MS, &async) < 0)
 		log_err("STATS_TaskInit() failed\n");
 
 exit:

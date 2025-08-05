@@ -10,6 +10,7 @@
 #include "log.h"
 #include "motor_control_api.h"
 #include "io_device.h"
+#include "rtos_apps/async.h"
 #if BUILD_MOTOR_IO_DEVICE == 1
 #include "mcdrv.h"
 #endif
@@ -22,6 +23,7 @@
 #define CONTROLLER_STAT_PERIOD_SEC 2
 #define MONITORING_STAT_PERIOD_MS  1000
 
+extern struct rtos_apps_async *async;
 char *state_names[] = {"CONTROL", "IO_DEVICE_MISSING", "STANDBY"};
 
 static void controller_stats_print(void *data)
@@ -51,7 +53,7 @@ static void controller_stats_dump(struct controller_ctx *ctx)
     ctx->stats_snap.pending = true;
 
     // Print controller data
-    if (STATS_Async(controller_stats_print, &ctx->stats_snap) != true)
+    if (rtos_apps_async_call(async, controller_stats_print, &ctx->stats_snap) != true)
         ctx->stats_snap.pending = false;
 }
 
@@ -96,7 +98,7 @@ static void controller_monitoring_send(struct controller_ctx *ctx)
     cyclic_task_get_monitoring(ctx->c_task, &ctx->msg.cyclic_task_stats, MONITOR_MAX_SOCKET);
     ctx->msg_pending = true;
 
-    if (STATS_Async(__controller_monitoring_send, ctx) != true)
+    if (rtos_apps_async_call(async, __controller_monitoring_send, ctx) != true)
         ctx->msg_pending = false;
 }
 

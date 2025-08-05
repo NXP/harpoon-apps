@@ -21,6 +21,8 @@
 
 //#define SRP_RESERVATION
 
+extern struct rtos_apps_async *async;
+
 void tsn_task_stats_init(struct tsn_task *task)
 {
     rtos_apps_stats_init(&task->stats.sched_err, 31, "sched err", NULL);
@@ -130,7 +132,7 @@ static void tsn_task_stats_dump(struct tsn_task *task)
     rtos_apps_stats_reset(&task->stats.total_time);
     task->stats_snap.pending = true;
 
-    if (STATS_Async(tsn_task_stats_print, task) < 0)
+    if (rtos_apps_async_call(async, tsn_task_stats_print, task) < 0)
         task->stats_snap.pending = false;
 }
 
@@ -153,7 +155,7 @@ void net_socket_stats_dump(struct net_socket *sock)
     memcpy(&sock->stats_snap, &sock->stats, sizeof(struct net_socket_stats));
     sock->stats_snap.pending = true;
 
-    if (STATS_Async(net_socket_stats_print, sock) < 0)
+    if (rtos_apps_async_call(async, net_socket_stats_print, sock) < 0)
         sock->stats_snap.pending = false;
 }
 

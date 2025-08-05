@@ -14,6 +14,8 @@
 #include "avb_tsn/log.h"
 #include "rtos_apps/types.h"
 
+extern struct rtos_apps_async *async;
+
 static void socket_stats_print(void *data)
 {
     struct socket *sock = data;
@@ -42,7 +44,7 @@ static void socket_stats_dump(struct socket *sock)
     rtos_apps_stats_reset(&sock->stats.traffic_latency);
     sock->stats_snap.pending = true;
 
-    if (STATS_Async(socket_stats_print, sock) < 0)
+    if (rtos_apps_async_call(async, socket_stats_print, sock) < 0)
         sock->stats_snap.pending = false;
 }
 

@@ -10,6 +10,7 @@
 
 #include "control_strategies.h"
 #include "log.h"
+#include "rtos_apps/async.h"
 #include "slist.h"
 #include "rtos_apps/types.h"
 #include "stats_task.h"
@@ -35,6 +36,8 @@
 #define IDENTIFICATION_STATE_MS              5000ULL /* ms */
 #define IDENTIFICATION_MAX_MOTOR             2
 #define IDENTIFICATION_MAX_STEPS             6
+
+extern struct rtos_apps_async *async;
 
 char *strategy_names[] = {"SYNCHRONIZED", "FOLLOW", "HOLD_INDEX", "INTERLACED", "STOP", "IDENTIFY"};
 char *strategy_states_names[] = {"PREPARE", "STARTUP", "INIT", "STRATEGY", "RESET"};
@@ -1264,7 +1267,7 @@ static void motor_stats_send(struct control_strategy_ctx *ctx)
 
     ctx->net_stats_pending = true;
 
-    if (STATS_Async(__motor_stats_send, ctx) != true)
+    if (rtos_apps_async_call(async, __motor_stats_send, ctx) != true)
         ctx->net_stats_pending = false;
 }
 
@@ -1424,7 +1427,7 @@ void control_strategy_stats_dump(struct control_strategy_ctx *ctx)
         memcpy(&ctx->stats_snap, &ctx->stats, sizeof(struct stats_control_strategy));
         ctx->stats_snap.pending = true;
 
-        if (STATS_Async(control_strategy_stats_print, &ctx->stats_snap) != true)
+        if (rtos_apps_async_call(async, control_strategy_stats_print, &ctx->stats_snap) != true)
             ctx->stats_snap.pending = false;
     }
 
@@ -1446,7 +1449,7 @@ void control_strategy_stats_dump(struct control_strategy_ctx *ctx)
         rtos_apps_stats_reset(&motor->stats.pos_err_deg);
 
         // Print motor data on serial interface
-        if (STATS_Async(control_strategy_motor_stats_print, &motor->stats_snap) != true)
+        if (rtos_apps_async_call(async, control_strategy_motor_stats_print, &motor->stats_snap) != true)
             motor->stats_snap.pending = false;
     }
 }
