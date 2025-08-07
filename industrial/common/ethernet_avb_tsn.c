@@ -14,7 +14,7 @@
 #include "alarm_task.h"
 #include "avb_tsn/genavb.h"
 #include "avb_tsn/stats_task.h"
-#include "avb_tsn/types.h"
+#include "rtos_apps/types.h"
 #include "cyclic_task.h"
 #include "ethernet.h"
 #include "hardware_ethernet.h"
