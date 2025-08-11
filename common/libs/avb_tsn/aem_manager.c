@@ -1,6 +1,6 @@
 /*
  * Copyright 2014-2016 Freescale Semiconductor, Inc.
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -39,7 +39,7 @@ int aem_manager_create_entities(void)
 	 || (aem_entity_create(aem_desc_list[AEM_ENTITY_LISTENER_TALKER_AUDIO_SINGLE_MILAN_ID], listener_talker_audio_single_milan_init) < 0)
 		) {
 
-		ERR("entity generation failed\n");
+		log_err("entity generation failed\n");
 		rc = -1;
 		goto out;
 	}

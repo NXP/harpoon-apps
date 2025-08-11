@@ -8,7 +8,7 @@
 #include "math.h"
 #include "rtos_apps/log.h"
 #include "motor_params.h"
-#include "types.h"
+#include "rtos_apps/types.h"
 
 void check_trap_traj(struct traj_trapez *traj)
 {

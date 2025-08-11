@@ -4,10 +4,14 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "control_strategies.h"
 #include "log.h"
 #include "slist.h"
-#include "types.h"
+#include "rtos_apps/types.h"
 #include "stats_task.h"
 #include "network_stats.h"
 #include "math.h"
@@ -295,7 +299,7 @@ static ctrl_strategy_return_codes_t strategy_synchronized_init(struct control_st
     slist_for_each (&ctx->motor_list, entry) {
         motor = container_of(entry, struct controlled_motor_ctx, node);
         if (scenario_init(&motor->scenario, SCENARIO_SYNCHRONIZED, ctx->app_period_ns) < 0) {
-            ERR("Error when initializing scenario %u\n", 0);
+            log_err("Error when initializing scenario %u\n", 0);
             goto err;
         }
 
@@ -431,7 +435,7 @@ static ctrl_strategy_return_codes_t strategy_follow_init(struct control_strategy
     struct controlled_motor_ctx *motor;
 
     if (ctx->num_motors < 2) {
-        ERR("Unable to initialize FOLLOW mode because less than two io_devices are controlled\n");
+        log_err("Unable to initialize FOLLOW mode because less than two io_devices are controlled\n");
         goto err;
     }
 
@@ -469,7 +473,7 @@ static ctrl_strategy_return_codes_t strategy_follow_loop(struct control_strategy
     }
 
     if (motor_master == NULL) {
-        ERR("Motor master not found\n");
+        log_err("Motor master not found\n");
         goto err;
     }
 
@@ -600,7 +604,7 @@ static ctrl_strategy_return_codes_t strategy_interlaced_prepare(struct control_s
     ctrl_strategy_return_codes_t rc = CTRL_STRAT_OK;
 
     if (ctx->num_motors != 2) {
-        ERR("Unable to initialize INTERLACED mode because less than two io_devices are controlled\n");
+        log_err("Unable to initialize INTERLACED mode because less than two io_devices are controlled\n");
         rc = CTRL_STRAT_ERROR;
         goto exit;
     }
@@ -643,7 +647,7 @@ static ctrl_strategy_return_codes_t strategy_interlaced_prepare(struct control_s
         // We set the startup delay used to wait for static motor to hold the position
         ctx->interlaced_context.startup_delay = motor_static->demo_count + ZERO_ALIGNEMENT_DELAY;
     } else {
-        DBG("Dynamic motor can't rotate, try other motor, (delta_notch_deg = %f)\n", delta_notch_deg);
+        log_debug("Dynamic motor can't rotate, try other motor, (delta_notch_deg = %f)\n", delta_notch_deg);
         switch_motor_alternation_interlaced(ctx);
         rc = CTRL_STRAT_WAIT;
         goto exit;
@@ -738,12 +742,12 @@ static ctrl_strategy_return_codes_t strategy_interlaced_init(struct control_stra
     struct controlled_motor_ctx *motor_dynamic = ctx->interlaced_context.motor_dynamic;
 
     if (scenario_init(&motor_static->scenario, SCENARIO_INTERLACED, ctx->app_period_ns) < 0) {
-        ERR("Error when initializing scenario %u\n", 0);
+        log_err("Error when initializing scenario %u\n", 0);
         goto err;
     }
 
     if (scenario_init(&motor_dynamic->scenario, SCENARIO_INTERLACED, ctx->app_period_ns) < 0) {
-        ERR("Error when initializing scenario %u\n", 0);
+        log_err("Error when initializing scenario %u\n", 0);
         goto err;
     }
 
@@ -1162,17 +1166,17 @@ static ctrl_strategy_return_codes_t strategy_identification_loop(struct control_
         ctx->interlaced_context.motor_static->iq_req = 0.0;
 
         for (j = 0; j < IDENTIFICATION_MAX_MOTOR; j++) {
-            INF("motor%u:%u\n", (id->id[j] >> 8) & 0xff, id->id[j] & 0xff);
+            log_info("motor%u:%u\n", (id->id[j] >> 8) & 0xff, id->id[j] & 0xff);
 
-            INF("I(A)     w_final(rpm):\n");
+            log_info("I(A)     w_final(rpm):\n");
 
             for (i = 0; i < id->i_max; i++)
-                INF("%8f %8f\n", id->iq_min + i * id->iq_step, id->speed_final[j][i]);
+                log_info("%8f %8f\n", id->iq_min + i * id->iq_step, id->speed_final[j][i]);
 
-            INF("\n");
-            INF("I(A)     b/J(1/s):\n");
+            log_info("\n");
+            log_info("I(A)     b/J(1/s):\n");
             for (i = 0; i < id->i_max; i++)
-                INF("%8f %8f\n", id->iq_min + i * id->iq_step, id->b_J[j][i]);
+                log_info("%8f %8f\n", id->iq_min + i * id->iq_step, id->b_J[j][i]);
         }
 
         break;
@@ -1190,10 +1194,10 @@ static void control_strategy_stats_print(void *data)
     struct stats_control_strategy *stats = data;
     struct control_strategy_ctx *ctx = container_of(data, struct control_strategy_ctx, stats_snap);
 
-    INF("ctx(%x):\n", ctx);
-    INF("  state            : %s\n", strategy_states_names[stats->state]);
-    INF("  current strategy : %s\n", strategy_names[stats->current_strategy]);
-    INF("  old strategy     : %s\n", strategy_names[stats->old_strategy]);
+    log_info("ctx(%x):\n", ctx);
+    log_info("  state            : %s\n", strategy_states_names[stats->state]);
+    log_info("  current strategy : %s\n", strategy_names[stats->current_strategy]);
+    log_info("  old strategy     : %s\n", strategy_names[stats->old_strategy]);
 
     stats->pending = false;
 }
@@ -1205,17 +1209,17 @@ static void control_strategy_motor_stats_print(void *data)
 
     stats_compute(&stats->pos_err_deg);
 
-    INF("ctx(%x) io_device id: %hu, motor id: %hu\n", ctx, ctx->id >> 8, ctx->id & 0xff);
-    INF("  startup offset : %f\n", stats->startup_offset);
-    INF("  pos real       : %f\n", stats->pos_real);
-    INF("  pos target     : %f\n", stats->pos_target);
-    INF("  speed real     : %f\n", stats->speed_real);
-    INF("  errors margin: %u, margin stop: %u\n", stats->err_margin, stats->err_margin_stop);
+    log_info("ctx(%x) io_device id: %hu, motor id: %hu\n", ctx, ctx->id >> 8, ctx->id & 0xff);
+    log_info("  startup offset : %f\n", stats->startup_offset);
+    log_info("  pos real       : %f\n", stats->pos_real);
+    log_info("  pos target     : %f\n", stats->pos_target);
+    log_info("  speed real     : %f\n", stats->speed_real);
+    log_info("  errors margin: %u, margin stop: %u\n", stats->err_margin, stats->err_margin_stop);
     stats_print(&stats->pos_err_deg);
     hist_print(&stats->pos_err_deg_hist);
 
     if (stats->err_margin)
-        INF("  last margin error: %f\n", stats->last_margin_error);
+        log_info("  last margin error: %f\n", stats->last_margin_error);
 
     stats->pending = false;
 }
@@ -1348,7 +1352,7 @@ int control_strategy_context_init(struct control_strategy_ctx **ctx, control_str
                                   unsigned int app_period_ns)
 {
     if (control_strategy_h != NULL) {
-        ERR("Strategy context already initialized\n");
+        log_err("Strategy context already initialized\n");
         goto err;
     }
 
@@ -1393,13 +1397,13 @@ int control_strategy_context_init(struct control_strategy_ctx **ctx, control_str
     control_strategy_h->state = RESET;
 
     if (network_stats_open(&control_strategy_h->net_stats_ctx) < 0) {
-        ERR("Failed to open network stats socket\n");
+        log_err("Failed to open network stats socket\n");
         goto err;
     }
 
     *ctx = control_strategy_h;
 
-    INF("Strategy successfuly initialized\n");
+    log_info("Strategy successfuly initialized\n");
 
     return 0;
 
@@ -1461,7 +1465,7 @@ struct controlled_motor_ctx *control_strategy_register_motor(struct control_stra
 {
     struct controlled_motor_ctx *new_motor = rtos_malloc(sizeof(struct controlled_motor_ctx));
     if (!new_motor) {
-        ERR("Unable to allocate controlled motor context\n");
+        log_err("Unable to allocate controlled motor context\n");
         goto err;
     }
 
@@ -1485,10 +1489,10 @@ struct controlled_motor_ctx *control_strategy_register_motor(struct control_stra
     slist_add_head(&ctx->motor_list, &new_motor->node);
     ctx->num_motors++;
     
-    INF("Registered motor with : \n");
-    INF("    IO device ID : %hu\n", io_device_id);
-    INF("    Motor ID     : %hu\n", motor_id);
-    INF("    Internal ID  : %hu\n", new_motor->id);
+    log_info("Registered motor with : \n");
+    log_info("    IO device ID : %hu\n", io_device_id);
+    log_info("    Motor ID     : %hu\n", motor_id);
+    log_info("    Internal ID  : %hu\n", new_motor->id);
 
     return new_motor;
 

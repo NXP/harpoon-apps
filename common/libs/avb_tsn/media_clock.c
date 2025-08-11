@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -19,7 +19,7 @@ int init_media_clock_source(aar_crf_stream_t *crf, genavb_clock_domain_t clock_d
 	int rc;
 
 	if (!crf) {
-		ERR("init_media_clock_source: current crf config is null\n");
+		log_err("init_media_clock_source: current crf config is null\n");
 		goto err;
 	}
 
@@ -31,14 +31,14 @@ int init_media_clock_source(aar_crf_stream_t *crf, genavb_clock_domain_t clock_d
 		/* If connecting an AVTP talker stream without any previous CRF connection: set as media clock master. */
 		rc = genavb_clock_domain_set_role(MEDIA_CLOCK_MASTER, clock_domain, NULL);
 		if (rc != GENAVB_SUCCESS) {
-			ERR("clock_domain_set_role failed: %s\n", genavb_strerror(rc));
+			log_err("clock_domain_set_role failed: %s\n", genavb_strerror(rc));
 			goto err;
 		}
 	} else {
 		/* If connecting an AVTP listener stream without any previous CRF connection: set as media clock slave to that stream. */
 		rc = genavb_clock_domain_set_role(MEDIA_CLOCK_SLAVE, clock_domain, listener_stream_params);
 		if (rc != GENAVB_SUCCESS) {
-			ERR("clock_domain_set_role failed: %s\n", genavb_strerror(rc));
+			log_err("clock_domain_set_role failed: %s\n", genavb_strerror(rc));
 			goto err;
 		}
 	}

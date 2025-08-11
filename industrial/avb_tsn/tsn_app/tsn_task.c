@@ -1,14 +1,17 @@
 /*
- * Copyright 2019, 2022-2024 NXP
+ * Copyright 2019, 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+#include <string.h>
+#include <stdio.h>
 
 #include "tsn_task.h"
 
 #include "avb_tsn/stats_task.h"
 #include "avb_tsn/log.h"
-#include "avb_tsn/types.h"
+#include "rtos_apps/types.h"
 
 #include "genavb.h"
 #include "genavb/srp.h"
@@ -91,12 +94,12 @@ static void tsn_task_stats_print(void *data)
     stats_compute(&task->stats_snap.proc_time);
     stats_compute(&task->stats_snap.total_time);
 
-    INF("tsn task(%p)\n", task);
-    INF("sched           : %u\n", task->stats_snap.sched);
-    INF("sched early     : %u\n", task->stats_snap.sched_early);
-    INF("sched missed    : %u\n", task->stats_snap.sched_missed);
-    INF("sched timeout   : %u\n", task->stats_snap.sched_timeout);
-    INF("clock discont   : %u\n", task->stats_snap.clock_discont);
+    log_info("tsn task(%p)\n", task);
+    log_info("sched           : %u\n", task->stats_snap.sched);
+    log_info("sched early     : %u\n", task->stats_snap.sched_early);
+    log_info("sched missed    : %u\n", task->stats_snap.sched_missed);
+    log_info("sched timeout   : %u\n", task->stats_snap.sched_timeout);
+    log_info("clock discont   : %u\n", task->stats_snap.clock_discont);
 
     stats_print(&task->stats_snap.sched_err);
     hist_print(&task->stats_snap.sched_err_hist);
@@ -135,9 +138,9 @@ static void net_socket_stats_print(void *data)
 {
     struct net_socket *sock = data;
 
-    INF("net %s socket(%p) %d\n", sock->dir ? "tx" : "rx", sock, sock->id);
-    INF("frames     : %u\n", sock->stats_snap.frames);
-    INF("err        : %u\n", sock->stats_snap.err);
+    log_info("net %s socket(%p) %d\n", sock->dir ? "tx" : "rx", sock, sock->id);
+    log_info("frames     : %u\n", sock->stats_snap.frames);
+    log_info("err        : %u\n", sock->stats_snap.err);
 
     sock->stats_snap.pending = false;
 }
@@ -262,7 +265,7 @@ static void tsn_net_st_config_enable(struct tsn_task *task)
 
     map = priority_to_traffic_class_map(CFG_TRAFFIC_CLASS_MAX, CFG_SR_CLASS_MAX);
     if (!map) {
-        ERR("priority_to_traffic_class_map() error\n");
+        log_err("priority_to_traffic_class_map() error\n");
         return;
     } else {
         tclass = map[iso_traffic_prio];
@@ -303,9 +306,9 @@ static void tsn_net_st_config_enable(struct tsn_task *task)
     config.control_list = gate_list;
 
     if (genavb_st_set_admin_config(addr->port, task->params->clk_id, &config) < 0)
-        ERR("genavb_st_set_admin_config() error\n");
+        log_err("genavb_st_set_admin_config() error\n");
     else
-        INF("scheduled traffic config enabled\n");
+        log_info("scheduled traffic config enabled\n");
 }
 
 static void tsn_net_st_config_disable(struct tsn_task *task)
@@ -316,9 +319,9 @@ static void tsn_net_st_config_disable(struct tsn_task *task)
     config.enable = 0;
 
     if (genavb_st_set_admin_config(addr->port, task->params->clk_id, &config) < 0)
-        ERR("genavb_st_set_admin_config() error\n");
+        log_err("genavb_st_set_admin_config() error\n");
     else
-        INF("scheduled traffic config disabled\n");
+        log_info("scheduled traffic config disabled\n");
 }
 
 static void tsn_net_st_oper_config_print(struct tsn_task *task)
@@ -331,16 +334,16 @@ static void tsn_net_st_oper_config_print(struct tsn_task *task)
     config.control_list = gate_list;
 
     if (genavb_st_get_config(addr->port, GENAVB_ST_OPER, &config, ST_LIST_LEN) < 0) {
-        ERR("genavb_st_get_config() error\n");
+        log_err("genavb_st_get_config() error\n");
         return;
     }
 
-    INF("base time   : %llu\n", config.base_time);
-    INF("cycle time  : %u / %u\n", config.cycle_time_p, config.cycle_time_q);
-    INF("ext time    : %u\n", config.cycle_time_ext);
+    log_info("base time   : %llu\n", config.base_time);
+    log_info("cycle time  : %u / %u\n", config.cycle_time_p, config.cycle_time_q);
+    log_info("ext time    : %u\n", config.cycle_time_ext);
 
     for (i = 0; i < config.list_length; i++)
-        INF("%u op: %u, interval: %u, gates: %b\n",
+        log_info("%u op: %u, interval: %u, gates: %b\n",
             i, gate_list[i].operation, gate_list[i].time_interval, gate_list[i].gate_states);
 }
 
@@ -354,7 +357,7 @@ static void tsn_net_fp_config_enable(struct tsn_task *task)
 
     map = priority_to_traffic_class_map(CFG_TRAFFIC_CLASS_MAX, CFG_SR_CLASS_MAX);
     if (!map) {
-        ERR("priority_to_traffic_class_map() error\n");
+        log_err("priority_to_traffic_class_map() error\n");
         return;
     } else {
         tclass = map[addr->priority];
@@ -368,7 +371,7 @@ static void tsn_net_fp_config_enable(struct tsn_task *task)
     }
 
     if (genavb_fp_set(addr->port, GENAVB_FP_CONFIG_802_1Q, &config) < 0) {
-        ERR("genavb_fp_set(802.1Q) error\n");
+        log_err("genavb_fp_set(802.1Q) error\n");
         return;
     }
 
@@ -378,7 +381,7 @@ static void tsn_net_fp_config_enable(struct tsn_task *task)
     config.u.cfg_802_3.add_frag_size = 0;
 
     if (genavb_fp_set(addr->port, GENAVB_FP_CONFIG_802_3, &config) < 0) {
-        ERR("genavb_fp_set(802.3) error\n");
+        log_err("genavb_fp_set(802.3) error\n");
         return;
     }
 }
@@ -391,24 +394,24 @@ static void tsn_net_fp_print(struct tsn_task *task)
     int i, off = 0;
 
     if (genavb_fp_get(addr->port, GENAVB_FP_CONFIG_802_1Q, &config) < 0) {
-        ERR("genavb_fp_get(802.1Q) error\n");
+        log_err("genavb_fp_get(802.1Q) error\n");
     } else {
         for (i = 0; i < QOS_PRIORITY_MAX; i++)
             off += snprintf(status + off, 3, "%s", config.u.cfg_802_1Q.admin_status[i] == GENAVB_FP_ADMIN_STATUS_EXPRESS ? " E" : " P");
 
-        INF("admin status      :%s\n", status);
-        INF("preemption active : %u\n", config.u.cfg_802_1Q.preemption_active);
-        INF("hold request      : %u\n", config.u.cfg_802_1Q.hold_request);
+        log_info("admin status      :%s\n", status);
+        log_info("preemption active : %u\n", config.u.cfg_802_1Q.preemption_active);
+        log_info("hold request      : %u\n", config.u.cfg_802_1Q.hold_request);
     }
 
     if (genavb_fp_get(addr->port, GENAVB_FP_CONFIG_802_3, &config) < 0) {
-        ERR("genavb_fp_get(802.3) error\n");
+        log_err("genavb_fp_get(802.3) error\n");
     } else {
-        INF("status verify     : %u\n", config.u.cfg_802_3.status_verify);
-        INF("enable tx         : %u\n", config.u.cfg_802_3.enable_tx);
-        INF("verify disable tx : %u\n", config.u.cfg_802_3.verify_disable_tx);
-        INF("verify time       : %u\n", config.u.cfg_802_3.verify_time);
-        INF("add frag size     : %u\n", config.u.cfg_802_3.add_frag_size);
+        log_info("status verify     : %u\n", config.u.cfg_802_3.status_verify);
+        log_info("enable tx         : %u\n", config.u.cfg_802_3.enable_tx);
+        log_info("verify disable tx : %u\n", config.u.cfg_802_3.verify_disable_tx);
+        log_info("verify time       : %u\n", config.u.cfg_802_3.verify_time);
+        log_info("add frag size     : %u\n", config.u.cfg_802_3.add_frag_size);
     }
 }
 
@@ -420,7 +423,7 @@ int tsn_task_start(struct tsn_task *task)
         goto err;
 
     if (genavb_clock_gettime64(task->params->clk_id, &now) != GENAVB_SUCCESS) {
-        ERR("genavb_clock_gettime64() error\n");
+        log_err("genavb_clock_gettime64() error\n");
         goto err;
     }
 
@@ -432,7 +435,7 @@ int tsn_task_start(struct tsn_task *task)
 
     if (genavb_timer_start(task->timer, start_time,
                            task->params->task_period_ns, GENAVB_TIMERF_ABS) != GENAVB_SUCCESS) {
-        ERR("genavb_timer_start() error\n");
+        log_err("genavb_timer_start() error\n");
         goto err;
     }
 
@@ -472,7 +475,7 @@ static int msrp_init(struct genavb_handle *s_avb_handle)
 
     genavb_result = genavb_control_open(s_avb_handle, &s_msrp_handle, GENAVB_CTRL_MSRP);
     if (genavb_result != GENAVB_SUCCESS) {
-        ERR("avb_control_open() failed: %s\n", genavb_strerror(genavb_result));
+        log_err("avb_control_open() failed: %s\n", genavb_strerror(genavb_result));
         rc = -1;
         goto err_control_open;
     }
@@ -504,13 +507,13 @@ static int tsn_net_rx_srp_register(struct genavb_socket_rx_params *params)
     memcpy(listener_register.stream_id, tsn_stream_id, 8);
     listener_register.stream_id[7] = addr->u.l2.dst_mac[5];
 
-    INF("stream_params: %p\n", listener_register.stream_id);
+    log_info("stream_params: %p\n", listener_register.stream_id);
 
     msg_type = GENAVB_MSG_LISTENER_REGISTER;
     msg_len = sizeof(listener_response);
     rc = genavb_control_send_sync(s_msrp_handle, (genavb_msg_type_t *)&msg_type, &listener_register, sizeof(listener_register), &listener_response, &msg_len, 1000);
     if ((rc != GENAVB_SUCCESS) || (msg_type != GENAVB_MSG_LISTENER_RESPONSE) || (listener_response.status != GENAVB_SUCCESS)) {
-        ERR(STREAM_STR_FMT " failed: %s\n", STREAM_STR(listener_register.stream_id), genavb_strerror(rc));
+        log_err(STREAM_STR_FMT " failed: %s\n", STREAM_STR(listener_register.stream_id), genavb_strerror(rc));
         return -1;
     }
 
@@ -529,13 +532,13 @@ static int tsn_net_rx_srp_deregister(struct genavb_socket_rx_params *params)
     memcpy(listener_deregister.stream_id, tsn_stream_id, 8);
     listener_deregister.stream_id[7] = addr->u.l2.dst_mac[5];
 
-    INF("stream_params: %p\n", listener_deregister.stream_id);
+    log_info("stream_params: %p\n", listener_deregister.stream_id);
 
     msg_type = GENAVB_MSG_LISTENER_DEREGISTER;
     msg_len = sizeof(listener_response);
     rc = genavb_control_send_sync(s_msrp_handle, (genavb_msg_type_t *)&msg_type, &listener_deregister, sizeof(listener_deregister), &listener_response, &msg_len, 1000);
     if ((rc != GENAVB_SUCCESS) || (msg_type != GENAVB_MSG_LISTENER_RESPONSE) || (listener_response.status != GENAVB_SUCCESS)) {
-        ERR(STREAM_STR_FMT " failed: %s\n", STREAM_STR(listener_deregister.stream_id), genavb_strerror(rc));
+        log_err(STREAM_STR_FMT " failed: %s\n", STREAM_STR(listener_deregister.stream_id), genavb_strerror(rc));
         return -1;
     }
 
@@ -568,7 +571,7 @@ static int tsn_net_tx_srp_register(struct genavb_socket_tx_params *params)
 
     rc = genavb_control_send_sync(s_msrp_handle, (genavb_msg_type_t *)&msg_type, &talker_register, sizeof(talker_register), &talker_response, &msg_len, 1000);
     if ((rc != GENAVB_SUCCESS) || (msg_type != GENAVB_MSG_TALKER_RESPONSE) || (talker_response.status != GENAVB_SUCCESS)) {
-        ERR(STREAM_STR_FMT " failed: %s\n", STREAM_STR(talker_register.stream_id), genavb_strerror(rc));
+        log_err(STREAM_STR_FMT " failed: %s\n", STREAM_STR(talker_register.stream_id), genavb_strerror(rc));
         return -1;
     }
 
@@ -591,7 +594,7 @@ static int tsn_net_tx_srp_deregister(struct genavb_socket_tx_params *params)
     msg_len = sizeof(talker_response);
     rc = genavb_control_send_sync(s_msrp_handle, (genavb_msg_type_t *)&msg_type, &talker_deregister, sizeof(talker_deregister), &talker_response, &msg_len, 1000);
     if ((rc != GENAVB_SUCCESS) || (msg_type != GENAVB_MSG_TALKER_RESPONSE) || (talker_response.status != GENAVB_SUCCESS)) {
-        ERR(STREAM_STR_FMT " failed: %s\n", STREAM_STR(talker_deregister.stream_id), genavb_strerror(rc));
+        log_err(STREAM_STR_FMT " failed: %s\n", STREAM_STR(talker_deregister.stream_id), genavb_strerror(rc));
 
         return -1;
     }
@@ -617,14 +620,14 @@ static int tsn_task_net_init(struct tsn_task *task)
 
         if (genavb_socket_rx_open(&sock->genavb_rx, GENAVB_SOCKF_NONBLOCK,
                                   &task->params->rx_params[i]) != GENAVB_SUCCESS) {
-            ERR("genavb_socket_rx_open error\n");
+            log_err("genavb_socket_rx_open error\n");
             goto close_sock_rx;
         }
 
         sock->buf = rtos_malloc(task->params->rx_buf_size);
         if (!sock->buf) {
             genavb_socket_rx_close(sock->genavb_rx);
-            ERR("error allocating rx_buff\n");
+            log_err("error allocating rx_buff\n");
             goto close_sock_rx;
         }
 
@@ -639,14 +642,14 @@ static int tsn_task_net_init(struct tsn_task *task)
         sock->dir = TX;
 
         if (genavb_socket_tx_open(&sock->genavb_tx, 0, &task->params->tx_params[j]) != GENAVB_SUCCESS) {
-            ERR("genavb_socket_tx_open error\n");
+            log_err("genavb_socket_tx_open error\n");
             goto close_sock_tx;
         }
 
         sock->buf = rtos_malloc(task->params->tx_buf_size);
         if (!sock->buf) {
             genavb_socket_tx_close(sock->genavb_tx);
-            ERR("error allocating tx_buff\n");
+            log_err("error allocating tx_buff\n");
             goto close_sock_tx;
         }
 
@@ -728,7 +731,7 @@ int tsn_task_register(struct tsn_task **task, struct tsn_task_params *params,
     task_name[19] = '\0';
 
     if (tsn_task_net_init(*task) < 0) {
-        ERR("tsn_task_net_init error\n");
+        log_err("tsn_task_net_init error\n");
         goto err_free;
     }
 
@@ -736,19 +739,19 @@ int tsn_task_register(struct tsn_task **task, struct tsn_task_params *params,
 
     if (main_loop) {
         if (rtos_thread_create(&(*task)->thread, params->priority, 0, params->stack_depth, task_name, main_loop, ctx) < 0) {
-            ERR("xTaskCreate failed\n\r");
+            log_err("xTaskCreate failed\n\r");
             goto net_exit;
         }
     }
 
     if (timer_callback) {
         if (genavb_timer_create(&(*task)->timer, params->clk_id, 0) != GENAVB_SUCCESS) {
-            ERR("genavb_timer_create() error\n");
+            log_err("genavb_timer_create() error\n");
             goto task_delete;
         }
 
         if (genavb_timer_set_callback((*task)->timer, timer_callback, *task) != GENAVB_SUCCESS) {
-            ERR("genavb_timer_create() error\n");
+            log_err("genavb_timer_create() error\n");
             goto timer_destroy;
         }
     } else {

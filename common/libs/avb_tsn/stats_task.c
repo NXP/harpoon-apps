@@ -84,7 +84,7 @@ static void STATS_TasksCPULoad(struct TasksCPULoad_Ctx *Ctx)
     NbTasks = uxTaskGetSystemState(Ctx->TaskStatusArray,
                                    STATS_MAX_TASKS, &TotalTime);
     if (!NbTasks) {
-        ERR("uxTaskGetSystemState error, check STATS_MAX_TASKS\n");
+        log_err("uxTaskGetSystemState error, check STATS_MAX_TASKS\n");
         return;
     }
 
@@ -239,16 +239,16 @@ int STATS_TaskInit(void (*PeriodicFn)(void *Data), void *Data, unsigned int Peri
 
 #if CONFIG_STATS_CPU_LOAD
     if (STATS_TasksCPULoadInit(&Ctx->TasksCPULoad) < 0)
-        ERR("STATS_TasksCPULoadInit failed\n");
+        log_err("STATS_TasksCPULoadInit failed\n");
 #endif
 
 #if CONFIG_STATS_ASYNC
     if (STATS_AsyncInit(&Ctx->Async) < 0)
-        ERR("STATS_AsyncInit failed \n");
+        log_err("STATS_AsyncInit failed \n");
 #endif
 
     if (rtos_thread_create(&Ctx->stats_task, STATS_TASK_PRIORITY, 0, STATS_TASK_STACK_SIZE, STATS_TASK_NAME, STATS_Task, Ctx) < 0) {
-        ERR("rtos_thread_create(%s) failed\n", STATS_TASK_NAME);
+        log_err("rtos_thread_create(%s) failed\n", STATS_TASK_NAME);
         goto exit;
     }
 

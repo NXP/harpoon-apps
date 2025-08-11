@@ -1,8 +1,10 @@
 /*
- * Copyright 2022, 2024 NXP
+ * Copyright 2022, 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+#include <string.h>
 
 #include "rtos_abstraction_layer.h"
 #include "monitoring_stats.h"
@@ -28,7 +30,7 @@ int monitoring_stats_open(struct monitoring_stats_ctx **ctx)
 
     (*ctx)->socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if ((*ctx)->socket_fd < 0) {
-        ERR("socket call failed\n");
+        log_err("socket call failed\n");
         goto err_free;
     }
 
@@ -53,7 +55,7 @@ int monitoring_stats_send(struct monitoring_stats_ctx *ctx, struct monitoring_ms
                 (struct sockaddr *)&ctx->server_address, sizeof(ctx->server_address));
 
     if (rc < 0) {
-        ERR("sendto() call failed, err: %d\n", rc);
+        log_err("sendto() call failed, err: %d\n", rc);
         goto err;
     }
     return 0;

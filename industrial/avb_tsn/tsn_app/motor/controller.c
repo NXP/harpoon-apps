@@ -1,8 +1,10 @@
 /*
- * Copyright 2019, 2021, 2023-2024 NXP
+ * Copyright 2019, 2021, 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+#include <string.h>
 
 #include "controller.h"
 #include "log.h"
@@ -26,14 +28,14 @@ static void controller_stats_print(void *data)
 {
     struct controller_stats *stats_snap = data;
 
-    INF("current state           : %s\n", state_names[stats_snap->state]);
-    INF("state control           : %u\n", stats_snap->sm_control);
-    INF("state io_device missing : %u\n", stats_snap->sm_io_device_missing);
-    INF("state standby           : %u\n", stats_snap->sm_standby);
-    INF("errors msg id: %u, src id: %u, motor id: %u, empty data: %u\n",
+    log_info("current state           : %s\n", state_names[stats_snap->state]);
+    log_info("state control           : %u\n", stats_snap->sm_control);
+    log_info("state io_device missing : %u\n", stats_snap->sm_io_device_missing);
+    log_info("state standby           : %u\n", stats_snap->sm_standby);
+    log_info("errors msg id: %u, src id: %u, motor id: %u, empty data: %u\n",
         stats_snap->err_msg_id, stats_snap->err_src_id,
         stats_snap->err_motor_id, stats_snap->err_invalid_len_received);
-    INF("errors strat loop: %u, strat next: %u\n",
+    log_info("errors strat loop: %u, strat next: %u\n",
         stats_snap->err_strat_loop, stats_snap->err_strat_next);
 
     stats_snap->pending = false;
@@ -297,7 +299,7 @@ void controller_net_receive(void *data, int msg_id, int src_id, void *buf, int l
         // Check size of data received
         if (len != sizeof(struct msg_feedback)) {
             if (ctx->stats.err_invalid_len_received == INT32_MAX){
-                ERR("Overflow on ctx->stats.err_invalid_len_received var!\n");
+                log_err("Overflow on ctx->stats.err_invalid_len_received var!\n");
                 return;
             } else
                 ctx->stats.err_invalid_len_received++;
@@ -359,12 +361,12 @@ int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool
     /* Initialize queue that handles button events */
     ctx->event_queue = rtos_mqueue_alloc_init(1, sizeof(enum event_motor));
     if (!ctx->event_queue) {
-        ERR("Unable to create queue\n");
+        log_err("Unable to create queue\n");
         goto err;
     }
 
     if (user_button_add_event_queue(&ctx->event_queue) < 0) {
-        ERR("Unable to add event queue for user button events\n");
+        log_err("Unable to add event queue for user button events\n");
         goto err_del_queue;
     }
 
@@ -377,7 +379,7 @@ int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool
 
     // Initialize control strategy
     if (control_strategy_context_init(&ctx->strategy, first_strategy, c_task->params.task_period_ns) < 0) {
-        ERR("Unable to initialize control strategy\n");
+        log_err("Unable to initialize control strategy\n");
         goto err_del_queue;
     }
 
@@ -390,7 +392,7 @@ int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool
             if (genavb_clock_gettime64(c_task->params.clk_id, &now) == GENAVB_SUCCESS) {
                 ctx->io_devices[i].motors[j] = control_strategy_register_motor(ctx->strategy, ctx->io_devices[i].id, j, now);
             } else {
-                ERR("Get genavb clock failed!\n");
+                log_err("Get genavb clock failed!\n");
                 goto err;
             }
 
@@ -402,12 +404,12 @@ int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool
 
     if (cmd_client) {
         if (command_client_start(&ctx->cmd_client_ctx) < 0) {
-            ERR("Unable to start command client\n");
+            log_err("Unable to start command client\n");
         }
     }
 
     if (monitoring_stats_open(&ctx->monitoring_stats_ctx) < 0) {
-        ERR("Failed to open monitoring stats socket\n");
+        log_err("Failed to open monitoring stats socket\n");
         goto err_del_queue;
     }
 
@@ -415,7 +417,7 @@ int controller_init(struct controller_ctx *ctx, struct cyclic_task *c_task, bool
     if (cyclic_task_init(c_task, controller_net_receive, controller_loop, ctx) < 0)
         goto err_del_queue;
 
-    INF("Controller Init Successful\n");
+    log_info("Controller Init Successful\n");
 
     return 0;
 

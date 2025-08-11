@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <inttypes.h>
+#include <string.h>
+#include <stdio.h>
+
 #include "log.h"
 #include "genavb.h"
 #include "storage.h"
@@ -43,7 +47,7 @@ static int timer_pps_start(struct gavb_pps *pps)
 
     rc = genavb_clock_gettime64(pps->clk_id, &now);
     if (rc != GENAVB_SUCCESS) {
-        ERR("genavb_clock_gettime64() error %d \n", rc);
+        log_err("genavb_clock_gettime64() error %d \n", rc);
         goto err;
     }
 
@@ -52,7 +56,7 @@ static int timer_pps_start(struct gavb_pps *pps)
 
     rc = genavb_timer_start(pps->t, start_time, NSECS_PER_SEC, GENAVB_TIMERF_PPS | GENAVB_TIMERF_ABS);
     if (rc != GENAVB_SUCCESS) {
-        ERR("genavb_timer_start error %d \n", rc);
+        log_err("genavb_timer_start error %d \n", rc);
         goto err;
     }
 
@@ -69,7 +73,7 @@ static void timer_callback(void *data, int count)
     /* Handle discontinuities */
     if (count < 0) {
         timer_pps_start(pps);
-        INF("discontinuity : callback_counter %d \n", count);
+        log_info("discontinuity : callback_counter %d \n", count);
     }
 }
 
@@ -81,23 +85,23 @@ int gavb_pps_init(struct gavb_pps *pps, genavb_clock_id_t clk_id)
 
     rc = genavb_timer_create(&pps->t, pps->clk_id, GENAVB_TIMERF_PPS);
     if (rc != GENAVB_SUCCESS) {
-        ERR("genavb_timer_create error %d \n", rc);
+        log_err("genavb_timer_create error %d \n", rc);
         goto err;
     }
 
     rc = genavb_timer_set_callback(pps->t, timer_callback, pps);
     if (rc != GENAVB_SUCCESS) {
-        ERR("genavb_timer_set_callback error %d \n", rc);
+        log_err("genavb_timer_set_callback error %d \n", rc);
         goto err_destroy;
     }
 
     rc = timer_pps_start(pps);
     if (rc != 0) {
-        ERR("timer_pps_start error %d \n", rc);
+        log_err("timer_pps_start error %d \n", rc);
         goto err_destroy;
     }
 
-    INF("success, clk_id: %u\n", clk_id);
+    log_info("success, clk_id: %u\n", clk_id);
     return 0;
 
 err_destroy:
@@ -182,13 +186,13 @@ int gavb_stack_init(void)
 
         storage_read_int("btb_mode", &btb_mode);
         if (btb_mode) {
-            INF("BTB mode\n");
+            log_info("BTB mode\n");
             genavb_config->avdecc_config.entity_cfg[0].flags |= AVDECC_FAST_CONNECT_MODE | AVDECC_FAST_CONNECT_BTB;
             genavb_config->avdecc_config.entity_cfg[0].channel_waitmask |= AVDECC_WAITMASK_MEDIA_STACK;
         }
 
         if (!storage_read_u64("talker_id", &talker_entity_id)) {
-            INF("talker_entity_id 0x%016"PRIx64"\n", talker_entity_id);
+            log_info("talker_entity_id 0x%016"PRIx64"\n", talker_entity_id);
             genavb_config->avdecc_config.entity_cfg[0].talker_entity_id[0] = talker_entity_id;
             genavb_config->avdecc_config.entity_cfg[0].talker_entity_id_n = 1;
             genavb_config->avdecc_config.entity_cfg[0].talker_unique_id[0] = 0;
@@ -199,7 +203,7 @@ int gavb_stack_init(void)
             struct avb_avdecc_config *avdecc_cfg;
             avdecc_cfg = system_config_get_avdecc();
             if (!avdecc_cfg) {
-                ERR("system_config_get_avdecc() failed\n");
+                log_err("system_config_get_avdecc() failed\n");
                 goto err;
             }
 
@@ -217,12 +221,12 @@ int gavb_stack_init(void)
             if (AEM_ID_VALID(avdecc_cfg->aem_id)) {
                 aem_entity = aem_entity_load_from_reference_entity(aem_desc_list[avdecc_cfg->aem_id]);
                 if (!aem_entity) {
-                    ERR("Failed to load aem(%d)\n", avdecc_cfg->aem_id);
+                    log_err("Failed to load aem(%d)\n", avdecc_cfg->aem_id);
                     goto err_aem;
                 }
                 genavb_config->avdecc_config.entity_cfg[0].aem = aem_entity;
             } else {
-                ERR("Invalid aem id: %d\n", avdecc_cfg->aem_id);
+                log_err("Invalid aem id: %d\n", avdecc_cfg->aem_id);
                 goto err_aem;
             }
 #endif
@@ -234,7 +238,7 @@ int gavb_stack_init(void)
 
     if ((rc = genavb_init(&s_genavb_handle, 0)) != GENAVB_SUCCESS) {
         s_genavb_handle = NULL;
-        ERR("genavb_init() failed: %s\n", genavb_strerror(rc));
+        log_err("genavb_init() failed: %s\n", genavb_strerror(rc));
         goto err_genavb_init;
     }
 
@@ -330,25 +334,25 @@ int gavb_port_stats_init(unsigned int port_id)
 
     num = genavb_port_stats_get_number(port_id);
     if (num < 0) {
-        ERR("genavb_port_stats_get_number() error %d\n", num);
+        log_err("genavb_port_stats_get_number() error %d\n", num);
         goto err;
     }
 
     stats->num = num;
     stats->names = rtos_malloc(num * sizeof(char *));
     if (!stats->names) {
-        ERR("rtos_malloc() failed\n");
+        log_err("rtos_malloc() failed\n");
         goto err;
     }
 
     if (genavb_port_stats_get_strings(port_id, stats->names, num * sizeof(char *)) != GENAVB_SUCCESS) {
-        ERR("genavb_port_stats_get_strings() failed\n");
+        log_err("genavb_port_stats_get_strings() failed\n");
         goto err;
     }
 
     stats->values = rtos_malloc(num * sizeof(uint64_t));
     if (!stats->values) {
-        ERR("rtos_malloc() failed\n");
+        log_err("rtos_malloc() failed\n");
         goto err;
     }
 
@@ -377,12 +381,12 @@ struct port_stats *gavb_port_stats_get(unsigned int port_id)
     struct port_stats *stats = &port_stats[port_id];
 
     if (!stats->names || !stats->values) {
-        ERR("port stats are not initialized\n");
+        log_err("port stats are not initialized\n");
         goto err;
     }
 
     if (genavb_port_stats_get(port_id, stats->values, stats->num * sizeof(uint64_t)) < 0) {
-        ERR("genavb_port_stats_get() error\n");
+        log_err("genavb_port_stats_get() error\n");
         goto err;
     }
 

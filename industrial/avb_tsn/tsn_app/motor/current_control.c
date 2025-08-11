@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2023-2024 NXP
+ * Copyright 2019, 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,7 +7,7 @@
 #include "current_control.h"
 
 #include "motor_params.h"
-#include "types.h"
+#include "rtos_apps/types.h"
 
 /** Position P Controller
  *

@@ -1,14 +1,16 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+#include <string.h>
 
 #include "alarm_task.h"
 #include "tsn_tasks_config.h"
 
 #include "avb_tsn/log.h"
-#include "avb_tsn/types.h"
+#include "rtos_apps/types.h"
 
 static void net_callback(void *data)
 {
@@ -17,7 +19,7 @@ static void net_callback(void *data)
     struct alarm_task *a_task = task->ctx;
 
     if (rtos_mqueue_send(a_task->queue.handle, &sock, RTOS_NO_WAIT) < 0) {
-        ERR("xQueueSendFromISR() failed\n\r");
+        log_err("xQueueSendFromISR() failed\n\r");
     }
 }
 
@@ -34,7 +36,7 @@ static void main_alarm_monitor(void *data)
         while (tsn_net_receive_sock(sock) == NET_OK) {
             struct tsn_common_hdr *hdr = sock->buf;
 
-            INF("alarm received from device: %u, time: %llu\n",
+            log_info("alarm received from device: %u, time: %llu\n",
                 hdr->src_id, hdr->sched_time);
 
             if (a_task->net_rx_func)
@@ -98,23 +100,23 @@ int alarm_task_monitor_init(struct alarm_task *a_task,
     a_task->queue.handle = rtos_mqueue_alloc_init(a_task->queue.length,
                                                   sizeof(struct net_socket *));
     if (!a_task->queue.handle) {
-        ERR("rtos_mqueue_alloc_init failed\n");
+        log_err("rtos_mqueue_alloc_init failed\n");
         goto err;
     }
 
     rc = tsn_task_register(&a_task->task, params, a_task->id, main_alarm_monitor, a_task, NULL);
     if (rc < 0) {
-        ERR("tsn_task_register rc = %d\n", __func__, rc);
+        log_err("tsn_task_register rc = %d\n", __func__, rc);
         goto err;
     }
 
     rc = tsn_net_receive_set_cb(&a_task->task->sock_rx[0], net_callback);
     if (rc < 0) {
-        ERR("tsn_net_receive_set_cb rc = %d\n", __func__, rc);
+        log_err("tsn_net_receive_set_cb rc = %d\n", __func__, rc);
         goto err;
     }
 
-    INF("success\n");
+    log_info("success\n");
 
     return 0;
 
@@ -160,7 +162,7 @@ int alarm_task_io_init(struct alarm_task *a_task)
 
     rc = tsn_task_register(&a_task->task, params, a_task->id, main_alarm_io, a_task, NULL);
     if (rc < 0) {
-        ERR("tsn_task_register rc = %d\n", __func__, rc);
+        log_err("tsn_task_register rc = %d\n", __func__, rc);
         goto err;
     }
 

@@ -1,8 +1,10 @@
 /*
- * Copyright 2017, 2022, 2024 NXP
+ * Copyright 2017, 2022, 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+#include <string.h>
 
 #include <genavb/genavb.h>
 
@@ -23,7 +25,7 @@ int crf_connect(aar_crf_stream_t *crf, media_clock_role_t role, genavb_clock_dom
 	int rc;
 
 	if (clock_domain >= GENAVB_CLOCK_DOMAIN_MAX || clock_domain < GENAVB_CLOCK_DOMAIN_0) {
-		ERR("Invalid domain_index (%u)\n", clock_domain);
+		log_err("Invalid domain_index (%u)\n", clock_domain);
 		goto err;
 	}
 
@@ -31,18 +33,18 @@ int crf_connect(aar_crf_stream_t *crf, media_clock_role_t role, genavb_clock_dom
 		stream_params->clock_domain = clock_domain;
 
 	if (!crf) {
-		ERR("CRF stream not found for domain_index (%u)\n", clock_domain);
+		log_err("CRF stream not found for domain_index (%u)\n", clock_domain);
 		goto err;
 	}
 
 	if (crf->stream_handle) {
-		ERR("CRF stream already connected for domain_index (%u)\n", clock_domain);
+		log_err("CRF stream already connected for domain_index (%u)\n", clock_domain);
 		goto err;
 	}
 
 	rc = genavb_clock_domain_set_role(role, clock_domain, stream_params);
 	if (rc != GENAVB_SUCCESS) {
-		ERR("clock_domain_set_role failed, rc = %d\n", rc);
+		log_err("clock_domain_set_role failed, rc = %d\n", rc);
 		goto err;
 	}
 
@@ -54,7 +56,7 @@ int crf_connect(aar_crf_stream_t *crf, media_clock_role_t role, genavb_clock_dom
 
 	rc = genavb_stream_create(genavb_handle, &crf->stream_handle, &crf->stream_params, &crf->cur_batch_size, 0);
 	if (rc != GENAVB_SUCCESS) {
-		ERR("genavb_stream_create failed, rc = %d\n", rc);
+		log_err("genavb_stream_create failed, rc = %d\n", rc);
 		goto err;
 	}
 
@@ -67,17 +69,17 @@ err:
 void crf_disconnect(aar_crf_stream_t *crf)
 {
 	if (!crf) {
-		ERR("CRF stream not found\n");
+		log_err("CRF stream not found\n");
 		return;
 	}
 
 	if (!crf->stream_handle) {
-		ERR("CRF stream already disconnected for domain_index (%u)\n", crf->stream_params.clock_domain);
+		log_err("CRF stream already disconnected for domain_index (%u)\n", crf->stream_params.clock_domain);
 		return;
 	}
 
 	if (genavb_stream_destroy(crf->stream_handle) != GENAVB_SUCCESS)
-		ERR("genavb_stream_destroy error\n");
+		log_err("genavb_stream_destroy error\n");
 
 	crf->stream_handle = NULL;
 }

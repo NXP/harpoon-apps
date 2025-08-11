@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -17,13 +17,13 @@
 
 static void motor_params_dump(struct motor_control_params *params, unsigned int id)
 {
-    INF("motor%u:%u params:\n", (id >> 8) & 0xff, id & 0xff);
-    INF("vel max: %f (rpm)\n", params->max_vel_rpm);
-    INF("acc max: %f (rpm/s)\n", params->max_accel_rpm_p_s);
+    log_info("motor%u:%u params:\n", (id >> 8) & 0xff, id & 0xff);
+    log_info("vel max: %f (rpm)\n", params->max_vel_rpm);
+    log_info("acc max: %f (rpm/s)\n", params->max_accel_rpm_p_s);
 
-    INF("J:       %f (A.s/rpm)\n", params->J);
-    INF("b:       %f (A/rpm)\n", params->b);
-    INF("Tm:      %f (A)\n", params->Tm);
+    log_info("J:       %f (A.s/rpm)\n", params->J);
+    log_info("b:       %f (A/rpm)\n", params->b);
+    log_info("Tm:      %f (A)\n", params->Tm);
 }
 
 static void motor_params_check(struct motor_control_params *params)

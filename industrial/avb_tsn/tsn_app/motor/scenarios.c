@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2024 NXP
+ * Copyright 2019, 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -1510,7 +1510,7 @@ void get_scenario_block(struct scenario_ctx *ctx)
         //FIXME change after_delay values to time to avoid this scaling
         ctx->after_delay = (ctx->blocks[ctx->blocks_iterator].after_delay * APP_PERIOD_250_US) / ctx->app_period_ns;
     } else {
-        ERR("Scenario blocks pointer is NULL\n");
+        log_err("Scenario blocks pointer is NULL\n");
     }
 }
 

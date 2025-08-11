@@ -4,13 +4,15 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <string.h>
+
 #include "cyclic_task.h"
 #include "tsn_tasks_config.h"
 
 #include "rtos_apps/stats.h"
 #include "avb_tsn/stats_task.h"
 #include "avb_tsn/log.h"
-#include "avb_tsn/types.h"
+#include "rtos_apps/types.h"
 
 static void socket_stats_print(void *data)
 {
@@ -18,12 +20,12 @@ static void socket_stats_print(void *data)
 
     stats_compute(&sock->stats_snap.traffic_latency);
 
-    INF("cyclic rx socket(%p) net_sock(%p) peer id: %d\n", sock, sock->net_sock, sock->peer_id);
-    INF("valid frames  : %u\n", sock->stats_snap.valid_frames);
-    INF("err id        : %u\n", sock->stats_snap.err_id);
-    INF("err ts        : %u\n", sock->stats_snap.err_ts);
-    INF("err underflow : %u\n", sock->stats_snap.err_underflow);
-    INF("link %s\n", sock->stats_snap.link_status ? "up" : "down");
+    log_info("cyclic rx socket(%p) net_sock(%p) peer id: %d\n", sock, sock->net_sock, sock->peer_id);
+    log_info("valid frames  : %u\n", sock->stats_snap.valid_frames);
+    log_info("err id        : %u\n", sock->stats_snap.err_id);
+    log_info("err ts        : %u\n", sock->stats_snap.err_ts);
+    log_info("err underflow : %u\n", sock->stats_snap.err_underflow);
+    log_info("link %s\n", sock->stats_snap.link_status ? "up" : "down");
 
     stats_print(&sock->stats_snap.traffic_latency);
     hist_print(&sock->stats_snap.traffic_latency_hist);
@@ -250,7 +252,7 @@ int cyclic_task_start(struct cyclic_task *c_task)
     unsigned int period_ns = c_task->params.task_period_ns;
 
     if (!period_ns || ((NSECS_PER_SEC / period_ns) * period_ns != NSECS_PER_SEC)) {
-        ERR("invalid task period(%u ns), needs to be an integer divider of 1 second\n", period_ns);
+        log_err("invalid task period(%u ns), needs to be an integer divider of 1 second\n", period_ns);
         return -1;
     }
 
@@ -271,14 +273,14 @@ int cyclic_task_init(struct cyclic_task *c_task,
     int i;
     int rc;
 
-    INF("cyclic task type: %d, id: %u\n\n", c_task->type, c_task->id);
-    INF("task params\n");
-    INF("task_period_ns        : %u\n", params->task_period_ns);
-    INF("task_period_offset_ns : %u\n", params->task_period_offset_ns);
-    INF("transfer_time_ns      : %u\n", params->transfer_time_ns);
-    INF("sched_traffic_offset  : %u\n", params->sched_traffic_offset);
-    INF("use_fp                : %u\n", params->use_fp);
-    INF("use_st                : %u\n", params->use_st);
+    log_info("cyclic task type: %d, id: %u\n\n", c_task->type, c_task->id);
+    log_info("task params\n");
+    log_info("task_period_ns        : %u\n", params->task_period_ns);
+    log_info("task_period_offset_ns : %u\n", params->task_period_offset_ns);
+    log_info("transfer_time_ns      : %u\n", params->transfer_time_ns);
+    log_info("sched_traffic_offset  : %u\n", params->sched_traffic_offset);
+    log_info("use_fp                : %u\n", params->use_fp);
+    log_info("use_st                : %u\n", params->use_st);
 
     tx_stream = tsn_conf_get_stream(c_task->tx_socket.stream_id);
     if (!tx_stream)
@@ -308,7 +310,7 @@ int cyclic_task_init(struct cyclic_task *c_task,
 
     c_task->queue_h = rtos_mqueue_alloc_init(CYCLIC_EVENT_QUEUE_LENGTH, sizeof(struct cyclic_event));
     if (!c_task->queue_h) {
-        ERR("rtos_mqueue_alloc_init failed\n");
+        log_err("rtos_mqueue_alloc_init failed\n");
         goto err_mqueue;
     }
 
@@ -318,7 +320,7 @@ int cyclic_task_init(struct cyclic_task *c_task,
 
     rc = tsn_task_register(&c_task->task, params, c_task->id, main_cyclic, c_task, timer_callback);
     if (rc < 0) {
-        ERR("tsn_task_register rc = %d\n", __func__, rc);
+        log_err("tsn_task_register rc = %d\n", __func__, rc);
         goto err_task_register;
     }
 
@@ -332,7 +334,7 @@ int cyclic_task_init(struct cyclic_task *c_task,
 
     c_task->tx_socket.net_sock = tsn_net_sock_tx(c_task->task, 0);
 
-    INF("success\n");
+    log_info("success\n");
 
     return 0;
 

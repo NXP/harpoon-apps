@@ -1,13 +1,15 @@
 /*
- * Copyright 2019, 2022-2023 NXP
+ * Copyright 2019, 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "log.h"
+#include <string.h>
 
-uint64_t app_log_time_s;
-unsigned int app_log_level = VERBOSE_INFO;
+#include "rtos_apps/log.h"
+#include "rtos_apps/types.h"
+
+#include "log.h"
 
 void app_log_update_time(genavb_clock_id_t clk_id)
 {
@@ -16,33 +18,29 @@ void app_log_update_time(genavb_clock_id_t clk_id)
     if (genavb_clock_gettime64(clk_id, &log_time) < 0)
         return;
 
-    app_log_time_s = log_time / NSECS_PER_SEC;
-}
-
-static void __app_log_level_set(unsigned int level)
-{
-    if (level <= VERBOSE_DEBUG)
-        app_log_level = level;
+#if defined(CONFIG_RTOS_APPS_LOG_TIMESTAMP)
+    rtos_apps_log_timestamp_update(log_time / NSECS_PER_SEC);
+#endif
 }
 
 int app_log_level_set(char *level_str)
 {
-    unsigned int level;
+    rtos_apps_log_level_t level;
 
     if (!strcmp(level_str, "crit"))
-        level = VERBOSE_ERROR;
+        level = LOG_CRIT;
     else if (!strcmp(level_str, "err"))
-        level = VERBOSE_ERROR;
+        level = LOG_ERR;
     else if (!strcmp(level_str, "init"))
-        level = VERBOSE_INFO;
+        level = LOG_INFO;
     else if (!strcmp(level_str, "info"))
-        level = VERBOSE_INFO;
+        level = LOG_INFO;
     else if (!strcmp(level_str, "dbg"))
-        level = VERBOSE_DEBUG;
+        level = LOG_DEBUG;
     else
         return -1;
 
-    __app_log_level_set(level);
+    rtos_apps_log_level_config_set(level);
 
     return 0;
 }
