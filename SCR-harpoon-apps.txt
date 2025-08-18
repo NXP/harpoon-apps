@@ -103,3 +103,11 @@ Description and comments:    An abstraction layer for Real-Time Operating System
 Release Location:            https://github.com/NXP/rtos-abstraction-layer (tag 1_4_0)
 Origin:                      NXP (BSD-3-Clause) - https://github.com/NXP/rtos-abstraction-layer/blob/1_4/SCR-rtos-abstraction-layer.txt
 --------------------------------------------
+Package:                     rtos-apps
+Outgoing License:            BSD-3-Clause
+License File:                LICENSE.txt
+Type of Content:             source code
+Description and comments:    A library of re-usable application components
+Release Location:            https://github.com/NXP/rtos-apps
+Origin:                      NXP (BSD-3-Clause)
+--------------------------------------------
