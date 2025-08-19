@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -54,8 +54,8 @@ void audio_element_usage(void)
 
 static int audio_element_routing_connect(int fd, unsigned int pipeline_id, unsigned int element_id, unsigned int output, unsigned int input)
 {
-	struct hrpn_cmd_audio_element_routing_connect connect;
-	struct hrpn_resp_audio_element_routing resp;
+	struct audio_cmd_element_routing_connect connect;
+	struct audio_resp_element_routing resp;
 	unsigned int len;
 
 	connect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_CONNECT;
@@ -71,8 +71,8 @@ static int audio_element_routing_connect(int fd, unsigned int pipeline_id, unsig
 
 static int audio_element_routing_disconnect(int fd, unsigned int pipeline_id, unsigned int element_id, unsigned int output)
 {
-	struct hrpn_cmd_audio_element_routing_disconnect disconnect;
-	struct hrpn_resp_audio_element_routing resp;
+	struct audio_cmd_element_routing_disconnect disconnect;
+	struct audio_resp_element_routing resp;
 	unsigned int len;
 
 	disconnect.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_DISCONNECT;
@@ -154,8 +154,8 @@ out:
 
 static int audio_pipeline_element_dump(int fd, unsigned int pipeline_id, unsigned int element_type, unsigned int element_id)
 {
-	struct hrpn_cmd_audio_element_dump dump;
-	struct hrpn_resp_audio_element resp;
+	struct audio_cmd_element_dump dump;
+	struct audio_resp_element resp;
 	unsigned int len;
 
 	dump.type = HRPN_CMD_TYPE_AUDIO_ELEMENT_DUMP;
@@ -221,8 +221,8 @@ out:
 
 static int audio_pipeline_dump(int fd, unsigned int pipeline_id)
 {
-	struct hrpn_cmd_audio_pipeline_dump dump;
-	struct hrpn_resp_audio_pipeline resp;
+	struct audio_cmd_pipeline_dump dump;
+	struct audio_resp_audio_pipeline resp;
 	unsigned int len;
 
 	dump.type = HRPN_CMD_TYPE_AUDIO_PIPELINE_DUMP;

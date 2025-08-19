@@ -4,6 +4,7 @@ project(harpoon_ctrl)
 
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
 SET(CommonPath "${ProjDirPath}/../common")
+SET(RtosAppsPath "${ProjDirPath}/../../rtos-apps")
 
 set(MCUX_SDK_PROJECT_NAME harpoon_ctrl)
 
@@ -23,5 +24,8 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
     ${CommonPath}
     ${ProjDirPath}
 )
+
+set(RTOS_APPS_TARGET ${MCUX_SDK_PROJECT_NAME})
+include(${RtosAppsPath}/rtos_apps_audio_ctrl.cmake)
 
 include(lib_ctrl)

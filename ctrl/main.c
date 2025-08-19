@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -67,7 +67,7 @@ static void audio_usage(void)
 
 static int audio_run(int fd, unsigned int id, unsigned int frequency, unsigned int period, uint8_t *hw_addr, bool use_audio_hat)
 {
-	struct hrpn_cmd_audio_run run = {0,};
+	struct audio_cmd_run run = {0,};
 	struct hrpn_response resp;
 	unsigned int len;
 
@@ -75,7 +75,7 @@ static int audio_run(int fd, unsigned int id, unsigned int frequency, unsigned i
 	run.id = id;
 	run.frequency = frequency;
 	run.period = period;
-	run.use_audio_hat = use_audio_hat;
+	run.use_alternate_config = use_audio_hat;
 
 	memcpy(run.addr, hw_addr, sizeof(run.addr));
 
@@ -86,7 +86,7 @@ static int audio_run(int fd, unsigned int id, unsigned int frequency, unsigned i
 
 static int audio_stop(int fd)
 {
-	struct hrpn_cmd_audio_stop stop;
+	struct audio_cmd_stop stop;
 	struct hrpn_response resp;
 	unsigned int len;
 

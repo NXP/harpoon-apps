@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,37 +9,37 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "hrpn_ctrl_audio_pipeline.h"
+#include "rtos_apps/audio/audio_ctrl.h"
 
 enum {
 	HRPN_CMD_TYPE_LATENCY_RUN = 0x0000,
 	HRPN_CMD_TYPE_LATENCY_STOP,
 	HRPN_RESP_TYPE_LATENCY = 0x0010,
 
-	HRPN_CMD_TYPE_AUDIO_RUN = 0x0100,
-	HRPN_CMD_TYPE_AUDIO_STOP,
-	HRPN_RESP_TYPE_AUDIO = 0x0110,
+	HRPN_CMD_TYPE_AUDIO_RUN = AUDIO_CMD_TYPE_RUN,
+	HRPN_CMD_TYPE_AUDIO_STOP = AUDIO_CMD_TYPE_STOP,
+	HRPN_RESP_TYPE_AUDIO = AUDIO_RESP_TYPE,
 
-	HRPN_CMD_TYPE_AUDIO_PIPELINE_DUMP = 0x200,
-	HRPN_RESP_TYPE_AUDIO_PIPELINE = 0x2ff,
+	HRPN_CMD_TYPE_AUDIO_PIPELINE_DUMP = AUDIO_CMD_TYPE_PIPELINE_DUMP,
+	HRPN_RESP_TYPE_AUDIO_PIPELINE = AUDIO_RESP_TYPE_PIPELINE,
 
-	HRPN_CMD_TYPE_AUDIO_ELEMENT_DUMP = 0x300,
-	HRPN_RESP_TYPE_AUDIO_ELEMENT = 0x3ff,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_DUMP = AUDIO_CMD_TYPE_ELEMENT_DUMP,
+	HRPN_RESP_TYPE_AUDIO_ELEMENT = AUDIO_RESP_TYPE_ELEMENT,
 
-	HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_CONNECT = 0x400,
-	HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_DISCONNECT = 0x401,
-	HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING = 0x44f,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_CONNECT = AUDIO_CMD_TYPE_ELEMENT_ROUTING_CONNECT,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_ROUTING_DISCONNECT = AUDIO_CMD_TYPE_ELEMENT_ROUTING_DISCONNECT,
+	HRPN_RESP_TYPE_AUDIO_ELEMENT_ROUTING = AUDIO_RESP_TYPE_ELEMENT_ROUTING,
 
-	HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ENABLE = 0x450,
-	HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_DISABLE = 0x451,
-	HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ID = 0x452,
-	HRPN_RESP_TYPE_AUDIO_ELEMENT_PLL = 0x45f,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ENABLE = AUDIO_CMD_TYPE_ELEMENT_PLL_ENABLE,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_DISABLE = AUDIO_CMD_TYPE_ELEMENT_PLL_DISABLE,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_PLL_ID = AUDIO_CMD_TYPE_ELEMENT_PLL_ID,
+	HRPN_RESP_TYPE_AUDIO_ELEMENT_PLL = AUDIO_RESP_TYPE_ELEMENT_PLL,
 
-	HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_CONNECT = 0x480,
-	HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_DISCONNECT = 0x481,
-	HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_CONNECT = 0x482,
-	HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_DISCONNECT = 0x483,
-	HRPN_RESP_TYPE_AUDIO_ELEMENT_AVTP = 0x48f,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_CONNECT = AUDIO_CMD_TYPE_ELEMENT_AVTP_SOURCE_CONNECT,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SOURCE_DISCONNECT = AUDIO_CMD_TYPE_ELEMENT_AVTP_SOURCE_DISCONNECT,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_CONNECT = AUDIO_CMD_TYPE_ELEMENT_AVTP_SINK_CONNECT,
+	HRPN_CMD_TYPE_AUDIO_ELEMENT_AVTP_SINK_DISCONNECT = AUDIO_CMD_TYPE_ELEMENT_AVTP_SINK_DISCONNECT,
+	HRPN_RESP_TYPE_AUDIO_ELEMENT_AVTP = AUDIO_RESP_TYPE_ELEMENT_AVTP,
 
 	HRPN_CMD_TYPE_INDUSTRIAL = 0x500,
 	HRPN_CMD_TYPE_CAN_RUN = 0x580,
@@ -70,25 +70,6 @@ struct hrpn_cmd_latency_stop {
 };
 
 struct hrpn_resp_latency {
-	uint32_t type;
-	uint32_t status;
-};
-
-/* Audio application commands */
-struct hrpn_cmd_audio_run {
-	uint32_t type;
-	uint32_t id;
-	uint32_t frequency;
-	uint32_t period;
-	bool use_audio_hat;
-	uint8_t addr[6];
-};
-
-struct hrpn_cmd_audio_stop {
-	uint32_t type;
-};
-
-struct hrpn_resp_audio {
 	uint32_t type;
 	uint32_t status;
 };
@@ -149,9 +130,9 @@ struct hrpn_command {
 		struct hrpn_cmd cmd;
 		struct hrpn_cmd_latency_run latency_run;
 		struct hrpn_cmd_latency_stop latency_stop;
-		struct hrpn_cmd_audio_run audio_run;
-		struct hrpn_cmd_audio_stop audio_stop;
-		struct hrpn_cmd_audio_pipeline audio_pipeline;
+		struct audio_cmd_run audio_run;
+		struct audio_cmd_stop audio_stop;
+		struct audio_cmd_pipeline audio_pipeline;
 		struct hrpn_cmd_industrial_run industrial_run;
 		struct hrpn_cmd_industrial_stop industrial_stop;
 		struct hrpn_cmd_ethernet ethernet;
@@ -162,13 +143,9 @@ struct hrpn_response {
 	union {
 		struct hrpn_resp resp;
 		struct hrpn_resp_latency latency;
-		struct hrpn_resp_audio audio;
+		struct audio_resp audio;
 		struct hrpn_resp_industrial industrial;
 	} u;
 };
-
-#if (CONFIG_GENAVB_ENABLE == 1)
-#include "genavb/control.h"
-#endif
 
 #endif /* _HRPN_CTRL_H_ */
