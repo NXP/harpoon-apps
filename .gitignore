@@ -91,6 +91,7 @@ bin/helper.cfg
 cmake_install.cmake
 
 # armgcc build folder
+build
 app_bin
 build_log.txt
 CMakeFiles

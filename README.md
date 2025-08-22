@@ -128,7 +128,7 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │       │   ├── stdio.h
 │   │       │   └── unistd.h
 │   │       └── os.h
-│   ├── harpoon_drivers_test                <-- top directory of the application
+│   ├── hello_world                <-- top directory of the application
 │   │   ├── freertos
 │   │   │   ├── boards                      <-- board-specific source code used for FreeRTOS
 │   │   │   │   ├── evkmimx8mm
@@ -137,39 +137,40 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 │   │   │   │   │   └── armgcc_aarch64      <-- entry point to build this application for FreeRTOS/evkmimx8mm
 │   │   │   │   │       ├── build_ddr_debug.sh
 │   │   │   │   │       ├── build_ddr_release.sh
-│   │   │   │   │       ├── clean.sh
-│   │   │   │   │       └── CMakeLists.txt
+│   │   │   │   │       └── clean.sh
 │   │   │   │    ...
+│   │   │   ├── CMakeLists.txt
 │   │   │   └── main.c                      <-- main entry point for FreeRTOS
-│   │   ├── include
-│   │   │   └── i2c_test.h
 │   │   └── src
-│   │       └── i2c_test.c                  <-- hardware/os-independent source code for the application
+│   │       └── hello_world.c                  <-- hardware/os-independent source code for the application
 |   ├── audio                <-- RTOS audio application
 │   ├── rt_latency           <-- RTOS rt latency measurement application
 │   ├── industrial           <-- RTOS industrial application
 │   ├── virtio_net           <-- RTOS virtio application
 │   ├── README.md
 │   └── west.yml
-├── FreeRTOS-Kernel                         <-- RTOS Kernel Git tree
 ├── gen_avb_sdk                             <-- GenAVB/TSN stack
-├── heterogeneous-multicore                 <--- Heterogeneous Multicore Framework
-├── mcux-sdk                                <-- MCUXpresso Git tree
-│   ├── ...
-│   ├── components
-│   ├── devices
-│   │   ├── <SoC>
-│   │   │   ├── drivers                     <-- SoC-dependent drivers and hardware definitions
-│   │    ...
-│   ├── docs
-│   ├── drivers                             <-- IP-dependent drivers
-│   ├── middleware
-│   ├── tools
-│   └── utilities
-└── middleware                              <-- multicore and rpmsg-lite middleware
-└── rtos-abstraction-layer                  <-- RTOS Abstraction Layer
-└── rtos-apps                               <-- RTOS Application Libraries
-└── zephyr                                  <-- Imported Zephyr module
+├── heterogeneous-multicore                 <-- Heterogeneous Multicore Framework
+├── mcuxsdk
+│   ├── mcuxsdk-manifest                    <-- MCUXpresso manifests
+│   ├── mcuxsdk                             <-- MCUXpresso Git tree
+│   │   ├── ...
+│   │   ├── components
+│   │   ├── devices
+│   │   │   ─ <SoC>
+│   │   │   │   ├── drivers                 <-- SoC-dependent drivers and hardware definitions
+│   │   │    ...
+│   │   ├── docs
+│   │   ├── drivers                         <-- IP-dependent drivers
+│   │   ├── middleware
+│   │   ├── tools
+│   │   └── utilities
+├─── rtos-abstraction-layer                  <-- RTOS Abstraction Layer
+├─── rtos-apps                               <-- RTOS Application Libraries
+├─── zsdk                                    <-- Imported Zephyr components
+│   ├── modules
+│   ├── zephyr
+│   └── zsdk
 ```
 
 # Reference Applications
@@ -185,11 +186,19 @@ If starting from a fresh console, the cross-compiler variable needs to be set:
 export ARMGCC_DIR=/opt/arm-gnu-toolchain-14.2.rel1-x86_64-aarch64-none-elf
 ```
 
+#### Using Build Scripts (Recommended)
 Then move to the right path, depending on the board and the RTOS that you are looking for. The example below builds the application within FreeRTOS and for the i.MX 8M Plus EVK board:
 
 ```bash
 cd harpoon-apps/rt_latency/freertos/boards/evkmimx8mp/armgcc_aarch64/
 ./build_ddr_release.sh
+```
+
+#### Using West Directly
+Alternatively, you can use the `west` command directly from the workspace root:
+
+```bash
+west sdk_build -p always rt_latency/freertos/ -b evkmimx8mp --config ddr_release -Dcore_id=ca53 -d rt_latency/freertos/boards/evkmimx8mp/armgcc_aarch64/ddr_release
 ```
 
 The resulting binary is located under the `ddr_release/` directory and is called `rt_latency.bin`. This is the binary blob that _jailhouse_ loads into the inmate cell before starting it.
