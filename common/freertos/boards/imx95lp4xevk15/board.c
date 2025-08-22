@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -13,7 +13,7 @@
 
 #include "FreeRTOS.h"
 #include "sm_platform.h"
-#include "os/irq.h"
+#include "freertos/os/irq.h"
 
 /*******************************************************************************
  * Variables
