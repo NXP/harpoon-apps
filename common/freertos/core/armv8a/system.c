@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,5 +8,5 @@
 #include "gic_v3.h"
 
 void SystemInitHook (void) {
-	GIC_Enable(1);
+	GIC_Enable();
 }
