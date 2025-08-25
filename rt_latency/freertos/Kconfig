@@ -1,0 +1,5 @@
+rsource "${SdkRootDirPath}/Kconfig.mcuxpresso"
+rsource "${SdkRootDirPath}/../../rtos-apps/Kconfig"
+rsource "${SdkRootDirPath}/../../rtos-abstraction-layer/freertos/Kconfig"
+# Include rpmsg-lite middleware manually
+rsource "${SdkRootDirPath}/../../rpmsg-lite/Kconfig"
