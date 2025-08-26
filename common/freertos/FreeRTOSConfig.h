@@ -1,6 +1,7 @@
 /*
 FreeRTOS Kernel V10.3.0
 Copyright (C) 2017-2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+Copyright 2025 NXP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -28,7 +29,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #if defined(__ICCARM__)||defined(__CC_ARM)||defined(__GNUC__)
     /* Clock manager provides in this variable system core clock frequency */
-    #include "os/stdint.h"
+    #include <stdint.h>
     extern uint32_t SystemCoreClock;
 #endif
 

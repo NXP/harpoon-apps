@@ -1,12 +1,12 @@
 /*
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2022, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #ifndef _JH_CONSOLE_H_
 #define _JH_CONSOLE_H_
 
-#include "os/stdint.h"
+#include <stdint.h>
 
 void jh_putc(int c);
 void jh_puts(const char *s);

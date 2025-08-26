@@ -5,7 +5,7 @@
  */
 
 #include "rtos_apps/log.h"
-#include "os/string.h"
+#include <string.h>
 
 #include "os/cpu_load.h"
 #include "hrpn_ctrl.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,7 +7,7 @@
 #ifndef _COMMON_COUNTER_H_
 #define _COMMON_COUNTER_H_
 
-#include "os/stdint.h"
+#include <stdint.h>
 
 typedef struct os_counter os_counter_t;
 

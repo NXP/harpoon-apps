@@ -14,7 +14,7 @@
 
 #include "os/counter.h"
 #include "os/irq.h"
-#include "os/string.h"
+#include <string.h>
 
 /*******************************************************************************
  * Definitions

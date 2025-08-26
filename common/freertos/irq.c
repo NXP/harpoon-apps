@@ -6,7 +6,7 @@
 
 #include "os/irq.h"
 #include "os/stddef.h"
-#include "os/stdint.h"
+#include <stdint.h>
 
 #include "FreeRTOS.h"
 

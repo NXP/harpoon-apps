@@ -1,12 +1,12 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #ifndef _FREERTOS_MMU_H_
 #define _FREERTOS_MMU_H_
 
-#include "os/stdint.h"
+#include <stdint.h>
 #include "os/stddef.h"
 #include "mmu_armv8a.h"
 
