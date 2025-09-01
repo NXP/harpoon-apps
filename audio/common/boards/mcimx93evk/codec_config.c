@@ -194,17 +194,17 @@ static inline bool is_value_in_array(uint32_t value, uint32_t array[], size_t si
 	return false;
 }
 
-int32_t audio_app_codec_set_format(enum codec_id cid,uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
+int32_t audio_app_codec_set_format(uint8_t codec_id,uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
 {
 	int32_t err = kStatus_Success;
 
-	if (cid == CODEC_ID_WM8962) {
+	if (codec_id == CODEC_ID_WM8962) {
 		err = CODEC_SetFormat(&wm8962_codec_handle, mclk, sample_rate, bitwidth);
 		if (err != kStatus_Success) {
 			log_warn("WM8962 codec set format failed: sample rate %d not supported (err %d)\n",sample_rate, err);
 			goto end;
 		}
-	} else if (cid == CODEC_ID_CS42448) {
+	} else if (codec_id == CODEC_ID_CS42448) {
 		err = CODEC_SetFormat(&cs42448_codec_handle, mclk, sample_rate, bitwidth);
 		if (err != kStatus_Success) {
 			log_warn("CS42448 codec set format failed: sample rate %d not supported (err %d)\n",sample_rate, err);
@@ -212,7 +212,7 @@ int32_t audio_app_codec_set_format(enum codec_id cid,uint32_t mclk, uint32_t sam
 		}
 	} else {
 		err = -1;
-		rtos_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%d)", codec_id);
 		goto end;
 	}
 
@@ -220,17 +220,17 @@ end:
 	return err;
 }
 
-int32_t audio_app_codec_setup(enum codec_id cid)
+int32_t audio_app_codec_setup(uint8_t codec_id)
 {
 	int32_t err;
 
-	if (cid == CODEC_ID_WM8962) {
+	if (codec_id == CODEC_ID_WM8962) {
 		err = codec_wm8962_setup();
-	} else if (cid == CODEC_ID_CS42448) {
+	} else if (codec_id == CODEC_ID_CS42448) {
 		err = codec_cs42448_setup();
 	} else {
 		err = -1;
-		rtos_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%d)", codec_id);
 		goto end;
 	}
 
@@ -238,17 +238,17 @@ end:
 	return err;
 }
 
-int32_t audio_app_codec_close(enum codec_id cid)
+int32_t audio_app_codec_close(uint8_t codec_id)
 {
 	int32_t err;
 
-	if (cid == CODEC_ID_WM8962) {
+	if (codec_id == CODEC_ID_WM8962) {
 		err = CODEC_Deinit(&wm8962_codec_handle);
 		if (err != kStatus_Success) {
 			log_err("WM8962 deinitialization failed (err %d)\n", err);
 			goto end;
 		}
-	} else if (cid == CODEC_ID_CS42448) {
+	} else if (codec_id == CODEC_ID_CS42448) {
 		err = CODEC_Deinit(&cs42448_codec_handle);
 		if (err != kStatus_Success) {
 			log_err("CS42448 deinitialization failed (err %d)\n", err);
@@ -256,7 +256,7 @@ int32_t audio_app_codec_close(enum codec_id cid)
 		}
 	} else {
 		err = -1;
-		rtos_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%u)", codec_id);
 		goto end;
 	}
 

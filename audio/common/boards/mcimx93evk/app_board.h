@@ -49,4 +49,9 @@
 
 #define SAI_DATA_MASK_NONE 0
 
+enum codec_id {
+    CODEC_ID_WM8962,
+    CODEC_ID_CS42448,
+};
+
 #endif /* _APP_BOARD_H_ */

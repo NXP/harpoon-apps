@@ -83,11 +83,11 @@ static inline bool is_value_in_array(uint32_t value, uint32_t array[], size_t si
 	return false;
 }
 
-int32_t audio_app_codec_set_format(enum codec_id cid, uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
+int32_t audio_app_codec_set_format(uint8_t codec_id, uint32_t mclk, uint32_t sample_rate, uint32_t bitwidth)
 {
 	int32_t err;
 
-	if (cid == CODEC_ID_HIFIBERRY) {
+	if (codec_id == CODEC_ID_HIFIBERRY) {
 		err = CODEC_SetFormat(&pcm512x_codec_handle, mclk, sample_rate, bitwidth);
 		if (err != kStatus_Success) {
 			log_err("PCM5122 set format failed (err %d)\n", err);
@@ -100,7 +100,7 @@ int32_t audio_app_codec_set_format(enum codec_id cid, uint32_t mclk, uint32_t sa
 			goto end;
 		}
 	}
-	else if (cid == CODEC_ID_WM8524) {
+	else if (codec_id == CODEC_ID_WM8524) {
 		err = CODEC_SetFormat(&wm8524_codec_handle, mclk, sample_rate, bitwidth);
 		if (err != kStatus_Success) {
 			log_err("WM8524 set format failed (err %d)\n", err);
@@ -109,18 +109,18 @@ int32_t audio_app_codec_set_format(enum codec_id cid, uint32_t mclk, uint32_t sa
 	}
 	else {
 		err = -1;
-		rtos_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%d)", codec_id);
 	}
 
 end:
 	return err;
 }
 
-int32_t audio_app_codec_setup(enum codec_id cid)
+int32_t audio_app_codec_setup(uint8_t codec_id)
 {
 	int32_t err = 0;
 
-	if (cid == CODEC_ID_HIFIBERRY) {
+	if (codec_id == CODEC_ID_HIFIBERRY) {
 		/* Setup I2C clock */
 		CLOCK_SetRootMux(kCLOCK_RootI2c3, kCLOCK_I2cRootmuxSysPll1Div5); /* Set I2C source to SysPLL1 Div5 160MHZ */
 		CLOCK_SetRootDivider(kCLOCK_RootI2c3, 1U, 10U);                  /* Set root clock to 160MHZ / 10 = 16MHZ */
@@ -139,7 +139,7 @@ int32_t audio_app_codec_setup(enum codec_id cid)
 			goto end;
 		}
 	}
-	else if (cid == CODEC_ID_WM8524) {
+	else if (codec_id == CODEC_ID_WM8524) {
 		/* Use default setting to init codec */
 		err = CODEC_Init(&wm8524_codec_handle, &wm8524_codec_config);
 		if ((err != kStatus_Success) && (err != kStatus_CODEC_NotSupport)) {
@@ -150,18 +150,18 @@ int32_t audio_app_codec_setup(enum codec_id cid)
 	}
 	else {
 		err = -1;
-		rtos_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%d)", codec_id);
 	}
 
 end:
 	return err;
 }
 
-int32_t audio_app_codec_close(enum codec_id cid)
+int32_t audio_app_codec_close(uint8_t codec_id)
 {
 	int32_t err;
 
-	if (cid == CODEC_ID_HIFIBERRY) {
+	if (codec_id == CODEC_ID_HIFIBERRY) {
 		err = CODEC_Deinit(&pcm512x_codec_handle);
 		if (err != kStatus_Success) {
 			log_err("PCM5122 deinitialisation failed (err %d)\n", err);
@@ -174,7 +174,7 @@ int32_t audio_app_codec_close(enum codec_id cid)
 			goto end;
 		}
 	}
-	else if (cid == CODEC_ID_WM8524) {
+	else if (codec_id == CODEC_ID_WM8524) {
 		err = CODEC_Deinit(&wm8524_codec_handle);
 		if ((err != kStatus_Success) && (err != kStatus_CODEC_NotSupport)) {
 			log_err("WM8524 deinitialisation failed (err %d)\n", err);
@@ -183,7 +183,7 @@ int32_t audio_app_codec_close(enum codec_id cid)
 	}
 	else {
 		err = -1;
-		rtos_assert(0, "Unexpected codec id (%d)", cid);
+		rtos_assert(0, "Unexpected codec id (%u)", codec_id);
 	}
 
 end:

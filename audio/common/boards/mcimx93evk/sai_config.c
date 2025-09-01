@@ -24,7 +24,7 @@ struct sai_active_config audio_app_sai_active_list[] = {
 		.tx_sync_mode = SAI3_TX_SYNC_MODE,
 		.rx_sync_mode = SAI3_CS42448_RX_SYNC_MODE,
 		.msel = kSAI_BclkSourceMclkDiv,		/* MCLK1 */
-		.cid = CODEC_ID_CS42448,
+		.codec_id = CODEC_ID_CS42448,
 		.slot_count = DEMO_AUDIO_DATA_CHANNEL,
 		.slot_size = DEMO_AUDIO_BIT_WIDTH,
 		.rx_mask = SAI_DATA_MASK_NONE,
@@ -38,7 +38,7 @@ void audio_app_sai_alternate_config(bool use_audio_hat, unsigned int rate)
 {
 	if (use_audio_hat) {
 		/* MX93AUD_HAT connected to the first SAI: SAI3 */
-		audio_app_sai_active_list[0].cid = CODEC_ID_CS42448;
+		audio_app_sai_active_list[0].codec_id = CODEC_ID_CS42448;
 		audio_app_sai_active_list[0].rx_sync_mode = SAI3_CS42448_RX_SYNC_MODE;
 		audio_app_sai_active_list[0].slot_count = DEMO_MX93AUDHAT_AUDIO_DATA_CHANNEL;
 		audio_app_sai_active_list[0].slot_size = DEMO_MX93AUDHAT_AUDIO_BIT_WIDTH;
@@ -61,7 +61,7 @@ void audio_app_sai_alternate_config(bool use_audio_hat, unsigned int rate)
 		}
 	} else {
 		/* On board codec connected to the first SAI: SAI3 */
-		audio_app_sai_active_list[0].cid = CODEC_ID_WM8962;
+		audio_app_sai_active_list[0].codec_id = CODEC_ID_WM8962;
 		audio_app_sai_active_list[0].rx_sync_mode = SAI3_WM8962_RX_SYNC_MODE;
 		audio_app_sai_active_list[0].slot_count = DEMO_AUDIO_DATA_CHANNEL;
 		audio_app_sai_active_list[0].slot_size = DEMO_AUDIO_BIT_WIDTH;
