@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -10,6 +10,7 @@
 #ifndef CONFIG_AUD_DISABLE_ENET
 #include "genavb_sdk.h"
 #endif
+#include "fsl_audiomix.h"
 
 /* Definitions for WM8960 */
 #define WM8960_SAI			(I2S3)
@@ -42,6 +43,8 @@
 
 #define HIFIBERRY_SAI_MASTER_SLAVE	kSAI_Slave
 
+#define HIFIBERRY_SAI_ROOT_CLK_ID	kCLOCK_RootSai5
+#define HIFIBERRY_SAI_CLK_ID	kAUDIOMIX_Attach_SAI5_MCLK1_To_SAI5_ROOT
 #define HIFIBERRY_SAI_CLK_FREQ				\
     (CLOCK_GetPllFreq(kCLOCK_AudioPll1Ctrl)		\
      / (CLOCK_GetRootPreDivider(kCLOCK_RootSai5))	\
@@ -54,12 +57,16 @@
 /* SAI5 definitions */
 #define SAI5_SAI			(I2S5)
 #define SAI5_MASTER_SLAVE		(HIFIBERRY_SAI_MASTER_SLAVE)
+#define SAI5_ROOT_CLK_ID			(HIFIBERRY_SAI_ROOT_CLK_ID)
+#define SAI5_CLK_ID			(HIFIBERRY_SAI_CLK_ID)
 #define SAI5_CLK_FREQ			(HIFIBERRY_SAI_CLK_FREQ)
 #define SAI5_TX_SYNC_MODE		(HIFIBERRY_SAI_TX_SYNC_MODE)
 #define SAI5_RX_SYNC_MODE		(HIFIBERRY_SAI_RX_SYNC_MODE)
 
 /* SAI3 definitions */
 #define SAI3_SAI			(I2S3)
+#define SAI3_ROOT_CLK_ID			(kCLOCK_RootSai3)
+#define SAI3_CLK_ID			(kAUDIOMIX_Attach_SAI3_MCLK1_To_SAI3_ROOT)
 #define SAI3_MASTER_SLAVE		(WM8960_SAI_MASTER_SLAVE)
 #define SAI3_CLK_FREQ			(WM8960_SAI_CLK_FREQ)
 #define SAI3_TX_SYNC_MODE		(WM8960_SAI_TX_SYNC_MODE)

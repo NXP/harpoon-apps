@@ -1,21 +1,16 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "fsl_clock.h"
 #include "fsl_common.h"
 
 #include "codec_config.h"
 #include "rtos_abstraction_layer.h"
 #include "sai_drv.h"
 #include "sai_config.h"
-
-static const uintptr_t sai_clock_root[] = {0, kCLOCK_RootSai2,
-	kCLOCK_RootSai3, 0, kCLOCK_RootSai5, kCLOCK_RootSai6, kCLOCK_RootSai7};
-
-static const uintptr_t sai_clock[] = {0, kCLOCK_Sai2,
-	kCLOCK_Sai3, 0, kCLOCK_Sai5, kCLOCK_Sai6, kCLOCK_Sai7};
 
 void sai_clock_setup(void)
 {
@@ -26,11 +21,7 @@ void sai_clock_setup(void)
 
 	/* Enable SAI clocks */
 	for (i = 0; i < sai_active_list_nelems; i++) {
-		int sai_id;
 		uint32_t root_mux_apll;
-
-		sai_id = get_sai_id(sai_active_list[i].sai_base);
-		rtos_assert(sai_id, "SAI%d enabled but not supported in this platform!", i);
 
 		/* Set SAI source to AUDIO PLL 393216000HZ */
 		switch (sai_active_list[i].audio_pll) {
@@ -44,13 +35,13 @@ void sai_clock_setup(void)
 				rtos_assert(false, "Invalid Audio PLL! (%d)", sai_active_list[i].audio_pll);
 				break;
 		}
-		CLOCK_SetRootMux(sai_clock_root[sai_id - 1], root_mux_apll);
+		CLOCK_SetRootMux(sai_active_list[i].root_clk_id, root_mux_apll);
 
 		/* Set root clock to 393216000HZ / 16 = 24.576MHz */
-		CLOCK_SetRootDivider(sai_clock_root[sai_id - 1],
+		CLOCK_SetRootDivider(sai_active_list[i].root_clk_id,
 				sai_active_list[i].audio_pll_mul,
 				sai_active_list[i].audio_pll_div);
-		CLOCK_EnableClock(sai_clock[sai_id - 1]);
+		CLOCK_EnableClock(sai_active_list[i].clk_id);
 	}
 }
 
@@ -84,32 +75,23 @@ static uint32_t __get_pll_from_srate(uint32_t srate)
 	return apll;
 }
 
-uint32_t sai_select_audio_pll_mux(int sai_id, int srate)
+uint32_t sai_select_audio_pll_mux(int sai_active_index, int srate)
 {
 	uint32_t root_mux_apll;
 
 	root_mux_apll = __get_pll_rootmux_from_srate(srate);
-	CLOCK_SetRootMux(sai_clock_root[sai_id - 1], root_mux_apll);
+	CLOCK_SetRootMux(sai_active_list[sai_active_index].root_clk_id, root_mux_apll);
 
 	return __get_pll_from_srate(srate);
 }
 
-static uint32_t get_sai_clock_root(uint32_t id)
-{
-	return sai_clock_root[id];
-}
-
 uint32_t get_sai_clock_freq(unsigned int sai_active_index)
 {
-	uint32_t sai_clock_root;
-	int sai_id;
+	clock_root_control_t sai_clock_root;
 
-	rtos_assert(sai_active_index < sai_active_list_nelems, "%u not a valid active index", sai_active_index);
+	rtos_assert(sai_active_index < sai_active_list_nelems, "%u not a valid active sai_active_index", sai_active_index);
 
-	sai_id = get_sai_id(sai_active_list[sai_active_index].sai_base);
-	rtos_assert(sai_id, "SAI%d enabled but not supported in this platform!", sai_active_index);
-
-	sai_clock_root = get_sai_clock_root(sai_id - 1);
+	sai_clock_root = sai_active_list[sai_active_index].root_clk_id;
 
 	return CLOCK_GetPllFreq(sai_active_list[sai_active_index].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
 }

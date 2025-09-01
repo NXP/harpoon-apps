@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -15,6 +15,8 @@
 struct sai_active_config sai_active_list[] = {
 	{
 		.sai_base = SAI3_SAI,
+		.clk_id = SAI3_CLK_ID,
+		.root_clk_id = SAI3_ROOT_CLK_ID,
 		.masterSlave = SAI3_MASTER_SLAVE,
 		.audio_pll = kCLOCK_AudioPll1Out,
 		.audio_pll_mul = 1,

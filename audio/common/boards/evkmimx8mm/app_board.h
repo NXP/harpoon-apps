@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -51,6 +51,8 @@
 
 /* SAI5 definitions */
 #define SAI5_SAI			(I2S5)
+#define SAI5_ROOT_CLK_ID			(kCLOCK_RootSai5)
+#define SAI5_CLK_ID			(kCLOCK_Sai5)
 #define SAI5_MASTER_SLAVE		(HIFIBERRY_SAI_MASTER_SLAVE)
 #define SAI5_CLK_FREQ			(HIFIBERRY_SAI_CLK_FREQ)
 #define SAI5_TX_SYNC_MODE		(HIFIBERRY_SAI_TX_SYNC_MODE)
@@ -58,6 +60,8 @@
 
 /* SAI3 definitions */
 #define SAI3_SAI			(I2S3)
+#define SAI3_ROOT_CLK_ID			(kCLOCK_RootSai3)
+#define SAI3_CLK_ID			(kCLOCK_Sai3)
 #define SAI3_MASTER_SLAVE		(WM8524_SAI_MASTER_SLAVE)
 #define SAI3_CLK_FREQ			(WM8524_SAI_CLK_FREQ)
 #define SAI3_TX_SYNC_MODE		(WM8524_SAI_TX_SYNC_MODE)

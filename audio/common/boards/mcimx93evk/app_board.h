@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -33,6 +33,8 @@
 
 /* SAI3 definitions */
 #define SAI3_SAI					(SAI3)
+#define SAI3_ROOT_CLK_ID					(kCLOCK_Root_Sai3)
+#define SAI3_CLK_ID					(kCLOCK_Sai3)
 #define SAI3_MASTER_SLAVE			(CODEC_SAI_MASTER_SLAVE)
 #define SAI3_CLK_FREQ				CLOCK_GetIpFreq(kCLOCK_Root_Sai3)
 #define SAI3_TX_SYNC_MODE			(CODEC_SAI_TX_SYNC_MODE)

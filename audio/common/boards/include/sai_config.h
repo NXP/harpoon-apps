@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -11,6 +11,8 @@
 
 struct sai_active_config {
 	void *sai_base;
+	uint32_t clk_id;
+	uint32_t root_clk_id;
 	uint32_t masterSlave;
 	uint32_t msel;
 	uint32_t audio_pll;
