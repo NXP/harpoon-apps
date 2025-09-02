@@ -6,7 +6,6 @@
 
 #include "board.h"
 #include "log.h"
-#include "rtos_apps/stats.h"
 
 #include "rtos_abstraction_layer.h"
 #include "stats_task.h"
