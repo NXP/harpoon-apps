@@ -30,7 +30,7 @@ void audio_app_sai_clock_setup(void)
 	}
 }
 
-uint32_t audio_app_sai_select_audio_pll_mux(unsigned int sai_id, int srate)
+uint32_t audio_app_sai_select_audio_pll_mux(unsigned int index, uint32_t srate)
 {
 	return kCLOCK_AudioPll1Out;
 }

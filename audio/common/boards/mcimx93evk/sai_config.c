@@ -34,7 +34,7 @@ struct sai_active_config audio_app_sai_active_list[] = {
 
 int32_t audio_app_sai_active_list_nelems = ARRAY_SIZE(audio_app_sai_active_list);
 
-void audio_app_sai_alternate_config(bool use_audio_hat, unsigned int rate)
+void audio_app_sai_alternate_config(bool use_audio_hat, uint32_t rate)
 {
 	if (use_audio_hat) {
 		/* MX93AUD_HAT connected to the first SAI: SAI3 */

@@ -76,7 +76,7 @@ static uint32_t __get_pll_from_srate(uint32_t srate)
 	return apll;
 }
 
-uint32_t audio_app_sai_select_audio_pll_mux(unsigned int index, int srate)
+uint32_t audio_app_sai_select_audio_pll_mux(unsigned int index, uint32_t srate)
 {
 	uint32_t root_mux_apll;
 
