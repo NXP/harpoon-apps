@@ -19,6 +19,7 @@ void audio_app_sai_clock_setup(void)
 
 	/* Enable SAI clocks */
 	for (i = 0; i < audio_app_sai_active_list_nelems; i++) {
+		rtos_assert(audio_app_sai_active_list[i].audio_pll_div < UINT8_MAX, "pll_div out of bound");
 		const clock_root_config_t saiClkCfg = {
 			.clockOff = false,
 			.mux = 1, // select audiopll1out source(393216000 Hz)
