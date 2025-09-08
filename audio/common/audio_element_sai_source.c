@@ -54,8 +54,8 @@ struct sai_line {
 	unsigned int max;
 	unsigned int underflow;
 	unsigned int overflow;
-	struct stats latency;
-	struct hist latency_hist;
+	struct rtos_apps_stats latency;
+	struct rtos_apps_hist latency_hist;
 };
 
 struct sai_source_element {
@@ -114,8 +114,8 @@ static int sai_source_element_run(struct audio_element *element)
 
 			level = __sai_rx_level(line->base, line->id);
 
-			stats_update(&line->latency, level - line->min);
-			hist_update(&line->latency_hist, level - line->min);
+			rtos_apps_stats_update(&line->latency, level - line->min);
+			rtos_apps_hist_update(&line->latency_hist, level - line->min);
 
 			if (level < line->min) {
 				/* rx underflow */
@@ -217,13 +217,13 @@ static void sai_source_element_stats(struct audio_element *element)
 		log_info("  underflow: %u, overflow: %u\n",
 			line->underflow, line->overflow);
 
-		stats_compute(&line->latency);
-		stats_print(&line->latency);
+		rtos_apps_stats_compute(&line->latency);
+		rtos_apps_stats_print(&line->latency);
 
-		hist_print(&line->latency_hist);
+		rtos_apps_hist_print(&line->latency_hist);
 
-		stats_reset(&line->latency);
-		hist_reset(&line->latency_hist);
+		rtos_apps_stats_reset(&line->latency);
+		rtos_apps_hist_reset(&line->latency_hist);
 	}
 }
 
@@ -382,8 +382,8 @@ int sai_source_element_init(struct audio_element *element, struct audio_element_
 			line->min = line_config->channel_n * element->period;
 			line->max = 2 * line_config->channel_n * element->period;
 
-			stats_init(&line->latency, 31, "rx latency (samples)", NULL);
-			hist_init(&line->latency_hist, 16, 1);
+			rtos_apps_stats_init(&line->latency, 31, "rx latency (samples)", NULL);
+			rtos_apps_hist_init(&line->latency_hist, 16, 1);
 
 			line++;
 

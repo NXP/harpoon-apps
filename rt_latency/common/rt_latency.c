@@ -99,8 +99,8 @@ static void rt_latency_stats_dump(struct rt_latency_ctx *ctx)
 
 		ctx->stats_snapshot.pending = true;
 
-		stats_reset(&ctx->stats.irq_delay);
-		stats_reset(&ctx->stats.irq_to_sched);
+		rtos_apps_stats_reset(&ctx->stats.irq_delay);
+		rtos_apps_stats_reset(&ctx->stats.irq_to_sched);
 	}
 }
 
@@ -183,12 +183,12 @@ retry:
 
 	irq_delay = calc_diff_ns(dev, ctx->time_prog, ctx->time_irq);
 
-	stats_update(&ctx->stats.irq_delay, irq_delay);
-	hist_update(&ctx->stats.irq_delay_hist, irq_delay);
+	rtos_apps_stats_update(&ctx->stats.irq_delay, irq_delay);
+	rtos_apps_hist_update(&ctx->stats.irq_delay_hist, irq_delay);
 
 	irq_to_sched = calc_diff_ns(dev, ctx->time_prog, now);
-	stats_update(&ctx->stats.irq_to_sched, irq_to_sched);
-	hist_update(&ctx->stats.irq_to_sched_hist, irq_to_sched);
+	rtos_apps_stats_update(&ctx->stats.irq_to_sched, irq_to_sched);
+	rtos_apps_hist_update(&ctx->stats.irq_to_sched_hist, irq_to_sched);
 
 	if (!ctx->quiet) {
 		/* Dump statistics every TIMER_STATS_PERIOD_SEC seconds */
@@ -229,13 +229,13 @@ void cache_inval(void)
 void print_stats(struct rt_latency_ctx *ctx)
 {
 	if (ctx->stats_snapshot.pending) {
-		stats_compute(&ctx->stats_snapshot.irq_delay);
-		stats_print(&ctx->stats_snapshot.irq_delay);
-		hist_print(&ctx->stats_snapshot.irq_delay_hist);
+		rtos_apps_stats_compute(&ctx->stats_snapshot.irq_delay);
+		rtos_apps_stats_print(&ctx->stats_snapshot.irq_delay);
+		rtos_apps_hist_print(&ctx->stats_snapshot.irq_delay_hist);
 
-		stats_compute(&ctx->stats_snapshot.irq_to_sched);
-		stats_print(&ctx->stats_snapshot.irq_to_sched);
-		hist_print(&ctx->stats_snapshot.irq_to_sched_hist);
+		rtos_apps_stats_compute(&ctx->stats_snapshot.irq_to_sched);
+		rtos_apps_stats_print(&ctx->stats_snapshot.irq_to_sched);
+		rtos_apps_hist_print(&ctx->stats_snapshot.irq_to_sched_hist);
 		log_info("late alarm scheduling: %u\n", ctx->stats_snapshot.late_alarm_sched);
 		log_info("\n");
 
@@ -274,11 +274,11 @@ void rt_latency_destroy(struct rt_latency_ctx *ctx)
 	rt_latency_stats_dump(ctx);
 	print_stats(ctx);
 
-	stats_reset(&ctx->stats.irq_delay);
-	hist_reset(&ctx->stats.irq_delay_hist);
+	rtos_apps_stats_reset(&ctx->stats.irq_delay);
+	rtos_apps_hist_reset(&ctx->stats.irq_delay_hist);
 
-	stats_reset(&ctx->stats.irq_to_sched);
-	hist_reset(&ctx->stats.irq_to_sched_hist);
+	rtos_apps_stats_reset(&ctx->stats.irq_to_sched);
+	rtos_apps_hist_reset(&ctx->stats.irq_to_sched_hist);
 
 	ctx->stats.late_alarm_sched = 0;
 
@@ -294,11 +294,11 @@ int rt_latency_init(os_counter_t *dev,
 	ctx->dev = dev;
 	ctx->irq_load_dev = irq_load_dev;
 
-	stats_init(&ctx->stats.irq_delay, 31, "irq delay (ns)", NULL);
-	hist_init(&ctx->stats.irq_delay_hist, 20, 1000);
+	rtos_apps_stats_init(&ctx->stats.irq_delay, 31, "irq delay (ns)", NULL);
+	rtos_apps_hist_init(&ctx->stats.irq_delay_hist, 20, 1000);
 
-	stats_init(&ctx->stats.irq_to_sched, 31, "irq to sched (ns)", NULL);
-	hist_init(&ctx->stats.irq_to_sched_hist, 20, 1000);
+	rtos_apps_stats_init(&ctx->stats.irq_to_sched, 31, "irq to sched (ns)", NULL);
+	rtos_apps_hist_init(&ctx->stats.irq_to_sched_hist, 20, 1000);
 
 	ctx->stats_snapshot.pending = false;
 

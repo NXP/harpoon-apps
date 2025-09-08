@@ -57,8 +57,8 @@ struct pll_element {
 	int64_t prev_bclk_ppb;
 
 	struct {
-		struct stats bclk_err;
-		struct stats bclk_ppb;
+		struct rtos_apps_stats bclk_err;
+		struct rtos_apps_stats bclk_ppb;
 	} stats;
 };
 
@@ -222,8 +222,8 @@ static int pll_element_run(struct audio_element *element)
 
 	pll->prev_err = err;
 
-	stats_update(&pll->stats.bclk_err, bclk_err);
-	stats_update(&pll->stats.bclk_ppb, bclk_ppb);
+	rtos_apps_stats_update(&pll->stats.bclk_err, bclk_err);
+	rtos_apps_stats_update(&pll->stats.bclk_ppb, bclk_ppb);
 
 exit:
 	pll->src_bcr = src_bcr;
@@ -248,8 +248,8 @@ static void pll_element_reset(struct audio_element *element)
 	pll->state = PLL_STATE_UNLOCKED;
 	pll->sample_count = 0;
 
-	stats_reset(&pll->stats.bclk_err);
-	stats_reset(&pll->stats.bclk_ppb);
+	rtos_apps_stats_reset(&pll->stats.bclk_err);
+	rtos_apps_stats_reset(&pll->stats.bclk_ppb);
 }
 
 static void pll_element_exit(struct audio_element *element)
@@ -273,14 +273,14 @@ static void pll_element_stats(struct audio_element *element)
 	log_info("pll(%p), samples: %u\n",
 		pll, pll->sample_count);
 
-	stats_compute(&pll->stats.bclk_err);
-	stats_compute(&pll->stats.bclk_ppb);
+	rtos_apps_stats_compute(&pll->stats.bclk_err);
+	rtos_apps_stats_compute(&pll->stats.bclk_ppb);
 
-	stats_print(&pll->stats.bclk_err);
-	stats_print(&pll->stats.bclk_ppb);
+	rtos_apps_stats_print(&pll->stats.bclk_err);
+	rtos_apps_stats_print(&pll->stats.bclk_ppb);
 
-	stats_reset(&pll->stats.bclk_err);
-	stats_reset(&pll->stats.bclk_ppb);
+	rtos_apps_stats_reset(&pll->stats.bclk_err);
+	rtos_apps_stats_reset(&pll->stats.bclk_ppb);
 }
 
 int pll_element_check_config(struct audio_element_config *config)
@@ -319,8 +319,8 @@ int pll_element_init(struct audio_element *element, struct audio_element_config 
 
 	pll_adjust(pll->pll_id, 0);
 
-	stats_init(&pll->stats.bclk_err, 31, "err", NULL);
-	stats_init(&pll->stats.bclk_ppb, 31, "ppb", NULL);
+	rtos_apps_stats_init(&pll->stats.bclk_err, 31, "err", NULL);
+	rtos_apps_stats_init(&pll->stats.bclk_ppb, 31, "ppb", NULL);
 
 	pll_element_reset(element);
 

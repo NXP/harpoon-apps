@@ -78,8 +78,8 @@ struct stats_controlled_motor {
     uint32_t err_margin;
     uint32_t err_margin_stop;
     float last_margin_error;
-    struct stats pos_err_deg;
-    struct hist pos_err_deg_hist;
+    struct rtos_apps_stats pos_err_deg;
+    struct rtos_apps_hist pos_err_deg_hist;
     int32_t pos_err_max;
 };
 
@@ -197,8 +197,8 @@ static void update_pos_err_stat(struct controlled_motor_ctx *motor, float pos, f
     pos_err_deg_stats = (fabs(pos - pos_target)) * 360.0 * DEG_SCALE_STATS;
     pos_err_deg_hist = (fabs(pos - pos_target)) * 360.0 * DEG_SCALE_HIST;
 
-    stats_update(&motor->stats.pos_err_deg, pos_err_deg_stats);
-    hist_update(&motor->stats.pos_err_deg_hist, pos_err_deg_hist);
+    rtos_apps_stats_update(&motor->stats.pos_err_deg, pos_err_deg_stats);
+    rtos_apps_hist_update(&motor->stats.pos_err_deg_hist, pos_err_deg_hist);
 
     if (pos_err_deg_stats > abs(motor->stats.pos_err_max)) {
         motor->stats.pos_err_max = (pos - pos_target) * 360.0 * DEG_SCALE_STATS;
@@ -1207,7 +1207,7 @@ static void control_strategy_motor_stats_print(void *data)
     struct stats_controlled_motor *stats = data;
     struct controlled_motor_ctx *ctx = container_of(data, struct controlled_motor_ctx, stats_snap);
 
-    stats_compute(&stats->pos_err_deg);
+    rtos_apps_stats_compute(&stats->pos_err_deg);
 
     log_info("ctx(%x) io_device id: %hu, motor id: %hu\n", ctx, ctx->id >> 8, ctx->id & 0xff);
     log_info("  startup offset : %f\n", stats->startup_offset);
@@ -1215,8 +1215,8 @@ static void control_strategy_motor_stats_print(void *data)
     log_info("  pos target     : %f\n", stats->pos_target);
     log_info("  speed real     : %f\n", stats->speed_real);
     log_info("  errors margin: %u, margin stop: %u\n", stats->err_margin, stats->err_margin_stop);
-    stats_print(&stats->pos_err_deg);
-    hist_print(&stats->pos_err_deg_hist);
+    rtos_apps_stats_print(&stats->pos_err_deg);
+    rtos_apps_hist_print(&stats->pos_err_deg_hist);
 
     if (stats->err_margin)
         log_info("  last margin error: %f\n", stats->last_margin_error);
@@ -1443,7 +1443,7 @@ void control_strategy_stats_dump(struct control_strategy_ctx *ctx)
         memcpy(&motor->stats_snap, &motor->stats, sizeof(struct stats_controlled_motor));
         motor->stats_snap.pending = true;
 
-        stats_reset(&motor->stats.pos_err_deg);
+        rtos_apps_stats_reset(&motor->stats.pos_err_deg);
 
         // Print motor data on serial interface
         if (STATS_Async(control_strategy_motor_stats_print, &motor->stats_snap) != true)
@@ -1477,8 +1477,8 @@ struct controlled_motor_ctx *control_strategy_register_motor(struct control_stra
     new_motor->absolute_time_beginning = time;
 
     // Init motor stats
-    stats_init(&new_motor->stats.pos_err_deg, 31, "pos err", NULL);
-    hist_init(&new_motor->stats.pos_err_deg_hist, 180, 1);
+    rtos_apps_stats_init(&new_motor->stats.pos_err_deg, 31, "pos err", NULL);
+    rtos_apps_hist_init(&new_motor->stats.pos_err_deg_hist, 180, 1);
 
     motor_params_init(&new_motor->params, new_motor->id);
 

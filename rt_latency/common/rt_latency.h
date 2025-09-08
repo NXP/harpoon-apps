@@ -96,11 +96,11 @@ static inline int rt_latency_get_tc_load(int test_case_id)
 }
 
 typedef struct rt_latency_stats {
-	struct stats irq_delay;
-	struct hist irq_delay_hist;
+	struct rtos_apps_stats irq_delay;
+	struct rtos_apps_hist irq_delay_hist;
 
-	struct stats irq_to_sched;
-	struct hist irq_to_sched_hist;
+	struct rtos_apps_stats irq_to_sched;
+	struct rtos_apps_hist irq_to_sched_hist;
 
 	uint32_t late_alarm_sched;
 	bool pending;

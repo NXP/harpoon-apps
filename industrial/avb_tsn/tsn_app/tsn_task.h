@@ -60,12 +60,12 @@ struct net_socket_stats {
 
 struct tsn_task_stats {
     bool pending;
-    struct stats sched_err;
-    struct hist sched_err_hist;
-    struct stats proc_time;
-    struct hist proc_time_hist;
-    struct stats total_time;
-    struct hist total_time_hist;
+    struct rtos_apps_stats sched_err;
+    struct rtos_apps_hist sched_err_hist;
+    struct rtos_apps_stats proc_time;
+    struct rtos_apps_hist proc_time_hist;
+    struct rtos_apps_stats total_time;
+    struct rtos_apps_hist total_time_hist;
     unsigned int sched;
     unsigned int sched_early;
     unsigned int sched_missed;

@@ -18,7 +18,7 @@ static void socket_stats_print(void *data)
 {
     struct socket *sock = data;
 
-    stats_compute(&sock->stats_snap.traffic_latency);
+    rtos_apps_stats_compute(&sock->stats_snap.traffic_latency);
 
     log_info("cyclic rx socket(%p) net_sock(%p) peer id: %d\n", sock, sock->net_sock, sock->peer_id);
     log_info("valid frames  : %u\n", sock->stats_snap.valid_frames);
@@ -27,8 +27,8 @@ static void socket_stats_print(void *data)
     log_info("err underflow : %u\n", sock->stats_snap.err_underflow);
     log_info("link %s\n", sock->stats_snap.link_status ? "up" : "down");
 
-    stats_print(&sock->stats_snap.traffic_latency);
-    hist_print(&sock->stats_snap.traffic_latency_hist);
+    rtos_apps_stats_print(&sock->stats_snap.traffic_latency);
+    rtos_apps_hist_print(&sock->stats_snap.traffic_latency_hist);
 
     sock->stats_snap.pending = false;
 }
@@ -39,7 +39,7 @@ static void socket_stats_dump(struct socket *sock)
         return;
 
     memcpy(&sock->stats_snap, &sock->stats, sizeof(struct socket_stats));
-    stats_reset(&sock->stats.traffic_latency);
+    rtos_apps_stats_reset(&sock->stats.traffic_latency);
     sock->stats_snap.pending = true;
 
     if (STATS_Async(socket_stats_print, sock) < 0)
@@ -108,8 +108,8 @@ static void cyclic_net_receive(struct cyclic_task *c_task)
 
         traffic_latency = sock->net_sock->ts - hdr->sched_time;
 
-        stats_update(&sock->stats.traffic_latency, traffic_latency);
-        hist_update(&sock->stats.traffic_latency_hist, traffic_latency);
+        rtos_apps_stats_update(&sock->stats.traffic_latency, traffic_latency);
+        rtos_apps_hist_update(&sock->stats.traffic_latency_hist, traffic_latency);
 
         if (traffic_latency > sock->stats.traffic_latency_max)
             sock->stats.traffic_latency_max = traffic_latency;
@@ -328,8 +328,8 @@ int cyclic_task_init(struct cyclic_task *c_task,
         c_task->rx_socket[i].net_sock = tsn_net_sock_rx(c_task->task, i);
         c_task->rx_socket[i].stats.traffic_latency_min = 0xffffffff;
 
-        stats_init(&c_task->rx_socket[i].stats.traffic_latency, 31, "traffic latency", NULL);
-        hist_init(&c_task->rx_socket[i].stats.traffic_latency_hist, 100, 1000);
+        rtos_apps_stats_init(&c_task->rx_socket[i].stats.traffic_latency, 31, "traffic latency", NULL);
+        rtos_apps_hist_init(&c_task->rx_socket[i].stats.traffic_latency_hist, 100, 1000);
     }
 
     c_task->tx_socket.net_sock = tsn_net_sock_tx(c_task->task, 0);

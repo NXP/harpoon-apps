@@ -23,14 +23,14 @@
 
 void tsn_task_stats_init(struct tsn_task *task)
 {
-    stats_init(&task->stats.sched_err, 31, "sched err", NULL);
-    hist_init(&task->stats.sched_err_hist, 100, 100);
+    rtos_apps_stats_init(&task->stats.sched_err, 31, "sched err", NULL);
+    rtos_apps_hist_init(&task->stats.sched_err_hist, 100, 100);
 
-    stats_init(&task->stats.proc_time, 31, "processing time", NULL);
-    hist_init(&task->stats.proc_time_hist, 100, 1000);
+    rtos_apps_stats_init(&task->stats.proc_time, 31, "processing time", NULL);
+    rtos_apps_hist_init(&task->stats.proc_time_hist, 100, 1000);
 
-    stats_init(&task->stats.total_time, 31, "total time", NULL);
-    hist_init(&task->stats.total_time_hist, 100, 1000);
+    rtos_apps_stats_init(&task->stats.total_time, 31, "total time", NULL);
+    rtos_apps_hist_init(&task->stats.total_time_hist, 100, 1000);
 
     task->stats.sched_err_max = 0;
 }
@@ -54,8 +54,8 @@ void tsn_task_stats_start(struct tsn_task *task)
         sched_err = -sched_err;
     }
 
-    stats_update(&task->stats.sched_err, sched_err);
-    hist_update(&task->stats.sched_err_hist, sched_err);
+    rtos_apps_stats_update(&task->stats.sched_err, sched_err);
+    rtos_apps_hist_update(&task->stats.sched_err_hist, sched_err);
 
     if (sched_err > task->stats.sched_err_max)
         task->stats.sched_err_max = sched_err;
@@ -74,11 +74,11 @@ void tsn_task_stats_end(struct tsn_task *task)
     proc_time = now - task->sched_now;
     total_time = now - task->sched_time;
 
-    stats_update(&task->stats.proc_time, proc_time);
-    hist_update(&task->stats.proc_time_hist, proc_time);
+    rtos_apps_stats_update(&task->stats.proc_time, proc_time);
+    rtos_apps_hist_update(&task->stats.proc_time_hist, proc_time);
 
-    stats_update(&task->stats.total_time, total_time);
-    hist_update(&task->stats.total_time_hist, total_time);
+    rtos_apps_stats_update(&task->stats.total_time, total_time);
+    rtos_apps_hist_update(&task->stats.total_time_hist, total_time);
 
     task->sched_time += task->params->task_period_ns;
 }
@@ -90,9 +90,9 @@ static void tsn_task_stats_print(void *data)
 {
     struct tsn_task *task = data;
 
-    stats_compute(&task->stats_snap.sched_err);
-    stats_compute(&task->stats_snap.proc_time);
-    stats_compute(&task->stats_snap.total_time);
+    rtos_apps_stats_compute(&task->stats_snap.sched_err);
+    rtos_apps_stats_compute(&task->stats_snap.proc_time);
+    rtos_apps_stats_compute(&task->stats_snap.total_time);
 
     log_info("tsn task(%p)\n", task);
     log_info("sched           : %u\n", task->stats_snap.sched);
@@ -101,14 +101,14 @@ static void tsn_task_stats_print(void *data)
     log_info("sched timeout   : %u\n", task->stats_snap.sched_timeout);
     log_info("clock discont   : %u\n", task->stats_snap.clock_discont);
 
-    stats_print(&task->stats_snap.sched_err);
-    hist_print(&task->stats_snap.sched_err_hist);
+    rtos_apps_stats_print(&task->stats_snap.sched_err);
+    rtos_apps_hist_print(&task->stats_snap.sched_err_hist);
 
-    stats_print(&task->stats_snap.proc_time);
-    hist_print(&task->stats_snap.proc_time_hist);
+    rtos_apps_stats_print(&task->stats_snap.proc_time);
+    rtos_apps_hist_print(&task->stats_snap.proc_time_hist);
 
-    stats_print(&task->stats_snap.total_time);
-    hist_print(&task->stats_snap.total_time_hist);
+    rtos_apps_stats_print(&task->stats_snap.total_time);
+    rtos_apps_hist_print(&task->stats_snap.total_time_hist);
 
     if (task->params->use_st)
         tsn_net_st_oper_config_print(task);
@@ -125,9 +125,9 @@ static void tsn_task_stats_dump(struct tsn_task *task)
         return;
 
     memcpy(&task->stats_snap, &task->stats, sizeof(struct tsn_task_stats));
-    stats_reset(&task->stats.sched_err);
-    stats_reset(&task->stats.proc_time);
-    stats_reset(&task->stats.total_time);
+    rtos_apps_stats_reset(&task->stats.sched_err);
+    rtos_apps_stats_reset(&task->stats.proc_time);
+    rtos_apps_stats_reset(&task->stats.total_time);
     task->stats_snap.pending = true;
 
     if (STATS_Async(tsn_task_stats_print, task) < 0)
