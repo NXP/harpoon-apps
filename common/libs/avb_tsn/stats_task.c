@@ -4,12 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "board.h"
-#include "clock_config.h"
 #include "rtos_apps/async.h"
-#include "rtos_apps/log.h"
 
-#include "rtos_abstraction_layer.h"
 #include "stats_task.h"
 
 /*******************************************************************************

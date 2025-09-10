@@ -7,17 +7,14 @@
 #include <string.h>
 
 #include "controller.h"
-#include "log.h"
-#include "motor_control_api.h"
-#include "io_device.h"
 #include "rtos_apps/async.h"
+#include "rtos_apps/log.h"
+#include "rtos_apps/types.h"
 #if BUILD_MOTOR_IO_DEVICE == 1
 #include "mcdrv.h"
 #endif
 #include "local_network.h"
-#include "stats_task.h"
 #include "user_button.h"
-#include "rtos_abstraction_layer.h"
 
 #define STRATEGY_CHANGE_DELAY      5000
 #define CONTROLLER_STAT_PERIOD_SEC 2

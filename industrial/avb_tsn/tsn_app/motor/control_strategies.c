@@ -9,11 +9,10 @@
 #include <string.h>
 
 #include "control_strategies.h"
-#include "log.h"
 #include "rtos_apps/async.h"
+#include "rtos_apps/log.h"
 #include "slist.h"
 #include "rtos_apps/types.h"
-#include "stats_task.h"
 #include "network_stats.h"
 #include "math.h"
 #include "motor_params.h"

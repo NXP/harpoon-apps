@@ -7,7 +7,6 @@
 #ifndef _STATS_H_
 #define _STATS_H_
 
-#include "rtos_abstraction_layer.h"
 #include "rtos_apps/async.h"
 
 int STATS_TaskInit(void (*PeriodicFn)(void *data), void *Data, unsigned int PeriodMs,
