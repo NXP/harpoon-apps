@@ -2,11 +2,13 @@
 include_guard(GLOBAL)
 message("GPT counter driver component is included.")
 
-target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/os/counter.c
-    ${CMAKE_CURRENT_LIST_DIR}/os/counter_gpt.c
+mcux_add_source(
+    SOURCES
+    os/counter.c
+    os/counter_gpt.c
 )
 
-target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    ${SdkDirPath}/drivers/gpt
+mcux_add_include(
+    INCLUDES
+    drivers/gpt
 )
