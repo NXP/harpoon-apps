@@ -301,7 +301,8 @@ err_init:
 	gavb_port_stats_exit(0);
 
 err_stats:
-	gavb_stack_exit();
+	if (gavb_stack_exit() < 0)
+		log_err("gavb_stack_exit() failed\n");
 
 exit:
 	return -1;
