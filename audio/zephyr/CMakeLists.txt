@@ -35,7 +35,8 @@ set(CommonPath "${ProjDirPath}/../../common")
 set(CommonBoardPath "${ProjDirPath}/../../common/boards/${BoardName}")
 set(AppPath "${ProjDirPath}/..")
 SET(ProjRootPath "${ProjDirPath}/../../")
-SET(HAL_NXP_PATH "${ProjRootPath}/../modules/hal/nxp")
+SET(HAL_NXP_PATH "${ProjRootPath}/../zsdk/modules/hal/nxp")
+SET(SdkRootDirPath "${HAL_NXP_PATH}/mcux/mcux-sdk-ng")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/zephyr")
 SET(RtosAppsPath "${ProjRootPath}/../rtos-apps")
 
@@ -53,6 +54,7 @@ zephyr_include_directories(
 	${CommonPath}
 	${CommonPath}/libs/ctrl
 	${CommonPath}/libs/jailhouse
+	${CommonPath}/libs/gen_sw_mbox
 	${CommonPath}/libs
 	${CommonPath}/zephyr/boards
 	${CommonBoardPath}
@@ -62,6 +64,7 @@ zephyr_include_directories(
 set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/jailhouse
+    ${CommonPath}/libs/gen_sw_mbox
     ${CommonPath}/libs/rpmsg
     ${RtosAbstractionLayerPath}
 )
@@ -93,187 +96,123 @@ endif()
 
 include(lib_ctrl)
 include(lib_jailhouse)
-include(lib_rpmsg_zephyr)
+
+include(lib_rpmsg)
+include(lib_gen_sw_mbox)
+
+function(include_mcux_driver driver)
+  set(CONFIG_MCUX_COMPONENT_driver.${driver} ON)
+  include(${SdkRootDirPath}/drivers/${driver}/CMakeLists.txt)
+endfunction()
 
 if(CONFIG_BOARD_IMX8MM_EVK)
-  set(MCUX_DEVICE "MIMX8MM6_ca53")
-  list(APPEND CMAKE_MODULE_PATH
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8MM6/drivers
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/i2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm186x
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm512x
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/wm8524
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/i2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyar8031
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/igpio
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/ii2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/sai
-  )
+  include_mcux_driver(sai)
+  include_mcux_driver(gpt)
+  include_mcux_driver(enet)
+  include_mcux_driver(ii2c)
 
-  include(driver_enet)
-  include(driver_gpt)
-  include(driver_igpio)
-  include(driver_ii2c)
-  include(driver_phy-common)
-  include(driver_phy-device-ar8031)
-  include(driver_sai)
+  set(CONFIG_MCUX_COMPONENT_driver.codec ON)
+  set(CONFIG_MCUX_COMPONENT_component.codec_i2c ON)
+  set(CONFIG_MCUX_COMPONENT_component.codec_adapters ON)
+  set(CONFIG_MCUX_COMPONENT_component.pcm186x_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.pcm512x_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.wm8524_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_driver.pcm186x ON )
+  set(CONFIG_MCUX_COMPONENT_driver.pcm512x ON)
+  set(CONFIG_MCUX_COMPONENT_driver.wm8524 ON)
+  include(${SdkRootDirPath}/components/codec/CMakeLists.txt)
+  set(CONFIG_MCUX_COMPONENT_component.ii2c_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.i2c_adapter_interface ON)
+  include(${SdkRootDirPath}/components/i2c/CMakeLists.txt)
 
-  include(driver_codec)
-
-  include(component_codec_adapters)
-  include(component_pcm186x_adapter)
-  include(component_pcm512x_adapter)
-  include(component_wm8524_adapter)
-  include(driver_pcm186x)
-  include(driver_pcm512x)
-  include(driver_wm8524)
-
-  zephyr_compile_definitions(CODEC_PCM512X_ENABLE=1)
-  zephyr_compile_definitions(CODEC_PCM186X_ENABLE=1)
-  zephyr_compile_definitions(CODEC_WM8524)
-  zephyr_compile_definitions(CODEC_WM8524_ENABLE=1)
+  set(CONFIG_MCUX_COMPONENT_component.eth_phy_common ON)
+  set(CONFIG_MCUX_COMPONENT_component.phyar8031 ON)
+  include(${SdkRootDirPath}/components/phy/CMakeLists.txt)
 elseif(CONFIG_BOARD_IMX8MN_EVK)
-  set(MCUX_DEVICE "MIMX8MN6_ca53")
-  list(APPEND CMAKE_MODULE_PATH
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8MN6/drivers
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/i2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm186x
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm512x
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/wm8524
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/i2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyar8031
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/igpio
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/ii2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/sai
-  )
+  include_mcux_driver(sai)
+  include_mcux_driver(gpt)
+  include_mcux_driver(enet)
+  include_mcux_driver(ii2c)
 
-  include(driver_enet)
-  include(driver_gpt)
-  include(driver_igpio)
-  include(driver_phy-common)
-  include(driver_phy-device-ar8031)
-  include(driver_sai)
+  set(CONFIG_MCUX_COMPONENT_driver.codec ON)
+  set(CONFIG_MCUX_COMPONENT_component.codec_i2c ON)
+  set(CONFIG_MCUX_COMPONENT_component.codec_adapters ON)
+  set(CONFIG_MCUX_COMPONENT_component.pcm186x_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.pcm512x_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.wm8524_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_driver.pcm186x ON )
+  set(CONFIG_MCUX_COMPONENT_driver.pcm512x ON)
+  set(CONFIG_MCUX_COMPONENT_driver.wm8524 ON)
+  include(${SdkRootDirPath}/components/codec/CMakeLists.txt)
+  set(CONFIG_MCUX_COMPONENT_component.ii2c_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.i2c_adapter_interface ON)
+  include(${SdkRootDirPath}/components/i2c/CMakeLists.txt)
 
-  include(driver_codec)
-  include(driver_ii2c)
-
-  include(component_codec_adapters)
-  include(component_pcm186x_adapter)
-  include(component_pcm512x_adapter)
-  include(component_wm8524_adapter)
-  include(driver_pcm186x)
-  include(driver_pcm512x)
-  include(driver_wm8524)
-
-  zephyr_compile_definitions(CODEC_PCM512X_ENABLE=1)
-  zephyr_compile_definitions(CODEC_PCM186X_ENABLE=1)
-  zephyr_compile_definitions(CODEC_WM8524)
-  zephyr_compile_definitions(CODEC_WM8524_ENABLE=1)
+  set(CONFIG_MCUX_COMPONENT_component.eth_phy_common ON)
+  set(CONFIG_MCUX_COMPONENT_component.phyar8031 ON)
+  include(${SdkRootDirPath}/components/phy/CMakeLists.txt)
 elseif(CONFIG_BOARD_IMX8MP_EVK)
-  set(MCUX_DEVICE "MIMX8ML8_ca53")
-  list(APPEND CMAKE_MODULE_PATH
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8ML8/drivers
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/i2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm186x
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm512x
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/wm8960
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/i2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyrtl8211f
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/mdio/enet_qos
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet_qos
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/igpio
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/igpio
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/ii2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/sai
+  # compile ARM common drivers
+  target_sources(app PRIVATE 
+    ${SdkRootDirPath}/drivers/common/fsl_common_arm.c
   )
 
-  include(driver_audiomix)
-  include(driver_enet_qos)
-  include(driver_flexcan)
-  include(driver_gpt)
-  include(driver_igpio)
-  include(driver_igpio)
-  include(driver_mdio-common)
-  include(driver_mdio-enet-qos)
-  include(driver_phy-common)
-  include(driver_phy-device-rtl8211f)
-  include(driver_sai)
+  include_mcux_driver(sai)
+  include_mcux_driver(gpt)
+  include_mcux_driver(enet_qos)
+  include_mcux_driver(ii2c)
 
-  include(driver_codec)
-  include(driver_ii2c)
+  # include audiomix
+  zephyr_include_directories(${SdkRootDirPath}/devices/i.MX/i.MX8MP/MIMX8ML8/drivers)
+  target_sources(app PRIVATE ${SdkRootDirPath}/devices/i.MX/i.MX8MP/MIMX8ML8/drivers/fsl_audiomix.c)
 
-  include(component_codec_adapters)
-  include(component_pcm186x_adapter)
-  include(component_pcm512x_adapter)
-  include(component_wm8960_adapter)
-  include(driver_pcm186x)
-  include(driver_pcm512x)
-  include(driver_wm8960)
+  include_mcux_driver(igpio)
 
-  zephyr_compile_definitions(CODEC_PCM512X_ENABLE=1)
-  zephyr_compile_definitions(CODEC_PCM186X_ENABLE=1)
-  zephyr_compile_definitions(CODEC_WM8960)
-  zephyr_compile_definitions(CODEC_WM8960_ENABLE=1)
+  set(CONFIG_MCUX_COMPONENT_driver.codec ON)
+  set(CONFIG_MCUX_COMPONENT_component.codec_i2c ON)
+  set(CONFIG_MCUX_COMPONENT_component.codec_adapters ON)
+  set(CONFIG_MCUX_COMPONENT_component.pcm186x_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.pcm512x_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.wm8960_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_driver.pcm186x ON )
+  set(CONFIG_MCUX_COMPONENT_driver.pcm512x ON)
+  set(CONFIG_MCUX_COMPONENT_driver.wm8960 ON)
+  include(${SdkRootDirPath}/components/codec/CMakeLists.txt)
+  set(CONFIG_MCUX_COMPONENT_component.ii2c_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.i2c_adapter_interface ON)
+  include(${SdkRootDirPath}/components/i2c/CMakeLists.txt)
+
+  set(CONFIG_MCUX_COMPONENT_component.eth_phy_common ON)
+  set(CONFIG_MCUX_COMPONENT_component.phyrtl8211f ON)
+  include(${SdkRootDirPath}/components/phy/CMakeLists.txt)
 elseif(CONFIG_BOARD_IMX93_EVK)
-  set(MCUX_DEVICE "MIMX9352_ca55")
-  list(APPEND CMAKE_MODULE_PATH
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX9352/drivers
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/cs42448
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/i2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm186x
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/pcm512x
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/codec/wm8962
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/i2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyrtl8211f
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/mdio/enet_qos
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet_qos
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/lpi2c
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/rgpio
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/sai
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/tpm
+  # compile ARM common drivers
+  target_sources(app PRIVATE 
+    ${SdkRootDirPath}/drivers/common/fsl_common_arm.c
   )
 
-  include(driver_enet_qos)
-  include(driver_flexcan)
-  include(driver_mdio-common)
-  include(driver_mdio-enet-qos)
-  include(driver_phy-device-rtl8211f)
-  include(driver_rgpio)
-  include(driver_sai)
-  include(driver_tpm)
+  include_mcux_driver(sai)
+  include_mcux_driver(tpm)
+  include_mcux_driver(enet_qos)
+  include_mcux_driver(lpi2c)
 
-  include(driver_lpi2c)
-  include(driver_codec)
+  include_mcux_driver(rgpio)
 
-  include(component_codec_adapters)
-  include(component_cs42448_adapter)
-  include(component_wm8962_adapter)
-  include(driver_cs42448)
-  include(driver_wm8962)
+  set(CONFIG_MCUX_COMPONENT_driver.codec ON)
+  set(CONFIG_MCUX_COMPONENT_component.codec_i2c ON)
+  set(CONFIG_MCUX_COMPONENT_component.codec_adapters ON)
+  set(CONFIG_MCUX_COMPONENT_component.cs42448_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.wm8962_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_driver.cs42448 ON )
+  set(CONFIG_MCUX_COMPONENT_driver.wm8962 ON)
+  include(${SdkRootDirPath}/components/codec/CMakeLists.txt)
+  set(CONFIG_MCUX_COMPONENT_component.lpi2c_adapter ON)
+  set(CONFIG_MCUX_COMPONENT_component.i2c_adapter_interface ON)
+  include(${SdkRootDirPath}/components/i2c/CMakeLists.txt)
 
-  zephyr_compile_definitions(CODEC_WM8962)
-  zephyr_compile_definitions(CODEC_WM8962_ENABLE=1)
-  zephyr_compile_definitions(CODEC_CS42448)
-  zephyr_compile_definitions(CODEC_CS42448_ENABLE=1)
+  set(CONFIG_MCUX_COMPONENT_component.eth_phy_common ON)
+  set(CONFIG_MCUX_COMPONENT_component.phyrtl8211f ON)
+  include(${SdkRootDirPath}/components/phy/CMakeLists.txt)
 endif()
 
 target_sources(app PRIVATE
