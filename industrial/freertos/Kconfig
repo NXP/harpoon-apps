@@ -1,0 +1,18 @@
+menu "Harpoon Industrial App configuration"
+config GENAVB_ENABLE
+    bool "Enables GenAVB/TSN Stack"
+    default y
+    select RTOS_APPS_TSN_GENAVB_ENABLE
+
+config MOTOR_CONTROLLER
+    bool "Enables Motor Control"
+    depends on GENAVB_ENABLE
+
+endmenu
+
+rsource "${SdkRootDirPath}/Kconfig.mcuxpresso"
+rsource "${SdkRootDirPath}/../../rtos-apps/Kconfig"
+rsource "${SdkRootDirPath}/../../rtos-abstraction-layer/freertos/Kconfig"
+rsource "${SdkRootDirPath}/../../gen_avb_sdk/Kconfig"
+# Include rpmsg-lite middleware manually
+rsource "${SdkRootDirPath}/../../rpmsg-lite/Kconfig"

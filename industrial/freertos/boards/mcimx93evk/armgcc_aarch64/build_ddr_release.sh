@@ -1,9 +1,9 @@
 #!/bin/sh
 
-if [ -d "CMakeFiles" ];then rm -rf CMakeFiles; fi
-if [ -f "Makefile" ];then rm -f Makefile; fi
-if [ -f "cmake_install.cmake" ];then rm -f cmake_install.cmake; fi
-if [ -f "CMakeCache.txt" ];then rm -f CMakeCache.txt; fi
+app_root_path="../../../"
+board=mcimx93evk
+build_target=ddr_release
+cpu=ca55
+output_dir=${build_target}
 
-cmake -DCMAKE_TOOLCHAIN_FILE="../../../../../../mcux-sdk/tools/cmake_toolchain_files/armgcc_aarch64.cmake" -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=ddr_release .
-make -j $(nproc)
+west sdk_build -p always ${app_root_path} -b ${board} --config ${build_target} -Dcore_id=${cpu} -d ${output_dir}
