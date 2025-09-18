@@ -1,0 +1,22 @@
+menu "Harpoon Audio App configuration"
+config GENAVB_ENABLE
+    bool "Enables GenAVB/TSN Stack"
+    select RTOS_APPS_AUDIO_GENAVB_ENABLE
+
+config AUD_DISABLE_ENET
+    bool "Enables GenAVB/TSN Stack"
+    depends on !GENAVB_ENABLE
+
+config GENAVB_USE_AVDECC
+    bool "Enables AVDECC for GenAVB/TSN Stack"
+    default y if GENAVB_ENABLE
+
+endmenu
+
+rsource "${SdkRootDirPath}/Kconfig.mcuxpresso"
+rsource "${SdkRootDirPath}/../../rtos-apps/Kconfig"
+rsource "${SdkRootDirPath}/../../rtos-abstraction-layer/freertos/Kconfig"
+rsource "${SdkRootDirPath}/../../gen_avb_sdk/Kconfig"
+rsource "${SdkRootDirPath}/../../gen_avb_sdk/apps/rtos/aem-manager/Kconfig"
+# Include rpmsg-lite middleware manually
+rsource "${SdkRootDirPath}/../../rpmsg-lite/Kconfig"
