@@ -33,6 +33,7 @@ zephyr_include_directories(
 	${CommonBoardPath}
 	${CommonPath}/libs/jailhouse
 	${CommonPath}/libs/ctrl
+	${CommonPath}/libs/gen_sw_mbox
 	${ProjDirPath}
 	)
 
@@ -41,6 +42,7 @@ set(MCUX_SDK_PROJECT_NAME app)
 set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/jailhouse
+    ${CommonPath}/libs/gen_sw_mbox
     ${CommonPath}/libs/rpmsg
     ${RtosAbstractionLayerPath}
 )
@@ -64,7 +66,9 @@ zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX93_EVK SDK_DEVICE_MAXIMUM_CPU_C
 
 include(lib_jailhouse)
 include(lib_ctrl)
-include(lib_rpmsg_zephyr)
+
+include(lib_rpmsg)
+include(lib_gen_sw_mbox)
 
 target_sources(app PRIVATE main.c)
 target_sources(app PRIVATE ../common/rt_latency.c)
