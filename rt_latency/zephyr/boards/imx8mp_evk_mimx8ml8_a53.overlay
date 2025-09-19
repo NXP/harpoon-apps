@@ -29,3 +29,7 @@
 &gpio1 {
 	status = "disabled";
 };
+
+&flexcan1 {
+	status = "disabled";
+};
