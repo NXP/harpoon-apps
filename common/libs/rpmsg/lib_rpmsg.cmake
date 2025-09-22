@@ -2,11 +2,8 @@
 include_guard(GLOBAL)
 message("lib_rpmsg component is included.")
 
-set(MulticorePath "${ProjRootPath}/../middleware/multicore")
-
 list(APPEND CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_LIST_DIR}/../gen_sw_mbox/
-    ${MulticorePath}
 )
 
 target_compile_definitions(${MCUX_SDK_PROJECT_NAME} PRIVATE AARCH64=1)
