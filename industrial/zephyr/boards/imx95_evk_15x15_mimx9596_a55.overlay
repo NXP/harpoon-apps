@@ -12,6 +12,7 @@
 
 /delete-node/ &dram;
 /delete-node/ &scmi_shmem0;
+/delete-node/ &netc;
 
 / {
 	dram: memory@SRAM_BASE {
