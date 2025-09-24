@@ -1,16 +1,14 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <stdio.h>
-#include <string.h>
-#include "os/assert.h"
+#include "rtos_abstraction_layer.h"
+
 #include "os/irq.h"
 #include "os/mmu.h"
-#include "os/semaphore.h"
-#include "os/stdlib.h"
+
 #include "fsl_device_registers.h"
 
 #define MBOX_MAX_INST	(4)
@@ -77,12 +75,12 @@ struct gen_sw_mbox {
 	int irq, remote_irq;
 	struct gen_sw_mbox_chan chan[MAX_CH];
 	int ref_cnt;
-	os_sem_t lock;
+	rtos_sem_t lock;
 };
 
 static struct gen_sw_mbox *mbox_inst[MBOX_MAX_INST];
 
-static os_sem_t gen_sw_mbox_semaphore;
+static rtos_sem_t gen_sw_mbox_semaphore;
 
 static bool is_inited;
 
@@ -101,20 +99,20 @@ static struct gen_sw_mbox *gen_sw_mbox_get_instance(void *base)
 
 static void gen_sw_mbox_get(struct gen_sw_mbox *mbox)
 {
-	os_assert(mbox, "gen_sw_mbox instance is NULL!");
+	rtos_assert(mbox, "gen_sw_mbox instance is NULL!");
 
-	os_sem_take(&mbox->lock, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_sem_take(&mbox->lock, RTOS_WAIT_FOREVER);
 	mbox->ref_cnt++;
-	os_sem_give(&mbox->lock, 0);
+	rtos_sem_give(&mbox->lock);
 }
 
 static void gen_sw_mbox_put(struct gen_sw_mbox *mbox)
 {
-	os_assert(mbox, "gen_sw_mbox instance is NULL!");
+	rtos_assert(mbox, "gen_sw_mbox instance is NULL!");
 
-	os_sem_take(&mbox->lock, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_sem_take(&mbox->lock, RTOS_WAIT_FOREVER);
 	mbox->ref_cnt--;
-	os_sem_give(&mbox->lock, 0);
+	rtos_sem_give(&mbox->lock);
 }
 
 static void gen_sw_mbox_handler(void *data)
@@ -157,16 +155,16 @@ int gen_sw_mbox_sendmsg(void *base, uint32_t ch, uint32_t msg, bool block)
 	struct gen_sw_mbox *mbox;
 	struct gen_sw_mbox_mmio *mmio;
 
-	os_assert(ch < MAX_CH, "gen_sw_mbox channel is invalid!");
+	rtos_assert(ch < MAX_CH, "gen_sw_mbox channel is invalid!");
 
-	os_sem_take(&gen_sw_mbox_semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_sem_take(&gen_sw_mbox_semaphore, RTOS_WAIT_FOREVER);
 	mbox = gen_sw_mbox_get_instance(base);
 	if (!mbox) {
-		os_sem_give(&gen_sw_mbox_semaphore, 0);
+		rtos_sem_give(&gen_sw_mbox_semaphore);
 		return -1;
 	}
 	gen_sw_mbox_get(mbox);
-	os_sem_give(&gen_sw_mbox_semaphore, 0);
+	rtos_sem_give(&gen_sw_mbox_semaphore);
 
 	mmio = mbox->mmio;
 
@@ -192,18 +190,18 @@ int gen_sw_mbox_register_chan_callback(void *base, uint32_t ch,
 {
 	struct gen_sw_mbox *mbox;
 
-	os_assert(ch < MAX_CH, "gen_sw_mbox channel is invalid!");
-	os_assert(recv_cb, "gen_sw_mbox channel recv_cb() is NULL!");
+	rtos_assert(ch < MAX_CH, "gen_sw_mbox channel is invalid!");
+	rtos_assert(recv_cb, "gen_sw_mbox channel recv_cb() is NULL!");
 
-	os_sem_take(&gen_sw_mbox_semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_sem_take(&gen_sw_mbox_semaphore, RTOS_WAIT_FOREVER);
 	mbox = gen_sw_mbox_get_instance(base);
 	if (!mbox) {
-		os_sem_give(&gen_sw_mbox_semaphore, 0);
+		rtos_sem_give(&gen_sw_mbox_semaphore);
 		return -1;
 	}
 
 	gen_sw_mbox_get(mbox);
-	os_sem_give(&gen_sw_mbox_semaphore, 0);
+	rtos_sem_give(&gen_sw_mbox_semaphore);
 
 	mbox->chan[ch].recv_cb = recv_cb;
 	mbox->chan[ch].data = data;
@@ -215,12 +213,12 @@ int gen_sw_mbox_unregister_chan_callback(void *base, uint32_t ch)
 {
 	struct gen_sw_mbox *mbox;
 
-	os_assert(ch < MAX_CH, "gen_sw_mbox channel is invalid!");
+	rtos_assert(ch < MAX_CH, "gen_sw_mbox channel is invalid!");
 
-	os_sem_take(&gen_sw_mbox_semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_sem_take(&gen_sw_mbox_semaphore, RTOS_WAIT_FOREVER);
 	mbox = gen_sw_mbox_get_instance(base);
 	if (!mbox) {
-		os_sem_give(&gen_sw_mbox_semaphore, 0);
+		rtos_sem_give(&gen_sw_mbox_semaphore);
 		return -1;
 	}
 
@@ -228,7 +226,7 @@ int gen_sw_mbox_unregister_chan_callback(void *base, uint32_t ch)
 	mbox->chan[ch].data = NULL;
 
 	gen_sw_mbox_put(mbox);
-	os_sem_give(&gen_sw_mbox_semaphore, 0);
+	rtos_sem_give(&gen_sw_mbox_semaphore);
 
 	return 0;
 }
@@ -268,8 +266,8 @@ void gen_sw_mbox_init(void)
 	if (is_inited == true)
 		return;
 
-	err = os_sem_init(&gen_sw_mbox_semaphore, 1);
-	os_assert(!err, "gen_sw_mbox_semaphore initialization failed!");
+	err = rtos_sem_init(&gen_sw_mbox_semaphore, 1);
+	rtos_assert(!err, "gen_sw_mbox_semaphore initialization failed!");
 	is_inited = true;
 }
 
@@ -278,7 +276,7 @@ void gen_sw_mbox_deinit(void)
 	if (is_inited != true)
 		return;
 
-	os_sem_destroy(&gen_sw_mbox_semaphore);
+	rtos_sem_destroy(&gen_sw_mbox_semaphore);
 	is_inited = false;
 }
 
@@ -288,9 +286,9 @@ int gen_sw_mbox_register(void *base, int irq, int remote_irq, uint32_t irq_prio)
 	int ret;
 	int i;
 
-	os_assert(base, "gen_sw_mbox MMIO base is NULL!");
+	rtos_assert(base, "gen_sw_mbox MMIO base is NULL!");
 
-	os_sem_take(&gen_sw_mbox_semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_sem_take(&gen_sw_mbox_semaphore, RTOS_WAIT_FOREVER);
 
 	mbox = gen_sw_mbox_get_instance(base);
 	if (mbox) {
@@ -298,7 +296,7 @@ int gen_sw_mbox_register(void *base, int irq, int remote_irq, uint32_t irq_prio)
 		goto exit;
 	}
 
-	mbox = os_malloc(sizeof(struct gen_sw_mbox));
+	mbox = rtos_malloc(sizeof(struct gen_sw_mbox));
 	if (!mbox) {
 		ret = -1;
 		goto exit;
@@ -315,7 +313,7 @@ int gen_sw_mbox_register(void *base, int irq, int remote_irq, uint32_t irq_prio)
 		goto err_map;
 	}
 
-	ret = os_sem_init(&mbox->lock, 1);
+	ret = rtos_sem_init(&mbox->lock, 1);
 	if (ret)
 		goto err_semaphore;
 
@@ -334,16 +332,16 @@ int gen_sw_mbox_register(void *base, int irq, int remote_irq, uint32_t irq_prio)
 
 	gen_sw_mbox_add_mbox(mbox);
 
-	os_sem_give(&gen_sw_mbox_semaphore, 0);
+	rtos_sem_give(&gen_sw_mbox_semaphore);
 
 	return 0;
 
 err_semaphore:
 	os_mmu_unmap((uintptr_t)mbox->mmio, KB(4));
 err_map:
-	os_free(mbox);
+	rtos_free(mbox);
 exit:
-	os_sem_give(&gen_sw_mbox_semaphore, 0);
+	rtos_sem_give(&gen_sw_mbox_semaphore);
 
 	return ret;
 }
@@ -352,32 +350,32 @@ int gen_sw_mbox_unregister(void *base)
 {
 	struct gen_sw_mbox *mbox;
 
-	os_assert(base, "gen_sw_mbox MMIO base is NULL!");
+	rtos_assert(base, "gen_sw_mbox MMIO base is NULL!");
 
-	os_sem_take(&gen_sw_mbox_semaphore, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_sem_take(&gen_sw_mbox_semaphore, RTOS_WAIT_FOREVER);
 	mbox = gen_sw_mbox_get_instance(base);
 	if (!mbox) {
-		os_sem_give(&gen_sw_mbox_semaphore, 0);
+		rtos_sem_give(&gen_sw_mbox_semaphore);
 		return 0;
 	}
 
-	os_sem_take(&mbox->lock, 0, OS_SEM_TIMEOUT_MAX);
+	rtos_sem_take(&mbox->lock, RTOS_WAIT_FOREVER);
 	if (mbox->ref_cnt > 0) {
-		os_sem_give(&mbox->lock, 0);
+		rtos_sem_give(&mbox->lock);
 		return -1;
 	}
 
 	gen_sw_mbox_del_mbox(mbox);
 
-	os_sem_give(&mbox->lock, 0);
-	os_sem_give(&gen_sw_mbox_semaphore, 0);
+	rtos_sem_give(&mbox->lock);
+	rtos_sem_give(&gen_sw_mbox_semaphore);
 
 	os_irq_disable(mbox->irq);
 	os_irq_unregister(mbox->irq);
 	os_mmu_unmap((uintptr_t)mbox->mmio, KB(4));
 
-	os_sem_destroy(&mbox->lock);
-	os_free(mbox);
+	rtos_sem_destroy(&mbox->lock);
+	rtos_free(mbox);
 
 	return 0;
 }
