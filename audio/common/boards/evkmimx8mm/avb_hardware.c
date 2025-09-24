@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -101,8 +101,8 @@ static void gpt_clock_config(void)
 	CLOCK_EnableClock(kCLOCK_Gpt1);
 
 	CLOCK_DisableClock(kCLOCK_Gpt2);
-	CLOCK_SetRootMux(kCLOCK_RootGpt2, kCLOCK_GptRootmuxOsc24M);
-	CLOCK_SetRootDivider(kCLOCK_RootGpt2, 1U, 1U);
+	CLOCK_SetRootMux(kCLOCK_RootGpt2, kCLOCK_GptRootmuxAudioPll1);
+	CLOCK_SetRootDivider(kCLOCK_RootGpt2, 1U, 4U); /* 393216000HZ / 4 = 98,304MHz */
 	CLOCK_EnableClock(kCLOCK_Gpt2);
 }
 

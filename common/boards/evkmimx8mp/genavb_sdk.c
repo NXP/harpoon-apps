@@ -13,7 +13,6 @@
 #define FracPLL_FDIV_CTL1_Offset (8U)
 extern const ccm_analog_frac_pll_config_t g_audioPll1Config;
 
-
 /*
  * 24MHz XTAL oscillator as primary clock source for all PLLs
  * The imx_pll API from GenAVB/TSN expects pll_ref to match: pll_out = ref x (div + num/denum) [1]
