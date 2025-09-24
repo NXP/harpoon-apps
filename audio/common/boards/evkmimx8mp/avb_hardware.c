@@ -98,7 +98,7 @@ static void gpt_clock_config(void)
 {
 	CLOCK_DisableClock(kCLOCK_Gpt1);
 	CLOCK_SetRootMux(kCLOCK_RootGpt1, kCLOCK_GptRootmuxAudioPll1);
-	CLOCK_SetRootDivider(kCLOCK_RootGpt1, 1U, 4U); /* 393216000HZ / 4 = 98,304MHz */
+	CLOCK_SetRootDivider(kCLOCK_RootGpt1, 1U, 4U); /* BOARD_GPT_REC_BASE_FREQ: 393216000HZ / 4 = 98,304MHz */
 	CLOCK_EnableClock(kCLOCK_Gpt1);
 
 	CLOCK_DisableClock(kCLOCK_Gpt2);

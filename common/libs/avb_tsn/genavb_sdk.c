@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -15,7 +15,18 @@ unsigned int BOARD_GPT_clk_src(void *base)
 
 unsigned int BOARD_GPT_clk_freq(void *base)
 {
-	return dev_get_gpt_ipg_freq(base);
+#if defined(BOARD_GPT_REC_BASE)
+	/* The MCR mechanism relies the nominal input frequency to be returned here
+	 * So, avoid the calculation erros caused by the fractional parts and make sure
+	 * to always return the right (nominal) frequency.
+	 */
+	if (base == BOARD_GPT_REC_BASE)
+		return BOARD_GPT_REC_BASE_FREQ;
+	else
+#endif
+	{
+		return dev_get_gpt_ipg_freq(base);
+	}
 }
 #endif
 

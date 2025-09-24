@@ -73,6 +73,7 @@
 #define BOARD_GPT_0_IRQ                          GPT2_IRQn
 #define BOARD_GPT_REC_BASE                       GPT2
 #define BOARD_GPT_REC_SW_SAMPLING                1 /* Enable MCR with SW sampling. */
+#define BOARD_GPT_REC_BASE_FREQ                  98304000U
 
 #define BOARD_GENAVB_TIMER_0_IRQ                 BOARD_GPT_0_IRQ
 #define BOARD_GENAVB_TIMER_0_IRQ_HANDLER         BOARD_GPT_0_IRQ_HANDLER

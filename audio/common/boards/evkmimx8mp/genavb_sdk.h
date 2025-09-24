@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -61,6 +61,7 @@
 #define BOARD_GPT_0_IRQ                          GPT1_IRQn
 #define BOARD_GPT_REC_BASE                       GPT1
 #define BOARD_GPT_REC_CHANNEL                    2
+#define BOARD_GPT_REC_BASE_FREQ                  98304000U
 
 #define BOARD_GENAVB_TIMER_0_IRQ                 BOARD_GPT_0_IRQ
 #define BOARD_GENAVB_TIMER_0_IRQ_HANDLER         BOARD_GPT_0_IRQ_HANDLER
