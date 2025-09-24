@@ -3,9 +3,8 @@ set(RTOS_ABSTRACTION_LAYER_DIR "${ProjDirPath}/../../../rtos-abstraction-layer/z
 
 set(GenAVBPath "${ProjDirPath}/../../../gen_avb_sdk")
 set(GenAVBBuildPath "${CMAKE_CURRENT_BINARY_DIR}/gen_avb_build")
-set(CMAKE_TOOLCHAIN_FILE "${ProjDirPath}/../../../modules/hal/nxp/tools/cmake_toolchain_files/armgcc_aarch64.cmake")
 # We keep FreeRTOS variables for minimal changes and replace the FreeRTOS API with our stubs
-set(MCUX_SDK "${ProjDirPath}/../../../modules/hal/nxp/mcux/mcux-sdk")
+set(MCUX_SDK "${ProjDirPath}/../../../zsdk/modules/hal/nxp/mcux/mcux-sdk-ng")
 set(RTOS_DIR "${RTOS_ABSTRACTION_LAYER_DIR}/zephyr")
 set(RTOS_APPS "${ProjDirPath}/../../")
 

@@ -48,7 +48,8 @@ set(CommonBoardPath "${ProjDirPath}/../../common/boards/${BoardName}")
 set(AppPath "${ProjDirPath}/..")
 SET(AppBoardPath "${AppPath}/freertos/boards/${BoardName}")
 SET(ProjRootPath "${ProjDirPath}/../../")
-SET(HAL_NXP_PATH "${ProjRootPath}/../modules/hal/nxp")
+SET(HAL_NXP_PATH "${ProjRootPath}/../zsdk/modules/hal/nxp")
+SET(SdkRootDirPath "${HAL_NXP_PATH}/mcux/mcux-sdk-ng")
 SET(RtosAbstractionLayerPath "${ProjRootPath}/../rtos-abstraction-layer/zephyr")
 SET(RtosAppsPath "${ProjRootPath}/../rtos-apps")
 
@@ -67,6 +68,7 @@ zephyr_include_directories(
 	${CommonBoardPath}
 	${CommonPath}/libs/jailhouse
 	${CommonPath}/libs/ctrl
+	${CommonPath}/libs/gen_sw_mbox
 	${ProjDirPath}
 	)
 
@@ -76,6 +78,7 @@ set(CMAKE_MODULE_PATH
     ${CommonPath}/libs/ctrl
     ${CommonPath}/libs/jailhouse
     ${CommonPath}/libs/rpmsg
+    ${CommonPath}/libs/gen_sw_mbox
     ${RtosAbstractionLayerPath}
 )
 
@@ -99,99 +102,74 @@ zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX93_EVK SDK_DEVICE_MAXIMUM_CPU_C
 
 include(lib_jailhouse)
 include(lib_ctrl)
-include(lib_rpmsg_zephyr)
+include(lib_gen_sw_mbox)
+include(lib_rpmsg)
+
+function(include_mcux_driver driver)
+  set(CONFIG_MCUX_COMPONENT_driver.${driver} ON)
+  include(${SdkRootDirPath}/drivers/${driver}/CMakeLists.txt)
+endfunction()
 
 if(CONFIG_BOARD_IMX8MM_EVK)
-  set(MCUX_DEVICE "MIMX8MM6_ca53")
-  list(APPEND CMAKE_MODULE_PATH
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8MM6/drivers
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyar8031
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
-  )
-
-  include(driver_enet)
-  include(driver_gpt)
-  include(driver_phy-common)
-  include(driver_phy-device-ar8031)
+  # include_mcux_driver(gpt) # already compiled by hal_nxp
+  include_mcux_driver(enet)
+  
+  set(CONFIG_MCUX_COMPONENT_component.eth_phy_common ON)
+  set(CONFIG_MCUX_COMPONENT_component.phyar8031 ON)
+  include(${SdkRootDirPath}/components/phy/CMakeLists.txt)
 elseif(CONFIG_BOARD_IMX8MN_EVK)
-  set(MCUX_DEVICE "MIMX8MN6_ca53")
-  list(APPEND CMAKE_MODULE_PATH
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8MN6/drivers
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyar8031
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
-  )
-
-  include(driver_enet)
-  include(driver_gpt)
-  include(driver_phy-common)
-  include(driver_phy-device-ar8031)
+  # include_mcux_driver(gpt) # already compiled by hal_nxp
+  include_mcux_driver(enet)
+  
+  set(CONFIG_MCUX_COMPONENT_component.eth_phy_common ON)
+  set(CONFIG_MCUX_COMPONENT_component.phyar8031 ON)
+  include(${SdkRootDirPath}/components/phy/CMakeLists.txt)
 elseif(CONFIG_BOARD_IMX8MP_EVK)
-  set(MCUX_DEVICE "MIMX8ML8_ca53")
-  list(APPEND CMAKE_MODULE_PATH
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX8ML8/drivers
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyrtl8211f
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/mdio/enet_qos
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet_qos
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/gpt
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/igpio
-  )
+  # compile ARM common drivers
+  target_sources(app PRIVATE 
+      ${SdkRootDirPath}/drivers/common/fsl_common_arm.c
+      )
 
-  include(driver_enet_qos)
-  include(driver_flexcan)
-  include(driver_gpt)
-  include(driver_igpio)
-  include(driver_mdio-common)
-  include(driver_mdio-enet-qos)
-  include(driver_phy-common)
-  include(driver_phy-device-rtl8211f)
+  # include_mcux_driver(gpt) # already compiled by hal_nxp
+  include_mcux_driver(enet_qos)
+  include_mcux_driver(flexcan)
+  
+  include_mcux_driver(igpio)
+
+  set(CONFIG_MCUX_COMPONENT_component.eth_phy_common ON)
+  set(CONFIG_MCUX_COMPONENT_component.phyrtl8211f ON)
+  include(${SdkRootDirPath}/components/phy/CMakeLists.txt)
 elseif(CONFIG_BOARD_IMX93_EVK)
-  set(MCUX_DEVICE "MIMX9352_ca55")
-  list(APPEND CMAKE_MODULE_PATH
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX9352/drivers
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyrtl8211f
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/mdio/enet_qos
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/enet_qos
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/tpm
-  )
+  # compile ARM common drivers
+  target_sources(app PRIVATE 
+      ${SdkRootDirPath}/drivers/common/fsl_common_arm.c
+      )
 
-  include(driver_enet_qos)
-  include(driver_flexcan)
-  include(driver_mdio-common)
-  include(driver_mdio-enet-qos)
-  include(driver_phy-device-rtl8211f)
-  include(driver_tpm)
+  # include_mcux_driver(tpm) # already compiled by hal_nxp
+  include_mcux_driver(enet_qos)
+  include_mcux_driver(flexcan)
+  
+  include_mcux_driver(rgpio)
+
+  set(CONFIG_MCUX_COMPONENT_component.eth_phy_common ON)
+  set(CONFIG_MCUX_COMPONENT_component.phyrtl8211f ON)
+  include(${SdkRootDirPath}/components/phy/CMakeLists.txt)
 elseif(CONFIG_BOARD_IMX95_EVK_15X15 OR CONFIG_BOARD_IMX95_EVK)
-  set(MCUX_DEVICE "MIMX9596_ca55")
-  list(APPEND CMAKE_MODULE_PATH
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/devices/MIMX9596/drivers
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/common
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/tpm
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/components/phy/device/phyrtl8211f
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/flexcan
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/tpm
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/msgintr
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/netc
-    ${HAL_NXP_PATH}/mcux/mcux-sdk/drivers/netc/socs/imx95
-  )
+  # compile ARM common drivers
+  target_sources(app PRIVATE 
+      ${SdkRootDirPath}/drivers/common/fsl_common_arm.c
+      )
+  # include_mcux_driver(tpm) # already compiled by hal_nxp
+  set(CONFIG_MCUX_COMPONENT_driver.netc_imx95 ON)
+  include_mcux_driver(netc)
+  include_mcux_driver(msgintr)
+  include_mcux_driver(flexcan)
+  
+  include_mcux_driver(rgpio)
 
-  include(driver_flexcan)
-  include(driver_tpm)
-  include(driver_msgintr)
-  include(driver_netc)
-  include(driver_netc_soc_imx95)
-  include(driver_phy-device-rtl8211f)
+  set(CONFIG_MCUX_COMPONENT_component.eth_phy_common ON)
+  set(CONFIG_MCUX_COMPONENT_component.phyrtl8211f ON)
+  include(${SdkRootDirPath}/components/phy/CMakeLists.txt)
 endif()
 
 target_sources(app PRIVATE
