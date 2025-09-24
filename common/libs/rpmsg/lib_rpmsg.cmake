@@ -3,10 +3,9 @@ include_guard(GLOBAL)
 message("lib_rpmsg component is included.")
 
 set(MulticorePath "${ProjRootPath}/../middleware/multicore")
-set(HtMulticorePath "${ProjRootPath}/../heterogeneous-multicore")
 
 list(APPEND CMAKE_MODULE_PATH
-    ${HtMulticorePath}/libs/gen_sw_mbox
+    ${CMAKE_CURRENT_LIST_DIR}/../gen_sw_mbox/
     ${MulticorePath}
 )
 
