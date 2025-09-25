@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -78,14 +78,19 @@ static void pin_mux_enet_qos(void)
 
 static void BOARD_TpmClockSetup(void)
 {
-	const clock_root_config_t tpmClkCfg = {
+	const clock_root_config_t tpm2ClkCfg = {
 		.clockOff = false,
-		.mux = 0, /* 24MHz oscillator source */
+		.mux = kCLOCK_TPM2_ClockRoot_MuxAudioPll1Out, /* BOARD_TPM_REC_BASE_FREQ: 393216000HZ / 8 = 49,152MHz */
+		.div = 8
+	};
+	const clock_root_config_t tpm4ClkCfg = {
+		.clockOff = false,
+		.mux = kCLOCK_TPM4_ClockRoot_MuxOsc24M, /* 24MHz oscillator source */
 		.div = 1
 	};
 
-	CLOCK_SetRootClock(kCLOCK_Root_Tpm2, &tpmClkCfg);
-	CLOCK_SetRootClock(kCLOCK_Root_Tpm4, &tpmClkCfg);
+	CLOCK_SetRootClock(kCLOCK_Root_Tpm2, &tpm2ClkCfg);
+	CLOCK_SetRootClock(kCLOCK_Root_Tpm4, &tpm4ClkCfg);
 }
 
 static void enet_qos_clock_config(void)

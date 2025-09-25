@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,8 +20,8 @@
 const fracn_pll_init_t g_audioPllCfg = {
 	.rdiv = 1,
 	.mfi = 163,
-	.mfn = 84,
-	.mfd = 100,
+	.mfn = 1680000,
+	.mfd = 2000000,
 	.odiv = 10
 };
 

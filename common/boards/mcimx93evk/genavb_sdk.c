@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,13 +9,23 @@
  */
 #include "genavb_sdk.h"
 
+extern const fracn_pll_init_t g_audioPllCfg;
+
+#define PLL_PARENT_CLOCK_XTAL	24000000U
+#define PLL_NUMERATOR_MFN_GET(val) (((val) & PLL_NUMERATOR_MFN_MASK) >> PLL_NUMERATOR_MFN_SHIFT)
+
 /*
- * 24MHz XTAL oscillator
- * Primary clock source for all PLLs
+ * 24MHz XTAL oscillator as primary clock source for all PLLs
+ * The imx_pll API from GenAVB/TSN expects pll_ref to match: pll_out = ref x (div + num/denum) [1]
+ * While the i.MX 93 has: pll_out = (24MHz / rdiv) * (mfi + (mfn / mfd)) / odiv [2]
+ * So, align the returned pll_ref to take into account the pre and post dividers
  */
 uint32_t dev_get_pll_ref_freq(void)
 {
-	/* TODO */ return 0;
+	uint32_t rdiv   = g_audioPllCfg.rdiv;
+	uint32_t odiv  = g_audioPllCfg.odiv;
+
+	return PLL_PARENT_CLOCK_XTAL / (rdiv * odiv);
 }
 
 /*
@@ -23,22 +33,25 @@ uint32_t dev_get_pll_ref_freq(void)
  */
 void dev_write_audio_pll_num(uint32_t num)
 {
-	/* TODO */
+	/* FIXME add sanity checks on the numerator: -2 <= mfn/mfd <= 2 and and make sure
+	 * num does not overflow the 30-bits signed mfn field.
+	 */
+	AUDIOPLL->NUMERATOR.RW = PLL_NUMERATOR_MFN(num);
 }
 
 uint32_t dev_read_audio_pll_num(void)
 {
-	/* TODO */ return 0;
+	return PLL_NUMERATOR_MFN_GET(AUDIOPLL->NUMERATOR.RW);
 }
 
 uint32_t dev_read_audio_pll_denom(void)
 {
-	/* TODO */ return 1;
+	return g_audioPllCfg.mfd;
 }
 
 uint32_t dev_read_audio_pll_post_div(void)
 {
-	/* TODO */ return 1;
+	return g_audioPllCfg.mfi;
 }
 
 /*

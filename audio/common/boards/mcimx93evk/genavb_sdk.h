@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -59,6 +59,9 @@
 
 #define BOARD_TPM_0_BASE							TPM2
 #define BOARD_TPM_0_IRQ								TPM2_IRQn
+#define BOARD_TPM_REC_BASE							TPM2
+#define BOARD_TPM_REC_SW_SAMPLING						1 /* Enable MCR with SW sampling */
+#define BOARD_TPM_REC_BASE_FREQ							49152000U
 
 #define BOARD_GENAVB_TIMER_0_IRQ					BOARD_TPM_0_IRQ
 #define BOARD_GENAVB_TIMER_0_IRQ_HANDLER			BOARD_TPM_0_IRQ_HANDLER

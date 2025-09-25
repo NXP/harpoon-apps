@@ -38,7 +38,14 @@ unsigned int BOARD_TPM_clk_src(void *base)
 
 unsigned int BOARD_TPM_clk_freq(void *base)
 {
-	return dev_get_tpm_counter_freq(base);
+#if defined(BOARD_TPM_REC_BASE)
+	if (base == BOARD_TPM_REC_BASE)
+		return BOARD_TPM_REC_BASE_FREQ;
+	else
+#endif
+	{
+		return dev_get_tpm_counter_freq(base);
+	}
 }
 #endif
 
