@@ -40,12 +40,21 @@
 
 #define BOARD_NET_PORT0_MII_MODE    kENET_RgmiiMode
 #define BOARD_NET_PORT0_DRV_TYPE    ENET_t
-#define BOARD_NET_PORT0_DRV_BASE    ENET1_BASE
 #define BOARD_NET_PORT0_DRV_INDEX	(0)
+/* Keep compatibility with both MCU SDK NG and hal_nxp legacy device headers using different (ENET vs ENET1) defines for the MAC controller */
+#ifdef ENET1
+#define BOARD_NET_PORT0_DRV_BASE     ENET1_BASE
 #define BOARD_NET_PORT0_DRV_IRQ0     ENET1_IRQn
 #define BOARD_NET_PORT0_DRV_IRQ0_HND ENET1_DriverIRQHandler
 #define BOARD_NET_PORT0_DRV_IRQ1     ENET1_1588_Timer_IRQn
 #define BOARD_NET_PORT0_DRV_IRQ1_HND ENET1_1588_Timer_DriverIRQHandler
+#else
+#define BOARD_NET_PORT0_DRV_BASE     ENET_BASE
+#define BOARD_NET_PORT0_DRV_IRQ0     ENET_IRQn
+#define BOARD_NET_PORT0_DRV_IRQ0_HND ENET_DriverIRQHandler
+#define BOARD_NET_PORT0_DRV_IRQ1     ENET_1588_IRQn
+#define BOARD_NET_PORT0_DRV_IRQ1_HND ENET_1588_Timer_DriverIRQHandler
+#endif
 
 #define BOARD_NET_PORT0_1588_TIMER_EVENT_CHANNEL  kENET_PtpTimerChannel2
 
