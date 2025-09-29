@@ -23,6 +23,8 @@ detect_machine ()
         echo 'imx95evk15'
     elif grep -q 'NXP i\.MX95 19X19 board' /sys/devices/soc0/machine; then
         echo 'imx95evk19'
+    elif grep -q 'NXP i\.MX943 EVK board' /sys/devices/soc0/machine; then
+        echo 'imx943evk'
     else
         echo 'Unknown'
     fi
@@ -40,7 +42,7 @@ function get_rpmsg_dev()
     'imx93evk')
         RPMSG_DEV=fe100000.rpmsg-ca55
         ;;
-    'imx95evk15'|'imx95evk19')
+    'imx95evk15'|'imx95evk19'|'imx943evk')
         RPMSG_DEV=c0100000.rpmsg-ca55
         ;;
     *)

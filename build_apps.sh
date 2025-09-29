@@ -6,7 +6,7 @@
 
 valid_apps=("audio" "hello_world" "industrial" "rt_latency" "virtio_net")
 
-valid_boards=("evkmimx8mm" "evkmimx8mn" "evkmimx8mp" "mcimx93evk" "imx95lp4xevk15" "imx95lpd5evk19")
+valid_boards=("evkmimx8mm" "evkmimx8mn" "evkmimx8mp" "mcimx93evk" "imx95lp4xevk15" "imx95lpd5evk19" "imx943evk")
 
 valid_oss=("freertos" "zephyr")
 
