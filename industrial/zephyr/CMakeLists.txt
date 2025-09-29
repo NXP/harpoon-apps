@@ -214,13 +214,8 @@ if(CONFIG_USE_INDUSTRIAL_ETHERNET)
 	        ${AppPath}/common/ethernet.c
 	      )
 endif()
-if(CONFIG_BOARD_IMX8MP_EVK)
+if(CONFIG_BOARD_IMX93_EVK)
   target_sources(app PRIVATE
-	       ${AppPath}/common/ethernet_sdk_enet_qos.c
-	      )
-elseif(CONFIG_BOARD_IMX93_EVK)
-  target_sources(app PRIVATE
-	       ${AppPath}/common/ethernet_sdk_enet_qos.c
 	       ${CommonBoardPath}/clock_init.c
 	      )
 elseif(CONFIG_BOARD_IMX95_EVK_15X15)
@@ -234,9 +229,5 @@ elseif(CONFIG_BOARD_IMX95_EVK)
 	       ${AppPath}/zephyr/boards/${BoardName}/clock_setup.c
 	       ${AppPath}/zephyr/boards/${BoardName}/pinctrl.c
 	       ${AppPath}/zephyr/boards/${BoardName}/ethernet_setup.c
-	      )
-else()
-  target_sources(app PRIVATE
-	       ${AppPath}/common/ethernet_sdk_enet.c
 	      )
 endif()

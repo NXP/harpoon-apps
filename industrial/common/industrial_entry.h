@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,7 +20,7 @@ enum industrial_use_case_id {
 };
 
 #define INDUSTRIAL_CAN_USE_CASES_NUM 1
-#define INDUSTRIAL_ETHERNET_USE_CASES_NUM 3
+#define INDUSTRIAL_ETHERNET_USE_CASES_NUM 1
 #define INDUSTRIAL_USE_CASES_MAX 3
 
 struct event {
@@ -74,17 +74,6 @@ void *ethernet_avb_tsn_init(void *parameters);
 int ethernet_avb_tsn_run(void *priv, struct event *e);
 void ethernet_avb_tsn_stats(void *priv);
 void ethernet_avb_tsn_exit(void *priv);
-
-void *ethernet_sdk_enet_init(void *parameters);
-void *ethernet_sdk_enet_init_loopback(void *parameters);
-int ethernet_sdk_enet_run(void *priv, struct event *e);
-void ethernet_sdk_enet_stats(void *priv);
-void ethernet_sdk_enet_exit(void *priv);
-
-void *ethernet_sdk_enet_loopback_init(void *parameters);
-int ethernet_sdk_enet_loopback_run(void *priv, struct event *e);
-void ethernet_sdk_enet_loopback_stats(void *priv);
-void ethernet_sdk_enet_loopback_exit(void *priv);
 
 void *industrial_control_init(int nb_use_cases);
 void *industrial_get_data_ctx(struct industrial_ctx *ctx, int use_case_id);

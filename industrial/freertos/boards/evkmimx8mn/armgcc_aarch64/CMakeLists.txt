@@ -60,7 +60,6 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
     "${AppPath}/common/boards/${BoardName}/hardware_ethernet.c"
     "${AppPath}/common/boards/${BoardName}/pin_mux.c"
     "${AppPath}/common/ethernet.c"
-    "${AppPath}/common/ethernet_sdk_enet.c"
     "${AppPath}/common/industrial.c"
     "${BoardPath}/board.c"
     "${BoardPath}/mmu.c"
