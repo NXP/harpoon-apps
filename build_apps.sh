@@ -4,7 +4,7 @@
 # build or clean all applications: ./build_apps [clean]
 # build or clean specified applications: ./build_apps [clean]  [os] [board-list] [app-list]
 
-valid_apps=("audio" "harpoon_drivers_test" "hello_world" "industrial" "rt_latency" "virtio_net")
+valid_apps=("audio" "hello_world" "industrial" "rt_latency" "virtio_net")
 
 valid_boards=("evkmimx8mm" "evkmimx8mn" "evkmimx8mp" "mcimx93evk" "imx95lp4xevk15" "imx95lpd5evk19")
 
