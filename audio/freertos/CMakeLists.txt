@@ -50,6 +50,9 @@ mcux_add_source(
 
 mcux_add_macro(CC "CONFIG_HAS_CORTEX_A")
 
+# Disable "array-bounds" that leads to an error when using "DNDEBUG", due to a skipped assert.
+set_source_files_properties(${SdkRootDirPath}/drivers/sai/fsl_sai.c PROPERTIES COMPILE_FLAGS "-Wno-array-bounds")
+
 # Common FreeRTOS configurations
 include(${SdkRootDirPath}/${harpoon_root_path}/common/freertos/common_freertos.cmake)
 include(${SdkRootDirPath}/${harpoon_root_path}/common/freertos/core/armv8a/common_freertos_core_armv8a.cmake)
