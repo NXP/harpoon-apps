@@ -1,5 +1,8 @@
 include(${SdkRootDirPath}/../../gen_avb_sdk/mcux_genavb.cmake)
 
+# Disable "array-bounds" that leads to an error when using "DNDEBUG", due to a skipped assert in fsl_enet.c in ENET_SetTsISRHandler.
+set_source_files_properties(${SdkRootDirPath}/drivers/enet/fsl_enet.c PROPERTIES COMPILE_FLAGS "-Wno-array-bounds")
+
 mcux_set_variable(CONFIG "endpoint_tsn")
 mcux_set_variable(GenAVBPath "../../gen_avb_sdk")
 mcux_set_variable(RTOS_ABSTRACTION_LAYER_DIR "${SdkRootDirPath}/../../rtos-abstraction-layer/freertos")
