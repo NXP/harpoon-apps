@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -19,7 +19,7 @@ void virtio_board_init(void)
 	/* Init board cpu and hardware. */
 	BOARD_InitMemory();
 	/* Enable GIC before register any interrupt handler*/
-	GIC_Enable(1);
+	GIC_Enable();
 	board_pins_setup();
 	board_clock_setup();
 	BOARD_InitDebugConsole();
