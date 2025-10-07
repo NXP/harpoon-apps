@@ -6,8 +6,9 @@ Version: 3.4
 --------------------------------------------
 Package:                     Harpoon Apps
 Outgoing License:            BSD-3-Clause
-License Files:               LICENSES/COPYING-BSD-3
-                             LICENSES/COPYING-Apache.txt (*/mmu.c)
+License Files:               LICENSES/BSD-3-Clause.txt
+                             LICENSES/Apache-2.0.txt (*/mmu.c)
+                             LICENSES/MIT.txt
 Type of Content:             source code, project files, linker files
 Description and comments:    Harpoon application examples
                              SDK-based examples to show how to use peripheral
