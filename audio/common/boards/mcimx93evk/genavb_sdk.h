@@ -67,6 +67,7 @@
 #define BOARD_GENAVB_TIMER_0_IRQ_HANDLER			BOARD_TPM_0_IRQ_HANDLER
 
 unsigned int BOARD_TPM_clk_src(void *base);
+unsigned int BOARD_TPM_clk_src_div(void *base);
 unsigned int BOARD_TPM_clk_freq(void *base);
 int BOARD_NetPort_Get_MAC(unsigned int port, uint8_t *mac);
 
@@ -78,5 +79,6 @@ uint32_t dev_read_audio_pll_post_div(void);
 uint32_t dev_get_enet_core_freq(void *base);
 uint32_t dev_get_enet_1588_freq(void *base);
 uint32_t dev_get_tpm_counter_freq(void *base);
+uint32_t dev_get_tpm_counter_clk_src_div(void *base);
 
 #endif /* _GENAVB_SDK_H_ */

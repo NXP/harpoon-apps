@@ -93,3 +93,21 @@ uint32_t dev_get_gpt_ipg_freq(void *base)
 	else
 		return 0;
 }
+
+uint32_t dev_get_gpt_clk_src_div(void *base)
+{
+	if (base == GPT1)
+		return (CLOCK_GetRootPreDivider(kCLOCK_RootGpt1) * CLOCK_GetRootPostDivider(kCLOCK_RootGpt1));
+	else if (base == GPT2)
+		return (CLOCK_GetRootPreDivider(kCLOCK_RootGpt2) * CLOCK_GetRootPostDivider(kCLOCK_RootGpt2));
+	else if (base == GPT3)
+		return (CLOCK_GetRootPreDivider(kCLOCK_RootGpt3) * CLOCK_GetRootPostDivider(kCLOCK_RootGpt3));
+	else if (base == GPT4)
+		return (CLOCK_GetRootPreDivider(kCLOCK_RootGpt4) * CLOCK_GetRootPostDivider(kCLOCK_RootGpt4));
+	else if (base == GPT5)
+		return (CLOCK_GetRootPreDivider(kCLOCK_RootGpt5) * CLOCK_GetRootPostDivider(kCLOCK_RootGpt5));
+	else if (base == GPT6)
+		return (CLOCK_GetRootPreDivider(kCLOCK_RootGpt6) * CLOCK_GetRootPostDivider(kCLOCK_RootGpt6));
+	else
+		return 1;
+}

@@ -96,3 +96,21 @@ uint32_t dev_get_tpm_counter_freq(void *base)
 	else
 		return 0;
 }
+
+uint32_t dev_get_tpm_counter_clk_src_div(void *base)
+{
+	if (base == TPM1)
+		return CLOCK_GetRootClockDiv(kCLOCK_Root_BusAon);
+	else if (base == TPM2)
+		return CLOCK_GetRootClockDiv(kCLOCK_Root_Tpm2);
+	else if (base == TPM3)
+		return CLOCK_GetRootClockDiv(kCLOCK_Root_BusWakeup);
+	else if (base == TPM4)
+		return CLOCK_GetRootClockDiv(kCLOCK_Root_Tpm4);
+	else if (base == TPM5)
+		return CLOCK_GetRootClockDiv(kCLOCK_Root_Tpm5);
+	else if (base == TPM6)
+		return CLOCK_GetRootClockDiv(kCLOCK_Root_Tpm6);
+	else
+		return 1;
+}

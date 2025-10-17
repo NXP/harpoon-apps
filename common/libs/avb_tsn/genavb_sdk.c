@@ -13,6 +13,15 @@ unsigned int BOARD_GPT_clk_src(void *base)
 	return kGPT_ClockSource_Periph;
 }
 
+unsigned int BOARD_GPT_clk_src_div(void *base)
+{
+#if defined(BOARD_GPT_REC_BASE)
+	return dev_get_gpt_clk_src_div(base);
+#else
+	return 1;
+#endif
+}
+
 unsigned int BOARD_GPT_clk_freq(void *base)
 {
 #if defined(BOARD_GPT_REC_BASE)
@@ -34,6 +43,15 @@ unsigned int BOARD_GPT_clk_freq(void *base)
 unsigned int BOARD_TPM_clk_src(void *base)
 {
 	return kTPM_SystemClock;
+}
+
+unsigned int BOARD_TPM_clk_src_div(void *base)
+{
+#if defined(BOARD_TPM_REC_BASE)
+	return dev_get_tpm_counter_clk_src_div(base);
+#else
+	return 1;
+#endif
 }
 
 unsigned int BOARD_TPM_clk_freq(void *base)
