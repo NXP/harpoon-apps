@@ -7,6 +7,8 @@
 #include "clock_config.h"
 #include "fsl_audiomix.h"
 
+#include "rtos_abstraction_layer.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -68,6 +70,28 @@ static inline void BOARD_AudioClockSetup(void)
 
 	/* init SAI PLL run at 361267200HZ */
 	AUDIOMIX_InitAudioPll(AUDIOMIX, &g_saiPLLConfig);
+}
+
+/* Avoid precision error due to fractional part in CLOCK_GetPllFreq()
+ * and return the right frequency configured above
+ */
+uint32_t BOARD_GetAudioPLLFreq(int pll_id)
+{
+	uint32_t pll_freq = 0;
+
+	switch (pll_id) {
+	case kCLOCK_AudioPll1Ctrl:
+		pll_freq = 393216000;
+		break;
+	case kCLOCK_AudioPll2Ctrl:
+		pll_freq = 361267200;
+		break;
+	default:
+		rtos_assert(false, "Invalid Audio PLL! (%d)", pll_id);
+		break;
+	}
+
+	return pll_freq;
 }
 
 void BOARD_InitClocks(void)

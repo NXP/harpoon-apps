@@ -7,6 +7,8 @@
 #include "fsl_clock.h"
 #include "fsl_common.h"
 
+#include "clock_config.h"
+
 #include "rtos_abstraction_layer.h"
 
 #include "rtos_apps/audio/audio_app.h"
@@ -53,5 +55,5 @@ uint32_t audio_app_sai_get_clock_freq(unsigned int index)
 
 	sai_clock_root = audio_app_sai_active_list[index].root_clk_id;
 
-	return CLOCK_GetPllFreq(audio_app_sai_active_list[index].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
+	return BOARD_GetAudioPLLFreq(audio_app_sai_active_list[index].audio_pll) / CLOCK_GetRootPreDivider(sai_clock_root) / CLOCK_GetRootPostDivider(sai_clock_root);
 }
