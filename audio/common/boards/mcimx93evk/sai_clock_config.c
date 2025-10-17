@@ -22,18 +22,13 @@ void audio_app_sai_clock_setup(void)
 		rtos_assert(audio_app_sai_active_list[i].audio_pll_div < UINT8_MAX, "pll_div out of bound");
 		const clock_root_config_t saiClkCfg = {
 			.clockOff = false,
-			.mux = 1, // select audiopll1out source(393216000 Hz)
+			.mux = 1, /* select audiopll1out source (393216000 Hz) */
 			.div = audio_app_sai_active_list[i].audio_pll_div,
 		};
-		
+
 		CLOCK_SetRootClock(audio_app_sai_active_list[i].root_clk_id, &saiClkCfg);
 		CLOCK_EnableClock(audio_app_sai_active_list[i].clk_id);
 	}
-}
-
-uint32_t audio_app_sai_select_audio_pll_mux(unsigned int index, uint32_t srate)
-{
-	return kCLOCK_AudioPll1Out;
 }
 
 uint32_t audio_app_sai_get_clock_freq(unsigned int index)

@@ -22,7 +22,7 @@ void audio_app_sai_clock_setup(void)
 	for (i = 0; i < audio_app_sai_active_list_nelems; i++) {
 		uint32_t root_mux_apll;
 
-		/* Set SAI source to AUDIO PLL 393216000HZ */
+		/* Set SAI source to AUDIO PLL1 (393216000 HZ) or AUDIO PLL2 (361267200 HZ) */
 		switch (audio_app_sai_active_list[i].audio_pll) {
 			case kCLOCK_AudioPll1Ctrl:
 				root_mux_apll = kCLOCK_SaiRootmuxAudioPll1;
@@ -37,52 +37,12 @@ void audio_app_sai_clock_setup(void)
 
 		CLOCK_SetRootMux(audio_app_sai_active_list[i].root_clk_id, root_mux_apll);
 
-		/* Set root clock to 393216000HZ / 16 = 24.576MHz */
+		/* Set SAI root clock to PLL Freq / 16 = (24.576MHz or 22.5792MHz) */
 		CLOCK_SetRootDivider(audio_app_sai_active_list[i].root_clk_id,
 				audio_app_sai_active_list[i].audio_pll_mul,
 				audio_app_sai_active_list[i].audio_pll_div);
 		CLOCK_EnableClock(audio_app_sai_active_list[i].clk_id);
 	}
-}
-
-static uint32_t __get_pll_rootmux_from_srate(uint32_t srate)
-{
-	uint32_t root_mux_apll;
-
-	if (srate % 44100 == 0) {
-		/* Audio PLL for frequencies multiple of 44100 Hz */
-		root_mux_apll = kCLOCK_SaiRootmuxAudioPll2;
-	} else {
-		/* Audio PLL for frequencies multiple of 48000 Hz */
-		root_mux_apll = kCLOCK_SaiRootmuxAudioPll1;
-	}
-
-	return root_mux_apll;
-}
-
-static uint32_t __get_pll_from_srate(uint32_t srate)
-{
-	uint32_t apll;
-
-	if (srate % 44100 == 0) {
-		/* Audio PLL for frequencies multiple of 44100 Hz */
-		apll = kCLOCK_AudioPll2Ctrl;
-	} else {
-		/* Audio PLL for frequencies multiple of 48000 Hz */
-		apll = kCLOCK_AudioPll1Ctrl;
-	}
-
-	return apll;
-}
-
-uint32_t audio_app_sai_select_audio_pll_mux(unsigned int index, uint32_t srate)
-{
-	uint32_t root_mux_apll;
-
-	root_mux_apll = __get_pll_rootmux_from_srate(srate);
-	CLOCK_SetRootMux(audio_app_sai_active_list[index].root_clk_id, root_mux_apll);
-
-	return __get_pll_from_srate(srate);
 }
 
 uint32_t audio_app_sai_get_clock_freq(unsigned int index)

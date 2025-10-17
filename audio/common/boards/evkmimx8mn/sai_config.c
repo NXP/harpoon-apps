@@ -50,7 +50,27 @@ struct sai_active_config audio_app_sai_active_list[] = {
 
 uint32_t audio_app_sai_active_list_nelems = ARRAY_SIZE(audio_app_sai_active_list);
 
+static uint32_t __get_pll_from_srate(uint32_t srate)
+{
+	uint32_t apll;
+
+	if (srate % 44100 == 0) {
+		/* Audio PLL for frequencies multiple of 44100 Hz */
+		apll = kCLOCK_AudioPll2Ctrl;
+	} else {
+		/* Audio PLL for frequencies multiple of 48000 Hz */
+		apll = kCLOCK_AudioPll1Ctrl;
+	}
+
+	return apll;
+}
+
 void audio_app_sai_alternate_config(bool use_audio_hat, uint32_t rate)
 {
-	return;
+	int i;
+
+	/* update the used PLL based on requested rate. */
+	for (i = 0; i < audio_app_sai_active_list_nelems; i++) {
+		audio_app_sai_active_list[i].audio_pll = __get_pll_from_srate(rate);
+	}
 }
