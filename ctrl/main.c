@@ -75,7 +75,7 @@ static int audio_run(int fd, unsigned int id, unsigned int frequency, unsigned i
 	run.id = id;
 	run.frequency = frequency;
 	run.period = period;
-	run.use_alternate_config = use_audio_hat;
+	run.config_idx = use_audio_hat ? 1 : 0;
 
 	memcpy(run.addr, hw_addr, sizeof(run.addr));
 

@@ -8,6 +8,7 @@
 #include "fsl_sai.h"
 
 #include "app_board.h"
+#include "sai_config.h"
 
 #include "rtos_apps/audio/audio_app.h"
 
@@ -65,7 +66,7 @@ static uint32_t __get_pll_from_srate(uint32_t srate)
 	return apll;
 }
 
-void audio_app_sai_alternate_config(bool use_audio_hat, uint32_t rate)
+void BOARD_sai_apply_config(uint32_t rate, bool use_audio_hat)
 {
 	int i;
 

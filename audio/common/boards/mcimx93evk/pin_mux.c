@@ -62,7 +62,7 @@ void BOARD_InitPins(void)
 						IOMUXC_PAD_OD_MASK);
 }
 
-void audio_app_pin_mux_dynamic_config(bool use_audio_hat)
+void BOARD_pin_mux_dynamic_config(bool use_audio_hat)
 {
 	/* GPIO IO19 can only be used by the on-board codec or by the MX93AUD-HAT once */
 	if (use_audio_hat) {

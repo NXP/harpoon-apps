@@ -9,6 +9,8 @@
 #include "rtos_apps/audio/audio_app.h"
 #include "rtos_apps/audio/audio_pipeline.h"
 
+#include "audio_app.h"
+
 const struct audio_pipeline_config pipeline_dtmf_config = {
 
 	.name = "DTMF pipeline",
@@ -1557,42 +1559,46 @@ struct play_pipeline_config play_pipeline_mcr_smp_config = {
 };
 #endif
 
-const struct play_pipeline_config *audio_app_play_config[] = {
-	[0] = &play_pipeline_dtmf_config,
-	[1] = &play_pipeline_sine_config,
-	[2] = &play_pipeline_loopback_config,
-	[3] = &play_pipeline_full_config,
-#if (CONFIG_GENAVB_ENABLE == 1)
-	[4] = &play_pipeline_full_avb_config,
-#endif
-#if defined(CONFIG_SMP)
-	[5]  = &play_pipeline_smp_config,
-#endif
-#if (CONFIG_GENAVB_ENABLE == 1)
-	[6] = &play_pipeline_mcr_avb_config,
-#endif
-#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
-	[7] = &play_pipeline_avb_smp_config,
-	[8] = &play_pipeline_mcr_smp_config,
-#endif
+const struct play_pipeline_config *play_config[][AUDIO_APP_MAX_RUN_MODES] = {
+	[0] = {
+		[0] = &play_pipeline_dtmf_config,
+		[1] = &play_pipeline_sine_config,
+		[2] = &play_pipeline_loopback_config,
+		[3] = &play_pipeline_full_config,
+	#if (CONFIG_GENAVB_ENABLE == 1)
+		[4] = &play_pipeline_full_avb_config,
+	#endif
+	#if defined(CONFIG_SMP)
+		[5]  = &play_pipeline_smp_config,
+	#endif
+	#if (CONFIG_GENAVB_ENABLE == 1)
+		[6] = &play_pipeline_mcr_avb_config,
+	#endif
+	#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
+		[7] = &play_pipeline_avb_smp_config,
+		[8] = &play_pipeline_mcr_smp_config,
+	#endif
+	},
+
+	[1] = {
+		[0] = &play_pipeline_dtmf_aud_hat_config,
+		[1] = &play_pipeline_sine_aud_hat_config,
+		[2] = &play_pipeline_loopback_aud_hat_config,
+		[3] = &play_pipeline_full_aud_hat_config,
+	#if (CONFIG_GENAVB_ENABLE == 1)
+		[4] = &play_pipeline_full_avb_aud_hat_config,
+	#endif
+	#if defined(CONFIG_SMP)
+		[5]  = &play_pipeline_smp_config,
+	#endif
+	#if (CONFIG_GENAVB_ENABLE == 1)
+		[6] = &play_pipeline_mcr_avb_aud_hat_config,
+	#endif
+	#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
+		[7] = &play_pipeline_avb_smp_config,
+		[8] = &play_pipeline_mcr_smp_config,
+	#endif
+	},
 };
 
-const struct play_pipeline_config *audio_app_play_alternate_config[] = {
-	[0] = &play_pipeline_dtmf_aud_hat_config,
-	[1] = &play_pipeline_sine_aud_hat_config,
-	[2] = &play_pipeline_loopback_aud_hat_config,
-	[3] = &play_pipeline_full_aud_hat_config,
-#if (CONFIG_GENAVB_ENABLE == 1)
-	[4] = &play_pipeline_full_avb_aud_hat_config,
-#endif
-#if defined(CONFIG_SMP)
-	[5]  = &play_pipeline_smp_config,
-#endif
-#if (CONFIG_GENAVB_ENABLE == 1)
-	[6] = &play_pipeline_mcr_avb_aud_hat_config,
-#endif
-#if defined(CONFIG_SMP) && (CONFIG_GENAVB_ENABLE == 1)
-	[7] = &play_pipeline_avb_smp_config,
-	[8] = &play_pipeline_mcr_smp_config,
-#endif
- };
+uint32_t max_play_configs = ARRAY_SIZE(play_config);

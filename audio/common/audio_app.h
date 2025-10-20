@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 
+#define AUDIO_APP_MAX_RUN_MODES		9
+
 int audio_app_ctrl_send(void *ctrl_handle, void *data, uint32_t len);
 int audio_app_ctrl_recv(void *ctrl_handle, void *data, uint32_t *len);
 void *audio_app_ctrl_init(void);

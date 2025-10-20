@@ -13,6 +13,7 @@
 #include "fsl_sai.h"
 
 #include "app_board.h"
+#include "codec_config.h"
 #include "rtos_apps/log.h"
 #include "rtos_abstraction_layer.h"
 
@@ -233,7 +234,7 @@ end:
 	return err;
 }
 
-bool audio_app_codec_is_rate_supported(uint32_t rate, bool use_audio_hat)
+bool BOARD_codec_is_rate_supported(uint32_t rate, bool use_audio_hat)
 {
 	uint32_t supported_rates[] = SUPPORTED_RATES;
 

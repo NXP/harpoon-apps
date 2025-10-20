@@ -83,6 +83,7 @@ void BOARD_InitPins(void)
 			IOMUXC_SW_PAD_CTL_PAD_HYS(1U));
 }
 
-void audio_app_pin_mux_dynamic_config(bool use_audio_hat) {
+void BOARD_pin_mux_dynamic_config(bool use_audio_hat)
+{
 	return;
 }

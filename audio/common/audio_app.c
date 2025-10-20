@@ -9,7 +9,12 @@
 #include "os/irq.h"
 #include "rtos_apps/audio/audio_ctrl.h"
 #include "rtos_apps/audio/audio_entry.h"
+#include "rtos_apps/audio/audio_app.h"
 #include "rtos_apps/log.h"
+
+#include "pin_mux.h"
+#include "sai_config.h"
+#include "codec_config.h"
 
 #include "rtos_abstraction_layer.h"
 
@@ -39,6 +44,9 @@ extern void BOARD_NET_PORT0_DRV_IRQ3_HND(void);
 extern void BOARD_GENAVB_TIMER_0_IRQ_HANDLER(void);
 
 #endif /* #if defined(CONFIG_RTOS_APPS_AUDIO_GENAVB_ENABLE) */
+
+extern const struct play_pipeline_config *play_config[][AUDIO_APP_MAX_RUN_MODES];
+extern uint32_t max_play_configs;
 
 /*******************************************************************************
  * Definitions
@@ -149,7 +157,7 @@ void *audio_app_ctrl_init(void)
 	return ctrl_handle;
 }
 
-bool audio_app_check_params(uint32_t period, uint32_t rate)
+static bool audio_check_params(uint32_t period, uint32_t rate)
 {
 	if (period == 2) {
 		switch (rate) {
@@ -162,6 +170,49 @@ bool audio_app_check_params(uint32_t period, uint32_t rate)
 		}
 	}
 	return true;
+}
+
+int audio_app_apply_config(struct audio_app_run_config *run_config, const struct play_pipeline_config **play_cfg)
+{
+	bool use_audio_hat;
+
+	if (run_config->index >= max_play_configs) {
+		log_err("Unsupported configuration(%u)\n", run_config->index);
+		goto err;
+	}
+
+	if (run_config->mode >= AUDIO_APP_MAX_RUN_MODES) {
+		log_err("Unsupported run mode(%u)\n", run_config->mode, run_config->index);
+		goto err;
+	}
+
+	*play_cfg = play_config[run_config->index][run_config->mode];
+
+	if (!*play_cfg) {
+		log_err("Configuration(%u): Unsupported run mode(%u)\n", run_config->index, run_config->mode);
+		goto err;
+	}
+
+	/* Configuration 1 has pipelines supporting MX93-AUDHAT */
+	use_audio_hat = (run_config->index == 1) ? true : false;
+
+	if (!BOARD_codec_is_rate_supported(run_config->rate, use_audio_hat)) {
+		log_err("Configuration(%u): Unsupported rate(%u Hz)\n", run_config->rate);
+		goto err;
+	}
+
+	if (!audio_check_params(run_config->period, run_config->rate)) {
+		log_warn("Configuration(%u): Unsupported combination rate(%u Hz)/period(%u)\n",
+			 run_config->index, run_config->period, run_config->rate);
+	}
+
+	BOARD_pin_mux_dynamic_config(use_audio_hat);
+	BOARD_sai_apply_config(run_config->rate, use_audio_hat);
+
+	return 0;
+
+err:
+	return -1;
 }
 
 int audio_app_init(void)

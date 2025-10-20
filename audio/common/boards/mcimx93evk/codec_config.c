@@ -11,6 +11,7 @@
 #include "fsl_rgpio.h"
 
 #include "app_board.h"
+#include "codec_config.h"
 #include "rtos_apps/log.h"
 #include "rtos_abstraction_layer.h"
 
@@ -264,7 +265,7 @@ end:
 	return err;
 }
 
-bool audio_app_codec_is_rate_supported(uint32_t rate, bool use_audio_hat)
+bool BOARD_codec_is_rate_supported(uint32_t rate, bool use_audio_hat)
 {
 	uint32_t supported_rates_cs42448[] = CS42448_SUPPORTED_RATES;
 	uint32_t supported_rates_wm8962[] = WM8962_SUPPORTED_RATES;
