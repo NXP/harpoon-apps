@@ -128,9 +128,11 @@ void main_task(void)
 		K_LOWEST_APPLICATION_THREAD_PRIO, 0, K_NO_WAIT);
 }
 
-void main(void)
+int main(void)
 {
 	hardware_setup();
 
 	main_task();
+
+	return 0;
 }

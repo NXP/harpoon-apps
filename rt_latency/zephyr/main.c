@@ -222,7 +222,7 @@ void destroy_test_case(void *context)
 	ctx->started = false;
 }
 
-void main(void)
+int main(void)
 {
 	struct main_ctx *ctx = &main_ctx;
 	int rc;
@@ -242,4 +242,6 @@ void main(void)
 		k_msleep(100);
 
 	} while(1);
+
+	return 0;
 }

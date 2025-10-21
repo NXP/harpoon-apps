@@ -19,9 +19,11 @@ static void hardware_setup(void)
 	BOARD_InitClocks();
 }
 
-void main(void)
+int main(void)
 {
 	hardware_setup();
 
 	audio_app_main();
+
+	return 0;
 }
