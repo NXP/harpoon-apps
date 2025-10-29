@@ -3,7 +3,7 @@
 [![Version](https://img.shields.io/github/v/release/NXP/harpoon-apps)](https://github.com/NXP/harpoon-apps/releases/latest)
 [![Contributors](https://img.shields.io/github/contributors/NXP/harpoon-apps)](https://github.com/NXP/harpoon-apps/graphs/contributors)
 
-Harpoon is a software platform providing an RTOS and application specific drivers, running under the Jailhouse hypervisor and side-by-side with a full Linux distribution on the Cortex-A cores of NXP MPU’s (i.MX 8M Mini, i.MX 8M Nano, i.MX 8M Plus, i.MX 93 and i.MX 95).
+Harpoon is a software platform providing an RTOS and application specific drivers, running under the Jailhouse hypervisor and side-by-side with a full Linux distribution on the Cortex-A cores of NXP MPU’s (i.MX 8M Mini, i.MX 8M Nano, i.MX 8M Plus, i.MX 93, i.MX 943 and i.MX 95).
 
 Harpoon offers an environment for developing real-time demanding applications, leveraging the higher performance of the Cortex-A cores (ARMv8-A) compared to the Cortex-M cores (ARMv7-M/ARMv8-M) traditionally used for RTOS based applications.
 
@@ -226,7 +226,7 @@ Please refer to https://docs.zephyrproject.org/latest/develop/west/install.html 
 ./build_apps.sh [clean]                                 - build or clean all applications
 ./build_apps.sh [clean] [os] [board-list] [app-list]    - build or clean specified applications
                                                         - os: freertos or zephyr (both if not specified)
-                                                        - board-list: one or more of: evkmimx8mm evkmimx8mn evkmimx8mp mcimx93evk imx95lp4xevk15 imx95lpd5evk19 (all if not specified)
+                                                        - board-list: one or more of: evkmimx8mm evkmimx8mn evkmimx8mp mcimx93evk imx95lp4xevk15 imx95lpd5evk19 imx943evk (all if not specified)
                                                         - app-list: one or more of: audio harpoon_drivers_test hello_world industrial rt_latency virtio_net (all if not specified)
 ```
 Before executing the script, as mentioned above, the enviroment variables "ARMGCC_DIR" and "Zephyr_DIR" (if building Zephyr applications) need to be set.
