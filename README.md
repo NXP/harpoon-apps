@@ -17,7 +17,7 @@ This project provides the fundamental support for RTOS applications running in a
 * Hardware resource partitioning using Jailhouse hypervisor, providing an inter-cell IPC communication
 * Arm® CMSIS-Core device drivers and header files for 64-bit Cortex-A53/A55 cores
 * RTOS kernel integration (Zephyr and FreeRTOS)
-* Open-source peripheral drivers leveraging the MCUXpresso SDK ( [mcux-sdk project](https://github.com/nxp-mcuxpresso/mcux-sdk) )
+* Open-source peripheral drivers leveraging the MCUXpresso SDK ( [mcux-sdk project](https://github.com/nxp-mcuxpresso/mcuxsdk-manifests) )
 * Integration in Linux Yocto BSP as well as Real-time Edge Software Yocto through the [meta-nxp-harpoon](https://github.com/NXP/meta-nxp-harpoon) layer (integration with systemd)
 
 This project is the main repository to build the RTOS application for ARMv8-A cores, it contains the [west.yml](https://github.com/NXP/harpoon-apps/blob/main/west.yml) which keeps the description and revision for other projects in the overall Harpoon delivery. Currently available software components are shown in below figure.
