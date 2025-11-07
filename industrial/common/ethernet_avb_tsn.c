@@ -75,6 +75,7 @@ extern struct system_config system_cfg;
 #define ST_TX_TIME_FACTOR 2 /* Factor applied to critical time interval, to avoid frames getting stuck */
 #define ST_LIST_LEN       2
 
+#if CONFIG_USE_ST
 /*
  * Returns the complete transmit time including MAC framing and physical
  * layer overhead (802.3).
@@ -96,7 +97,6 @@ static unsigned int frame_tx_time_ns(unsigned int frame_size, int speed_mbps)
     return (((1000 / speed_mbps) * eth_size * 8) + ST_TX_TIME_MARGIN);
 }
 
-#if CONFIG_USE_ST
 #define SCHED_TRAFFIC_OFFSET 40000
 static void tsn_net_st_config_enable(struct tsn_task_params *params, bool use_fp, bool use_st)
 {
@@ -312,12 +312,30 @@ void ethernet_avb_tsn_exit(void *priv)
 {
 	struct ethernet_ctx *ctx = priv;
 	struct ethernet_avb_tsn_ctx *avb_tsn_ctx;
+#if CONFIG_USE_ST
 	struct rtos_apps_tsn_config *config;
 	struct cyclic_task_config *c_cfg;
+#endif
 
 	avb_tsn_ctx = (struct ethernet_avb_tsn_ctx *)(ctx + 1);
 
 	rtos_apps_tsn_exit(avb_tsn_ctx->tsn_ctx);
+
+#if CONFIG_USE_ST
+	config = system_config_get_tsn_app(ctx);
+	if (!config) {
+		log_err("system_config_get_tsn_app() failed\n");
+		return;
+	}
+
+	c_cfg = tsn_conf_get_cyclic_task(config->role);
+	if (!c_cfg) {
+		log_err("tsn_conf_get_cyclic_task() failed\n");
+		return;
+	}
+
+	tsn_net_st_config_disable(&c_cfg->params);
+#endif
 
 	gavb_pps_exit(&avb_tsn_ctx->pps);
 	gavb_port_stats_exit(0);
@@ -337,22 +355,6 @@ void ethernet_avb_tsn_exit(void *priv)
 #endif
 #ifdef BOARD_NET_PORT0_DRV_IRQ3_HND
 	os_irq_unregister(BOARD_NET_PORT0_DRV_IRQ3);
-#endif
-
-	config = system_config_get_tsn_app(ctx);
-	if (!config) {
-		log_err("system_config_get_tsn_app() failed\n");
-		return;
-	}
-
-	c_cfg = tsn_conf_get_cyclic_task(config->role);
-	if (!c_cfg) {
-		log_err("tsn_conf_get_cyclic_task() failed\n");
-		return;
-	}
-
-#if CONFIG_USE_ST
-	tsn_net_st_config_disable(&c_cfg->params);
 #endif
 
 	rtos_free(ctx);
