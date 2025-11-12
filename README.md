@@ -73,104 +73,142 @@ It provides a `west` manifest to fetch not only Zephyr, but also FreeRTOS as wel
 
 ```bash
 .
-.
 ├── harpoon-apps
-│   ├── common                              <-- source code common to all applications
-│   │   ├── freertos
-│   │   │   ├── boards
-│   │   │   │   ├── evkmimx8mm
-│   │   │   │   │   ├── armgcc_aarch64
-│   │   │   │   │   │   ├── flags.cmake
-│   │   │   │   │   │   ├── MIMX8MM6xxxxx_ca53_ddr_ram.ld <-- linker script
-│   │   │   │   │   │   └── MIMX8MM6xxxxx_ca53_ram.ld
-│   │   │   │   │   ├── board.c
-│   │   │   │   │   ├── board.h             <-- board-specific board configuration for all applications
-│   │   │   │   │   ├── clock_config.h
-│   │   │   │   │   └── mmu.c               <-- board-specific MMU regions for all applications
-│   │   │   │    ...
-│   │   │   ├── common_freertos.cmake       <-- hardware-agnostic source code for FreeRTOS
-│   │   │   ├── core                        <-- includes os-specific header files for the os APIs
-│   │   │   │   └── armv8a
-│   │   │   │       ├── common_freertos_core_armv8a.cmake
-│   │   │   │       └── startup.S           <-- ARMv8-A startup code
-│   │   │   ├── FreeRTOSConfig.h
-│   │   │   ├── FreeRTOS_helper.c
-│   │   │   ├── FreeRTOS_tick_config.c
-│   │   │   ├── idle.{c,h}                  <-- implementation of idle task
-│   │   │   ├── irq.{c,h}                   <-- contains interrupt handler
-│   │   │   ├── mmu.h                       <-- glue with the SDK MMU driver
-│   │   │   ├── os                          <-- includes os-specific header files for the os APIs
-│   │   │   │   ├── assert.h
-│   │   │   │   ├── counter.{c,h}
-│   │   │   │   ├── semaphore.h
-│   │   │   │   ├── stdio.h
-│   │   │   │   └── unistd.h
-│   │   │   └── os.h
-│   │   ├── libs
-│   │   │   ├── ...
-│   │   │   └── jailhouse
-│   │   │       ├── console.c
-│   │   │       ├── console.h
-│   │   │       ├── ...
-│   │   │       └── lib_jailhouse.cmake
-│   │   ├── os                              <-- includes standard/posix header files os APIs
-│   │   │   ├── assert.h
-│   │   │   ├── cache.h
-│   │   │   ├── counter.h
-│   │   │   ├── semaphore.h
-│   │   │   ├── stdio.h
-│   │   │   └── unistd.h
-│   │   └── zephyr
-│   │       ├── os
-│   │       │   ├── assert.h
-│   │       │   ├── counter.h
-│   │       │   ├── semaphore.h
-│   │       │   ├── stdio.h
-│   │       │   └── unistd.h
-│   │       └── os.h
-│   ├── hello_world                <-- top directory of the application
-│   │   ├── freertos
-│   │   │   ├── boards                      <-- board-specific source code used for FreeRTOS
-│   │   │   │   ├── evkmimx8mm
-│   │   │   │   │   ├── app_board.h         <-- optional header file for application-specific board configuration definitions
-│   │   │   │   │   ├── app_mmu.h           <-- optional header file for application-specific MMU regions mapping for this board
-│   │   │   │   │   └── armgcc_aarch64      <-- entry point to build this application for FreeRTOS/evkmimx8mm
-│   │   │   │   │       ├── build_ddr_debug.sh
-│   │   │   │   │       ├── build_ddr_release.sh
-│   │   │   │   │       └── clean.sh
-│   │   │   │    ...
-│   │   │   ├── CMakeLists.txt
-│   │   │   └── main.c                      <-- main entry point for FreeRTOS
-│   │   └── src
-│   │       └── hello_world.c                  <-- hardware/os-independent source code for the application
-|   ├── audio                <-- RTOS audio application
-│   ├── rt_latency           <-- RTOS rt latency measurement application
-│   ├── industrial           <-- RTOS industrial application
-│   ├── virtio_net           <-- RTOS virtio application
+│   ├── common <-- source code common to all applications
+│   │   ├── boards
+│   │   │   ├── evkmimx8mm
+│   │   │   │   ├── genavb_sdk.c
+│   │   │   │   ├── gen_sw_mbox_config.h
+│   │   │   │   └── rpmsg_config.h
+│   │   │   └── [...]
+│   │   ├── freertos
+│   │   │   ├── boards
+│   │   │   │   ├── evkmimx8mm
+│   │   │   │   │   ├── armgcc_aarch64
+│   │   │   │   │   │   ├── flags.cmake
+│   │   │   │   │   │   ├── MIMX8MM6xxxxx_ca53_ddr_ram.ld <-- linker script
+│   │   │   │   │   │   └── MIMX8MM6xxxxx_ca53_ram.ld
+│   │   │   │   │   ├── board.{c,h} <-- board-specific board configuration for all applications
+│   │   │   │   │   ├── memory.h
+│   │   │   │   │   └── mmu.c <-- board-specific MMU regions for all applications
+│   │   │   │   └── [...]
+│   │   │   ├── core <-- includes os-specific header files for the os APIs
+│   │   │   │   └── armv8a
+│   │   │   │       ├── common_freertos_core_armv8a.cmake
+│   │   │   │       ├── exception.c
+│   │   │   │       ├── startup.S <-- ARMv8-A startup code
+│   │   │   │       └── system.c
+│   │   │   ├── os
+│   │   │   │   ├── counter.{c,h}
+│   │   │   │   ├── counter_gpt.c
+│   │   │   │   ├── counter_tpm.c
+│   │   │   │   ├── cpu_load.h
+│   │   │   │   ├── irq.h
+│   │   │   │   ├── limits.h
+│   │   │   │   ├── math.h
+│   │   │   │   ├── mmu.h
+│   │   │   │   ├── mqueue.c
+│   │   │   │   ├── stdbool.h
+│   │   │   │   └── stddef.h
+│   │   │   ├── common_freertos.cmake <-- hardware-agnostic source code for FreeRTOS
+│   │   │   ├── driver_counter_*.cmake
+│   │   │   ├── FreeRTOSConfig.h
+│   │   │   ├── FreeRTOS_helper.c
+│   │   │   ├── FreeRTOS_tick_config.c
+│   │   │   ├── idle.{c,h} <-- implementation of idle task
+│   │   │   ├── irq.{c,h} <-- contains interrupt handler
+│   │   │   ├── mmu.h <-- glue with the SDK MMU driver
+│   │   ├── libs
+│   │   │   ├── avb_tsn
+│   │   │   ├── ctrl
+│   │   │   ├── gen_sw_mbox
+│   │   │   ├── jailhouse
+│   │   │   └── rpmsg
+│   │   ├── os <-- includes standard/posix header files os APIs
+│   │   │   ├── cache.h
+│   │   │   ├── counter.h
+│   │   │   ├── cpu_load.h
+│   │   │   ├── irq.h
+│   │   │   ├── limits.h
+│   │   │   ├── math.h
+│   │   │   ├── mmu.h
+│   │   │   ├── stdbool.h
+│   │   │   └── stddef.h
+│   │   └── zephyr
+│   │       ├── boards
+│   │       │   ├── evkmimx8mm
+│   │       │   │   └── board.h
+│   │       │   ├── [...]
+│   │       │   └── memory.h
+│   │       └── os
+│   ├── ctrl
+│   ├── docs
+│   ├── hello_world <-- top directory of the application
+│   │   ├── freertos
+│   │   │   └── boards <-- board-specific source code used for FreeRTOS
+│   │   │   │   ├── evkmimx8mm
+│   │   │   │   │   ├── app_board.h <-- optional header file for application-specific board configuration definitions
+│   │   │   │   │   ├── app_mmu.h <-- optional header file for application-specific MMU regions mapping for this board
+│   │   │   │   │   ├── armgcc_aarch64 <-- entry point to build this application for FreeRTOS/evkmimx8mm
+│   │   │   │   │   │   ├── build_ddr_debug.sh
+│   │   │   │   │   │   ├── build_ddr_release.sh
+│   │   │   │   │   │   └── clean.sh
+│   │   │   │   │   ├── prj.conf
+│   │   │   │   │   └── variable.cmake
+│   │   │   │   └── [...]
+│   │   │   ├── CMakeLists.txt <-- common CMakeLists.txt for FreeRTOS application
+│   │   │   ├── Kconfig <-- application-specific Kconfig
+│   │   │   ├── main.c <-- main entry point for FreeRTOS
+│   │   │   └── prj.conf <-- common application configuration for MCUX SDK FreeRTOS
+│   │   ├── src
+│   │   │   └── hello_world.c <-- hardware/os-independent source code for the application
+│   │   └── zephyr
+│   │       └── boards
+│   │       │   ├── evkmimx8mm
+│   │       │   │   └── armgcc_aarch64
+│   │       │   ├── [...]
+│   │       │   ├── imx8mm_evk_mimx8mm6_a53.overlay <-- board-specific overlay for application-specific modifications
+│   │       │   ├── *.overlay
+│   │       ├── CMakeLists.txt
+│   │       ├── main.c
+│   │       └── prj.conf <-- common application configuration for Zephyr
+│   ├── LICENSES
+│   ├── audio <-- RTOS audio application
+│   ├── industrial <-- RTOS industrial measurement application
+│   ├── rt_latency <-- RTOS rt latency measurement application
+│   ├── virtio_net <-- RTOS virtio application
+│   ├── scripts <-- scripts for Linux Host
+│   │   └── systemd
 │   ├── README.md
 │   └── west.yml
-├── gen_avb_sdk                             <-- GenAVB/TSN stack
-├── heterogeneous-multicore                 <-- Heterogeneous Multicore Framework
+├── gen_avb_sdk <-- GenAVB/TSN stack
+├── heterogeneous-multicore <-- Heterogeneous Multicore Framework
 ├── mcuxsdk
-│   ├── mcuxsdk-manifest                    <-- MCUXpresso manifests
-│   ├── mcuxsdk                             <-- MCUXpresso Git tree
-│   │   ├── ...
-│   │   ├── components
-│   │   ├── devices
-│   │   │   ─ <SoC>
-│   │   │   │   ├── drivers                 <-- SoC-dependent drivers and hardware definitions
-│   │   │    ...
-│   │   ├── docs
-│   │   ├── drivers                         <-- IP-dependent drivers
-│   │   ├── middleware
-│   │   ├── tools
-│   │   └── utilities
-├─── rtos-abstraction-layer                  <-- RTOS Abstraction Layer
-├─── rtos-apps                               <-- RTOS Application Libraries
-├─── zsdk                                    <-- Imported Zephyr components
-│   ├── modules
-│   ├── zephyr
-│   └── zsdk
+│   ├── mcuxsdk <-- MCUXpresso manifests
+│   │   ├── arch
+│   │   ├── ...
+│   │   ├── components
+│   │   ├── devices
+│   │   │   ─ <SoC>
+│   │   │   │   ├── drivers <-- SoC-dependent drivers and hardware definitions
+│   │   │    ...
+│   │   ├── docs
+│   │   ├── drivers <-- IP-dependent drivers
+│   │   ├── middleware
+│   │   ├── rtos
+│   │   │   └── freertos
+│   │   ├── tools
+│   │   └── utilities
+│   └── mcuxsdk-manifests
+├── rpmsg-lite <-- RPMsg-Lite Middleware
+├── rtos-abstraction-layer <-- RTOS Abstraction Layer
+├── rtos-apps <-- RTOS Application Libraries
+└── zsdk <-- Imported Zephyr components
+    ├── modules
+    │   ├── [...]
+    │   └── hal
+    │       └── nxp <-- NXP drivers
+    └── zephyr
 ```
 
 # Reference Applications
