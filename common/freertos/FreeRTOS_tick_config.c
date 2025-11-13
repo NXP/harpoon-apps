@@ -23,6 +23,8 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * SPDX-License-Identifier: MIT
+ *
  * 1 tab == 4 spaces!
  */
 

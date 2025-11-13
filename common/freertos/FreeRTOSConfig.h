@@ -22,6 +22,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
  http://aws.amazon.com/freertos
  http://www.FreeRTOS.org
+
+SPDX-License-Identifier: MIT
 */
 
 #ifndef FREERTOS_CONFIG_H
