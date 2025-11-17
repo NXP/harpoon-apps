@@ -1267,7 +1267,7 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 				.stream_n = 2,
 				.stream[0].flags = GENAVB_STREAM_FLAGS_MCR,
 				.stream[1].flags = GENAVB_STREAM_FLAGS_MCR,
-				.clock_domain = GENAVB_CLOCK_DOMAIN_0,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_DEFAULT,
 			},
 			.outputs = 4,
 			.output = {3, },	/* 3 - 6 */
@@ -1321,7 +1321,7 @@ const struct audio_pipeline_config pipeline_mcr_avb_config = {
 			.type = AUDIO_ELEMENT_AVTP_SINK,
 			.u.avtp_sink = {
 				.stream_n = 2,
-				.clock_domain = GENAVB_CLOCK_DOMAIN_0,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_DEFAULT,
 			},
 
 			.inputs = 4,
@@ -1388,6 +1388,7 @@ const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config = {
 				.stream_n = 2,
 				.stream[0].flags = GENAVB_STREAM_FLAGS_MCR,
 				.stream[1].flags = GENAVB_STREAM_FLAGS_MCR,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_DEFAULT,
 			},
 			.outputs = 4,
 			.output = {7, },	/* 7 - 10 */
@@ -1441,6 +1442,7 @@ const struct audio_pipeline_config pipeline_mcr_avb_aud_hat_config = {
 			.type = AUDIO_ELEMENT_AVTP_SINK,
 			.u.avtp_sink = {
 				.stream_n = 2,
+				.clock_domain = GENAVB_CLOCK_DOMAIN_DEFAULT,
 			},
 
 			.inputs = 4,
