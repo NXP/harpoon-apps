@@ -72,5 +72,11 @@ include(lib_ctrl)
 include(lib_rpmsg)
 include(lib_gen_sw_mbox)
 
+if(CONFIG_BOARD_IMX943_EVK)
+target_sources(app PRIVATE
+       ${CommonPath}/zephyr/boards/imx943evk/clock_init.c
+)
+endif()
+
 target_sources(app PRIVATE main.c)
 target_sources(app PRIVATE ../common/rt_latency.c)

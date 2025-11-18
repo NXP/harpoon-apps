@@ -37,5 +37,10 @@ zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MN_EVK SDK_DEVICE_MAXIMUM_CPU_
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX8MP_EVK SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1800000000UL)
 zephyr_compile_definitions_ifdef(CONFIG_BOARD_IMX93_EVK SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY=1700000000UL)
 
+if(CONFIG_BOARD_IMX943_EVK)
+target_sources(app PRIVATE
+       ${CommonPath}/zephyr/boards/imx943evk/clock_init.c
+)
+endif()
 
 target_sources(app PRIVATE main.c)
