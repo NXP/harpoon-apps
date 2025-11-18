@@ -1,7 +1,7 @@
 NXP Software Content Register
 
 Release: Harpoon Apps
-Version: 3.4
+Version: 3.5
 
 --------------------------------------------
 Package:                     Harpoon Apps
@@ -14,53 +14,91 @@ Description and comments:    Harpoon application examples
                              SDK-based examples to show how to use peripheral
                              drivers, integrate middleware and execute application
                              inside jailhouse cells on ARM Cortex-A core(s).
-Release Location:            https://github.com/NXP/harpoon-apps (tag harpoon_3.4.0)
+Release Location:            https://github.com/NXP/harpoon-apps (tag harpoon_3.5.0)
 Origin:                      NXP (BSD-3-Clause)
 --------------------------------------------
-Package:                     MCUXpresso_SDK
-Outgoing License:            LA_OPT_NXP_Software_License - Additional distribution license granted - Section 2.3 applies
-License File:                mcux-sdk/LA_OPT_NXP_Software_License.txt
+Package:                     mcuxsdk-core
+Outgoing License:            BSD-3-Clause
+License File:                COPYING-BSD-3
 Type of Content:             source code
-Description and comments:    Full SDK including device system files,
-                             middleware components, board peripheral drivers, etc.
-Release Location:            https://github.com/nxp-mcuxpresso/mcux-sdk branch feature/aarch64_support (tag MCUX_2.16.000_aarch64_0.3)
-Origin:                      NXP (LA_OPT_NXP_Software_License)
+Description and comments:    MCUXpresso SDK core drivers, build scripts and cmake,
+                             kconfig build files.
+Release Location:            https://github.com/nxp-mcuxpresso/mcuxsdk-core branch feature/heterogeneous_multicore (tag Real-Time-Edge-v3.3-202512)
+Origin:                      NXP (BSD-3-Clause)
+                             Zephyr (Apache 2.0) - https://github.com/zephyrproject-rtos/zephyr
+                             Kconfiglib - Ulf Magnusson (ISC) - https://github.com/ulfalizer/Kconfiglib
 --------------------------------------------
-Package:                     CMSIS_5
+Package:                     mcux-component
+Outgoing License:            LA_OPT_NXP_Software_License - Additional distribution license granted - Section 2.3 applies
+License File:                LICENSE
+Type of Content:             source code
+Description and comments:    SDK components and board peripheral drivers, for example,
+                             flash and codec drivers.
+Release Location:            https://github.com/nxp-mcuxpresso/mcux-component branch feature/heterogeneous_multicore (tag Real-Time-Edge-v3.3-202512)
+Origin:                      NXP (proprietary)
+                             NXP (BSD-3-Clause)
+                             ITE (BSD-3-Clause)
+                             cmsis_drivers - ARM (Apache-2.0) - https://github.com/ARM-software/CMSIS_6/tree/v6.1.0
+                             unity - ThrowTheSwitch.org (MIT) - https://github.com/ThrowTheSwitch/Unity
+                             rtt - SEGGER Microcontroller (single-clause) - https://github.com/SEGGERMicro/RTT
+                             wifi_bt_module - Murata Manufacturing Co., Ltd. (BSD-3-Clause) - https://github.com/murata-wireless/nxp-freertos-calibration
+                             CRC32-GS - Gary S. Brown (BSD-3-Clause)
+                             mcuoneclipse - Erich Styger (BSD-2-Clause) - https://github.com/ErichStyger/mcuoneclipse/tree/SourceForgeRelease_29-12-2022
+                             FreeRTOSConfig - Amazon (MIT) - https://github.com/FreeRTOS/FreeRTOS-Kernel
+                             aws_iot - Amazon (MIT) - https://github.com/FreeRTOS/iot-reference-nxp-rt1060
+                             MemFault - Memfault, Inc (Apache-2.0) - https://github.com/memfault/memfault-firmware-sdk
+                             coremark - EEMBC (Apache-2.0) - https://github.com/eembc/coremark
+--------------------------------------------
+Package:                     mcux-devices-imx
+Outgoing License:            BSD-3-Clause
+License File:                LICENSE
+Type of Content:             source code
+Description and comments:    Device system files, template files, IDE related startup
+                             and linker files.
+Release Location:            https://github.com/nxp-mcuxpresso/mcux-devices-imx branch feature/heterogeneous_multicore (tag Real-Time-Edge-v3.3-202512)
+Origin:                      NXP (BSD-3-Clause)
+                             NXP (Apache-2.0)
+--------------------------------------------
+Package:                     mcuxsdk-manifests
+Outgoing License:            LA_OPT_Online_Code_Hosting
+License File:                LICENSE
+Type of Content:             source code
+Description and comments:    SDK Manifests for west-based repository management.
+Release Location:            https://github.com/nxp-mcuxpresso/mcuxsdk-manifests branch feature/heterogeneous_multicore (tag Real-Time-Edge-v3.3-202512)
+Origin:                      NXP (LA_OPT_Online_Code_Hosting)
+--------------------------------------------
+Package:                     CMSIS
 Outgoing License:            Apache-2.0
-License File:                mcux-sdk/CMSIS/LICENSE.txt
+License File:                LICENSE.txt
 Type of Content:             source code
 Description and comments:    Vendor-independent hardware abstraction layer for microcontrollers that are based
                              on Arm Cortex processors.
-Release Location:            https://github.com/nxp-mcuxpresso/CMSIS_5.git (tag MCUX_2.14.0_aarch64_0.1)
-Origin:                      ARM (Apache-2.0) - https://github.com/ARM-software/CMSIS_5.git
---------------------------------------------
-Package:                     Multicore SDK
-Outgoing License:            BSD-3-Clause
-License File:                mcux-sdk/COPYING-BSD-3
-Type of Content:             source code
-Description and comments:    NXP Multicore Software Development Kit.
-Release Location:            https://github.com/nxp-mcuxpresso/mcux-sdk-middleware-multicore branch feature/heterogeneous_multicore (tag Real-Time-Edge-v3.2-202507)
-Origin:                      NXP (BSD-3-Clause) - https://github.com/nxp-mcuxpresso/mcux-sdk/blob/MCUX_2.16.000/SW-Content-Register.txt#L169
+Release Location:            https://github.com/nxp-mcuxpresso/mcu-sdk-cmsis (tag Real-Time-Edge-v3.3-202512)
+Origin:                      NXP (Apache-2.0)
+                             ARM-software CMSIS_6 v6.1.0 project (Apache-2.0) - https://github.com/ARM-software/CMSIS_6/releases/tag/v6.1.0
+                             ARM-software CMSIS-DSP v1.16.2 project (Apache-2.0) - https://github.com/ARM-software/CMSIS-DSP/releases/tag/v1.16.2
+                             ARM-software CMSIS-DSP ComputeLibrary project (MIT) - https://github.com/ARM-software/CMSIS-DSP/releases/tag/v1.16.2
+                             ARM-software CMSIS-NN v6.0.0 project (Apache-2.0) - https://github.com/ARM-software/CMSIS-NN/releases/tag/v6.0.0
+                             ARM-software CMSIS-RTX v5.9.0 project (Apache-2.0) - https://github.com/ARM-software/CMSIS-RTX/releases/tag/v5.9.0
 --------------------------------------------
 Package:                     RPMsg-Lite
 Outgoing License:            BSD-3-Clause
-License File:                middleware/multicore/rpmsg-lite/LICENSE
+License File:                LICENSE
 Type of Content:             source code
 Description and comments:    Lightweight implementation of the Remote Processor
                              Messaging (RPMsg) protocol, originally implemented
                              in the Open Asymmetric Multi Processing (OpenAMP)
                              framework.
-Release Location:            https://github.com/nxp-mcuxpresso/rpmsg-lite branch feature/heterogeneous_multicore (tag Real-Time-Edge-v3.2-202507)
+Release Location:            https://github.com/nxp-mcuxpresso/rpmsg-lite branch feature/heterogeneous_multicore (tag Real-Time-Edge-v3.3-202512)
 Origin:                      NXP (BSD-3-Clause)
                              Mentor Graphics, Ltd. (BSD-3-Clause) - https://github.com/OpenAMP/open-amp (lib/rpmsg)
 --------------------------------------------
 Package:                     FreeRTOS-Kernel
 Outgoing License:            MIT
-License File:                FreeRTOS-Kernel/License.md
+License File:                License.md
 Type of Content:             source code
-Description and comments:    IoT operating system for microcontrollers with added ARM Cortex-A53 support
-Release Location:            https://github.com/nxp-mcuxpresso/FreeRTOS-Kernel.git (tag MCUX_2.16.000_aarch64_0.3)
+Description and comments:    IoT operating system for microcontrollers with added ARM Cortex-A53 and Cortex-A55 support
+Release Location:            https://github.com/nxp-mcuxpresso/FreeRTOS-Kernel.git (tag Real-Time-Edge-v3.3-202512)
 Origin:                      Amazon (MIT)
 --------------------------------------------
 Package:                     Zephyr
@@ -68,7 +106,7 @@ Outgoing License:            Apache-2.0
 License File:                zephyr/LICENSE
 Type of Content:             source code
 Description and comments:    Open source scalable real-time operating system
-Release Location:            https://github.com/nxp-zephyr/zephyr.git (tag Real-Time-Edge-v3.2-202507)
+Release Location:            https://github.com/nxp-zephyr/zephyr.git (tag Real-Time-Edge-v3.3-202512)
 Origin:                      https://github.com/zephyrproject-rtos/zephyr.git
 --------------------------------------------
 Package:                     hal_nxp
@@ -76,16 +114,16 @@ Outgoing License:            LA_OPT_NXP_Software_License - Additional distributi
 License File:                modules/hal/mcux/mcux-sdk/LA_OPT_NXP_Software_License.txt
 Type of Content:             source code
 Description and comments:    SDK files for Zephyr
-Release Location:            https://github.com/nxp-zephyr/hal_nxp.git (tag Real-Time-Edge-v3.2-202507)
-Origin:                      https://github.com/nxp-zephyr/hal_nxp.git
+Release Location:            https://github.com/nxp-zephyr/hal_nxp.git (tag Real-Time-Edge-v3.3-202512)
+Origin:                      NXP (BSD-3-Clause) - https://github.com/nxp-zephyr/hal_nxp.git
 --------------------------------------------
 Package:                     genavb-sdk
 Outgoing License:            BSD-3-Clause
 License File:                gen_avb_sdk/licenses/BSD-3-Clause
 Type of Content:             source code
 Description and comments:    GenAVB/TSN protocol stack for NXP MPUs and MCUs processors.
-Release Location:            https://github.com/NXP/GenAVB_TSN (tag 7_3_0)
-Origin:                      NXP (BSD-3-Clause) - https://github.com/NXP/GenAVB_TSN/blob/7_3/SCR_genavb-release.txt
+Release Location:            https://github.com/NXP/GenAVB_TSN (tag 7_5_0)
+Origin:                      NXP (BSD-3-Clause) - https://github.com/NXP/GenAVB_TSN/blob/7_5/SCR_genavb-release.txt
 --------------------------------------------
 Package:                     Heterogeneous_Multicore
 Outgoing License:            BSD-3-Clause
@@ -93,7 +131,7 @@ License Files:               LICENSE.txt
 Type of Content:             source code, project files, linker files
 Description and comments:    Library and applications to support inter-core communication and
                              resource sharing between heterogeneous multicore.
-Release Location:            https://github.com/nxp-real-time-edge-sw/heterogeneous-multicore branch master (tag Real-Time-Edge-v3.2-202507)
+Release Location:            https://github.com/nxp-real-time-edge-sw/heterogeneous-multicore branch master (tag Real-Time-Edge-v3.3-202512)
 Origin:                      NXP (BSD-3-Clause)
 --------------------------------------------
 Package:                     rtos-abstraction-layer
@@ -101,14 +139,14 @@ Outgoing License:            BSD-3-Clause
 License File:                LICENSE.txt
 Type of Content:             source code
 Description and comments:    An abstraction layer for Real-Time Operating Systems.
-Release Location:            https://github.com/NXP/rtos-abstraction-layer (tag 1_4_0)
-Origin:                      NXP (BSD-3-Clause) - https://github.com/NXP/rtos-abstraction-layer/blob/1_4/SCR-rtos-abstraction-layer.txt
+Release Location:            https://github.com/NXP/rtos-abstraction-layer (tag 1_6_0)
+Origin:                      NXP (BSD-3-Clause) - https://github.com/NXP/rtos-abstraction-layer/blob/1_6/SCR-rtos-abstraction-layer.txt
 --------------------------------------------
 Package:                     rtos-apps
 Outgoing License:            BSD-3-Clause
 License File:                LICENSE.txt
 Type of Content:             source code
 Description and comments:    A library of re-usable application components
-Release Location:            https://github.com/NXP/rtos-apps
-Origin:                      NXP (BSD-3-Clause)
+Release Location:            https://github.com/NXP/rtos-apps (tag 1_2_0)
+Origin:                      NXP (BSD-3-Clause) - https://github.com/NXP/rtos-apps/blob/1_2/SCR-rtos-apps.txt
 --------------------------------------------
