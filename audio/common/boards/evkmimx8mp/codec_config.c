@@ -59,6 +59,7 @@ static pcm512x_config_t pcm512xConfig = {
 	.gpio_led   = PCM512X_GPIO_LED,
 	.gpio_osc44 = PCM512X_GPIO_OSC44,
 	.gpio_osc48 = PCM512X_GPIO_OSC48,
+	.master_slave = false,
 };
 
 static codec_config_t pcm512x_codec_config = {
@@ -137,6 +138,21 @@ int32_t audio_app_codec_setup(uint8_t codec_id)
 		CLOCK_SetRootMux(kCLOCK_RootI2c3, kCLOCK_I2cRootmuxSysPll1Div5); /* Set I2C source to SysPLL1 Div5 160MHZ */
 		CLOCK_SetRootDivider(kCLOCK_RootI2c3, 1U, 10U);                  /* Set root clock to 160MHZ / 10 = 16MHZ */
 		CLOCK_EnableClock(kCLOCK_I2c3);
+
+		if (HIFIBERRY_SAI_MASTER_SLAVE == kSAI_Master) {
+			/* If the SAI connected to HifiBerry is in master mode, put the
+			 * PCM5122 into slave mode.
+			 */
+			pcm512xConfig.master_slave = false;
+		} else {
+			/* If the SAI connected to HifiBerry is in slave mode, put the
+			 * PCM5122 into master mode.
+			 */
+			pcm512xConfig.master_slave = true;
+		}
+
+		log_info("Configure PCM5122 in %s mode\n",
+			 (pcm512xConfig.master_slave) ? "master" : "slave");
 
 		/* Use default setting to init ADC and DAC */
 		err = CODEC_Init(&pcm512x_codec_handle, &pcm512x_codec_config);
