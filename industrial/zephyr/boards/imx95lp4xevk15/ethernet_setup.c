@@ -14,7 +14,7 @@
 
 void netcmix_init(void)
 {
-	uint32_t power_state;
+	uint32_t power_state = POWER_DOMAIN_STATE_OFF;
 
 	if(scmi_power_state_get(IMX95_PD_NETC, &power_state)) {
 		__ASSERT(false, "%s: scmi_power_state_get failed", __func__);
