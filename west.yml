@@ -15,44 +15,59 @@ manifest:
       url-base: https://github.com/NXP
 
   projects:
+    - name: mcuxsdk-manifests
+      remote: nxpmcuxpresso
+      revision: 664eba64531a0115122747ce615b92c2798352a8
+      import:
+        path-prefix: mcuxsdk
+        name-allowlist:
+          - CMSIS
+          - core
+          - freertos-kernel
+          - mcu-sdk-components
+          - mcu-sdk-examples
+          - mcux-devices-imx
+
     - name: zephyr
       remote: nxpzephyr
-      revision: 72c00f5157fe2cd00e72292bbee0f4e83ce10062
-    - name: mcux-sdk
-      remote: nxpmcuxpresso
-      revision: 8b87c88b7bfd4c100f339dbf47ac74788dbc8ba8
-    - name: GenAVB_TSN
-      revision: 6b962d6c34b0c3f142295a213dfa70bda193b23d
-      path: gen_avb_sdk
-    - name: rtos-abstraction-layer
-      revision: d0f9ef4adbe2ddcd18932cfd2758753204503fe0
-      path: rtos-abstraction-layer
-    - name: rtos-apps
-      revision: master
+      west-commands: scripts/west-commands.yml
+      revision: efe550bc592742561c171381b5c3a1c9b2e2630b
+      path: zsdk/zephyr
+
     - name: hal_nxp
       remote: nxpzephyr
-      revision: 744dcd8da0ccfb7aecba52ba116b4bf362c7541b
-      path: modules/hal/nxp
-      groups:
-        - hal
-    - name: FreeRTOS-Kernel
-      remote: nxpmcuxpresso
-      revision: c747fc1595cfc914021a6534adba86d6b152aac8
-    - name: CMSIS_5
-      remote: nxpmcuxpresso
-      path: mcux-sdk/CMSIS
-      revision: b5916939a8384aac3398e3f4ea97917fa9b030fd
+      revision: df59b170b903256d08c57054a6d43b0592d4d692
+      path: zsdk/modules/hal/nxp
+
+    # mcux-sdk-ng Kconfig in hal_nxp requires Kconfig symbols from els_pkc and psa_crypto_driver
+    - name: els_pkc
+      remote: nxp
+      repo-path: els_pkc
+      revision: 71d4a89c03fb32e618ee02c0cd54b3fc92736c96
+      path: zsdk/modules/crypto/els_pkc
+    - name: psa_crypto_driver
+      remote: nxp
+      repo-path: psa_crypto_driver
+      revision: 1a93893f986db38cf2c8910f6138b634f0437a48
+      path: zsdk/modules/crypto/psa_crypto_driver
+
+    - name: GenAVB_TSN
+      remote: nxp
+      revision: 851c0cae1353ee4b45d755d52b6a73b7b507e32b
+      path: gen_avb_sdk
+    - name: rtos-abstraction-layer
+      remote: nxp
+      revision: a72719986c8d2d4482258bafebb4e61d72e66ae0
+    - name: rtos-apps
+      remote: nxp
+      revision: 090c2169573744d195e1e7bdf3aebfdc58e80407
     - name: heterogeneous-multicore
       remote: nxprealtimeedgesw
-      revision: 3ae161522ebe06f90121be09e12f898acf928791
-    - name: mcux-sdk-middleware-multicore
-      remote: nxpmcuxpresso
-      revision: 5b8772984399c3fa4c1bc3d530db09fef74349c7
-      path: middleware/multicore
+      revision: 54dfae8caf7b928eddea54a9bc042b77d11b6ce0
     - name: rpmsg-lite
       remote: nxpmcuxpresso
-      revision: 436596cd4443d5cedd043291f45ac21504e70a4a
-      path: middleware/multicore/rpmsg_lite
+      revision: 42a37572d84fbabb35455292b3a87244b10a877e
+
   self:
     path: harpoon-apps
 
