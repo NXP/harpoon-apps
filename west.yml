@@ -53,7 +53,7 @@ manifest:
 
     - name: GenAVB_TSN
       remote: nxp
-      revision: 851c0cae1353ee4b45d755d52b6a73b7b507e32b
+      revision: 7d6fbbec1f347fb3d791a05a6249fcb801c4c6b9
       path: gen_avb_sdk
     - name: rtos-abstraction-layer
       remote: nxp
