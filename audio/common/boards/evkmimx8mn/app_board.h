@@ -40,7 +40,7 @@
 #define PCM186X_I2C_ADDR		(0x4A)
 #define PCM186X_GPIO_LED		(2U)
 
-#define HIFIBERRY_SAI_MASTER_SLAVE	kSAI_Slave
+#define HIFIBERRY_SAI_MASTER_SLAVE	kSAI_Master
 
 #define HIFIBERRY_SAI_CLK_FREQ				\
     (CLOCK_GetPllFreq(kCLOCK_AudioPll1Ctrl)		\
